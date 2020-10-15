@@ -1,6 +1,9 @@
 # security
 keys/
 
+# databases
+app/*.sqlite
+
 .idea/
 *.pyc
 py3/
