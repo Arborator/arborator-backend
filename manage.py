@@ -4,7 +4,7 @@ from flask_script import Manager
 from app import create_app, db
 from commands.seed_command import SeedCommand
 
-env = os.getenv("FLASK_ENV") or "test"
+env = os.getenv("FLASK_CONFIG") or "test"
 print(f"Active environment: * {env} *")
 app = create_app(env)
 

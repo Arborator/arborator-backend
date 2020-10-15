@@ -24,6 +24,13 @@ pip install -r requirements.txt
 
 to get the dependencies.
 
+### Manage the database
+
+Explicitely set the environment (```dev``` ,```prod``` and ```test```) 
+```
+export FLASK_CONFIG=dev
+```
+
 Next, initialize the database
 
 ```
@@ -31,6 +38,9 @@ python manage.py seed_db
 ```
 
 Type "Y" to accept the message (which is just there to prevent you accidentally deleting things -- it's just a local SQLite database)
+
+
+### Run the app
 
 Finally run the app with
 
@@ -40,7 +50,12 @@ python wsgi.py
 
 Navigate to the posted URL in your terminal to be greeted with Swagger, where you can test out the API.
 
+### Run the app for local development
 
+The following command is a shorthand for running the development server
+```
+python dev.py
+```
 
 
 ## Running tests
