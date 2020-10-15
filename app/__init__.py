@@ -10,7 +10,7 @@ def create_app(env=None):
     from app.config import config_by_name
     from app.routes import register_routes
 
-    app = Flask(__name__n, instance_relative_config=False)
+    app = Flask(__name__, instance_relative_config=False)
     app.config.from_object(config_by_name[env or "test"])
     print("Config : ", config_by_name[env or "test"])
     api = Api(app, title="Flaskerific API", version="0.1.0")
