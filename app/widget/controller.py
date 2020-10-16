@@ -16,7 +16,7 @@ api = Namespace("Widget", description="Single namespace, single entity")  # noqa
 class WidgetResource(Resource):
     """Widgets"""
 
-    @responds(schema=WidgetSchema, many=True)
+    @responds(schema=WidgetSchema(many=True))
     def get(self) -> List[Widget]:
         """Get all Widgets"""
 

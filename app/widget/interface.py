@@ -1,4 +1,4 @@
-from mypy_extensions import TypedDict
+from typing import TypedDict
 
 
 class WidgetInterface(TypedDict, total=False):

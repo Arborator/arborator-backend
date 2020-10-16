@@ -16,7 +16,7 @@ api = Namespace("Doodad", description="A modular namespace within Other API")  #
 class DoodadResource(Resource):
     """Doodads"""
 
-    @responds(schema=DoodadSchema, many=True)
+    @responds(schema=DoodadSchema(many=True))
     def get(self) -> List[Doodad]:
         """Get all Doodads"""
 

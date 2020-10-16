@@ -16,7 +16,7 @@ api = Namespace("Fizzbaz", description="A modular namespace within fizz")  # noq
 class FizzbazResource(Resource):
     """Fizzbaz"""
 
-    @responds(schema=FizzbazSchema, many=True)
+    @responds(schema=FizzbazSchema(many=True))
     def get(self) -> List[Fizzbaz]:
         """Get all Fizzbaz"""
 

@@ -1,4 +1,4 @@
-from mypy_extensions import TypedDict
+from typing import TypedDict
 
 
 class FizzbarInterface(TypedDict, total=False):

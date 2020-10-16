@@ -6,8 +6,14 @@ A sample project showing how to build a scalable, maintainable, modular Flask AP
 
 _This is an example project using the structure proposed in [this blog post](http://alanpryorjr.com/2019-05-20-flask-api-example/)._
 
+## Setting the environment config
+Create a .flaskenv file with the following config 
+```
+FLASK_ENV=env|prod|test
+```
 
-## Running the app
+
+## Setting the python virtual environment
 
 Preferably, first create a virtualenv and activate it, perhaps with the following command:
 
@@ -24,14 +30,10 @@ pip install -r requirements.txt
 
 to get the dependencies.
 
+
 ### Manage the database
 
-Explicitely set the environment (```dev``` ,```prod``` and ```test```) 
-```
-export FLASK_CONFIG=dev
-```
-
-Next, initialize the database
+If first time, initialize the database
 
 ```
 python manage.py seed_db
@@ -42,11 +44,15 @@ Type "Y" to accept the message (which is just there to prevent you accidentally 
 
 ### Run the app for local development
 
-The following command is a shorthand for running the development server
+In .flaskenv, set the `FLASK_ENV` to dev
 ```
-python dev.py
+FLASK_ENV=dev
 ```
 
+Then, you can run the app
+```
+python wsgi.py
+```
 
 ## Running tests
 
@@ -60,7 +66,7 @@ pytest
 
 ### Deploy the app in production
 
-##### Folder settup
+##### Set the environment
 
 On the server, create the project folder
 
@@ -78,6 +84,11 @@ Install the python packages requirements
 pip install -r requirements.txt
 ```
 
+In .flaskenv, set `FLASK_ENV` to prod
+```
+FLASK_ENV=prod
+```
+
 Initialize the DB (or paste an existant one)
 ```
 python migrate.py seed_db
@@ -89,5 +100,9 @@ If needed to, allow the folder access to the server user that will have control 
 ```
 sudo chown -Rf <admin>:<group> /var/www/flask_api_example/
 ```
+
+
+
+source : https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-uswgi-and-nginx-on-ubuntu-18-04
 
 Navigate to the posted URL in your terminal to be greeted with Swagger, where you can test out the API.

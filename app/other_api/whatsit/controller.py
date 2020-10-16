@@ -16,7 +16,7 @@ api = Namespace('Whatsit', description='A modular namespace within Other API')  
 class WhatsitResource(Resource):
     '''Whatsits'''
 
-    @responds(schema=WhatsitSchema, many=True)
+    @responds(schema=WhatsitSchema(many=True))
     def get(self) -> List[Whatsit]:
         '''Get all Whatsits'''
 
