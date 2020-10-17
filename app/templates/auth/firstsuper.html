@@ -1,0 +1,10 @@
+{% extends "base.html" %} 
+
+{% block body %}
+<form action="{{ url_for('auth.checkfirstsuper') }}" method="post">
+  <dl>
+    <dd><input type="password" name="password" /></dd>
+    <dd><input type="submit" value="Login" /></dd>
+  </dl>
+</form>
+{% endblock %}

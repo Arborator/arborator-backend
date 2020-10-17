@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+
+{% block title %}
+
+	{{project}}
+
+{% endblock %}
+
+{% block head_js %}
+<script type="text/javascript">	
+	project="{{project_name}}";
+	userid="{userid}";
+	username="{username}";
+	$('html').click(function() {
+		$("#exportdiv").css({ display: 'none' } );	
+		$("#userform").css({ display: 'none' } );	
+		$("#exoform").css({ display: 'none' } );	
+		});
+
+	edit = function(textid,opensentence) {
+		$("#textid").attr("value", textid );
+		$("#opensentence").attr("value", opensentence );
+		$("#editorform").submit();
+		}
+	removeSample = function(textid, text) {
+		$("#eraseNumber").attr("value",textid);
+		$("#question").html("Are you sure that you want to erase the text "+text+" from the database?")
+		$('#dialog').dialog('open');
+		}
+	exportAnnos = function(textid, text, offset) {
+		$("#exportNumber").attr("value",textid);
+		$("#textname").attr("value",text);
+		offset.left=offset.left-280;
+		$("#exportdiv").offset(offset).css({ display: 'inline' } );
+		}	
+	exportGo = function(type) {
+		$("#exportType").attr("value",type);
+		console.log($("#export"))
+		$("#export").submit();
+		$("#dialog").html("<img src='images/loading.gif'>");
+		$("#dialog").dialog({
+			height: 230,
+ 			width:150,
+			modal: true,
+			title:"Please wait!!!<br>This can be long.",
+			buttons: {}
+			});
+		$('#dialog').dialog('open');
+		}
+	adduser = function(textid, text, offset) {
+		$("#utextid").attr("value",textid);
+		$("#uremove").attr("value",0);
+		$("#userform").css({ display: 'block',top: offset.top, left: offset.left } );
+		}
+		
+	userchoice = function(v) {
+		$("#validator").attr("value",v);
+		$("#uremove").attr("value",0);		
+		$("#useraddremove").submit();	
+		}
+	
+	userremove = function(tid,uid) {	
+		$("#utextid").attr("value",tid);
+		$("#uremove").attr("value",uid);
+		$("#useraddremove").submit();
+		}
+	nextstatus = function(tid) {
+		//console.log("nextstatus",tid)	
+	
+		$.ajax({
+			type: "POST",
+			url: "statusChange.cgi",//CGI REF!!!
+			data: {"project":project,"userid":userid,"username":username,"textid":tid}, 
+			success: function(answer){
+					$("#textStatus"+tid).html(answer.status);
+					//console.log("changed!",answer);
+					
+				},
+			error: function(XMLHttpRequest, textStatus, errorThrown){
+				console.log("error",project,erasetreeid)}
+			});
+		}	
+	nl2br = function(str) {   
+		return (str + '').replace(/([^>\\r\\n]?)(\\r\\n|\\n\\r|\\r|\\n)/g, '$1'+ '<br>' +'$2');
+		}
+
+	startmate = function() {
+		//$("#startmateform :input").prop('disabled', true);
+		//checkMate();
+		$("#parseStatus").css('background-image', 'url("images/ajax-loader.gif")');  
+		$.ajax({
+			type: "POST",
+			url: "mate.cgi",//CGI REF!!!!
+			data: {"project":project,"parserType":$( "#parserType" ).val(), "whoseTrees":$( "#whoseTrees" ).val(), "evaluationPercent":$( "#evaluationPercent" ).val(), "additionnalLexicon":$( "#additionnalLexicon" ).val(), "resultAnnotator":$( "#resultAnnotator" ).val()}, 
+			success: function(answer){
+					$("#parseStatus").html(answer);
+					console.log("finished!",answer);
+					//clearInterval(timer);
+				},
+			error: function(XMLHttpRequest, textStatus, errorThrown){
+				console.log("mate error",project)
+				
+				}
+			});
+	
+		timer = setInterval(checkMate, 5000);
+		}
+	
+	checkMate = function() {
+		$.ajax({
+			url : "mate/parse.log",
+			dataType: "text",
+			cache: false,
+			processData: false,
+			success : function (data) {
+				$("#parseStatus").html(nl2br(data));
+				if (data.match("^Ready"))
+					{
+						console.log("Done");
+						clearInterval(timer);
+						$("#parseStatus").css('background-image', 'none'); 
+						//$("#startmateform :input").prop('disabled', false);
+					}
+				}
+			});
+			
+
+			
+		}
+	
+	
+	$(function () {
+		$("#dialog").dialog({
+			bgiframe: true,
+			autoOpen: false,
+			height: 350,
+ 			width:400,
+			modal: true,
+			buttons: {
+				
+				Cancel: function() {
+					$(this).dialog('close');
+				},
+				"OK": function() {
+					$(this).dialog('close');					
+					$("#erase").submit();
+				}
+				}
+			});
+			
+		$('#exochoice').change(function ()
+			{
+				$('#exochange').submit();
+			});	
+			
+		
+
+	})
+	
+
+	getEvaluation = function(project,uid) {
+		$("#evalubutton"+uid).replaceWith("<img id='evalubutton"+uid+"' src='images/ajax-loader.gif'>");
+		$.ajax({
+			type: "GET",
+			url: "getEvaluation.cgi", //CGI REF!!!!
+			data: {"project":project,"uid":uid}, 
+			success: function(answer){
+					$("#evalubutton"+uid).replaceWith(answer);
+					//console.log("got!"+answer);
+			
+				},
+			error: function(XMLHttpRequest, textStatus, errorThrown){
+				console.log("error",project)
+				alert("error erasing"+XMLHttpRequest+ '\\n'+textStatus+ "\\n"+errorThrown);
+				}
+			});
+		
+	}
+	
+</script>
+{% endblock %}
+
+{% block body %}
+<div id="center" class="center" style="width:100%">
+				<div id="navigation" style="width:100%;margin:0px;border:0px;" class="arbortitle  ui-widget-header ui-helper-clearfix">
+				<a href="{{url_for('home.home_page')}}" style='position: fixed;left:1px;top:1px'><img src="{{ url_for ('static', filename='images/arboratorNano.png') }}" border="0"></a>
+				<a href="{{ url_for('project.projectpage', project_name=project_name)}}" style='position: fixed;left:120px;top:5px;color:white;' title="project overview">{{img}} {{project_name}} Annotation Project</a>
+				
+				
+				<div style='margin:5 auto;' id='sentinfo'>Project Overview</div>
+					<form method="get" action="project.cgi"  id="searchform"  style='position: fixed;right:1px;top:1px'>
+						<input type="text" id="searchtext" name="searchtext" value="{query}"/>
+						<input type="hidden" id="project" name="project" value="{{project_name}}">
+						<span title="search" onClick="$('#searchform').submit();" style="cursor:pointer;" class="ui-button-icon-primary ui-icon ui-icon-search"></span>
+					</form>
+				</div>
+				<div class="ui-widget ui-widget-content ui-corner-all box"  style="text-align:-moz-center;">
+
+
+					<div class="ui-widget ui-widget-content ui-corner-all box"  style="text-align:-moz-center;" id='projectbox'>
+						The <b>{{project_name}}</b> Project has {{n}} texts and {{nb_sent}} sentences. <br/>
+						<br/>
+
+						<table class='whitable'>
+							<thead>
+								<tr>
+									<th>text name</th>
+									<th>number of sentences</th>
+									<th>number of tokens</th>
+									<th>sentence length</th>
+									<th >annotators</th>
+									<th>validator</th>
+									<th title='non sollicitated trees by users not assigned to this text are listed here.'>other trees</th>
+									<th>exo</th>
+									{% if True %}
+									<th> delete</th>
+									{% endif %}
+								</tr>
+							</thead>
+							{% for sample in samples %}
+								<tr>
+									<td><b><a  style='cursor:pointer;dispay:block' href="{{url_for('project.samplepage', project_name=project_name, sample_name=sample.name)}}">{{sample.name}}</a></b></td>
+									<td>{{sample.size}}</td>
+									<td>-</td>
+									<td>-</td>
+									<td><div style='float:left;margin-right:15px;'>{{sample.users}}</div></td>
+									<td>-</td>
+									<td>-</td>
+									<td>-</td>
+									{% if True %}
+									<th> x {{access}} </th>
+									{% endif %}
+								</tr>
+							{% endfor %}
+						</table>
+					</div>
+				</div>
+{% endblock %}

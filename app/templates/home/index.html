@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block head_js%}
+<script type="text/javascript">
+
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-11144858-1']);
+    _gaq.push(['_setDomainName', '.ilpga.fr']);
+    _gaq.push(['_trackPageview']);
+  
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+    
+  var BrowserDetect = {
+      init: function () {
+          this.browser = this.searchString(this.dataBrowser) || "An unknown browser";
+          this.version = this.searchVersion(navigator.userAgent)
+              || this.searchVersion(navigator.appVersion)
+              || "an unknown version";
+          this.OS = this.searchString(this.dataOS) || "an unknown OS";
+      },
+      searchString: function (data) {
+          for (var i=0;i<data.length;i++)	{
+              var dataString = data[i].string;
+              var dataProp = data[i].prop;
+              this.versionSearchString = data[i].versionSearch || data[i].identity;
+              if (dataString) {
+                  if (dataString.indexOf(data[i].subString) != -1)
+                      return data[i].identity;
+              }
+              else if (dataProp)
+                  return data[i].identity;
+          }
+      },
+      searchVersion: function (dataString) {
+          var index = dataString.indexOf(this.versionSearchString);
+          if (index == -1) return;
+          return parseFloat(dataString.substring(index+this.versionSearchString.length+1));
+      },
+      dataBrowser: [
+          {
+              string: navigator.userAgent,
+              subString: "Chrome",
+              identity: "Chrome"
+          },
+          { 	string: navigator.userAgent,
+              subString: "OmniWeb",
+              versionSearch: "OmniWeb/",
+              identity: "OmniWeb"
+          },
+          {
+              string: navigator.vendor,
+              subString: "Apple",
+              identity: "Safari",
+              versionSearch: "Version"
+          },
+          {
+              prop: window.opera,
+              identity: "Opera",
+              versionSearch: "Version"
+          },
+          {
+              string: navigator.vendor,
+              subString: "iCab",
+              identity: "iCab"
+          },
+          {
+              string: navigator.vendor,
+              subString: "KDE",
+              identity: "Konqueror"
+          },
+          {
+              string: navigator.userAgent,
+              subString: "Firefox",
+              identity: "Firefox"
+          },
+          {
+              string: navigator.vendor,
+              subString: "Camino",
+              identity: "Camino"
+          },
+          {		// for newer Netscapes (6+)
+              string: navigator.userAgent,
+              subString: "Netscape",
+              identity: "Netscape"
+          },
+          {
+              string: navigator.userAgent,
+              subString: "MSIE",
+              identity: "Explorer",
+              versionSearch: "MSIE"
+          },
+          {
+              string: navigator.userAgent,
+              subString: "Gecko",
+              identity: "Mozilla",
+              versionSearch: "rv"
+          },
+          { 		// for older Netscapes (4-)
+              string: navigator.userAgent,
+              subString: "Mozilla",
+              identity: "Netscape",
+              versionSearch: "Mozilla"
+          }
+      ],
+      dataOS : [
+          {
+              string: navigator.platform,
+              subString: "Win",
+              identity: "Windows"
+          },
+          {
+              string: navigator.platform,
+              subString: "Mac",
+              identity: "Mac"
+          },
+          {
+                 string: navigator.userAgent,
+                 subString: "iPhone",
+                 identity: "iPhone/iPod"
+          },
+          {
+              string: navigator.platform,
+              subString: "Linux",
+              identity: "Linux"
+          }
+      ]
+  
+  };
+  BrowserDetect.init();  
+</script>
+{% endblock %}
+{% block body %}
+    
+    <!--Project listing and stuff-->
+    <div style="text-align:center">
+            <div><a href="{{ url_for('home.q_test') }}"><p>Test run Arborator</p></a></div>
+            {% if projects %}
+                {% for project in projects %}
+                
+                    <p><a href = "{{ url_for('project.projectpage', project_name=project.name)}}">{{ project.name }}</a></p>
+                {% endfor %}
+            {% else %}
+                No projects have been created
+                
+             
+               
+            {% endif %}
+            {% if current_user.is_authenticated and current_user.super_admin %}
+            <hr>
+                <p><a href="{{ url_for('admin.list_projects') }}">Project table</a></p>
+                <p><a href="{{ url_for('admin.add_project') }}">Add project</a></p>
+                        						
+            {% endif %}
+            {% if session['logged_in'] %}
+                Logged in 
+            {% endif %}
+    </div>
+    
+    <!--info box-->
+    <div class='ui-widget ui-widget-content ui-corner-all' style='padding: 2em; margin-left: 199px; margin-right: 199px;clear: both;text-align:center;position: relative;'>
+            <p style="font-size:.7em;margin:1;">
+                <img border="0" src="{{ url_for ('static', filename='images/arboratorNano.png') }}" align='middle'>
+        Arborator is free software.
+        
+
+        
+            </p><br><hr>
+            <table style='margin-top:0;width:100%'><tr><td>
+            <p style="font-size:.7em;margin:1;">
+            <a href="http://www.gnu.org/licenses/agpl-3.0.html">
+        It is realeased under the 
+            </p> <p style="font-size:.7em;margin:1;">
+            
+                <img src="{{ url_for ('static', filename='images/Affero_General_Public_License_3.png') }}" align='middle'>
+        licence
+            </td>
+            
+            </tr>
+            </table></a></p> <p style="font-size:.7em;margin:1;">   
+        It can <a href="http://rhapsodie.ilpga.fr/wiki/Arborator#site_administration_and_installation">easily be installed on any Apache server.</a>
+            </p><p style="font-size:.7em;margin:1;">
+        This software relies on your browser's SVG capacity and is written principally for use in the 
+            <img border="0" src="{{ url_for ('static', filename='images/firefox.grey.png') }}" align='middle'> 
+        Firefox browser.
+            <br><br>
+            <script>
+                if (BrowserDetect.browser=="Firefox") document.write("You are using Firefox "+BrowserDetect.version+" on "+BrowserDetect.OS+". Everything should work fine.");
+                else if (BrowserDetect.browser=="Chrome") document.write("You are using Chrome "+BrowserDetect.version+" on "+BrowserDetect.OS+". This Browser is not fully tested.");
+                else document.write("You are using an unsupported browser ("+BrowserDetect.browser+" "+BrowserDetect.version+" on "+BrowserDetect.OS+"). Arborator is fully functional only on Firefox.");
+            </script>
+        </p>
+        <br>
+        <div class="ui-widget ui-widget-content ui-corner-all"  style='
+        font:italic normal .8em/1em Times, serif;text-align:center;margin:0 auto;padding:1em;'>
+            written by <a href='http://gerdes.fr'>Kim Gerdes</a><br/><br/>
+            <a href='http://www.univ-paris3.fr/'>Sorbonne nouvelle</a>,
+            <a href='http://ilpga.fr/'>ILPGA</a>,
+            <a href='http://lpp.univ-paris3.fr/'>LPP</a>
+            (<a href='http://lpp.univ-paris3.fr/'>CNRS</a>)
+            
+            <br><br>
+            
+            <a href="https://github.com/kimgerdes/arborator"><img style="position: absolute; top: 0; right: 0; border: 0;" src="{{ url_for ('static', filename='images/forkme.png') }}" alt="Fork me on GitHub"></a>
+        
+        </div>
+    </div>
+        
+{% endblock %}

@@ -2,7 +2,13 @@ from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_restx import Api
 
+from flask_login import LoginManager, current_user
+
+
 db = SQLAlchemy()
+login_manager = LoginManager()
+
+print("LOG : Current user =", current_user)
 
 
 def create_app(env=None):
@@ -17,6 +23,14 @@ def create_app(env=None):
 
     register_routes(api, app)
     db.init_app(app)
+    login_manager.init_app(app)
+
+
+    from .old_home import home as home_blueprint
+    app.register_blueprint(home_blueprint, url_prefix='/api')
+
+    from .auth import auth as auth_blueprint
+    app.register_blueprint(auth_blueprint, url_prefix='/')
 
     @app.route("/health")
     def health():

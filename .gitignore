@@ -1,5 +1,6 @@
 # security
 keys/
+app/user/auth_config.py
 
 # databases
 app/*.sqlite

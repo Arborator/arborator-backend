@@ -52,5 +52,6 @@ class WidgetIdResource(Resource):
         """Update Single Widget"""
 
         changes: WidgetInterface = request.parsed_obj
+        print("KK changes", changes)
         Widget = WidgetService.get_by_id(widgetId)
         return WidgetService.update(Widget, changes)

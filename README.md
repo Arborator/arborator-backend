@@ -44,15 +44,18 @@ Type "Y" to accept the message (which is just there to prevent you accidentally 
 
 ### Run the app for local development
 
-In .flaskenv, set the `FLASK_ENV` to dev
+In .flaskenv, set the `FLASK_ENV` to dev and `FLASK_APP` to wsgi.py
 ```
 FLASK_ENV=dev
+FLASK_APP=wsgi.py
 ```
 
-Then, you can run the app
+
+Then, you can run the app with flask and a secured certificate protocole.
 ```
-python wsgi.py
+flask run --cert=adhoc
 ```
+We need to specify `cert` because we use Google and Github credentials login and it required an https connection.
 
 ## Running tests
 

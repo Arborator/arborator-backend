@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block body %}
+
+    <a href="/">Home</a>
+    
+    {# Check for errors. #}
+    {% if result.error %}
+        <h2>Something Went Wrong: {{ result.error.message }}</h2>
+    {% endif %}
+    
+    {# Welcome the user. #}
+    {% if result.user %}
+        <h1>Hi {{ result.user.name }}</h1>
+        <h2>Your id is: {{ result.user.id }}</h2>
+        <h2>Your email is: {{ result.user.email }}</h2>
+    {% endif %}
+{% endblock body %}
