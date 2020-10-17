@@ -2,6 +2,9 @@ from app import db
 from typing import List
 from .model import User
 from .interface import UserInterface
+from flask_login import login_user
+
+from app import login_manager
 
 
 class UserService:
@@ -11,6 +14,11 @@ class UserService:
 
     @staticmethod
     def get_by_id(id: str) -> User:
+        return User.query.get(id)
+
+    @login_manager.user_loader
+    @staticmethod
+    def login_by_id(id: str) -> User:
         return User.query.get(id)
 
     @staticmethod
@@ -28,12 +36,10 @@ class UserService:
         db.session.commit()
         return [id]
 
-
-
     @staticmethod
     def make_valid_nickname(nickname):
         # return re.sub('[^a-zA-Z0-9_\.]', '', nickname)
-        return nickname.replace(' ', '')
+        return nickname.replace(" ", "")
 
     @staticmethod
     def make_unique_nickname(nickname):
@@ -46,7 +52,6 @@ class UserService:
                 break
             version += 1
         return new_nickname
-
 
     ## The creation is handled in the oath blueprint
     ## TODO : do the creation here

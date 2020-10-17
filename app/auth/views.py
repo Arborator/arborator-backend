@@ -92,7 +92,8 @@ def login(provider_name) -> Response:
             results_parsed = parse_user(provider_name, result.user)
 
             # Retrieve the user
-            user = UserService.get_by_id(results_parsed.get("id"))
+            # user = UserService.get_by_id(results_parsed.get("id"))
+            user = UserService.login_by_id(results_parsed.get("id"))
 
             # If no existing user, create a new one
             if not user:
@@ -196,13 +197,12 @@ def checkfirstsuper():
     return redirect("https://127.0.0.1:8080")
 
 
-@auth.route('/', methods=['GET'])
+@auth.route("/", methods=["GET"])
 def home_page():
-	"""
-	Home page
+    """
+    Home page
 
-	Is almost useless now, but the superadmin page is redirecting on this. Fix it
-	"""
+    Is almost useless now, but the superadmin page is redirecting on this. Fix it
+    """
 
-	
-	return {}
+    return {}

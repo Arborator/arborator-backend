@@ -3,6 +3,7 @@ from marshmallow import fields, Schema
 
 class UserSchema(Schema):
     """User schema"""
+
     id = fields.String(attribute="id")
     auth_provider = fields.String(attribute="auth_provider")
     username = fields.String(attribute="username")
