@@ -1,25 +1,41 @@
+from datetime import datetime
+
 from pytest import fixture
 
-from .model import Widget
-from .schema import WidgetSchema
-from .interface import WidgetInterface
+from .model import User
+from .schema import UserSchema
+from .interface import UserInterface
 
 
 @fixture
-def schema() -> WidgetSchema:
-    return WidgetSchema()
+def schema() -> UserSchema:
+    return UserSchema()
 
 
-def test_WidgetSchema_create(schema: WidgetSchema):
+def test_UserSchema_create(schema: UserSchema):
     assert schema
 
 
-def test_WidgetSchema_works(schema: WidgetSchema):
-    params: WidgetInterface = schema.load(
-        {"widgetId": "123", "name": "Test widget", "purpose": "Test purpose"}
+def test_UserSchema_works(schema: UserSchema):
+    params: UserInterface = schema.load(
+        {
+            "id": "1",
+            "auth_provider": "google",
+            "username": "JohnDoe",
+            "first_name": "John",
+            "family_name": "Doe",
+            "picture_url": "www.google.com",
+            "super_admin": True,
+            "created_date": str(datetime.now()),
+            "last_seen": str(datetime.now()),
+        }
     )
-    widget = Widget(**params)
+    user = User(**params)
 
-    assert widget.widget_id == 123
-    assert widget.name == "Test widget"
-    assert widget.purpose == "Test purpose"
+    assert user.id == "1"
+    assert user.auth_provider == "google"
+    assert user.username == "JohnDoe"
+    assert user.first_name == "John"
+    assert user.family_name == "Doe"
+    assert user.picture_url == "www.google.com"
+    assert user.super_admin == True

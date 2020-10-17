@@ -10,7 +10,7 @@ class UserService:
         return User.query.all()
 
     @staticmethod
-    def get_by_id(id: int) -> User:
+    def get_by_id(id: str) -> User:
         return User.query.get(id)
 
     @staticmethod
@@ -20,7 +20,7 @@ class UserService:
         return user
 
     @staticmethod
-    def delete_by_id(id: int) -> List[int]:
+    def delete_by_id(id: str) -> List[str]:
         user = User.query.filter(User.id == id).first()
         if not user:
             return []

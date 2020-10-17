@@ -26,7 +26,7 @@
                                   <li><a href="{{ url_for('auth.logout') }}">Logout</a></li>
                                   <li><a><i class="fa fa-user"></i>  Hi, {{ current_user.username }}!</a></li>
                                 {% else %}
-                                  <li><a href="{{ url_for('home.home_page') }}">Home</a></li>
+                                  <li><a href="{{ url_for('auth.home_page') }}">Home</a></li>
                                   <li><a href="{{ url_for('auth.choose_provider') }}">Login</a></li>
                                 {% endif %}
                             </ul>

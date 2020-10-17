@@ -26,9 +26,6 @@ def create_app(env=None):
     login_manager.init_app(app)
 
 
-    from .old_home import home as home_blueprint
-    app.register_blueprint(home_blueprint, url_prefix='/api')
-
     from .auth import auth as auth_blueprint
     app.register_blueprint(auth_blueprint, url_prefix='/')
 

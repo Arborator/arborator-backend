@@ -1,20 +1,33 @@
+from datetime import datetime
+
 from pytest import fixture
 from flask_sqlalchemy import SQLAlchemy
 from app.test.fixtures import app, db  # noqa
-from .model import Widget
+
+from .model import User
 
 
 @fixture
-def widget() -> Widget:
-    return Widget(widget_id=1, name="Test widget", purpose="Test purpose")
+def user() -> User:
+    return User(
+    id = "1",
+    auth_provider = "google",
+    username = "JohnDoe",
+    first_name = "John",
+    family_name = "Doe",
+    picture_url = "www.google.com",
+    super_admin = True,
+    created_date = datetime.utcnow(),
+    last_seen = datetime.utcnow(),
+    )
 
 
-def test_Widget_create(widget: Widget):
-    assert widget
+def test_User_create(user: User):
+    assert user
 
 
-def test_Widget_retrieve(widget: Widget, db: SQLAlchemy):  # noqa
-    db.session.add(widget)
+def test_User_retrieve(user: User, db: SQLAlchemy):  # noqa
+    db.session.add(user)
     db.session.commit()
-    s = Widget.query.first()
-    assert s.__dict__ == widget.__dict__
+    s = User.query.first()
+    assert s.__dict__ == user.__dict__

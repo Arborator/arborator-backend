@@ -192,5 +192,17 @@ def checkfirstsuper():
         message = "Access as superadmin has been denied."
     flash(message)
     # redirect to the login page
-    # TODO : fix this ugly thing, redirecting to url_for('home.home_page') goes to the bad port
+    # TODO : fix this ugly thing, redirecting to url_for('auth.home_page') goes to the bad port
     return redirect("https://127.0.0.1:8080")
+
+
+@auth.route('/', methods=['GET'])
+def home_page():
+	"""
+	Home page
+
+	Is almost useless now, but the superadmin page is redirecting on this. Fix it
+	"""
+
+	
+	return {}

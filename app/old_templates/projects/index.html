@@ -183,7 +183,7 @@
 {% block body %}
 <div id="center" class="center" style="width:100%">
 				<div id="navigation" style="width:100%;margin:0px;border:0px;" class="arbortitle  ui-widget-header ui-helper-clearfix">
-				<a href="{{url_for('home.home_page')}}" style='position: fixed;left:1px;top:1px'><img src="{{ url_for ('static', filename='images/arboratorNano.png') }}" border="0"></a>
+				<a href="{{url_for('auth.home_page')}}" style='position: fixed;left:1px;top:1px'><img src="{{ url_for ('static', filename='images/arboratorNano.png') }}" border="0"></a>
 				<a href="{{ url_for('project.projectpage', project_name=project_name)}}" style='position: fixed;left:120px;top:5px;color:white;' title="project overview">{{img}} {{project_name}} Annotation Project</a>
 				
 				

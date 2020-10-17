@@ -1,9 +1,10 @@
 from mypy_extensions import TypedDict
+from typing import Union
 from datetime import datetime
 
 
 class UserInterface(TypedDict, total=False):
-    id: int
+    id: str
     auth_provider: str
     username: str
     first_name: str

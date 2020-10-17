@@ -25,7 +25,7 @@
 			
 				
 		<div class="arbortitle fg-toolbar ui-widget-header ui-helper-clearfix">
-			<!-- <a href="{{ url_for('home.home_page') }}" style='position: absolute;left:0px;'><img src="{{ url_for ('static', filename='images/arboratorNano.png') }}" border="0"></a> -->
+			<!-- <a href="{{ url_for('auth.home_page') }}" style='position: absolute;left:0px;'><img src="{{ url_for ('static', filename='images/arboratorNano.png') }}" border="0"></a> -->
 			<span style='text-align:center;margin:0 auto;position: relative;top:0px;' id='sentinfo'>{{page_title}}</span>
 			<div style='float:right' id='log'>
 						{% if current_user.is_authenticated %}
@@ -33,7 +33,7 @@
 							<a href="{{ url_for('auth.logout') }}">Logout</a>
 
 						{% else %}
-							<!-- <a href="{{ url_for('home.home_page') }}">Home</a> -->
+							<!-- <a href="{{ url_for('auth.home_page') }}">Home</a> -->
 							<!-- <a href="{{ url_for('auth.choose_provider') }}">Login</a> -->
 						{% endif %}
 			</div>
