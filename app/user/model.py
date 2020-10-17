@@ -61,7 +61,7 @@ def load_user(user_id):
     return User.query.get(user_id)
 
 
-class User(UserMixin, db.Model, BaseM):
+class User(UserMixin, db.Model , BaseM):
 
     __tablename__ = 'users'
 
@@ -83,22 +83,7 @@ class User(UserMixin, db.Model, BaseM):
             setattr(self, key, val)
         return self
 
-    @staticmethod
-    def make_valid_nickname(nickname):
-        # return re.sub('[^a-zA-Z0-9_\.]', '', nickname)
-        return nickname.replace(' ', '')
 
-    @staticmethod
-    def make_unique_nickname(nickname):
-        if User.query.filter_by(username=nickname).first() is None:
-            return nickname
-        version = 2
-        while True:
-            new_nickname = nickname + str(version)
-            if User.query.filter_by(nickname=new_nickname).first() is None:
-                break
-            version += 1
-        return new_nickname
 
     @staticmethod
     def get_or_create(session, **kwargs):

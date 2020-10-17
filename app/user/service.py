@@ -29,13 +29,32 @@ class UserService:
         return [id]
 
 
+
+    @staticmethod
+    def make_valid_nickname(nickname):
+        # return re.sub('[^a-zA-Z0-9_\.]', '', nickname)
+        return nickname.replace(' ', '')
+
+    @staticmethod
+    def make_unique_nickname(nickname):
+        if User.query.filter_by(username=nickname).first() is None:
+            return nickname
+        version = 2
+        while True:
+            new_nickname = nickname + str(version)
+            if User.query.filter_by(nickname=new_nickname).first() is None:
+                break
+            version += 1
+        return new_nickname
+
+
     ## The creation is handled in the oath blueprint
     ## TODO : do the creation here
-    # @staticmethod
-    # def create(new_attrs: WidgetInterface) -> Widget:
-    #     new_widget = Widget(name=new_attrs["name"], purpose=new_attrs["purpose"])
+    @staticmethod
+    def create(new_attrs: UserInterface) -> User:
+        new_user = User(**new_attrs)
 
-    #     db.session.add(new_widget)
-    #     db.session.commit()
+        db.session.add(new_user)
+        db.session.commit()
 
-    #     return new_widget
+        return new_user

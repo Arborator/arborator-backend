@@ -21,8 +21,8 @@ class UserResource(Resource):
     @responds(schema=UserSchema, api=api)
     def get(self) -> User:
         user_id = session.get("user_id")
-        # if not user_id:
-        #     user_id = session.get("_user_id")
+        if not user_id:
+            user_id = session.get("_user_id")
 
         user = UserService.get_by_id(user_id)
         changes: UserInterface = {"last_seen": datetime.utcnow()}
