@@ -20,6 +20,7 @@ class WidgetResource(Resource):
     def get(self) -> List[Widget]:
         """Get all Widgets"""
 
+
         return WidgetService.get_all()
 
     @accepts(schema=WidgetSchema, api=api)
@@ -50,8 +51,6 @@ class WidgetIdResource(Resource):
     @responds(schema=WidgetSchema)
     def put(self, widgetId: int) -> Widget:
         """Update Single Widget"""
-
         changes: WidgetInterface = request.parsed_obj
-        print("KK changes", changes)
         Widget = WidgetService.get_by_id(widgetId)
         return WidgetService.update(Widget, changes)

@@ -1,5 +1,4 @@
 from mypy_extensions import TypedDict
-from typing import Union
 from datetime import datetime
 
 

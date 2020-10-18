@@ -16,8 +16,8 @@ class UserService:
     def get_by_id(id: str) -> User:
         return User.query.get(id)
 
-    @login_manager.user_loader
     @staticmethod
+    @login_manager.user_loader
     def login_by_id(id: str) -> User:
         return User.query.get(id)
 

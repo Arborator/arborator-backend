@@ -1,20 +1,28 @@
 from datetime import datetime
+from typing import List
 
 from flask import session
 from flask_accepts.decorators.decorators import responds
 from flask_restx import Namespace, Resource
 
-
 from .interface import UserInterface
-from .service import UserService
-from .schema import UserSchema
 from .model import User
-
+from .schema import UserSchema
+from .service import UserService
 
 api = Namespace("User", description="Single namespace, single entity")  # noqa
 
 
-@api.route("/infos")
+
+@api.route("/")
+class UsersResource(Resource):
+    "Users"
+    @responds(schema=UserSchema(many=True), api=api)
+    def get(self) -> List[User]:
+        return UserService.get_all()
+
+
+@api.route("/me")
 class UserResource(Resource):
     "User"
 

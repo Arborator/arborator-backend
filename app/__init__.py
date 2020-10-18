@@ -4,6 +4,7 @@ from flask_restx import Api
 
 from flask_login import LoginManager, current_user
 
+from app.utils.grew_utils import grew_request
 
 db = SQLAlchemy()
 login_manager = LoginManager()
@@ -12,13 +13,11 @@ print("LOG : Current user =", current_user)
 
 
 def create_app(env=None):
-    print("Environment :", env)
     from app.config import config_by_name
     from app.routes import register_routes
 
     app = Flask(__name__, instance_relative_config=False)
     app.config.from_object(config_by_name[env or "test"])
-    print("Config : ", config_by_name[env or "test"])
     api = Api(app, title="Flaskerific API", version="0.1.0")
 
     register_routes(api, app)

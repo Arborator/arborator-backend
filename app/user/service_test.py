@@ -1,13 +1,12 @@
 from datetime import datetime
-
 from typing import List
 
-from flask_sqlalchemy import SQLAlchemy
 from app.test.fixtures import app, db  # noqa
+from flask_sqlalchemy import SQLAlchemy
 
+from .interface import UserInterface
 from .model import User
 from .service import UserService  # noqa
-from .interface import UserInterface
 
 
 def test_get_all(db: SQLAlchemy):  # noqa

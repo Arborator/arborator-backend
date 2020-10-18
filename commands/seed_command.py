@@ -5,20 +5,17 @@ from flask_script import Command
 
 from app import db
 from app.widget import Widget
-from app.fizz.fizzbaz import Fizzbaz
-from app.fizz.fizzbar import Fizzbar
-from app.other_api.doodad import Doodad
-from app.other_api.whatsit import Whatsit
+from app.project.model import Project
 
 
 def seed_things():
-    classes = [Widget, Fizzbaz, Fizzbar, Doodad, Whatsit]
+    classes = [Widget]
     for klass in classes:
         seed_thing(klass)
 
 
 def seed_thing(cls):
-    things = [
+    things =[
         {"name": "Pizza Slicer", "purpose": "Cut delicious pizza"},
         {"name": "Rolling Pin", "purpose": "Roll delicious pizza"},
         {"name": "Pizza Oven", "purpose": "Bake delicious pizza"},

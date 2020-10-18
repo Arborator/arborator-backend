@@ -19,7 +19,7 @@ from authomatic.adapters import WerkzeugAdapter
 from authomatic import Authomatic
 
 
-from app.config import BaseConfig as Config
+from app.config import Config
 
 from . import auth
 
@@ -179,6 +179,7 @@ def checkfirstsuper():
     """
     Handle requests to the /firstsuper route
     """
+    print("YOLO")
     print("KK Checkfirstsuper")
     mdp = request.form.get("password")
     print("KK mdp", mdp)

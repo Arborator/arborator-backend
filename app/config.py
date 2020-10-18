@@ -6,7 +6,7 @@ from cryptography.hazmat.backends import default_backend
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 
-class BaseConfig:
+class Config:
     CONFIG_NAME = "base"
     USE_MOCK_EQUIVALENCY = False
     DEBUG = False
@@ -20,7 +20,7 @@ class BaseConfig:
     SESSION_COOKIE_SECURE = True
 
 
-class DevelopmentConfig(BaseConfig):
+class DevelopmentConfig(Config):
     CONFIG_NAME = "dev"
     SECRET_KEY = os.getenv(
         "DEV_SECRET_KEY", "You can't see California without Marlon Widgeto's eyes"
@@ -43,7 +43,7 @@ class DevelopmentConfig(BaseConfig):
     PKEY = default_backend().load_pem_private_key(cert_bytes, None)
 
 
-class TestingConfig(BaseConfig):
+class TestingConfig(Config):
     CONFIG_NAME = "test"
     SECRET_KEY = os.getenv("TEST_SECRET_KEY", "Thanos did nothing wrong")
     DEBUG = True
@@ -58,7 +58,7 @@ class TestingConfig(BaseConfig):
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'arborator_test.sqlite')
 
 
-class ProductionConfig(BaseConfig):
+class ProductionConfig(Config):
     CONFIG_NAME = "prod"
     SECRET_KEY = os.getenv("PROD_SECRET_KEY", "I'm Ron Burgundy?")
     DEBUG = False
@@ -81,7 +81,7 @@ class ProductionConfig(BaseConfig):
     PKEY = default_backend().load_pem_private_key(cert_bytes, None)
 
 
-EXPORT_CONFIGS: List[Type[BaseConfig]] = [
+EXPORT_CONFIGS: List[Type[Config]] = [
     DevelopmentConfig,
     TestingConfig,
     ProductionConfig,
