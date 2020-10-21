@@ -97,7 +97,6 @@ def login(provider_name) -> Response:
 
             # If no existing user, create a new one
             if not user:
-                print("KK Create new user")
                 username = results_parsed.get("username")
                 valid_username = UserService.make_valid_nickname(username)
                 unique_username = UserService.make_unique_nickname(valid_username)
@@ -179,11 +178,7 @@ def checkfirstsuper():
     """
     Handle requests to the /firstsuper route
     """
-    print("YOLO")
-    print("KK Checkfirstsuper")
     mdp = request.form.get("password")
-    print("KK mdp", mdp)
-    print("KK Config.FIRSTADMINKEY", Config.FIRSTADMINKEY)
     if mdp == Config.FIRSTADMINKEY:
 
         user = UserService.get_by_id(current_user.id)

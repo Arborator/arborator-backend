@@ -17,6 +17,10 @@ class UserService:
         return User.query.get(id)
 
     @staticmethod
+    def get_by_username(username: str) -> User:
+        return User.query.filter_by(username=username).first()
+
+    @staticmethod
     @login_manager.user_loader
     def login_by_id(id: str) -> User:
         return User.query.get(id)

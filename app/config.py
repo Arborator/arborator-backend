@@ -15,7 +15,7 @@ class Config:
     SECRET_KEY = 'p9Bv<3Eid9%$i01jge87rt32trig87'
     basedir = os.path.dirname(os.path.abspath(__file__))
     FIRSTADMINKEY="azer"
-    UPLOAD_FOLDER = "app/test/data/"
+    UPLOAD_FOLDER = "app/tmp/data/"
     SESSION_COOKIE_HTTPONLY = False
     SESSION_COOKIE_SECURE = True
 

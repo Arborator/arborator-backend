@@ -5,7 +5,7 @@ from flask_script import Command
 
 from app import db
 from app.widget import Widget
-from app.project.model import Project
+from app.projects.model import Project
 
 
 def seed_things():

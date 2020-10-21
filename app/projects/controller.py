@@ -1,4 +1,3 @@
-from app import project
 import json
 from typing import List
 
@@ -168,10 +167,40 @@ class ProjectFeaturesResource(Resource):
             }
 
         features = {
-            "shownmeta": ProjectFeatureService.get_by_project_id(project.id),
-            "shownfeatures": ProjectMetaFeatureService.get_by_project_id(project.id),
+            # TODO : On frontend and backend, It's absolutely necessary to uniformize naming conventions and orthography
+            # ... we should have "shownMeta" /"shownFeatues" or "shownMeta"/"shownFeature"
+            "shownmeta": ProjectMetaFeatureService.get_by_project_id(project.id),
+            "shownfeatures": ProjectFeatureService.get_by_project_id(project.id),
         }
         return features
+
+    def put(self, projectName: str):
+        parser = reqparse.RequestParser()
+        parser.add_argument(name="shownfeatures", type=str, action="append")
+        parser.add_argument(name="shownmeta", type=str, action="append")
+        args = parser.parse_args()
+        project = ProjectService.get_by_name(projectName)
+        if args.get("shownfeatures"):
+            ProjectFeatureService.delete_by_project_id(project.id)
+            for feature in args.shownfeatures:
+                new_attrs = {
+                    "project_id": project.id,
+                    "value": feature
+                }
+                ProjectFeatureService.create(new_attrs)
+            
+        if args.get("shownmeta"):
+            ProjectMetaFeatureService.delete_by_project_id(project.id)
+            for feature in args.shownmeta:
+                new_attrs = {
+                    "project_id": project.id,
+                    "value": feature
+                }
+                ProjectMetaFeatureService.create(new_attrs)
+
+        return {"status": "success"}
+
+
 
 
 @api.route("/<string:projectName>/conll-schema")
@@ -190,10 +219,22 @@ class ProjectConllSchemaResource(Resource):
             "getProjectConfig", current_app, data={"project_id": project.project_name}
         )
         conll_schema = {
-            "annotationFeatures": grew_reply["data"],
+            "annotationFeatures": grew_reply["data"][0], # be careful, grew_reply["data"] is a list of object. See why, and add an interface for GREW !!
         }
-
         return conll_schema
+
+    def put(self, projectName: str):
+        """Modify a single project conll schema"""
+        project = ProjectService.get_by_name(projectName)
+        parser = reqparse.RequestParser()
+        parser.add_argument(name="config", type=dict, action="append")
+        args = parser.parse_args()
+        reply = grew_request(
+            "updateProjectConfig",
+            current_app,
+            data={"project_id": project.project_name, "config": json.dumps(args.config)},
+        )
+        return { "status": "success", "message": "New conllu schema was saved"}
 
 
 @api.route("/<string:projectName>/access")

@@ -1,10 +1,11 @@
 def register_routes(api, app, root="api"):
     from app.user import register_routes as attach_user
-    from app.project import register_routes as attach_project
-
-    from app.widget import register_routes as attach_widget
+    from app.projects import register_routes as attach_projects
+    from app.samples import register_routes as attach_samples
+    from app.trees import register_routes as attach_trees
 
     # Add routes
     attach_user(api, app)
-    attach_project(api, app)
-    attach_widget(api, app)
+    attach_projects(api, app)
+    attach_samples(api, app)
+    attach_trees(api, app)
