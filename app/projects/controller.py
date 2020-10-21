@@ -210,14 +210,11 @@ class ProjectConllSchemaResource(Resource):
         grew_reply = grew_request(
             "getProjectConfig", current_app, data={"project_id": project.project_name}
         )
-        # annotationFeatures = grew_reply.get("data", {}).get(0)
-        print("KK DATA", grew_reply.get("data", {}))
-        if grew_reply.get("data", {}):
-
+        # TODO : redo this. It's ugly
+        data = grew_reply.get("data")
+        if data:
             conll_schema = {
-                "annotationFeatures": grew_reply.get("data", {}).get(
-                    0, {}
-                ),  # be careful, grew_reply["data"] is a list of object. See why, and add an interface for GREW !!
+                "annotationFeatures": data[0],  # be careful, grew_reply["data"] is a list of object. See why, and add an interface for GREW !!
             }
         else:
             conll_schema = {}
