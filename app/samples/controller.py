@@ -3,11 +3,12 @@ import re
 from app.projects.service import ProjectService
 from app.user.service import UserService
 from app.utils.grew_utils import grew_request
-from flask import current_app, request, Response
+from flask import Response, abort, current_app, request
 from flask_restx import Namespace, Resource, reqparse
 
 from .model import SampleRole
-from .service import SampleExerciseLevelService, SampleExportService, SampleRoleService, SampleUploadService
+from .service import (SampleExerciseLevelService, SampleExportService,
+                      SampleRoleService, SampleUploadService)
 
 api = Namespace(
     "Samples", description="Endpoints for dealing with samples of project"
@@ -62,7 +63,6 @@ class SampleResource(Resource):
             import_user = request.form.get(
                 "import_user", ""
             )  # TODO : change import_user
-        print("KK IMPORT USER: {}".format(import_user))
 
         if fichiers:
             reextensions = re.compile(r"\.(conll(u|\d+)?|txt|tsv|csv)$")
@@ -114,7 +114,7 @@ class SampleRoleResource(Resource):
             SampleRoleService.create(new_attrs)
 
         if args.action == "remove":
-            SampleRoleService.delete(project_id, sampleName, user_id, role)
+            SampleRoleService.delete_one(project_id, sampleName, user_id, role)
 
         data = {
             "roles": SampleRoleService.get_by_sample_name(project.id, sampleName),
@@ -160,8 +160,11 @@ class ExportSampleResource(Resource):
         samplecontentfiles = list()
 
         for sample_name in sample_names:
-            reply = grew_request('getConll', current_app, data={
-                            'project_id': project_name, 'sample_id': sample_name})
+            reply = grew_request(
+                "getConll",
+                current_app,
+                data={"project_id": project_name, "sample_id": sample_name},
+            )
             if reply.get("status") == "OK":
 
                 # {"sent_id_1":{"conlls":{"user_1":"conllstring"}}}
@@ -171,9 +174,11 @@ class ExportSampleResource(Resource):
                 for sent_id in sample_tree:
                     print("KK sent_id", sent_id)
                     last = SampleExportService.get_last_user(
-                        sample_tree[sent_id]["conlls"])
-                    sample_content["last"] = sample_content.get(
-                        "last", []) + [sample_tree[sent_id]["conlls"][last]]
+                        sample_tree[sent_id]["conlls"]
+                    )
+                    sample_content["last"] = sample_content.get("last", []) + [
+                        sample_tree[sent_id]["conlls"][last]
+                    ]
 
                 # gluing back the trees
                 sample_content["last"] = "\n\n".join(sample_content["last"])
@@ -183,8 +188,35 @@ class ExportSampleResource(Resource):
                 print("Error: {}".format(reply.get("message")))
 
         memory_file = SampleExportService.contentfiles2zip(
-            sample_names, samplecontentfiles)
+            sample_names, samplecontentfiles
+        )
 
-        resp = Response (memory_file, status=200,  mimetype='application/zip', headers={
-                        'Content-Disposition': 'attachment;filename=dump.{}.zip'.format(project_name)})
-        return resp        
+        resp = Response(
+            memory_file,
+            status=200,
+            mimetype="application/zip",
+            headers={
+                "Content-Disposition": "attachment;filename=dump.{}.zip".format(
+                    project_name
+                )
+            },
+        )
+        return resp
+
+
+@api.route("/<string:project_name>/samples/<string:sample_name>")
+class DeleteSampleResource(Resource):
+    def delete(self, project_name: str, sample_name: str):
+        project = ProjectService.get_by_name(project_name)
+        if not project:
+            abort(401, "Project not found on flask server")
+        grew_request(
+            "eraseSample",
+            current_app,
+            data={"project_id": project_name, "sample_id": sample_name},
+        )
+        SampleRoleService.delete_by_sample_name(project.id, sample_name)
+        SampleExerciseLevelService.delete_by_sample_name(project.id, sample_name)
+        return {
+            "status": "OK",
+        }

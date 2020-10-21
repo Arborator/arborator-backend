@@ -90,6 +90,7 @@ class SampleUploadService:
             return 400, sample_name + " caused a problem: " + mes + li
             # abort(400)
 
+
 # TODO : refactor this
 class SampleExportService:
     @staticmethod
@@ -161,12 +162,13 @@ class SampleRoleService:
         return new_sample_role
 
     @staticmethod
-    def get(
+    def get_one(
         project_id: int,
         sample_name: str,
         user_id: int,
         role: int,
     ):
+        """Get one specific user role """
         role = (
             db.session.query(SampleRole)
             .filter(SampleRole.user_id == user_id)
@@ -177,12 +179,13 @@ class SampleRoleService:
         )
 
     @staticmethod
-    def delete(
+    def delete_one(
         project_id: int,
         sample_name: str,
         user_id: int,
         role: int,
     ):
+        """Delete one specific user role """
         role = (
             db.session.query(SampleRole)
             .filter(SampleRole.user_id == user_id)
@@ -199,6 +202,7 @@ class SampleRoleService:
 
     @staticmethod
     def get_by_sample_name(project_id: int, sample_name: str):
+        """Get a dict of annotators and validators for a given sample"""
         roles = {}
         for r, label in SampleRole.ROLES:
             role = (
@@ -213,17 +217,34 @@ class SampleRoleService:
 
         return roles
 
+    @staticmethod
+    def delete_by_sample_name(project_id: int, sample_name: str):
+        """Delete all access of a sample. Used after a sample deletion was asked by the user
+        ... perform on grew server."""
+        roles = (
+            db.session.query(SampleRole)
+            .filter(SampleRole.project_id == project_id)
+            .filter(SampleRole.sample_name == sample_name)
+            .all()
+        )
+        for role in roles:
+            print("KK role", role)
+            db.session.delete(role)
+        db.session.commit()
+
+        return
+
     # def get_annotators_by_sample_id(project_id: int, sample_id: int) -> List[str]:
     #     return
 
 
 class SampleExerciseLevelService:
     @staticmethod
-    def get_by_sample_name(project_id: int, sample_name: str) -> SampleExerciseLevel:
-        sample_exercise_level = SampleExerciseLevel.query.filter_by(
-            sample_name=sample_name, project_id=project_id
-        ).first()
-        return sample_exercise_level
+    def create(new_attrs) -> SampleExerciseLevel:
+        new_sample_access_level = SampleExerciseLevel(**new_attrs)
+        db.session.add(new_sample_access_level)
+        db.session.commit()
+        return new_sample_access_level
 
     @staticmethod
     def update(sample_exercise_level: SampleExerciseLevel, changes):
@@ -232,11 +253,27 @@ class SampleExerciseLevelService:
         return sample_exercise_level
 
     @staticmethod
-    def create(new_attrs) -> SampleExerciseLevel:
-        new_sample_access_level = SampleExerciseLevel(**new_attrs)
-        db.session.add(new_sample_access_level)
+    def get_by_sample_name(project_id: int, sample_name: str) -> SampleExerciseLevel:
+        sample_exercise_level = SampleExerciseLevel.query.filter_by(
+            sample_name=sample_name, project_id=project_id
+        ).first()
+        return sample_exercise_level
+
+    @staticmethod
+    def delete_by_sample_name(project_id: int, sample_name: str):
+        """Delete all access of a sample. Used after a sample deletion was asked by the user
+        ... perform on grew server."""
+        roles = (
+            db.session.query(SampleExerciseLevel)
+            .filter(SampleExerciseLevel.project_id == project_id)
+            .filter(SampleExerciseLevel.sample_name == sample_name)
+            .all()
+        )
+        for role in roles:
+            db.session.delete(role)
         db.session.commit()
-        return new_sample_access_level
+
+        return
 
 
 #
