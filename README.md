@@ -1,10 +1,11 @@
 # Example of a scalable Flask API
 
-![The site](docs/site.png)
+This the back-end of the Arborator-Grew redevelopement of the arborator-server.
 
-A sample project showing how to build a scalable, maintainable, modular Flask API with a heavy emphasis on testing.
-
-_This is an example project using the structure proposed in [this blog post](http://alanpryorjr.com/2019-05-20-flask-api-example/)._
+## Useful Resources
+Before starting to dive deep in the code, you should refer to these following important resources :
+- [Flask-RESTx](https://flask-restx.readthedocs.io/en/latest/) : How to build a restful server with python
+- [Some Flask good practives](http://alanpryorjr.com/2019-05-20-flask-api-example/) : How to use static typing and testing procedure with flask.
 
 ## Setting the environment config
 Create a .flaskenv file with the following config 
