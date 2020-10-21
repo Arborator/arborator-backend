@@ -183,24 +183,16 @@ class ProjectFeaturesResource(Resource):
         if args.get("shownfeatures"):
             ProjectFeatureService.delete_by_project_id(project.id)
             for feature in args.shownfeatures:
-                new_attrs = {
-                    "project_id": project.id,
-                    "value": feature
-                }
+                new_attrs = {"project_id": project.id, "value": feature}
                 ProjectFeatureService.create(new_attrs)
-            
+
         if args.get("shownmeta"):
             ProjectMetaFeatureService.delete_by_project_id(project.id)
             for feature in args.shownmeta:
-                new_attrs = {
-                    "project_id": project.id,
-                    "value": feature
-                }
+                new_attrs = {"project_id": project.id, "value": feature}
                 ProjectMetaFeatureService.create(new_attrs)
 
         return {"status": "success"}
-
-
 
 
 @api.route("/<string:projectName>/conll-schema")
@@ -218,9 +210,17 @@ class ProjectConllSchemaResource(Resource):
         grew_reply = grew_request(
             "getProjectConfig", current_app, data={"project_id": project.project_name}
         )
-        conll_schema = {
-            "annotationFeatures": grew_reply["data"][0], # be careful, grew_reply["data"] is a list of object. See why, and add an interface for GREW !!
-        }
+        # annotationFeatures = grew_reply.get("data", {}).get(0)
+        print("KK DATA", grew_reply.get("data", {}))
+        if grew_reply.get("data", {}):
+
+            conll_schema = {
+                "annotationFeatures": grew_reply.get("data", {}).get(
+                    0, {}
+                ),  # be careful, grew_reply["data"] is a list of object. See why, and add an interface for GREW !!
+            }
+        else:
+            conll_schema = {}
         return conll_schema
 
     def put(self, projectName: str):
@@ -232,9 +232,12 @@ class ProjectConllSchemaResource(Resource):
         reply = grew_request(
             "updateProjectConfig",
             current_app,
-            data={"project_id": project.project_name, "config": json.dumps(args.config)},
+            data={
+                "project_id": project.project_name,
+                "config": json.dumps(args.config),
+            },
         )
-        return { "status": "success", "message": "New conllu schema was saved"}
+        return {"status": "success", "message": "New conllu schema was saved"}
 
 
 @api.route("/<string:projectName>/access")

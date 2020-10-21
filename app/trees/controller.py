@@ -11,7 +11,7 @@ api = Namespace(
 
 
 @api.route("/<string:projectName>/samples/<string:sampleName>/trees")
-class SampleResource(Resource):
+class SampleTreesResource(Resource):
     "Trees"
 
     def get(self, projectName: str, sampleName: str):
