@@ -141,11 +141,11 @@ def login(provider_name) -> Response:
             userJson = UserSchema().dump(user)
             resp = Response(userJson, status=200, mimetype="application/json")
 
-            if current_app.config["ENV"] == "development":
+            if current_app.config["ENV"] == "dev":
                 return make_response(
                     render_template("auth/redirect_dev.html", response=resp)
                 )
-            elif current_app.config["ENV"] == "production":
+            elif current_app.config["ENV"] == "prod":
                 return make_response(
                     render_template("auth/redirect_prod.html", response=resp)
                 )
