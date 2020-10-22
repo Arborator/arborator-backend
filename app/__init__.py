@@ -18,15 +18,21 @@ def create_app(env=None):
 
     app = Flask(__name__, instance_relative_config=False)
     app.config.from_object(config_by_name[env or "test"])
-    api = Api(app, title="Flaskerific API", version="0.1.0")
+    api = Api(
+        app,
+        title="Arborator-Grew Backend",
+        version="0.1.0",
+        doc='/api/doc',
+        # endpoint="/api"
+    )
 
     register_routes(api, app)
     db.init_app(app)
     login_manager.init_app(app)
 
-
     from .auth import auth as auth_blueprint
-    app.register_blueprint(auth_blueprint, url_prefix='/')
+
+    app.register_blueprint(auth_blueprint, url_prefix="/")
 
     @app.route("/health")
     def health():

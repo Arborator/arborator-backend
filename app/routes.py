@@ -7,9 +7,9 @@ def register_routes(api, app, root="api"):
     from app.grew import register_routes as attach_grew
 
     # Add routes
-    attach_user(api, app)
-    attach_projects(api, app)
-    attach_samples(api, app)
-    attach_trees(api, app)
-    attach_lexicon(api, app)
-    attach_grew(api, app)
+    attach_user(api, app, root)
+    attach_projects(api, app, root)
+    attach_samples(api, app, root)
+    attach_trees(api, app, root)
+    attach_lexicon(api, app, root)
+    attach_grew(api, app, root)
