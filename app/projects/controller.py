@@ -133,12 +133,13 @@ class ProjectIdResource(Resource):
 
     @responds(schema=ProjectSchema, api=api)
     def get(self, projectName: str):
-        """Get a single project (by it's name)"""
+        """Get a single project"""
         return ProjectService.get_by_name(projectName)
 
     @responds(schema=ProjectSchemaCamel, api=api)
     @accepts(schema=ProjectSchemaCamel, api=api)
     def put(self, projectName: str):
+        """Modify a single project (by it's name)"""
         changes: ProjectInterface = request.parsed_obj
         project = ProjectService.get_by_name(projectName)
 

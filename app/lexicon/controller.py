@@ -9,7 +9,7 @@ from flask_login import current_user
 from flask_restx import Namespace, Resource, reqparse
 
 api = Namespace(
-    "Grew", description="Endpoints for dealing with samples of project"
+    "Lexicon", description="Endpoints for dealing with samples of project"
 )  # noqa
 
 
