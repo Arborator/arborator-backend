@@ -22,8 +22,9 @@ def create_app(env=None):
         app,
         title="Arborator-Grew Backend",
         version="0.1.0",
-        doc='/api/doc',
-        # endpoint="/api"
+        doc="/api/doc",
+        endpoint="/api",
+        base_url="/api",
     )
 
     register_routes(api, app)
