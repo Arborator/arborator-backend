@@ -4,6 +4,8 @@
 import authomatic
 from authomatic.providers import oauth1, oauth2
 
+from flask import current_app
+
 CONFIG = { 
     'twitter': {  # Your internal provider name
         # Provider class
@@ -39,16 +41,16 @@ CONFIG = {
 
     'github': {
 
-        'class_': oauth2.GitHub,
-        # # 'consumer_key': '031490de23f3d79f6ad1',
-        # 'consumer_key':'e82130012299536bd9fa',
-        # # 'consumer_secret': '3c272d0218300e42e319d9a61091873cd6e7b02d',
-        # 'consumer_secret': 'b9462174b0fe58b477a403be5d95fabffa149ec2',
+        # prod
+        'consumer_key':'a10dffc2b29dbddacb9d',
+        'consumer_secret': '59cf1a4ffda3d036bc8274131ad82e7fa6038c01',
 
         # dev
-        'consumer_key':'924aedede12fde87b5f4',
-        'consumer_secret':'4b4e6235887137665573659c7ebd2f3980dde718',
+        #'consumer_key':'924aedede12fde87b5f4',
+        #'consumer_secret':'4b4e6235887137665573659c7ebd2f3980dde718',
 
+        # shared
+        'class_': oauth2.GitHub,
         'id': authomatic.provider_id(),
         'scope': oauth2.GitHub.user_info_scope
     },

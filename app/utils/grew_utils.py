@@ -6,9 +6,9 @@ from werkzeug.utils import secure_filename
 
 
 def grew_request(fct_name, current_app, data={}, files={}):
-    if current_app.config["ENV"] == "development":
+    if current_app.config["ENV"] == "dev":
         server = "http://arborator-dev.grew.fr"
-    elif current_app.config["ENV"] == "production":
+    elif current_app.config["ENV"] == "prod":
         server = "http://arborator.grew.fr"
     try:
         r = requests.post("%s/%s" % (server, fct_name), files=files, data=data)

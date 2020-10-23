@@ -149,6 +149,7 @@ def login(provider_name) -> Response:
                 return make_response(
                     render_template("auth/redirect_prod.html", response=resp)
                 )
+
     return response
 
 

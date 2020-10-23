@@ -36,7 +36,7 @@ class DevelopmentConfig(Config):
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
             'sqlite:///' + os.path.join(basedir, 'arborator_dev.sqlite')
     SQLALCHEMY_TRACK_MODIFICATIONS = True
-    ENV = 'development'
+    ENV = 'dev'
     fname = 'keys/arborator-grew-dev.pem'
     APP_ID = open('keys/arborator-grew-dev-appid.txt').read()
     cert_bytes = open(fname, 'rb').read()
@@ -73,7 +73,7 @@ class ProductionConfig(Config):
     
     SQLALCHEMY_TRACK_MODIFICATIONS = True
 
-    ENV = 'production'
+    ENV = 'prod'
     fname = 'keys/arborator-grew.pem'
     APP_ID = open('keys/arborator-grew-appid.txt').read()
     # INSTALATION_ID = int(open('keys/arborator-grew-installationid.txt').read())
