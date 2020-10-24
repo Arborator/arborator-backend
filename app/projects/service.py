@@ -1,6 +1,8 @@
 from typing import Dict, List
 
 from app import db
+from flask import abort
+from flask_login import current_user
 
 from .interface import ProjectExtendedInterface, ProjectInterface
 from .model import Project, ProjectAccess, ProjectFeature, ProjectMetaFeature
@@ -64,7 +66,7 @@ class ProjectAccessService:
             db.session.commit()
         return [(project_id, user_id)]
 
-    # TODO : Rename this as `get_by_username` because we are not fetching the user_id 
+    # TODO : Rename this as `get_by_username` because we are not fetching the user_id
     # ... but the username
     @staticmethod
     def get_by_user_id(user_id: str, project_id: str) -> ProjectAccess:
@@ -101,6 +103,23 @@ class ProjectAccessService:
             "guests": guests,
         }
 
+    @staticmethod
+    def require_access_level(project_id, required_access_level) -> None:
+        access_level = 0
+        if current_user.is_authenticated:
+            if current_user.super_admin:
+                pass
+
+            else:
+                access_level = ProjectAccessService.get_by_user_id(
+                    current_user.id, project_id
+                ).access_level.code
+
+        if access_level >= required_access_level:
+            return
+        else:
+            abort(403)
+
 
 class ProjectFeatureService:
     @staticmethod
@@ -119,8 +138,8 @@ class ProjectFeatureService:
             return []
 
     @staticmethod
-    def delete_by_project_id(project_id: str) ->str:
-        """TODO : Delete all the project features at once. This is a weird way of doing, but it's because we have a table specificaly 
+    def delete_by_project_id(project_id: str) -> str:
+        """TODO : Delete all the project features at once. This is a weird way of doing, but it's because we have a table specificaly
         ...dedicated for linking project shown features and project. Maybe a simple textfield in the project settings would do the job"""
         features = ProjectFeature.query.filter_by(project_id=project_id).all()
         for feature in features:
@@ -146,10 +165,9 @@ class ProjectMetaFeatureService:
         else:
             return []
 
-    
     @staticmethod
-    def delete_by_project_id(project_id: str) ->str:
-        """Delete all the project features at once. This is a weird way of doing, but it's because we have a table specificaly 
+    def delete_by_project_id(project_id: str) -> str:
+        """Delete all the project features at once. This is a weird way of doing, but it's because we have a table specificaly
         ...dedicated for linking project shown features and project. Maybe a simple textfield in the project settings would do the job"""
         features = ProjectMetaFeature.query.filter_by(project_id=project_id).all()
         for feature in features:

@@ -22,7 +22,6 @@ class SampleTreesResource(Resource):
             data={"project_id": projectName, "sample_id": sampleName},
         )
         data = reply.get("data")
-        print("KK data", reply.get("status"))
         if reply.get("status") != "OK":
             abort(409)
 
@@ -31,17 +30,17 @@ class SampleTreesResource(Resource):
             abort(404)
 
         samples = reply.get("data", {})
-
+        ProjectAccessService.require_access_level(project.id, 2)
         ##### exercise mode block #####
         exercise_mode = project.exercise_mode
         project_access: int = 0
         exercise_level: int = 4
 
-        project_access = ProjectAccessService.get_by_user_id(
-             current_user.id, project.id
-        ).access_level
+        if current_user.is_authenticated:
+            project_access = ProjectAccessService.get_by_user_id(
+                current_user.id, project.id
+            ).access_level.code
 
-        print("KK current_user.id", project_access)
         if exercise_mode:
             exercise_level_obj = SampleExerciseLevelService.get_by_sample_name(
                 project.id, sampleName

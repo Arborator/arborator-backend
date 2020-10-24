@@ -8,7 +8,7 @@
 ####
 # Copyright (C) 2009-2017 Kim Gerdes
 # kim AT gerdes. fr
-# http://arborator.ilpga.fr/
+# http://arborator.elizia.net/
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of version 3 of the GNU Affero General Public License (the "License")

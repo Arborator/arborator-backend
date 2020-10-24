@@ -42,12 +42,12 @@ CONFIG = {
     'github': {
 
         # prod
-        'consumer_key':'a10dffc2b29dbddacb9d',
-        'consumer_secret': '59cf1a4ffda3d036bc8274131ad82e7fa6038c01',
+        #'consumer_key':'a10dffc2b29dbddacb9d',
+        #'consumer_secret': '59cf1a4ffda3d036bc8274131ad82e7fa6038c01',
 
         # dev
-        #'consumer_key':'924aedede12fde87b5f4',
-        #'consumer_secret':'4b4e6235887137665573659c7ebd2f3980dde718',
+        'consumer_key':'924aedede12fde87b5f4',
+        'consumer_secret':'4b4e6235887137665573659c7ebd2f3980dde718',
 
         # shared
         'class_': oauth2.GitHub,

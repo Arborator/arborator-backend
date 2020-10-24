@@ -16,7 +16,8 @@ class ProjectSchema(Schema):
     id = fields.Integer(attribute="id")
     project_name = fields.String(attribute="project_name")
     description = fields.String(attribute="description")
-    image = BytesField(attribute="image")
+    # TODO : Find how to serialize glob images
+    # image = BytesField(attribute="image")
     visibility = fields.Integer(attribute="visibility")
     show_all_trees = fields.Boolean(attribute="show_all_trees")
     exercise_mode = fields.Boolean(attribute="exercise_mode")
