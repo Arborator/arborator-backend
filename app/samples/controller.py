@@ -52,6 +52,7 @@ class SampleResource(Resource):
         return samples
 
     def post(self, project_name: str):
+        """Upload a sample to the server"""
         project = ProjectService.get_by_name(project_name)
 
         fichiers = request.files.to_dict(flat=False).get("files")
@@ -179,7 +180,7 @@ class ExportSampleResource(Resource):
                     ]
 
                 # gluing back the trees
-                sample_content["last"] = "\n\n".join(sample_content["last"])
+                sample_content["last"] = "\n".join(sample_content["last"])
                 samplecontentfiles.append(sample_content)
 
             else:
