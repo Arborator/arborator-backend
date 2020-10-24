@@ -228,7 +228,6 @@ class SampleRoleService:
             .all()
         )
         for role in roles:
-            print("KK role", role)
             db.session.delete(role)
         db.session.commit()
 

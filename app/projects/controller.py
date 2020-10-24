@@ -41,7 +41,6 @@ class ProjectResource(Resource):
         # if len(grewnames ^ dbnames) > 0:
         # projects_info["difference"] = True
         for project in projects:
-            print("KK bla")
             dumped_project: ProjectExtendedInterface = ProjectSchema().dump(project)
             if dumped_project["project_name"] not in common:
                 continue

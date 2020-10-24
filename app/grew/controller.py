@@ -40,11 +40,9 @@ class TryRuleResource(Resource):
         parser.add_argument(name="pattern", type=str)
         parser.add_argument(name="rewriteCommands", type=str)
         args = parser.parse_args()
-        print("KK args", args)
         pattern = args.get("pattern")
         rewriteCommands = args.get("rewriteCommands")
         # tryRule(<string> project_id, [<string> sample_id], [<string> user_id], <string> pattern, <string> commands)
-        print("KK", project_name, pattern, rewriteCommands)
         reply = grew_request(
             "tryRule",
             current_app,
@@ -54,7 +52,6 @@ class TryRuleResource(Resource):
                 "commands": rewriteCommands,
             },
         )
-        print("KK reply", reply)
 
         if reply["status"] != "OK":
             if "message" in reply:

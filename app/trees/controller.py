@@ -30,7 +30,7 @@ class SampleTreesResource(Resource):
             abort(404)
 
         samples = reply.get("data", {})
-        ProjectAccessService.require_access_level(project.id, 2)
+        # ProjectAccessService.require_access_level(project.id, 2)
         ##### exercise mode block #####
         exercise_mode = project.exercise_mode
         project_access: int = 0
@@ -92,8 +92,6 @@ class SampleTreesResource(Resource):
         conll = args.conll
         sent_id = args.sent_id
 
-        print("KK saving", sample_name, sent_id)
-
         if not conll:
             abort(400)
         
@@ -114,7 +112,6 @@ class SampleTreesResource(Resource):
             data=data
         )
         resp = reply
-        print("KK resp", resp)
         if resp["status"] != "OK":
             if "data" in resp:
                 response =  {'status': 400, 'message': str(resp["data"])}
