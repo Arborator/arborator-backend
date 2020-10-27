@@ -1,6 +1,6 @@
 # security
 keys/
-app/user/auth_config.py
+auth_config.py
 
 # scrap
 z_sandbox/
