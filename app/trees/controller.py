@@ -190,6 +190,8 @@ def add_base_tree(trees):
             model_tree = sent_conlls[model_user]
             empty_conllu = emptyConllu(model_tree)
             sent_conlls[BASE_TREE] = empty_conllu
+        if current_user.username not in list_users:
+            sent_conlls[current_user.username] = sent_conlls[BASE_TREE]
     return trees
 
 
