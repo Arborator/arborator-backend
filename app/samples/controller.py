@@ -1,3 +1,4 @@
+import json
 import re
 
 from app.projects.service import ProjectService
@@ -56,14 +57,10 @@ class SampleResource(Resource):
         project = ProjectService.get_by_name(project_name)
 
         fichiers = request.files.to_dict(flat=False).get("files")
-        robot_active = request.form.get("robot", "false")
-        robot_name = request.form.get("robotname", "")
-        if robot_active == "true":
-            import_user = robot_name
-        else:
-            import_user = request.form.get(
-                "import_user", ""
-            )  # TODO : change import_user
+        users_ids_convertor = {}
+
+        for user_id_mapping in json.loads(request.form.get("usersIdsConvertor", {})):
+            users_ids_convertor[user_id_mapping["old"]] = user_id_mapping["new"]
 
         if fichiers:
             reextensions = re.compile(r"\.(conll(u|\d+)?|txt|tsv|csv)$")
@@ -78,9 +75,9 @@ class SampleResource(Resource):
                 status, message = SampleUploadService.upload(
                     f,
                     project_name,
-                    import_user,
                     reextensions=reextensions,
                     existing_samples=samples_names,
+                    users_ids_convertor=users_ids_convertor,
                 )
                 if status != 200:
                     resp = {"status": status, "message": message}
@@ -88,7 +85,7 @@ class SampleResource(Resource):
                     return resp
 
             # samples = {"samples": project_service.get_samples(project_name)}
-            samples = {"samples": "YOLO"}
+            samples = {"samples": "success"}
             return samples
 
 

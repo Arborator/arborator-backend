@@ -23,16 +23,19 @@ class SampleUploadService:
     def upload(
         fileobject,
         project_name,
-        import_user,
         reextensions=None,
         existing_samples=[],
+        users_ids_convertor={},
     ):
         if reextensions == None:
             reextensions = re.compile(r"\.(conll(u|\d+)?|txt|tsv|csv)$")
 
         filename = secure_filename(fileobject.filename)
         sample_name = reextensions.sub("", filename)
-        fileobject.save(os.path.join(Config.UPLOAD_FOLDER, filename))
+        path_file = os.path.join(Config.UPLOAD_FOLDER, filename)
+        fileobject.save(path_file)
+
+        convert_users_ids(path_file, users_ids_convertor)
 
         if sample_name not in existing_samples:
             # create a new sample in the grew project
@@ -47,28 +50,16 @@ class SampleUploadService:
         else:
             print("/!\ sample already exists")
 
-        tmpfile = add_or_keep_timestamps(os.path.join(Config.UPLOAD_FOLDER, filename))
+        tmpfile = add_or_keep_timestamps(path_file)
 
         with open(tmpfile, "rb") as inf:
             print("========== [saveConll]")
-            if import_user:
-                reply = grew_request(
-                    "saveConll",
-                    current_app,
-                    data={
-                        "project_id": project_name,
-                        "sample_id": sample_name,
-                        "user_id": import_user,
-                    },
-                    files={"conll_file": inf},
-                )
-            else:  # if no import_user has been provided, it should be in the conll metadata
-                reply = grew_request(
-                    "saveConll",
-                    current_app,
-                    data={"project_id": project_name, "sample_id": sample_name},
-                    files={"conll_file": inf},
-                )
+            reply = grew_request(
+                "saveConll",
+                current_app,
+                data={"project_id": project_name, "sample_id": sample_name},
+                files={"conll_file": inf},
+            )
 
         print("REPLY S+TATIUUUSS", reply)
         if reply.get("status") == "OK":
@@ -280,6 +271,20 @@ class SampleExerciseLevelService:
 #############    Helpers Function    #############
 #
 #
+
+
+def convert_users_ids(path_file, users_ids_convertor):
+    trees = conllFile2trees(path_file)
+
+    for tree in trees:
+        tree_current_user_id = tree.sentencefeatures.get("user_id", "default")
+        tree.sentencefeatures["user_id"] = users_ids_convertor[tree_current_user_id]
+
+    trees2conllFile(trees, path_file)
+    return
+
+    # if tree_current_user_id in users_ids_convertor.keys():
+    #     tree.sentencefeatures[]
 
 
 def add_or_keep_timestamps(conll_file):
