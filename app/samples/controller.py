@@ -59,7 +59,7 @@ class SampleResource(Resource):
         fichiers = request.files.to_dict(flat=False).get("files")
         users_ids_convertor = {}
 
-        for user_id_mapping in json.loads(request.form.get("usersIdsConvertor", {})):
+        for user_id_mapping in json.loads(request.form.get("usersIdsConvertor", "{}")):
             users_ids_convertor[user_id_mapping["old"]] = user_id_mapping["new"]
 
         if fichiers:
