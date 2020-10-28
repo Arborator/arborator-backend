@@ -37,9 +37,12 @@ class SampleTreesResource(Resource):
         exercise_level: int = 4
 
         if current_user.is_authenticated:
-            project_access = ProjectAccessService.get_by_user_id(
+            project_access_obj = ProjectAccessService.get_by_user_id(
                 current_user.id, project.id
-            ).access_level.code
+            )
+
+            if project_access_obj:
+                project_access = project_access_obj.access_level.code
 
         if exercise_mode:
             exercise_level_obj = SampleExerciseLevelService.get_by_sample_name(
