@@ -5,6 +5,9 @@ from flask import abort, current_app
 from flask_login import current_user
 from flask_restx import Namespace, Resource, reqparse
 
+BASE_TREE = "base_tree"
+TEACHER = "teacher"
+
 api = Namespace(
     "Trees", description="Endpoints for dealing with trees of a sample"
 )  # noqa
@@ -35,7 +38,6 @@ class SampleTreesResource(Resource):
         exercise_mode = project.exercise_mode
         project_access: int = 0
         exercise_level: int = 4
-
         if current_user.is_authenticated:
             project_access_obj = ProjectAccessService.get_by_user_id(
                 current_user.id, project.id
@@ -44,6 +46,12 @@ class SampleTreesResource(Resource):
             if project_access_obj:
                 project_access = project_access_obj.access_level.code
 
+        if project.visibility == 0 and project_access == 0:
+            abort(
+                403,
+                "The project is not visible and you don't have the right privileges",
+            )
+
         if exercise_mode:
             exercise_level_obj = SampleExerciseLevelService.get_by_sample_name(
                 project.id, sampleName
@@ -51,13 +59,19 @@ class SampleTreesResource(Resource):
             if exercise_level_obj:
                 exercise_level = exercise_level_obj.exercise_level.code
 
-            if project_access == 2:  # isAdmin (= isTeacher)
-                sample_trees = samples2trees(samples, sampleName)
-            elif project_access == 1:  # isGuest (= isStudent)
-                sample_trees = samples2trees_exercise_mode(
-                    samples, sampleName, current_user, projectName)
-            else:
-                abort(409)  # is not authentificated
+            sample_trees = exctract_trees_from_sample(samples, sampleName)
+            sample_trees = add_base_tree(sample_trees)
+
+            if project_access <= 1:
+                restricted_users = [BASE_TREE, TEACHER, current_user.username]
+                sample_trees = restrict_trees(sample_trees, restricted_users)
+
+            # if project_access == 2:  # isAdmin (= isTeacher)
+            #     sample_trees = samples2trees(samples, sampleName)
+            #     # add_base_tree(sample_trees)
+            # elif project_access == 1:  # isGuest (= isStudent)
+            #     sample_trees = samples2trees_exercise_mode(
+            #         samples, sampleName, current_user, projectName)
 
         ##### end block exercise mode #####
 
@@ -69,16 +83,13 @@ class SampleTreesResource(Resource):
                 # validator = project_service.is_validator(
                 #     project.id, sampleName, current_user.id)
                 if validator:
-                    sample_trees = samples2trees(
-                        samples, sampleName)
+                    sample_trees = samples2trees(samples, sampleName)
                 else:
                     sample_trees = samples2trees_with_restrictions(
-                        samples, sampleName, current_user)
+                        samples, sampleName, current_user
+                    )
 
-        data = {
-            "sample_trees": sample_trees,
-            "exercise_level":  exercise_level
-        }
+        data = {"sample_trees": sample_trees, "exercise_level": exercise_level}
         return data
 
     def post(self, projectName: str, sampleName: str):
@@ -97,7 +108,7 @@ class SampleTreesResource(Resource):
 
         if not conll:
             abort(400)
-        
+
         # TODO : add the is_annotator service
         # if project.visibility != 2:
         #     if not project_service.is_annotator(project.id, sample_name, current_user.id) or not project_service.is_validator(project.id, sample_name, current_user.id):
@@ -105,26 +116,27 @@ class SampleTreesResource(Resource):
         #             abort(403)
 
         TEACHER = "teacher"
-        if (project.exercise_mode == 1 and user_id == TEACHER):
+        if project.exercise_mode == 1 and user_id == TEACHER:
             conll = changeMetaField(conll, "user_id", TEACHER)
         print(">>>>", project_name)
-        data={'project_id': project_name, 'sample_id': sample_name,
-                    'user_id': user_id, 'sent_id': sent_id, "conll_graph": conll}
-        reply = grew_request(
-            'saveGraph', current_app,
-            data=data
-        )
+        data = {
+            "project_id": project_name,
+            "sample_id": sample_name,
+            "user_id": user_id,
+            "sent_id": sent_id,
+            "conll_graph": conll,
+        }
+        reply = grew_request("saveGraph", current_app, data=data)
         resp = reply
         if resp["status"] != "OK":
             if "data" in resp:
-                response =  {'status': 400, 'message': str(resp["data"])}
+                response = {"status": 400, "message": str(resp["data"])}
             else:
-                response = {'status': 400, 'message': 'You idiots!...'}
-            response.status_code = 400
+                response = {"status": 400, "message": "You idiots!..."}
+            response["status_code"] = 400
             abort(response)
 
-        return {"status":"success"}
-
+        return {"status": "success"}
 
 
 ################################################################################
@@ -149,6 +161,44 @@ def samples2trees(samples, sample_name):
                     "matches": {},
                 }
             trees[sentId]["conlls"][user_id] = conll
+    return trees
+
+
+def exctract_trees_from_sample(sample, sample_name):
+    """ transforms a samples into a trees object """
+    trees = {}
+    for sentId, users in sample.items():
+        for user_id, conll in users.items():
+            tree = conll2tree(conll)
+            if sentId not in trees:
+                trees[sentId] = {
+                    "sample_name": sample_name,
+                    "sentence": tree.sentence(),
+                    "conlls": {},
+                    "matches": {},
+                }
+            trees[sentId]["conlls"][user_id] = conll
+    return trees
+
+
+def add_base_tree(trees):
+    for sent_id, sent_trees in trees.items():
+        sent_conlls = sent_trees["conlls"]
+        list_users = list(sent_conlls.keys())
+        if BASE_TREE not in list_users:
+            model_user = TEACHER if TEACHER in list_users else list_users[0]
+            model_tree = sent_conlls[model_user]
+            empty_conllu = emptyConllu(model_tree)
+            sent_conlls[BASE_TREE] = empty_conllu
+    return trees
+
+
+def restrict_trees(trees, restricted_users):
+    for sent_id, sent_trees in trees.items():
+        sent_conlls = sent_trees["conlls"]
+        for user_id in list(sent_conlls.keys()):
+            if user_id not in restricted_users:
+                del sent_conlls[user_id]
     return trees
 
 
@@ -180,9 +230,6 @@ def samples2trees_with_restrictions(samples, sample_name, current_user):
                 }
             trees[sentId]["conlls"][user_id] = conll
     return trees
-
-
-BASE_TREE = "base_tree"
 
 
 def samples2trees_exercise_mode(trees_on_grew, sample_name, current_user, project_name):
