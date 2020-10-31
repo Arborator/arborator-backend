@@ -1,5 +1,7 @@
 import json
 from typing import List
+import werkzeug
+
 
 from app.utils.grew_utils import grew_request
 from flask import abort, current_app, request
@@ -16,6 +18,8 @@ from .service import (
     ProjectMetaFeatureService,
     ProjectService,
 )
+
+
 
 api = Namespace("Project", description="Endpoints for dealing with projects")  # noqa
 
@@ -304,3 +308,28 @@ class ProjectAccessUserResource(Resource):
         ProjectAccessService.delete(userId, project.id)
 
         return ProjectAccessService.get_users_role(project.id)
+
+
+@api.route('/<string:projectName>/image')
+class ProjectImageResource(Resource):
+    def post(self, projectName: str):
+        print('KK heey')
+        parser = reqparse.RequestParser()
+        parser.add_argument('files', type=werkzeug.datastructures.FileStorage, location='files')
+        args = parser.parse_args()
+        print('KK image', args['files'])
+        project = ProjectService.get_by_name(projectName)
+        if not project:
+            abort(400)
+        content = args['files'].read()
+        ProjectService.change_image(projectName, content)
+        return ProjectService.get_settings_infos(
+            projectName, current_user
+        )
+
+@api.route('/<string:projectName>/settings_info')
+class ProjectSettingsInfoResource(Resource):
+    def get(self, projectName: str):
+        return ProjectService.get_settings_infos(
+            projectName, current_user
+        )
