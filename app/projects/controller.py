@@ -61,6 +61,7 @@ class ProjectResource(Resource):
                     dumped_project["number_tokens"] = p["number_tokens"]
                     dumped_project["number_trees"] = p["number_trees"]
             projects_extended_list.append(dumped_project)
+        
         return projects_extended_list
 
     # @accepts(
