@@ -1,8 +1,7 @@
 import json
 from typing import List
+
 import werkzeug
-
-
 from app.utils.grew_utils import grew_request
 from flask import abort, current_app, request
 from flask_accepts.decorators.decorators import accepts, responds
@@ -12,14 +11,8 @@ from flask_restx import Namespace, Resource, reqparse
 from .interface import ProjectExtendedInterface, ProjectInterface
 from .model import Project, ProjectAccess
 from .schema import ProjectExtendedSchema, ProjectSchema, ProjectSchemaCamel
-from .service import (
-    ProjectAccessService,
-    ProjectFeatureService,
-    ProjectMetaFeatureService,
-    ProjectService,
-)
-
-
+from .service import (ProjectAccessService, ProjectFeatureService,
+                      ProjectMetaFeatureService, ProjectService)
 
 api = Namespace("Project", description="Endpoints for dealing with projects")  # noqa
 
@@ -51,8 +44,10 @@ class ProjectResource(Resource):
             # admins = [a.user_id for a in project_dao.get_admins(project.id)]
             # guests = [g.user_id for g in project_dao.get_guests(project.id)]
             #     projectJson = project.as_json(include={"admins": admins, "guests": guests})
-            dumped_project["admins"] = ProjectAccessService.get_admins(project.id)
-            dumped_project["guests"] = ProjectAccessService.get_guests(project.id)
+            dumped_project["admins"] = ProjectAccessService.get_admins(
+                project.id)
+            dumped_project["guests"] = ProjectAccessService.get_guests(
+                project.id)
 
             for p in data:
                 if p["name"] == project.project_name:
@@ -61,7 +56,7 @@ class ProjectResource(Resource):
                     dumped_project["number_tokens"] = p["number_tokens"]
                     dumped_project["number_trees"] = p["number_trees"]
             projects_extended_list.append(dumped_project)
-        
+
         return projects_extended_list
 
     # @accepts(
@@ -136,7 +131,7 @@ class ProjectResource(Resource):
 class ProjectIdResource(Resource):
     """Views for dealing with single identified project"""
 
-    @responds(schema=ProjectSchema, api=api)
+    @responds(schema=ProjectSchemaCamel, api=api)
     def get(self, projectName: str):
         """Get a single project"""
         return ProjectService.get_by_name(projectName)
@@ -145,6 +140,7 @@ class ProjectIdResource(Resource):
     @accepts(schema=ProjectSchemaCamel, api=api)
     def put(self, projectName: str):
         """Modify a single project (by it's name)"""
+        print("KK request.parsed_obj", request.parsed_obj)
         changes: ProjectInterface = request.parsed_obj
         project = ProjectService.get_by_name(projectName)
 
@@ -154,7 +150,8 @@ class ProjectIdResource(Resource):
         """Delete a single project (by it's name)"""
         project_name = ProjectService.delete_by_name(projectName)
         if project_name:
-            grew_request("eraseProject", current_app, data={"project_id": project_name})
+            grew_request("eraseProject", current_app,
+                         data={"project_id": project_name})
         return {"status": "Success", "projectName": project_name}
 
 
@@ -220,7 +217,8 @@ class ProjectConllSchemaResource(Resource):
         data = grew_reply.get("data")
         if data:
             conll_schema = {
-                "annotationFeatures": data[0],  # be careful, grew_reply["data"] is a list of object. See why, and add an interface for GREW !!
+                # be careful, grew_reply["data"] is a list of object. See why, and add an interface for GREW !!
+                "annotationFeatures": data[0],
             }
         else:
             conll_schema = {}
@@ -285,9 +283,11 @@ class ProjectAccessManyResource(Resource):
                 "access_level": access_level,
                 "project_id": project.id,
             }
-            project_access = ProjectAccessService.get_by_user_id(user_id, project.id)
+            project_access = ProjectAccessService.get_by_user_id(
+                user_id, project.id)
             if project_access:
-                project_access = ProjectAccessService.update(project_access, new_attrs)
+                project_access = ProjectAccessService.update(
+                    project_access, new_attrs)
             else:
                 project_access = ProjectAccessService.create(new_attrs)
 
@@ -313,10 +313,12 @@ class ProjectAccessUserResource(Resource):
 
 @api.route('/<string:projectName>/image')
 class ProjectImageResource(Resource):
+    @responds(schema=ProjectSchemaCamel)
     def post(self, projectName: str):
         print('KK heey')
         parser = reqparse.RequestParser()
-        parser.add_argument('files', type=werkzeug.datastructures.FileStorage, location='files')
+        parser.add_argument(
+            'files', type=werkzeug.datastructures.FileStorage, location='files')
         args = parser.parse_args()
         print('KK image', args['files'])
         project = ProjectService.get_by_name(projectName)
@@ -324,13 +326,11 @@ class ProjectImageResource(Resource):
             abort(400)
         content = args['files'].read()
         ProjectService.change_image(projectName, content)
-        return ProjectService.get_settings_infos(
-            projectName, current_user
-        )
+        return ProjectService.get_by_name(projectName)
 
-@api.route('/<string:projectName>/settings_info')
-class ProjectSettingsInfoResource(Resource):
-    def get(self, projectName: str):
-        return ProjectService.get_settings_infos(
-            projectName, current_user
-        )
+# @api.route('/<string:projectName>/settings_info')
+# class ProjectSettingsInfoResource(Resource):
+#     def get(self, projectName: str):
+#         return ProjectService.get_settings_infos(
+#             projectName, current_user
+#         )
