@@ -11,7 +11,7 @@ from app.config import Config
 from app.user.model import User
 from app.utils.conll3 import conllFile2trees, trees2conllFile
 from app.utils.grew_utils import grew_request
-from flask import current_app
+from flask import abort, current_app
 from sqlalchemy.sql.operators import startswith_op
 from werkzeug.utils import secure_filename
 
@@ -65,20 +65,22 @@ class SampleUploadService:
         if reply.get("status") == "OK":
             return 200, sample_name + " saved successfully on Grew"
         else:
-            mes = reply.get("data", {}).get("message", "")
-            # error because reply.get('message',{}) is a string
-            error_message = reply.get("message", {}).get("Conllx_error:")
-            error_sent_id = (
-                reply.get("message", {}).get("Conllx_error:").get("sent_id", "")
-            )
-            if not mes:
-                mes = "unknown problem"
-            li = reply.get("data", {}).get("line", "")
-            if li:
-                li = " line " + str(li)
-            else:
-                li = ""
-            return 400, sample_name + " caused a problem: " + mes + li
+            print("KK reply", reply)
+            abort(400, {"message": reply.get("message", "unknown error from grew")})
+            # mes = reply.get("data", {}).get("message", "")
+            # # error because reply.get('message',{}) is a string
+            # error_message = reply.get("message", {}).get("Conllx_error:")
+            # error_sent_id = (
+            #     reply.get("message", {}).get("Conllx_error:").get("sent_id", "")
+            # )
+            # if not mes:
+            #     mes = "unknown problem"
+            # li = reply.get("data", {}).get("line", "")
+            # if li:
+            #     li = " line " + str(li)
+            # else:
+            #     li = ""
+            # return 400, sample_name + " caused a problem: " + mes + li
             # abort(400)
 
 
