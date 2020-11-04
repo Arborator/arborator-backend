@@ -1,3 +1,4 @@
+from app.utils.conll3 import changeMetaField, conll2tree, emptyConllu
 from app.projects.service import ProjectAccessService, ProjectService
 from app.samples.service import SampleExerciseLevelService
 from app.utils.grew_utils import grew_request
@@ -61,9 +62,14 @@ class SampleTreesResource(Resource):
 
             sample_trees = exctract_trees_from_sample(samples, sampleName)
             sample_trees = add_base_tree(sample_trees)
+            
+            username = "anonymous"
+            if current_user.is_authenticated:
+                username = current_user.username
+                sample_trees = add_user_tree(sample_trees, username)
 
             if project_access <= 1:
-                restricted_users = [BASE_TREE, TEACHER, current_user.username]
+                restricted_users = [BASE_TREE, TEACHER, username]
                 sample_trees = restrict_trees(sample_trees, restricted_users)
 
             # if project_access == 2:  # isAdmin (= isTeacher)
@@ -144,7 +150,6 @@ class SampleTreesResource(Resource):
 ##################            Tree functions             #######################
 ##################                                       #######################
 ################################################################################
-from app.utils.conll3 import changeMetaField, conll2tree, emptyConllu
 
 
 def samples2trees(samples, sample_name):
@@ -190,8 +195,15 @@ def add_base_tree(trees):
             model_tree = sent_conlls[model_user]
             empty_conllu = emptyConllu(model_tree)
             sent_conlls[BASE_TREE] = empty_conllu
-        if current_user.username not in list_users:
-            sent_conlls[current_user.username] = sent_conlls[BASE_TREE]
+    return trees
+
+
+def add_user_tree(trees, username):
+    for sent_id, sent_trees in trees.items():
+        sent_conlls = sent_trees["conlls"]
+        list_users = list(sent_conlls.keys())
+        if username not in list_users:
+            sent_conlls[username] = sent_conlls[BASE_TREE]
     return trees
 
 
@@ -253,11 +265,13 @@ def samples2trees_exercise_mode(trees_on_grew, sample_name, current_user, projec
                 # TODO : put this script on frontend and not in backend (add a conllu -> sentence in javascript)
                 # if tree:
                 if trees_processed[tree_id]["sentence"] == "":
-                    trees_processed[tree_id]["sentence"] = conll2tree(tree).sentence()
+                    trees_processed[tree_id]["sentence"] = conll2tree(
+                        tree).sentence()
 
                     ### add the base tree (emptied conllu) ###
                     empty_conllu = emptyConllu(tree)
-                    base_conllu = changeMetaField(empty_conllu, "user_id", BASE_TREE)
+                    base_conllu = changeMetaField(
+                        empty_conllu, "user_id", BASE_TREE)
                     trees_processed[tree_id]["conlls"][BASE_TREE] = base_conllu
 
         if current_user.username not in trees_processed[tree_id]["conlls"]:
