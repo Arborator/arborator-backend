@@ -2,7 +2,7 @@ from app.utils.conll3 import changeMetaField, conll2tree, emptyConllu
 from app.projects.service import ProjectAccessService, ProjectService
 from app.samples.service import SampleExerciseLevelService
 from app.utils.grew_utils import grew_request
-from flask import abort, current_app
+from flask import abort, current_app, jsonify
 from flask_login import current_user
 from flask_restx import Namespace, Resource, reqparse
 
@@ -34,6 +34,7 @@ class SampleTreesResource(Resource):
             abort(404)
 
         samples = reply.get("data", {})
+        print("KK samples", samples)
         # ProjectAccessService.require_access_level(project.id, 2)
         ##### exercise mode block #####
         exercise_mode = project.exercise_mode
@@ -104,6 +105,7 @@ class SampleTreesResource(Resource):
         parser.add_argument(name="conll", type=str)
         parser.add_argument(name="user_id", type=str)
         args = parser.parse_args()
+        print('KK args', args)
 
         project = ProjectService.get_by_name(projectName)
         project_name = projectName
@@ -121,10 +123,9 @@ class SampleTreesResource(Resource):
         #         if project.exercise_mode == 0:
         #             abort(403)
 
-        TEACHER = "teacher"
         if project.exercise_mode == 1 and user_id == TEACHER:
             conll = changeMetaField(conll, "user_id", TEACHER)
-        print(">>>>", project_name)
+        print("project_name :", project_name)
         data = {
             "project_id": project_name,
             "sample_id": sample_name,
@@ -134,13 +135,18 @@ class SampleTreesResource(Resource):
         }
         reply = grew_request("saveGraph", current_app, data=data)
         resp = reply
+        print('KK resp', resp)
         if resp["status"] != "OK":
             if "data" in resp:
-                response = {"status": 400, "message": str(resp["data"])}
+                message = str(resp["data"])
+            elif "message" in resp:
+                message = str(resp["message"])
             else:
-                response = {"status": 400, "message": "You idiots!..."}
+                message = "unknown grew servor error"
+                
+            response = {"status": 400, "message": message}
             response["status_code"] = 400
-            abort(response)
+            abort(400, response)
 
         return {"status": "success"}
 
