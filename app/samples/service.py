@@ -14,6 +14,7 @@ from app.utils.grew_utils import grew_request
 from flask import abort, current_app
 from sqlalchemy.sql.operators import startswith_op
 from werkzeug.utils import secure_filename
+from werkzeug.datastructures import FileStorage
 
 from .model import SampleExerciseLevel, SampleRole
 
@@ -21,15 +22,14 @@ from .model import SampleExerciseLevel, SampleRole
 class SampleUploadService:
     @staticmethod
     def upload(
-        fileobject,
-        project_name,
+        fileobject: FileStorage,
+        project_name: str,
         reextensions=None,
         existing_samples=[],
         users_ids_convertor={},
     ):
         if reextensions == None:
             reextensions = re.compile(r"\.(conll(u|\d+)?|txt|tsv|csv)$")
-
         filename = secure_filename(fileobject.filename)
         sample_name = reextensions.sub("", filename)
         path_file = os.path.join(Config.UPLOAD_FOLDER, filename)
@@ -65,8 +65,8 @@ class SampleUploadService:
         if reply.get("status") == "OK":
             return 200, sample_name + " saved successfully on Grew"
         else:
-            print("KK reply", reply)
-            abort(400, {"message": reply.get("message", "unknown error from grew")})
+            abort(400, {"message": reply.get(
+                "message", "unknown error from grew")})
             # mes = reply.get("data", {}).get("message", "")
             # # error because reply.get('message',{}) is a string
             # error_message = reply.get("message", {}).get("Conllx_error:")
@@ -114,7 +114,8 @@ class SampleExportService:
 
     @staticmethod
     def get_last_user(tree):
-        timestamps = [(user, get_timestamp(conll)) for (user, conll) in tree.items()]
+        timestamps = [(user, get_timestamp(conll))
+                      for (user, conll) in tree.items()]
         if len(timestamps) == 1:
             last = timestamps[0][0]
         else:
@@ -129,7 +130,8 @@ class SampleExportService:
         with zipfile.ZipFile(memory_file, "w") as zf:
             for sample_name, sample in zip(sample_names, sampletrees):
                 for fuser, filecontent in sample.items():
-                    data = zipfile.ZipInfo("{}.{}.conllu".format(sample_name, fuser))
+                    data = zipfile.ZipInfo(
+                        "{}.{}.conllu".format(sample_name, fuser))
                     data.date_time = time.localtime(time.time())[:6]
                     data.compress_type = zipfile.ZIP_DEFLATED
                     zf.writestr(data, filecontent)
@@ -206,7 +208,8 @@ class SampleRoleService:
                 .filter(SampleRole.role == r)
                 .all()
             )
-            roles[label] = [{"key": a.username, "value": a.username} for a, b in role]
+            roles[label] = [{"key": a.username, "value": a.username}
+                            for a, b in role]
 
         return roles
 
@@ -276,17 +279,17 @@ class SampleExerciseLevelService:
 
 
 def convert_users_ids(path_file, users_ids_convertor):
-    trees = conllFile2trees(path_file)
+    """change trees user_ids"""
+    with open(path_file, "r", encoding="utf-8") as infile, open(path_file + "out", "w", encoding="utf-8") as outfile:
+        for line in infile.readlines():
+            if line.startswith("# user_id"):
+                old_user_id = line.strip("# user_id = ").rstrip("\n")
+                new_user_id = users_ids_convertor[old_user_id]
+                line = "# user_id = " + new_user_id + "\n"
 
-    for tree in trees:
-        tree_current_user_id = tree.sentencefeatures.get("user_id", "default")
-        tree.sentencefeatures["user_id"] = users_ids_convertor[tree_current_user_id]
-
-    trees2conllFile(trees, path_file)
+            outfile.write(line)
+    os.rename(path_file + "out", path_file)
     return
-
-    # if tree_current_user_id in users_ids_convertor.keys():
-    #     tree.sentencefeatures[]
 
 
 def add_or_keep_timestamps(conll_file):

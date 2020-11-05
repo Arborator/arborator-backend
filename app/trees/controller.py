@@ -34,7 +34,6 @@ class SampleTreesResource(Resource):
             abort(404)
 
         samples = reply.get("data", {})
-        print("KK samples", samples)
         # ProjectAccessService.require_access_level(project.id, 2)
         ##### exercise mode block #####
         exercise_mode = project.exercise_mode
@@ -105,7 +104,6 @@ class SampleTreesResource(Resource):
         parser.add_argument(name="conll", type=str)
         parser.add_argument(name="user_id", type=str)
         args = parser.parse_args()
-        print('KK args', args)
 
         project = ProjectService.get_by_name(projectName)
         project_name = projectName
@@ -135,7 +133,6 @@ class SampleTreesResource(Resource):
         }
         reply = grew_request("saveGraph", current_app, data=data)
         resp = reply
-        print('KK resp', resp)
         if resp["status"] != "OK":
             if "data" in resp:
                 message = str(resp["data"])

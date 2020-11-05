@@ -76,6 +76,8 @@ class Tree(dict):
 			govk = sorted(govs.keys())
 			if govk:
 				gk,gv = str(govk[0]),govs.get(govk[0],"_")
+				if gk == "-1":
+					gk = "_"
 			else:
 				gk,gv = "_","_"
 			if 'feats' in node:
