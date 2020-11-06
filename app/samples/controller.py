@@ -3,7 +3,7 @@ import re
 
 from app.projects.service import ProjectService
 from app.user.service import UserService
-from app.utils.grew_utils import grew_request
+from app.utils.grew_utils import GrewService, grew_request
 from flask import Response, abort, current_app, request
 from flask_restx import Namespace, Resource, reqparse
 
@@ -22,35 +22,31 @@ class SampleResource(Resource):
 
     def get(self, project_name: str):
         project = ProjectService.get_by_name(project_name)
+        grew_samples = GrewService.get_samples(project_name)
 
-        reply = grew_request(
-            "getSamples", current_app, data={"project_id": project_name}
-        )
-        data = reply.get("data")
-        samples = []
-        if data:
-            for sa in data:
-                sample = {
-                    "sample_name": sa["name"],
-                    "sentences": sa["number_sentences"],
-                    "number_trees": sa["number_trees"],
-                    "tokens": sa["number_tokens"],
-                    "treesFrom": sa["users"],
-                    "roles": {},
-                }
-                sample["roles"] = SampleRoleService.get_by_sample_name(
-                    project.id, sa["name"]
-                )
-                sample_exercise_level = SampleExerciseLevelService.get_by_sample_name(
-                    project.id, sa["name"]
-                )
-                if sample_exercise_level:
-                    sample["exerciseLevel"] = sample_exercise_level.exercise_level.code
-                else:
-                    sample["exerciseLevel"] = 4
+        processed_samples = []
+        for sa in grew_samples:
+            sample = {
+                "sample_name": sa["name"],
+                "sentences": sa["number_sentences"],
+                "number_trees": sa["number_trees"],
+                "tokens": sa["number_tokens"],
+                "treesFrom": sa["users"],
+                "roles": {},
+            }
+            sample["roles"] = SampleRoleService.get_by_sample_name(
+                project.id, sa["name"]
+            )
+            sample_exercise_level = SampleExerciseLevelService.get_by_sample_name(
+                project.id, sa["name"]
+            )
+            if sample_exercise_level:
+                sample["exerciseLevel"] = sample_exercise_level.exercise_level.code
+            else:
+                sample["exerciseLevel"] = 4
 
-                samples.append(sample)
-        return samples
+            processed_samples.append(sample)
+        return processed_samples
 
     def post(self, project_name: str):
         """Upload a sample to the server"""
@@ -64,12 +60,8 @@ class SampleResource(Resource):
 
         if fichiers:
             reextensions = re.compile(r"\.(conll(u|\d+)?|txt|tsv|csv)$")
-            reply = grew_request(
-                "getSamples", current_app, data={"project_id": project_name}
-            )
-            data = reply.get("data", [])
-
-            samples_names = [sa["name"] for sa in data]
+            grew_samples = GrewService.get_samples(project_name)
+            samples_names = [sa["name"] for sa in grew_samples]
 
             for f in fichiers:
                 status, message = SampleUploadService.upload(
@@ -81,7 +73,6 @@ class SampleResource(Resource):
                 )
                 if status != 200:
                     resp = {"status": status, "message": message}
-                    resp.status_code = status
                     return resp
 
             # samples = {"samples": project_service.get_samples(project_name)}
@@ -160,7 +151,6 @@ class ExportSampleResource(Resource):
         for sample_name in sample_names:
             reply = grew_request(
                 "getConll",
-                current_app,
                 data={"project_id": project_name, "sample_id": sample_name},
             )
             if reply.get("status") == "OK":
@@ -204,11 +194,10 @@ class ExportSampleResource(Resource):
 class DeleteSampleResource(Resource):
     def delete(self, project_name: str, sample_name: str):
         project = ProjectService.get_by_name(project_name)
-        if not project:
-            abort(401, "Project not found on flask server")
+        ProjectService.check_if_project_exist(project)
+
         grew_request(
             "eraseSample",
-            current_app,
             data={"project_id": project_name, "sample_id": sample_name},
         )
         SampleRoleService.delete_by_sample_name(project.id, sample_name)

@@ -1,7 +1,7 @@
 from app.utils.conll3 import changeMetaField, conll2tree, emptyConllu
 from app.projects.service import ProjectAccessService, ProjectService
 from app.samples.service import SampleExerciseLevelService
-from app.utils.grew_utils import grew_request
+from app.utils.grew_utils import grew_request, GrewService
 from flask import abort, current_app, jsonify
 from flask_login import current_user
 from flask_restx import Namespace, Resource, reqparse
@@ -20,20 +20,11 @@ class SampleTreesResource(Resource):
 
     def get(self, projectName: str, sampleName: str):
         """Entrypoint for getting all trees of a given sample"""
-        reply = grew_request(
-            "getConll",
-            current_app,
-            data={"project_id": projectName, "sample_id": sampleName},
-        )
-        data = reply.get("data")
-        if reply.get("status") != "OK":
-            abort(409)
-
         project = ProjectService.get_by_name(projectName)
-        if not project:
-            abort(404)
+        ProjectService.check_if_project_exist(project)
 
-        samples = reply.get("data", {})
+        grew_sample_trees = GrewService.get_sample_trees(projectName, sampleName)
+
         # ProjectAccessService.require_access_level(project.id, 2)
         ##### exercise mode block #####
         exercise_mode = project.exercise_mode
@@ -60,9 +51,9 @@ class SampleTreesResource(Resource):
             if exercise_level_obj:
                 exercise_level = exercise_level_obj.exercise_level.code
 
-            sample_trees = extract_trees_from_sample(samples, sampleName)
+            sample_trees = extract_trees_from_sample(grew_sample_trees, sampleName)
             sample_trees = add_base_tree(sample_trees)
-            
+
             username = "anonymous"
             if current_user.is_authenticated:
                 username = current_user.username
@@ -72,37 +63,32 @@ class SampleTreesResource(Resource):
                 restricted_users = [BASE_TREE, TEACHER, username]
                 sample_trees = restrict_trees(sample_trees, restricted_users)
 
-            # if project_access == 2:  # isAdmin (= isTeacher)
-            #     sample_trees = samples2trees(samples, sampleName)
-            #     # add_base_tree(sample_trees)
-            # elif project_access == 1:  # isGuest (= isStudent)
-            #     sample_trees = samples2trees_exercise_mode(
-            #         samples, sampleName, current_user, projectName)
-
-        ##### end block exercise mode #####
-
         else:
             if project.show_all_trees or project.visibility == 2:
-                sample_trees = samples2trees(samples, sampleName)
+                sample_trees = samples2trees(grew_sample_trees, sampleName)
             else:
                 validator = 1
                 # validator = project_service.is_validator(
                 #     project.id, sampleName, current_user.id)
                 if validator:
-                    sample_trees = samples2trees(samples, sampleName)
+                    sample_trees = samples2trees(
+                        grew_sample_trees,
+                        sampleName,
+                    )
                 else:
                     sample_trees = samples2trees_with_restrictions(
-                        samples, sampleName, current_user
+                        grew_sample_trees,
+                        sampleName,
+                        current_user,
                     )
-
         data = {"sample_trees": sample_trees, "exercise_level": exercise_level}
         return data
 
     def post(self, projectName: str, sampleName: str):
         parser = reqparse.RequestParser()
         parser.add_argument(name="sent_id", type=str)
-        parser.add_argument(name="conll", type=str)
         parser.add_argument(name="user_id", type=str)
+        parser.add_argument(name="conll", type=str)
         args = parser.parse_args()
 
         project = ProjectService.get_by_name(projectName)
@@ -131,19 +117,7 @@ class SampleTreesResource(Resource):
             "sent_id": sent_id,
             "conll_graph": conll,
         }
-        reply = grew_request("saveGraph", current_app, data=data)
-        resp = reply
-        if resp["status"] != "OK":
-            if "data" in resp:
-                message = str(resp["data"])
-            elif "message" in resp:
-                message = str(resp["message"])
-            else:
-                message = "unknown grew servor error"
-                
-            response = {"status": 400, "message": message}
-            response["status_code"] = 400
-            abort(400, response)
+        grew_request("saveGraph", data=data)
 
         return {"status": "success"}
 
@@ -268,13 +242,11 @@ def samples2trees_exercise_mode(trees_on_grew, sample_name, current_user, projec
                 # TODO : put this script on frontend and not in backend (add a conllu -> sentence in javascript)
                 # if tree:
                 if trees_processed[tree_id]["sentence"] == "":
-                    trees_processed[tree_id]["sentence"] = conll2tree(
-                        tree).sentence()
+                    trees_processed[tree_id]["sentence"] = conll2tree(tree).sentence()
 
                     ### add the base tree (emptied conllu) ###
                     empty_conllu = emptyConllu(tree)
-                    base_conllu = changeMetaField(
-                        empty_conllu, "user_id", BASE_TREE)
+                    base_conllu = changeMetaField(empty_conllu, "user_id", BASE_TREE)
                     trees_processed[tree_id]["conlls"][BASE_TREE] = base_conllu
 
         if current_user.username not in trees_processed[tree_id]["conlls"]:

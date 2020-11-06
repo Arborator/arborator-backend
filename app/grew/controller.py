@@ -31,8 +31,9 @@ class TryRuleResource(Resource):
         """
 
         project = ProjectService.get_by_name(project_name)
-        if not project:
-            abort(404)
+        ProjectService.check_if_project_exist(project)
+
+        # TODO : to change
         if not request.json:
             abort(400)
 
@@ -45,7 +46,6 @@ class TryRuleResource(Resource):
         # tryRule(<string> project_id, [<string> sample_id], [<string> user_id], <string> pattern, <string> commands)
         reply = grew_request(
             "tryRule",
-            current_app,
             data={
                 "project_id": project_name,
                 "pattern": pattern,
@@ -99,7 +99,6 @@ class SearchResource(Resource):
         pattern = args.get("pattern")
         reply = grew_request(
             "searchPatternInGraphs",
-            current_app,
             data={"project_id": project_name, "pattern": pattern},
         )
         if reply["status"] != "OK":
@@ -115,7 +114,6 @@ class SearchResource(Resource):
                 abort(409)
             conll = grew_request(
                 "getConll",
-                current_app,
                 data={
                     "sample_id": m["sample_id"],
                     "project_id": project_name,
@@ -141,7 +139,7 @@ class SearchInSampleResource(Resource):
         Aplly a grew search inside a project and sample
         """
         reply = grew_request(
-            "getSamples", current_app, data={"project_id": project_name}
+            "getSamples", data={"project_id": project_name}
         )
         data = reply.get("data")
         samples_name = [sa["name"] for sa in data]
@@ -156,7 +154,6 @@ class SearchInSampleResource(Resource):
         pattern = args.get("pattern")
         reply = grew_request(
             "searchPatternInGraphs",
-            current_app,
             data={"project_id": project_name, "pattern": pattern},
         )
         if reply["status"] != "OK":
@@ -174,7 +171,6 @@ class SearchInSampleResource(Resource):
 
             conll = grew_request(
                 "getConll",
-                current_app,
                 data={
                     "sample_id": m["sample_id"],
                     "project_id": project_name,
@@ -203,7 +199,6 @@ class RelationTableResource(Resource):
             abort(400)
         reply = grew_request(
             "searchPatternInGraphs",
-            current_app,
             data={
                 "project_id": project_name,
                 "pattern": "pattern { e: GOV -> DEP}",

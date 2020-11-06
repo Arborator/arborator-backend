@@ -42,7 +42,6 @@ class SampleUploadService:
             print("========== [newSample]")
             reply = grew_request(
                 "newSample",
-                current_app,
                 data={"project_id": project_name, "sample_id": sample_name},
             )
             print("reply = ", reply)
@@ -56,7 +55,6 @@ class SampleUploadService:
             print("========== [saveConll]")
             reply = grew_request(
                 "saveConll",
-                current_app,
                 data={"project_id": project_name, "sample_id": sample_name},
                 files={"conll_file": inf},
             )

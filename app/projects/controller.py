@@ -2,7 +2,7 @@ import json
 from typing import List
 
 import werkzeug
-from app.utils.grew_utils import grew_request
+from app.utils.grew_utils import GrewService
 from flask import abort, current_app, request
 from flask_accepts.decorators.decorators import accepts, responds
 from flask_login import current_user
@@ -11,8 +11,12 @@ from flask_restx import Namespace, Resource, reqparse
 from .interface import ProjectExtendedInterface, ProjectInterface
 from .model import Project, ProjectAccess
 from .schema import ProjectExtendedSchema, ProjectSchema, ProjectSchemaCamel
-from .service import (ProjectAccessService, ProjectFeatureService,
-                      ProjectMetaFeatureService, ProjectService)
+from .service import (
+    ProjectAccessService,
+    ProjectFeatureService,
+    ProjectMetaFeatureService,
+    ProjectService,
+)
 
 api = Namespace("Project", description="Endpoints for dealing with projects")  # noqa
 
@@ -24,32 +28,21 @@ class ProjectResource(Resource):
     @responds(schema=ProjectExtendedSchema(many=True), api=api)
     def get(self) -> List[ProjectExtendedInterface]:
         """Get all projects"""
-        # return [{"id":4, "project_name":"yolo"}, {"id":5, "project_name":"yolo"}]
-        # projects_info = {"difference": False, "projects": list()}
         projects_extended_list: List[ProjectExtendedInterface] = []
         projects: List[Project] = Project.query.all()
-        reply = grew_request("getProjects", current_app)
-        if not reply:
-            return []
-        data = reply["data"]
-        grewnames = set([project["name"] for project in data])
+
+        grew_projects = GrewService.get_projects()
+        grewnames = set([project["name"] for project in grew_projects])
         dbnames = set([project.project_name for project in projects])
         common = grewnames & dbnames
-        # if len(grewnames ^ dbnames) > 0:
-        # projects_info["difference"] = True
         for project in projects:
             dumped_project: ProjectExtendedInterface = ProjectSchema().dump(project)
             if dumped_project["project_name"] not in common:
                 continue
-            # admins = [a.user_id for a in project_dao.get_admins(project.id)]
-            # guests = [g.user_id for g in project_dao.get_guests(project.id)]
-            #     projectJson = project.as_json(include={"admins": admins, "guests": guests})
-            dumped_project["admins"] = ProjectAccessService.get_admins(
-                project.id)
-            dumped_project["guests"] = ProjectAccessService.get_guests(
-                project.id)
+            dumped_project["admins"] = ProjectAccessService.get_admins(project.id)
+            dumped_project["guests"] = ProjectAccessService.get_guests(project.id)
 
-            for p in data:
+            for p in grew_projects:
                 if p["name"] == project.project_name:
                     dumped_project["number_sentences"] = p["number_sentences"]
                     dumped_project["number_samples"] = p["number_samples"]
@@ -96,11 +89,7 @@ class ProjectResource(Resource):
         }
 
         # KK : TODO : put all grew request in a seperated file and add error catching
-        new_project_grew = grew_request(
-            "newProject",
-            current_app,
-            data={"project_id": new_project_attrs["project_name"]},
-        )
+        GrewService.create_project(new_project_attrs["project_name"])
 
         new_project = ProjectService.create(new_project_attrs)
         ProjectAccessService.create(
@@ -150,9 +139,15 @@ class ProjectIdResource(Resource):
         """Delete a single project (by it's name)"""
         project_name = ProjectService.delete_by_name(projectName)
         if project_name:
-            grew_request("eraseProject", current_app,
-                         data={"project_id": project_name})
-        return {"status": "Success", "projectName": project_name}
+            GrewService.delete_project(project_name)
+            return {"status": "Success", "projectName": project_name}
+        else:
+            return {
+                "status": "Error",
+                "message": "no project with name '{}' was found on arborator database".format(
+                    project_name
+                ),
+            }
 
 
 @api.route("/<string:projectName>/features")
@@ -160,14 +155,8 @@ class ProjectFeaturesResource(Resource):
     def get(self, projectName: str):
         """Get a single project features"""
         project = ProjectService.get_by_name(projectName)
-        if not project:
-            # TODO : Create our own custom errorhandler (the following code is present at least 6 times !)
-            return {
-                "status": "failed",
-                "message": "There was no project `{}` stored on grew".format(
-                    projectName
-                ),
-            }
+        ProjectService.check_if_project_exist(project)
+
 
         features = {
             # TODO : On frontend and backend, It's absolutely necessary to uniformize naming conventions and orthography
@@ -203,41 +192,20 @@ class ProjectConllSchemaResource(Resource):
     def get(self, projectName: str):
         """Get a single project conll schema"""
         project = ProjectService.get_by_name(projectName)
-        if not project:
-            return {
-                "status": "failed",
-                "message": "There was no project `{}` stored on grew".format(
-                    projectName
-                ),
-            }
-        grew_reply = grew_request(
-            "getProjectConfig", current_app, data={"project_id": project.project_name}
-        )
-        # TODO : redo this. It's ugly
-        data = grew_reply.get("data")
-        if data:
-            conll_schema = {
-                # be careful, grew_reply["data"] is a list of object. See why, and add an interface for GREW !!
-                "annotationFeatures": data[0],
-            }
-        else:
-            conll_schema = {}
+        ProjectService.check_if_project_exist(project)
+        conll_schema = GrewService.get_project_config(projectName)
         return conll_schema
 
     def put(self, projectName: str):
         """Modify a single project conll schema"""
         project = ProjectService.get_by_name(projectName)
+        ProjectService.check_if_project_exist(project)
         parser = reqparse.RequestParser()
         parser.add_argument(name="config", type=dict, action="append")
         args = parser.parse_args()
-        reply = grew_request(
-            "updateProjectConfig",
-            current_app,
-            data={
-                "project_id": project.project_name,
-                "config": json.dumps(args.config),
-            },
-        )
+        dumped_project_config = json.dumps(args.config)
+        GrewService.update_project_config(project.project_name, dumped_project_config)
+
         return {"status": "success", "message": "New conllu schema was saved"}
 
 
@@ -246,14 +214,7 @@ class ProjectAccessResource(Resource):
     def get(self, projectName: str):
         """Get a single project users access"""
         project = ProjectService.get_by_name(projectName)
-        if not project:
-            return {
-                "status": "failed",
-                "message": "There was no project `{}` stored on grew".format(
-                    projectName
-                ),
-            }
-
+        ProjectService.check_if_project_exist(project)
         return ProjectAccessService.get_users_role(project.id)
 
 
@@ -267,13 +228,8 @@ class ProjectAccessManyResource(Resource):
         args = parser.parse_args()
 
         project = ProjectService.get_by_name(projectName)
-        if not project:
-            return {
-                "status": "failed",
-                "message": "There was no project `{}` stored on grew".format(
-                    projectName
-                ),
-            }
+        ProjectService.check_if_project_exist(project)
+
         access_level = ProjectAccess.LABEL_TO_LEVEL[args.targetrole]
 
         for user_id in args.user_ids:
@@ -283,11 +239,9 @@ class ProjectAccessManyResource(Resource):
                 "access_level": access_level,
                 "project_id": project.id,
             }
-            project_access = ProjectAccessService.get_by_user_id(
-                user_id, project.id)
+            project_access = ProjectAccessService.get_by_user_id(user_id, project.id)
             if project_access:
-                project_access = ProjectAccessService.update(
-                    project_access, new_attrs)
+                project_access = ProjectAccessService.update(project_access, new_attrs)
             else:
                 project_access = ProjectAccessService.create(new_attrs)
 
@@ -298,35 +252,28 @@ class ProjectAccessManyResource(Resource):
 class ProjectAccessUserResource(Resource):
     def delete(self, projectName: str, userId: str):
         project = ProjectService.get_by_name(projectName)
-        if not project:
-            return {
-                "status": "failed",
-                "message": "There was no project `{}` stored on grew".format(
-                    projectName
-                ),
-            }
-
+        ProjectService.check_if_project_exist(project)
         ProjectAccessService.delete(userId, project.id)
 
         return ProjectAccessService.get_users_role(project.id)
 
 
-@api.route('/<string:projectName>/image')
+@api.route("/<string:projectName>/image")
 class ProjectImageResource(Resource):
     @responds(schema=ProjectSchemaCamel)
     def post(self, projectName: str):
-        print('KK heey')
         parser = reqparse.RequestParser()
         parser.add_argument(
-            'files', type=werkzeug.datastructures.FileStorage, location='files')
+            "files", type=werkzeug.datastructures.FileStorage, location="files"
+        )
         args = parser.parse_args()
-        print('KK image', args['files'])
         project = ProjectService.get_by_name(projectName)
-        if not project:
-            abort(400)
-        content = args['files'].read()
+        ProjectService.check_if_project_exist(project)
+
+        content = args["files"].read()
         ProjectService.change_image(projectName, content)
         return ProjectService.get_by_name(projectName)
+
 
 # @api.route('/<string:projectName>/settings_info')
 # class ProjectSettingsInfoResource(Resource):

@@ -28,7 +28,6 @@ class LexiconResource(Resource):
         print(sample_names, treeSelection)
         reply = grew_request(
             "getLexicon",
-            current_app,
             data={"project_id": project_name, "sample_ids": json.dumps(sample_names)},
         )
         for i in reply["data"]:

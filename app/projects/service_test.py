@@ -8,6 +8,7 @@ from flask_login import current_user
 
 from .interface import ProjectExtendedInterface, ProjectInterface
 from .model import Project, ProjectAccess, ProjectFeature, ProjectMetaFeature, DefaultUserTrees
+from ..utils.grew_utils import grew_request
 from ..samples.model import SampleRole
 
 
@@ -51,13 +52,6 @@ class ProjectService:
         project.image = value
         db.session.commit()
         return project
-
-    @staticmethod
-    def check_if_project_exist(project: Project) -> None:
-        if not project:
-            message = "There was no such project stored on arborator backend"
-            abort(404, {"message": message})
-
     # @staticmethod
     # def get_settings_infos(project_name, current_user):
     #     """ get project informations without any samples """
