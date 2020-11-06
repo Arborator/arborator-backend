@@ -10,7 +10,7 @@ from .service import UserService  # noqa
 
 
 def test_get_all(db: SQLAlchemy):  # noqa
-    yin: User = User(
+    user1: User = User(
         id="1",
         auth_provider="google",
         username="JohnDoe",
@@ -21,7 +21,7 @@ def test_get_all(db: SQLAlchemy):  # noqa
         created_date=datetime.utcnow(),
         last_seen=datetime.utcnow(),
     )
-    yang: User = User(
+    user2: User = User(
         id="2",
         auth_provider="github",
         username="JamesCarl",
@@ -32,18 +32,55 @@ def test_get_all(db: SQLAlchemy):  # noqa
         created_date=datetime.utcnow(),
         last_seen=datetime.utcnow(),
     )
-    db.session.add(yin)
-    db.session.add(yang)
+    db.session.add(user1)
+    db.session.add(user2)
     db.session.commit()
 
     results: List[User] = UserService.get_all()
 
     assert len(results) == 2
-    assert yin in results and yang in results
+    assert user1 in results and user2 in results
+
+
+def test_get_by_username(db: SQLAlchemy):  # noqa
+    user1: User = User(
+        id="1",
+        auth_provider="google",
+        username="user1",
+        first_name="John",
+        family_name="Doe",
+        picture_url="www.google.com",
+        super_admin=True,
+        created_date=datetime.utcnow(),
+        last_seen=datetime.utcnow(),
+    )
+    user2: User = User(
+        id="2",
+        auth_provider="github",
+        username="user2",
+        first_name="James",
+        family_name="Carl",
+        picture_url="www.google.com",
+        super_admin=True,
+        created_date=datetime.utcnow(),
+        last_seen=datetime.utcnow(),
+    )
+    db.session.add(user1)
+    db.session.add(user2)
+    db.session.commit()
+
+    retrieved_user1 = UserService.get_by_username("user1")
+    retrieved_user2 = UserService.get_by_username("user2")
+
+    assert retrieved_user1.username == "user1"
+    assert retrieved_user1.id == "1"
+
+    assert retrieved_user2.username == "user2"
+    assert retrieved_user2.id == "2"
 
 
 def test_update(db: SQLAlchemy):  # noqa
-    yin: User = User(
+    user1: User = User(
         id="1",
         auth_provider="google",
         username="JohnDoe",
@@ -55,18 +92,18 @@ def test_update(db: SQLAlchemy):  # noqa
         last_seen=datetime.utcnow(),
     )
 
-    db.session.add(yin)
+    db.session.add(user1)
     db.session.commit()
     updates: UserInterface = dict(first_name="New first_name")
 
-    UserService.update(yin, updates)
+    UserService.update(user1, updates)
 
-    result: User = User.query.get(yin.id)
+    result: User = User.query.get(user1.id)
     assert result.first_name == "New first_name"
 
 
 def test_delete_by_id(db: SQLAlchemy):  # noqa
-    yin: User = User(
+    user1: User = User(
         id="1",
         auth_provider="google",
         username="JohnDoe",
@@ -77,7 +114,7 @@ def test_delete_by_id(db: SQLAlchemy):  # noqa
         created_date=datetime.utcnow(),
         last_seen=datetime.utcnow(),
     )
-    yang: User = User(
+    user2: User = User(
         id="2",
         auth_provider="github",
         username="JamesCarl",
@@ -88,8 +125,8 @@ def test_delete_by_id(db: SQLAlchemy):  # noqa
         created_date=datetime.utcnow(),
         last_seen=datetime.utcnow(),
     )
-    db.session.add(yin)
-    db.session.add(yang)
+    db.session.add(user1)
+    db.session.add(user2)
     db.session.commit()
 
     UserService.delete_by_id("1")
@@ -98,12 +135,11 @@ def test_delete_by_id(db: SQLAlchemy):  # noqa
     results: List[User] = User.query.all()
 
     assert len(results) == 1
-    assert yin not in results and yang in results
+    assert user1 not in results and user2 in results
 
 
 def test_create(db: SQLAlchemy):  # noqa
-
-    yin: UserInterface = dict(
+    user1: UserInterface = dict(
         id="1",
         auth_provider="google",
         username="JohnDoe",
@@ -114,10 +150,48 @@ def test_create(db: SQLAlchemy):  # noqa
         created_date=datetime.utcnow(),
         last_seen=datetime.utcnow(),
     )
-    UserService.create(yin)
+    UserService.create(user1)
     results: List[User] = User.query.all()
 
     assert len(results) == 1
 
-    for k in yin.keys():
-        assert getattr(results[0], k) == yin[k]
+    for k in user1.keys():
+        assert getattr(results[0], k) == user1[k]
+
+
+def test_change_super_admin(db: SQLAlchemy):
+    user1: User = User(
+        id="1",
+        auth_provider="google",
+        username="JohnDoe",
+        first_name="John",
+        family_name="Doe",
+        picture_url="www.google.com",
+        super_admin=True,
+        created_date=datetime.utcnow(),
+        last_seen=datetime.utcnow(),
+    )
+    user2: User = User(
+        id="2",
+        auth_provider="github",
+        username="JamesCarl",
+        first_name="James",
+        family_name="Carl",
+        picture_url="www.google.com",
+        super_admin=False,
+        created_date=datetime.utcnow(),
+        last_seen=datetime.utcnow(),
+    )
+
+    db.session.add(user1)
+    db.session.add(user2)
+    db.session.commit()
+
+    UserService.change_super_admin(user1, False)
+    UserService.change_super_admin(user2, True)
+
+    changed_user1 = UserService.get_by_id("1")
+    changed_user2 = UserService.get_by_id("2")
+
+    assert changed_user1.super_admin == False
+    assert changed_user2.super_admin == True

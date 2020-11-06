@@ -60,7 +60,7 @@ class SampleTreesResource(Resource):
             if exercise_level_obj:
                 exercise_level = exercise_level_obj.exercise_level.code
 
-            sample_trees = exctract_trees_from_sample(samples, sampleName)
+            sample_trees = extract_trees_from_sample(samples, sampleName)
             sample_trees = add_base_tree(sample_trees)
             
             username = "anonymous"
