@@ -67,3 +67,13 @@ class UserService:
         db.session.commit()
 
         return new_user
+
+    @staticmethod
+    def change_super_admin(user: User, super_admin: bool):
+        if user:
+            user.super_admin = super_admin
+            db.session.commit()
+            print("<super_admin manager> : superadmin '{}' was {}".format(user.username, "ADDED" if super_admin else "REMOVED"))
+        else:
+            print("<super_admin manager> : no user found, operation cancelled")
+

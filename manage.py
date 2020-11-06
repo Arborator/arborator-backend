@@ -34,5 +34,19 @@ def drop_all():
         db.drop_all()
 
 
+@manager.option('--username', help='username of the super_admin to be added')
+def add_super_admin(username):
+    from app.user.service import UserService
+    user = UserService.get_by_username(username=username)
+    UserService.change_super_admin(user, True)
+
+    
+@manager.option('--username', help='username of the super_admin to be removed')
+def remove_super_admin(username):
+    from app.user.service import UserService
+    user = UserService.get_by_username(username=username)
+    UserService.change_super_admin(user, False)
+
+
 if __name__ == "__main__":
     manager.run()

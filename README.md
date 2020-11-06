@@ -43,6 +43,18 @@ python manage.py seed_db
 Type "Y" to accept the message (which is just there to prevent you accidentally deleting things -- it's just a local SQLite database)
 
 
+### Handling superadmin
+For adding a superadmin, run the following command
+```
+python manage.py add_super_admin --username $username
+```
+
+For removing a superadmin
+```
+python manage.py remove_super_admin --username $username
+```
+
+
 ### Run the app for local development
 
 In .flaskenv, set the `FLASK_ENV` to dev and `FLASK_APP` to wsgi.py

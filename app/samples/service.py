@@ -291,7 +291,6 @@ def convert_users_ids(path_file, users_ids_convertor):
     trees = conllFile2trees(path_file)
 
     for tree in trees:
-        print("KK tree", tree)
         tree_current_user_id = tree.sentencefeatures.get("user_id", "default")
         tree.sentencefeatures["user_id"] = users_ids_convertor[tree_current_user_id]
 
