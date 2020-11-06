@@ -172,7 +172,7 @@ def samples2trees(samples, sample_name):
     return trees
 
 
-def exctract_trees_from_sample(sample, sample_name):
+def extract_trees_from_sample(sample, sample_name):
     """ transforms a samples into a trees object """
     trees = {}
     for sentId, users in sample.items():
