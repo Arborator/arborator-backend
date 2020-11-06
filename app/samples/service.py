@@ -279,17 +279,27 @@ class SampleExerciseLevelService:
 
 
 def convert_users_ids(path_file, users_ids_convertor):
-    """change trees user_ids"""
-    with open(path_file, "r", encoding="utf-8") as infile, open(path_file + "out", "w", encoding="utf-8") as outfile:
-        for line in infile.readlines():
-            if line.startswith("# user_id"):
-                old_user_id = line.strip("# user_id = ").rstrip("\n")
-                new_user_id = users_ids_convertor[old_user_id]
-                line = "# user_id = " + new_user_id + "\n"
+    # with open(path_file, "r", encoding="utf-8") as infile, open(path_file + "out", "w", encoding="utf-8") as outfile:
+    #     for line in infile.readlines():
+    #         if line.startswith("# user_id"):
+    #             old_user_id = line.strip("# user_id = ").rstrip("\n")
+    #             new_user_id = users_ids_convertor[old_user_id]
+    #             line = "# user_id = " + new_user_id + "\n"
 
-            outfile.write(line)
-    os.rename(path_file + "out", path_file)
+    #         outfile.write(line)
+    # os.rename(path_file + "out", path_file)
+    trees = conllFile2trees(path_file)
+
+    for tree in trees:
+        print("KK tree", tree)
+        tree_current_user_id = tree.sentencefeatures.get("user_id", "default")
+        tree.sentencefeatures["user_id"] = users_ids_convertor[tree_current_user_id]
+
+    trees2conllFile(trees, path_file)
     return
+
+    # if tree_current_user_id in users_ids_convertor.keys():
+    #     tree.sentencefeatures[]
 
 
 def add_or_keep_timestamps(conll_file):

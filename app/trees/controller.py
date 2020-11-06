@@ -133,6 +133,7 @@ class SampleTreesResource(Resource):
         }
         reply = grew_request("saveGraph", current_app, data=data)
         resp = reply
+        print("KK reply", reply)
         if resp["status"] != "OK":
             if "data" in resp:
                 message = str(resp["data"])
