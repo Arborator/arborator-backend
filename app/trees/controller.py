@@ -109,7 +109,6 @@ class SampleTreesResource(Resource):
 
         if project.exercise_mode == 1 and user_id == TEACHER:
             conll = changeMetaField(conll, "user_id", TEACHER)
-        print("project_name :", project_name)
         data = {
             "project_id": project_name,
             "sample_id": sample_name,

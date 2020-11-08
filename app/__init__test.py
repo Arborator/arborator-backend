@@ -2,6 +2,7 @@ from app.test.fixtures import app, client  # noqa
 
 
 def test_app_creates(app):  # noqa
+    
     assert app
 
 

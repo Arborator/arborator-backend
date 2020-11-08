@@ -106,3 +106,33 @@ class GrewService:
         grew_samples = reply.get("data", [])
 
         return grew_samples
+    
+    @staticmethod
+    def create_sample(project_id: str, sample_id: str):
+        reply = grew_request(
+            "newSample",
+            data={"project_id": project_id, "sample_id": sample_id},
+        )
+
+        return reply
+
+    
+    @staticmethod
+    def save_sample(project_id: str, sample_id: str, conll_file) -> None:
+        grew_request(
+            "saveConll",
+            data={"project_id": project_id, "sample_id": sample_id},
+            files={"conll_file": conll_file},
+        )
+        return
+
+    @staticmethod
+    def delete_sample(project_id: str, sample_id: str) -> None:
+        grew_request(
+            "eraseSample",
+            data={"project_id": project_id, "sample_id": sample_id},
+        )
+
+    
+    # @staticmethod
+    # def save_tree()
