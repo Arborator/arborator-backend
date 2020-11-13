@@ -129,7 +129,6 @@ class ProjectIdResource(Resource):
     @accepts(schema=ProjectSchemaCamel, api=api)
     def put(self, projectName: str):
         """Modify a single project (by it's name)"""
-        print("KK request.parsed_obj", request.parsed_obj)
         changes: ProjectInterface = request.parsed_obj
         project = ProjectService.get_by_name(projectName)
 
