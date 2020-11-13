@@ -3,7 +3,7 @@ import re
 
 from app.projects.service import ProjectService
 from app.user.service import UserService
-from app.utils.grew_utils import grew_request
+from app.utils.grew_utils import GrewService, grew_request
 from flask import Response, abort, current_app, request
 from flask_login import current_user
 from flask_restx import Namespace, Resource, reqparse
@@ -11,7 +11,6 @@ from flask_restx import Namespace, Resource, reqparse
 api = Namespace(
     "Grew", description="Endpoints for dealing with samples of project"
 )  # noqa
-
 
 
 @api.route("/<string:project_name>/try-rule")
@@ -97,26 +96,18 @@ class SearchResource(Resource):
         args = parser.parse_args()
 
         pattern = args.get("pattern")
-        reply = grew_request(
-            "searchPatternInGraphs",
-            data={"project_id": project_name, "pattern": pattern},
-        )
+        reply = GrewService.search_pattern_in_graphs(project_name, pattern)
         if reply["status"] != "OK":
             abort(400)
         trees = {}
-
-        # print(121212,reply["data"])
-        # matches={}
-        # reendswithnumbers = re.compile(r"_(\d+)$")
-
         for m in reply["data"]:
             if m["user_id"] == "":
                 abort(409)
             conll = grew_request(
                 "getConll",
                 data={
-                    "sample_id": m["sample_id"],
                     "project_id": project_name,
+                    "sample_id": m["sample_id"],
                     "sent_id": m["sent_id"],
                     "user_id": m["user_id"],
                 },
@@ -124,26 +115,19 @@ class SearchResource(Resource):
             if conll["status"] != "OK":
                 abort(404)
             conll = conll["data"]
-            # trees=project_service.formatTrees(m, trees, conll, m['user_id'])
             trees = formatTrees_new(m, trees, conll)
-        # print(56565,trees)
-        js = json.dumps(trees)
-        resp = Response(js, status=200, mimetype="application/json")
-        return resp
+        return trees
 
 
-@api.route("/<string:project_name>/samples/<string:sample_name>/search")
+@api.route("/<string:project_name>/sample/<string:sample_name>/search")
 class SearchInSampleResource(Resource):
-    def get(self, project_name: str, sample_name: str):
+    def post(self, project_name: str, sample_name: str):
         """
         Aplly a grew search inside a project and sample
         """
-        reply = grew_request(
-            "getSamples", data={"project_id": project_name}
-        )
+        reply = grew_request("getSamples", data={"project_id": project_name})
         data = reply.get("data")
         samples_name = [sa["name"] for sa in data]
-
         if not sample_name in samples_name:
             abort(404)
 
@@ -152,17 +136,8 @@ class SearchInSampleResource(Resource):
         args = parser.parse_args()
 
         pattern = args.get("pattern")
-        reply = grew_request(
-            "searchPatternInGraphs",
-            data={"project_id": project_name, "pattern": pattern},
-        )
-        if reply["status"] != "OK":
-            abort(400)
-
+        reply = GrewService.search_pattern_in_graphs(project_name, pattern)
         trees = {}
-        # matches={}
-        # reendswithnumbers = re.compile(r"_(\d+)$")
-
         for m in reply["data"]:
             if m["sample_id"] != sample_name:
                 continue
@@ -181,8 +156,7 @@ class SearchInSampleResource(Resource):
             if conll["status"] != "OK":
                 abort(404)
             conll = conll["data"]
-            # trees=project_service.formatTrees(m, trees, conll, m['user_id'])
-
+            trees = formatTrees_new(m, trees, conll)
         return trees
 
 

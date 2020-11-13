@@ -26,7 +26,6 @@ def grew_request(fct_name, data={}, files={}):
         )
         print(error_message)
         abort(500, {"message": error_message})
-
     response = json.loads(response.text)
     if response.get("status") != "OK":
         if "data" in response:
@@ -106,3 +105,19 @@ class GrewService:
         grew_samples = reply.get("data", [])
 
         return grew_samples
+    
+    @staticmethod
+    def search_pattern_in_graphs(project_id: str, pattern: str, user_ids = []):
+        if current_app.config["ENV"] == "prod":
+            data = {
+                "project_id": project_id,
+                "pattern": pattern,
+            }
+        else:
+            data = {
+                "project_id": project_id,
+                "pattern": pattern,
+                "user_ids": "[{}]".format(",".join(user_ids)),
+            }
+        reply = grew_request("searchPatternInGraphs", data=data)
+        return reply
