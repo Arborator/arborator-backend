@@ -8,6 +8,7 @@ align_begin_and_end_regex = re.compile(
     r"^\d+\t(.+?)\t.*AlignBegin=(\d+).*AlignEnd=(\d+)"
 )
 
+
 class ConllService:
     @staticmethod
     def get_path_data():
@@ -45,11 +46,27 @@ class ConllService:
 
     @staticmethod
     def sentence_to_audio_tokens(sentence_string: str):
-        audio_tokens = []
+        audio_tokens = {}
         for line in sentence_string.split("\n"):
             if line:
                 if not line.startswith("#"):
                     m = align_begin_and_end_regex.search(line)
-                    audio_tokens += [(m.group(1), int(m.group(2)), int(m.group(3)))]
-        
+                    audio_token = {
+                        "token": m.group(1),
+                        "alignBegin": int(m.group(2)),
+                        "alignEnd": int(m.group(3)),
+                    }
+                    audio_tokens[int(line.split("\t")[0])] = audio_token
+
+        print(audio_tokens)
         return audio_tokens
+
+    @staticmethod
+    def process_sentences_audio_token(conll_name: str):
+        conll_string = ConllService.get_by_name(conll_name)
+        sentences_string = ConllService.seperate_conll_sentences(conll_string)
+        sentences_audio_token = []
+        for sentence_string in sentences_string:
+          audio_tokens = ConllService.sentence_to_audio_tokens(sentence_string)
+          sentences_audio_token.append(audio_tokens)
+        return sentences_audio_token

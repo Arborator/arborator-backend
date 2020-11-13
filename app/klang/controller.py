@@ -21,7 +21,8 @@ class ConllServiceResource(Resource):
 class ConllNameServiceResource(Resource):
     "ConllService"
 
-    def get(self, conll_name) :
+    def get(self, conll_name):
+        
         conll_string = ConllService.get_by_name(conll_name)
         sentences_string = ConllService.seperate_conll_sentences(conll_string)
         sentences_audio_token = []
