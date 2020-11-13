@@ -17,7 +17,7 @@ class ConllServiceResource(Resource):
         return ConllService.get_all()
 
 
-@api.route("/conll/<string:conll_name>")
+@api.route("/conlls/<string:conll_name>")
 class ConllNameServiceResource(Resource):
     "ConllService"
 

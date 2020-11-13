@@ -107,7 +107,6 @@ class GrewService:
         return grew_samples
     
     @staticmethod
-<<<<<<< HEAD
     def create_sample(project_id: str, sample_id: str):
         reply = grew_request(
             "newSample",
@@ -133,10 +132,7 @@ class GrewService:
             data={"project_id": project_id, "sample_id": sample_id},
         )
 
-    
-    # @staticmethod
-    # def save_tree()
-=======
+    @staticmethod
     def search_pattern_in_graphs(project_id: str, pattern: str, user_ids = []):
         if current_app.config["ENV"] == "prod":
             data = {
@@ -151,4 +147,3 @@ class GrewService:
             }
         reply = grew_request("searchPatternInGraphs", data=data)
         return reply
->>>>>>> origin/main

@@ -46,17 +46,20 @@ class ConllService:
 
     @staticmethod
     def sentence_to_audio_tokens(sentence_string: str):
-        audio_tokens = {}
+        # audio_tokens = {}
+        audio_tokens = []
         for line in sentence_string.split("\n"):
             if line:
                 if not line.startswith("#"):
                     m = align_begin_and_end_regex.search(line)
-                    audio_token = {
-                        "token": m.group(1),
-                        "alignBegin": int(m.group(2)),
-                        "alignEnd": int(m.group(3)),
-                    }
-                    audio_tokens[int(line.split("\t")[0])] = audio_token
+                    # audio_token = {
+                    #     "token": m.group(1),
+                    #     "alignBegin": int(m.group(2)),
+                    #     "alignEnd": int(m.group(3)),
+                    # }
+                    audio_token = [m.group(1), m.group(2), m.group(3)]
+                    audio_tokens.append(audio_token)
+                    # audio_tokens[int(line.split("\t")[0])] = audio_token
 
         print(audio_tokens)
         return audio_tokens
