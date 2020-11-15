@@ -1,14 +1,15 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_restx import Api
 
 from flask_login import LoginManager, current_user
+from flask_migrate import Migrate
 
 from app.klang.config import KlangConfig
 
 db = SQLAlchemy()
 login_manager = LoginManager()
-
+migrate = Migrate()
 
 klang_config = KlangConfig()
 
@@ -31,6 +32,7 @@ def create_app(env=None):
 
     register_routes(api, app)
     db.init_app(app)
+    migrate.init_app(app, db)
     login_manager.init_app(app)
 
     from .auth import auth as auth_blueprint
@@ -40,5 +42,10 @@ def create_app(env=None):
     @app.route("/health")
     def health():
         return jsonify("healthy")
+
+    ## server for public assets
+    @app.route('/assets/<path:path>')
+    def assets(path):
+        return send_from_directory('public', path)
 
     return app
