@@ -4,8 +4,10 @@ from flask_script import Manager
 from app import create_app, db
 from commands.seed_command import SeedCommand
 
+
 from dotenv import load_dotenv
 load_dotenv(dotenv_path=".flaskenv", verbose=True)
+from sqlalchemy import MetaData, Table, Column, Integer, String
 
 env = os.getenv("FLASK_ENV") or "test"
 print(f"Active environment: * {env} *")
