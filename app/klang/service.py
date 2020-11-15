@@ -1,8 +1,15 @@
 import os
 import re
 from typing import List
+from sqlalchemy import exc
+import sys
+import json
+from flask import abort
 
-from app import klang_config
+from app import klang_config, db
+from .model import Transcription
+from app.user.model import User
+from flask_login import current_user
 
 align_begin_and_end_regex = re.compile(
     r"^\d+\t(.+?)\t.*AlignBegin=(\d+).*AlignEnd=(\d+)"
@@ -46,22 +53,15 @@ class ConllService:
 
     @staticmethod
     def sentence_to_audio_tokens(sentence_string: str):
-        # audio_tokens = {}
         audio_tokens = []
         for line in sentence_string.split("\n"):
             if line:
                 if not line.startswith("#"):
                     m = align_begin_and_end_regex.search(line)
-                    # audio_token = {
-                    #     "token": m.group(1),
-                    #     "alignBegin": int(m.group(2)),
-                    #     "alignEnd": int(m.group(3)),
-                    # }
                     audio_token = [m.group(1), m.group(2), m.group(3)]
                     audio_tokens.append(audio_token)
-                    # audio_tokens[int(line.split("\t")[0])] = audio_token
 
-        print(audio_tokens)
+        
         return audio_tokens
 
     @staticmethod
@@ -73,3 +73,49 @@ class ConllService:
           audio_tokens = ConllService.sentence_to_audio_tokens(sentence_string)
           sentences_audio_token.append(audio_tokens)
         return sentences_audio_token
+
+    @staticmethod
+    def get_transcription(user_name, conll_name, original_trans):
+        trans = []
+        try:
+            record = Transcription.query.filter_by(
+                    user = user_name, 
+                    mp3 = conll_name).one()
+            trans = json.loads(record.transcription)
+            pass
+        except exc.SQLAlchemyError:
+            for line in original_trans:
+                trans.append([word[0] for word in line])
+            pass
+        return trans
+
+    @staticmethod
+    def get_users_list(is_admin):
+        users = []
+        if is_admin == 'true':
+            users = [x.username for x in User.query.all()]
+        else:
+            users = [current_user.username]
+        return users
+    
+    @staticmethod
+    def save_transcription(conll_name, transcription):
+        user_name = current_user.username
+        try:
+            Transcription.query.filter_by(
+                user = user_name, 
+                mp3 = conll_name
+            ).delete(synchronize_session = False)
+            trans_str = json.dumps(transcription)
+            print(transcription)
+            record = Transcription(
+                user = user_name, 
+                mp3 = conll_name, 
+                transcription = trans_str)
+            db.session.add(record)
+            db.session.commit()
+            pass
+        except:
+            print(sys.exc_info()[0])
+            abort(400)
+            pass
