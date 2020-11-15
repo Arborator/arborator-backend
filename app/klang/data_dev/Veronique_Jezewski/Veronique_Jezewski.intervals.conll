@@ -1,0 +1,693 @@
+# sent_id = Veronique_Jezewski.intervals.conll__1
+# text = et donc elle m'a dit que demain matin,
+# sound_url = Veronique_Jezewski.wav
+1	et	et	_	_	_	_	_	_	AlignBegin=162330|AlignEnd=162590
+2	donc	donc	_	_	_	_	_	_	AlignBegin=162590|AlignEnd=162849
+3	elle	elle	_	_	_	_	_	_	AlignBegin=162849|AlignEnd=163109
+4	m'a	m'a	_	_	_	_	_	_	AlignBegin=163109|AlignEnd=163368
+5	dit	dit	_	_	_	_	_	_	AlignBegin=163368|AlignEnd=163628
+6	que	que	_	_	_	_	_	_	AlignBegin=163628|AlignEnd=163887
+7	demain	demain	_	_	_	_	_	_	AlignBegin=163887|AlignEnd=164147
+8	matin	matin	_	_	_	_	_	_	AlignBegin=164147|AlignEnd=164407
+9	,	,	_	_	_	_	_	_	AlignBegin=164407|AlignEnd=164407
+
+# sent_id = Veronique_Jezewski.intervals.conll__2
+# text = euh bah Maia serait née.
+# sound_url = Veronique_Jezewski.wav
+1	euh	euh	_	_	_	_	_	_	AlignBegin=164407|AlignEnd=164677
+2	bah	bah	_	_	_	_	_	_	AlignBegin=164677|AlignEnd=164947
+3	Maia	Maia	_	_	_	_	_	_	AlignBegin=164947|AlignEnd=165217
+4	serait	serait	_	_	_	_	_	_	AlignBegin=165217|AlignEnd=165487
+5	née	née	_	_	_	_	_	_	AlignBegin=165487|AlignEnd=165758
+6	.	.	_	_	_	_	_	_	AlignBegin=165758|AlignEnd=165758
+
+# sent_id = Veronique_Jezewski.intervals.conll__3
+# text = et là, j'ai senti comme une vague de chaleur euh en moi.
+# sound_url = Veronique_Jezewski.wav
+1	et	et	_	_	_	_	_	_	AlignBegin=166999|AlignEnd=167231
+2	là	là	_	_	_	_	_	_	AlignBegin=167231|AlignEnd=167464
+3	,	,	_	_	_	_	_	_	AlignBegin=167464|AlignEnd=167464
+4	j'ai	j'ai	_	_	_	_	_	_	AlignBegin=167464|AlignEnd=167697
+5	senti	senti	_	_	_	_	_	_	AlignBegin=167697|AlignEnd=167929
+6	comme	comme	_	_	_	_	_	_	AlignBegin=167929|AlignEnd=168162
+7	une	une	_	_	_	_	_	_	AlignBegin=168162|AlignEnd=168395
+8	vague	vague	_	_	_	_	_	_	AlignBegin=168395|AlignEnd=168627
+9	de	de	_	_	_	_	_	_	AlignBegin=168627|AlignEnd=168860
+10	chaleur	chaleur	_	_	_	_	_	_	AlignBegin=168860|AlignEnd=169093
+11	euh	euh	_	_	_	_	_	_	AlignBegin=169093|AlignEnd=169326
+12	en	en	_	_	_	_	_	_	AlignBegin=169326|AlignEnd=169558
+13	moi	moi	_	_	_	_	_	_	AlignBegin=169558|AlignEnd=169791
+14	.	.	_	_	_	_	_	_	AlignBegin=169791|AlignEnd=169791
+
+# sent_id = Veronique_Jezewski.intervals.conll__4
+# text = puisque c'était euh c'était assez émouvant de savoir,
+# sound_url = Veronique_Jezewski.wav
+1	puisque	puisque	_	_	_	_	_	_	AlignBegin=169791|AlignEnd=170145
+2	c'était	c'était	_	_	_	_	_	_	AlignBegin=170145|AlignEnd=170499
+3	euh	euh	_	_	_	_	_	_	AlignBegin=170499|AlignEnd=170852
+4	c'était	c'était	_	_	_	_	_	_	AlignBegin=170852|AlignEnd=171206
+5	assez	assez	_	_	_	_	_	_	AlignBegin=171206|AlignEnd=171560
+6	émouvant	émouvant	_	_	_	_	_	_	AlignBegin=171560|AlignEnd=171914
+7	de	de	_	_	_	_	_	_	AlignBegin=171914|AlignEnd=172268
+8	savoir	savoir	_	_	_	_	_	_	AlignBegin=172268|AlignEnd=172622
+9	,	,	_	_	_	_	_	_	AlignBegin=172622|AlignEnd=172622
+
+# sent_id = Veronique_Jezewski.intervals.conll__5
+# text = que j'allais ressortir de cet hopital avec Maia.
+# sound_url = Veronique_Jezewski.wav
+1	que	que	_	_	_	_	_	_	AlignBegin=172622|AlignEnd=172872
+2	j'allais	j'allais	_	_	_	_	_	_	AlignBegin=172872|AlignEnd=173121
+3	ressortir	ressortir	_	_	_	_	_	_	AlignBegin=173121|AlignEnd=173371
+4	de	de	_	_	_	_	_	_	AlignBegin=173371|AlignEnd=173621
+5	cet	cet	_	_	_	_	_	_	AlignBegin=173621|AlignEnd=173870
+6	hopital	hopital	_	_	_	_	_	_	AlignBegin=173870|AlignEnd=174120
+7	avec	avec	_	_	_	_	_	_	AlignBegin=174120|AlignEnd=174370
+8	Maia	Maia	_	_	_	_	_	_	AlignBegin=174370|AlignEnd=174620
+9	.	.	_	_	_	_	_	_	AlignBegin=174620|AlignEnd=174620
+
+# sent_id = Veronique_Jezewski.intervals.conll__6
+# text = euh bah ensuite du coup euh donc on a attendu,
+# sound_url = Veronique_Jezewski.wav
+1	euh	euh	_	_	_	_	_	_	AlignBegin=176303|AlignEnd=176683
+2	bah	bah	_	_	_	_	_	_	AlignBegin=176683|AlignEnd=177062
+3	ensuite	ensuite	_	_	_	_	_	_	AlignBegin=177062|AlignEnd=177442
+4	du	du	_	_	_	_	_	_	AlignBegin=177442|AlignEnd=177822
+5	coup	coup	_	_	_	_	_	_	AlignBegin=177822|AlignEnd=178201
+6	euh	euh	_	_	_	_	_	_	AlignBegin=178201|AlignEnd=178581
+7	donc	donc	_	_	_	_	_	_	AlignBegin=178581|AlignEnd=178961
+8	on	on	_	_	_	_	_	_	AlignBegin=178961|AlignEnd=179340
+9	a	a	_	_	_	_	_	_	AlignBegin=179340|AlignEnd=179720
+10	attendu	attendu	_	_	_	_	_	_	AlignBegin=179720|AlignEnd=180099
+11	,	,	_	_	_	_	_	_	AlignBegin=180099|AlignEnd=180099
+
+# sent_id = Veronique_Jezewski.intervals.conll__7
+# text = toi et moi,toute la nuit dans la chambre
+# sound_url = Veronique_Jezewski.wav
+1	toi	toi	_	_	_	_	_	_	AlignBegin=180099|AlignEnd=180295
+2	et	et	_	_	_	_	_	_	AlignBegin=180295|AlignEnd=180491
+3	moi	moi	_	_	_	_	_	_	AlignBegin=180491|AlignEnd=180686
+4	,	,	_	_	_	_	_	_	AlignBegin=180686|AlignEnd=180686
+5	toute	toute	_	_	_	_	_	_	AlignBegin=180686|AlignEnd=180882
+6	la	la	_	_	_	_	_	_	AlignBegin=180882|AlignEnd=181077
+7	nuit	nuit	_	_	_	_	_	_	AlignBegin=181077|AlignEnd=181273
+8	dans	dans	_	_	_	_	_	_	AlignBegin=181273|AlignEnd=181468
+9	la	la	_	_	_	_	_	_	AlignBegin=181468|AlignEnd=181664
+10	chambre	chambre	_	_	_	_	_	_	AlignBegin=181664|AlignEnd=181859
+
+# sent_id = Veronique_Jezewski.intervals.conll__8
+# text = pour que le col s'ouvre et que le travail se fasse.
+# sound_url = Veronique_Jezewski.wav
+1	pour	pour	_	_	_	_	_	_	AlignBegin=181860|AlignEnd=182130
+2	que	que	_	_	_	_	_	_	AlignBegin=182130|AlignEnd=182400
+3	le	le	_	_	_	_	_	_	AlignBegin=182400|AlignEnd=182670
+4	col	col	_	_	_	_	_	_	AlignBegin=182670|AlignEnd=182941
+5	s'ouvre	s'ouvre	_	_	_	_	_	_	AlignBegin=182941|AlignEnd=183211
+6	et	et	_	_	_	_	_	_	AlignBegin=183211|AlignEnd=183481
+7	que	que	_	_	_	_	_	_	AlignBegin=183481|AlignEnd=183751
+8	le	le	_	_	_	_	_	_	AlignBegin=183751|AlignEnd=184021
+9	travail	travail	_	_	_	_	_	_	AlignBegin=184021|AlignEnd=184291
+10	se	se	_	_	_	_	_	_	AlignBegin=184291|AlignEnd=184561
+11	fasse	fasse	_	_	_	_	_	_	AlignBegin=184561|AlignEnd=184832
+12	.	.	_	_	_	_	_	_	AlignBegin=184832|AlignEnd=184832
+
+# sent_id = Veronique_Jezewski.intervals.conll__9
+# text = en attendant euh,j'ai reçu la péridurale,
+# sound_url = Veronique_Jezewski.wav
+1	en	en	_	_	_	_	_	_	AlignBegin=184832|AlignEnd=185216
+2	attendant	attendant	_	_	_	_	_	_	AlignBegin=185216|AlignEnd=185601
+3	euh	euh	_	_	_	_	_	_	AlignBegin=185601|AlignEnd=185986
+4	,	,	_	_	_	_	_	_	AlignBegin=185986|AlignEnd=185986
+5	j'ai	j'ai	_	_	_	_	_	_	AlignBegin=185986|AlignEnd=186370
+6	reçu	reçu	_	_	_	_	_	_	AlignBegin=186370|AlignEnd=186755
+7	la	la	_	_	_	_	_	_	AlignBegin=186755|AlignEnd=187140
+8	péridurale	péridurale	_	_	_	_	_	_	AlignBegin=187140|AlignEnd=187524
+9	,	,	_	_	_	_	_	_	AlignBegin=187524|AlignEnd=187524
+
+# sent_id = Veronique_Jezewski.intervals.conll__10
+# text = qui m'a bien soulagée des contractions.
+# sound_url = Veronique_Jezewski.wav
+1	qui	qui	_	_	_	_	_	_	AlignBegin=187524|AlignEnd=187781
+2	m'a	m'a	_	_	_	_	_	_	AlignBegin=187781|AlignEnd=188038
+3	bien	bien	_	_	_	_	_	_	AlignBegin=188038|AlignEnd=188295
+4	soulagée	soulagée	_	_	_	_	_	_	AlignBegin=188295|AlignEnd=188552
+5	des	des	_	_	_	_	_	_	AlignBegin=188552|AlignEnd=188808
+6	contractions	contractions	_	_	_	_	_	_	AlignBegin=188808|AlignEnd=189065
+7	.	.	_	_	_	_	_	_	AlignBegin=189065|AlignEnd=189065
+
+# sent_id = Veronique_Jezewski.intervals.conll__11
+# text = et euh ensuite, euh du coup, euh bah, vers sept heures du matin,
+# sound_url = Veronique_Jezewski.wav
+1	et	et	_	_	_	_	_	_	AlignBegin=189984|AlignEnd=190376
+2	euh	euh	_	_	_	_	_	_	AlignBegin=190376|AlignEnd=190767
+3	ensuite	ensuite	_	_	_	_	_	_	AlignBegin=190767|AlignEnd=191159
+4	,	,	_	_	_	_	_	_	AlignBegin=191159|AlignEnd=191159
+5	euh	euh	_	_	_	_	_	_	AlignBegin=191159|AlignEnd=191550
+6	du	du	_	_	_	_	_	_	AlignBegin=191550|AlignEnd=191941
+7	coup	coup	_	_	_	_	_	_	AlignBegin=191941|AlignEnd=192333
+8	,	,	_	_	_	_	_	_	AlignBegin=192333|AlignEnd=192333
+9	euh	euh	_	_	_	_	_	_	AlignBegin=192333|AlignEnd=192724
+10	bah	bah	_	_	_	_	_	_	AlignBegin=192724|AlignEnd=193116
+11	,	,	_	_	_	_	_	_	AlignBegin=193116|AlignEnd=193116
+12	vers	vers	_	_	_	_	_	_	AlignBegin=193116|AlignEnd=193507
+13	sept	sept	_	_	_	_	_	_	AlignBegin=193507|AlignEnd=193899
+14	heures	heures	_	_	_	_	_	_	AlignBegin=193899|AlignEnd=194290
+15	du	du	_	_	_	_	_	_	AlignBegin=194290|AlignEnd=194682
+16	matin	matin	_	_	_	_	_	_	AlignBegin=194682|AlignEnd=195073
+17	,	,	_	_	_	_	_	_	AlignBegin=195073|AlignEnd=195073
+
+# sent_id = Veronique_Jezewski.intervals.conll__12
+# text = la sage femme est venue me voir avec euh une sage femme étudiante,
+# sound_url = Veronique_Jezewski.wav
+1	la	la	_	_	_	_	_	_	AlignBegin=196271|AlignEnd=196548
+2	sage	sage	_	_	_	_	_	_	AlignBegin=196548|AlignEnd=196825
+3	femme	femme	_	_	_	_	_	_	AlignBegin=196825|AlignEnd=197102
+4	est	est	_	_	_	_	_	_	AlignBegin=197102|AlignEnd=197379
+5	venue	venue	_	_	_	_	_	_	AlignBegin=197379|AlignEnd=197656
+6	me	me	_	_	_	_	_	_	AlignBegin=197656|AlignEnd=197933
+7	voir	voir	_	_	_	_	_	_	AlignBegin=197933|AlignEnd=198210
+8	avec	avec	_	_	_	_	_	_	AlignBegin=198210|AlignEnd=198487
+9	euh	euh	_	_	_	_	_	_	AlignBegin=198487|AlignEnd=198765
+10	une	une	_	_	_	_	_	_	AlignBegin=198765|AlignEnd=199042
+11	sage	sage	_	_	_	_	_	_	AlignBegin=199042|AlignEnd=199319
+12	femme	femme	_	_	_	_	_	_	AlignBegin=199319|AlignEnd=199596
+13	étudiante	étudiante	_	_	_	_	_	_	AlignBegin=199596|AlignEnd=199873
+14	,	,	_	_	_	_	_	_	AlignBegin=199873|AlignEnd=199873
+
+# sent_id = Veronique_Jezewski.intervals.conll__13
+# text = qui s'est occupée de moi toute la nuit.
+# sound_url = Veronique_Jezewski.wav
+1	qui	qui	_	_	_	_	_	_	AlignBegin=199873|AlignEnd=200053
+2	s'est	s'est	_	_	_	_	_	_	AlignBegin=200053|AlignEnd=200233
+3	occupée	occupée	_	_	_	_	_	_	AlignBegin=200233|AlignEnd=200413
+4	de	de	_	_	_	_	_	_	AlignBegin=200413|AlignEnd=200592
+5	moi	moi	_	_	_	_	_	_	AlignBegin=200592|AlignEnd=200772
+6	toute	toute	_	_	_	_	_	_	AlignBegin=200772|AlignEnd=200952
+7	la	la	_	_	_	_	_	_	AlignBegin=200952|AlignEnd=201132
+8	nuit	nuit	_	_	_	_	_	_	AlignBegin=201132|AlignEnd=201312
+9	.	.	_	_	_	_	_	_	AlignBegin=201312|AlignEnd=201312
+
+# sent_id = Veronique_Jezewski.intervals.conll__14
+# text = le col était ouvert à dix.
+# sound_url = Veronique_Jezewski.wav
+1	le	le	_	_	_	_	_	_	AlignBegin=201665|AlignEnd=201892
+2	col	col	_	_	_	_	_	_	AlignBegin=201892|AlignEnd=202120
+3	était	était	_	_	_	_	_	_	AlignBegin=202120|AlignEnd=202348
+4	ouvert	ouvert	_	_	_	_	_	_	AlignBegin=202348|AlignEnd=202576
+5	à	à	_	_	_	_	_	_	AlignBegin=202576|AlignEnd=202803
+6	dix	dix	_	_	_	_	_	_	AlignBegin=202803|AlignEnd=203031
+7	.	.	_	_	_	_	_	_	AlignBegin=203031|AlignEnd=203031
+
+# sent_id = Veronique_Jezewski.intervals.conll__15
+# text = et ensuite, euh donc, on, euh, j'ai commencé à pousser.
+# sound_url = Veronique_Jezewski.wav
+1	et	et	_	_	_	_	_	_	AlignBegin=203539|AlignEnd=203789
+2	ensuite	ensuite	_	_	_	_	_	_	AlignBegin=203789|AlignEnd=204040
+3	,	,	_	_	_	_	_	_	AlignBegin=204040|AlignEnd=204040
+4	euh	euh	_	_	_	_	_	_	AlignBegin=204040|AlignEnd=204290
+5	donc	donc	_	_	_	_	_	_	AlignBegin=204290|AlignEnd=204540
+6	,	,	_	_	_	_	_	_	AlignBegin=204540|AlignEnd=204540
+7	on	on	_	_	_	_	_	_	AlignBegin=204540|AlignEnd=204790
+8	,	,	_	_	_	_	_	_	AlignBegin=204790|AlignEnd=204790
+9	euh	euh	_	_	_	_	_	_	AlignBegin=204790|AlignEnd=205040
+10	,	,	_	_	_	_	_	_	AlignBegin=205040|AlignEnd=205040
+11	j'ai	j'ai	_	_	_	_	_	_	AlignBegin=205040|AlignEnd=205291
+12	commencé	commencé	_	_	_	_	_	_	AlignBegin=205291|AlignEnd=205541
+13	à	à	_	_	_	_	_	_	AlignBegin=205541|AlignEnd=205791
+14	pousser	pousser	_	_	_	_	_	_	AlignBegin=205791|AlignEnd=206041
+15	.	.	_	_	_	_	_	_	AlignBegin=206041|AlignEnd=206041
+
+# sent_id = Veronique_Jezewski.intervals.conll__16
+# text = et euh, donc là, bah ça a été, euh, plus ou moins rapide.
+# sound_url = Veronique_Jezewski.wav
+1	et	et	_	_	_	_	_	_	AlignBegin=206986|AlignEnd=207231
+2	euh	euh	_	_	_	_	_	_	AlignBegin=207231|AlignEnd=207475
+3	,	,	_	_	_	_	_	_	AlignBegin=207475|AlignEnd=207475
+4	donc	donc	_	_	_	_	_	_	AlignBegin=207475|AlignEnd=207719
+5	là	là	_	_	_	_	_	_	AlignBegin=207719|AlignEnd=207964
+6	,	,	_	_	_	_	_	_	AlignBegin=207964|AlignEnd=207964
+7	bah	bah	_	_	_	_	_	_	AlignBegin=207964|AlignEnd=208208
+8	ça	ça	_	_	_	_	_	_	AlignBegin=208208|AlignEnd=208453
+9	a	a	_	_	_	_	_	_	AlignBegin=208453|AlignEnd=208697
+10	été	été	_	_	_	_	_	_	AlignBegin=208697|AlignEnd=208941
+11	,	,	_	_	_	_	_	_	AlignBegin=208941|AlignEnd=208941
+12	euh	euh	_	_	_	_	_	_	AlignBegin=208941|AlignEnd=209186
+13	,	,	_	_	_	_	_	_	AlignBegin=209186|AlignEnd=209186
+14	plus	plus	_	_	_	_	_	_	AlignBegin=209186|AlignEnd=209430
+15	ou	ou	_	_	_	_	_	_	AlignBegin=209430|AlignEnd=209675
+16	moins	moins	_	_	_	_	_	_	AlignBegin=209675|AlignEnd=209919
+17	rapide	rapide	_	_	_	_	_	_	AlignBegin=209919|AlignEnd=210164
+18	.	.	_	_	_	_	_	_	AlignBegin=210164|AlignEnd=210164
+
+# sent_id = Veronique_Jezewski.intervals.conll__17
+# text = euh elle m'a dit que ça devrait prendre cinq, dix minutes.
+# sound_url = Veronique_Jezewski.wav
+1	euh	euh	_	_	_	_	_	_	AlignBegin=210696|AlignEnd=210940
+2	elle	elle	_	_	_	_	_	_	AlignBegin=210940|AlignEnd=211184
+3	m'a	m'a	_	_	_	_	_	_	AlignBegin=211184|AlignEnd=211428
+4	dit	dit	_	_	_	_	_	_	AlignBegin=211428|AlignEnd=211672
+5	que	que	_	_	_	_	_	_	AlignBegin=211672|AlignEnd=211916
+6	ça	ça	_	_	_	_	_	_	AlignBegin=211916|AlignEnd=212160
+7	devrait	devrait	_	_	_	_	_	_	AlignBegin=212160|AlignEnd=212404
+8	prendre	prendre	_	_	_	_	_	_	AlignBegin=212404|AlignEnd=212648
+9	cinq	cinq	_	_	_	_	_	_	AlignBegin=212648|AlignEnd=212892
+10	,	,	_	_	_	_	_	_	AlignBegin=212892|AlignEnd=212892
+11	dix	dix	_	_	_	_	_	_	AlignBegin=212892|AlignEnd=213137
+12	minutes	minutes	_	_	_	_	_	_	AlignBegin=213137|AlignEnd=213381
+13	.	.	_	_	_	_	_	_	AlignBegin=213381|AlignEnd=213381
+
+# sent_id = Veronique_Jezewski.intervals.conll__18
+# text = euh et au final,ça a duré, euh bah, quarante cinq minutes.
+# sound_url = Veronique_Jezewski.wav
+1	euh	euh	_	_	_	_	_	_	AlignBegin=214015|AlignEnd=214252
+2	et	et	_	_	_	_	_	_	AlignBegin=214252|AlignEnd=214488
+3	au	au	_	_	_	_	_	_	AlignBegin=214488|AlignEnd=214724
+4	final	final	_	_	_	_	_	_	AlignBegin=214724|AlignEnd=214961
+5	,	,	_	_	_	_	_	_	AlignBegin=214961|AlignEnd=214961
+6	ça	ça	_	_	_	_	_	_	AlignBegin=214961|AlignEnd=215197
+7	a	a	_	_	_	_	_	_	AlignBegin=215197|AlignEnd=215433
+8	duré	duré	_	_	_	_	_	_	AlignBegin=215433|AlignEnd=215670
+9	,	,	_	_	_	_	_	_	AlignBegin=215670|AlignEnd=215670
+10	euh	euh	_	_	_	_	_	_	AlignBegin=215670|AlignEnd=215906
+11	bah	bah	_	_	_	_	_	_	AlignBegin=215906|AlignEnd=216142
+12	,	,	_	_	_	_	_	_	AlignBegin=216142|AlignEnd=216142
+13	quarante	quarante	_	_	_	_	_	_	AlignBegin=216142|AlignEnd=216379
+14	cinq	cinq	_	_	_	_	_	_	AlignBegin=216379|AlignEnd=216615
+15	minutes	minutes	_	_	_	_	_	_	AlignBegin=216615|AlignEnd=216851
+16	.	.	_	_	_	_	_	_	AlignBegin=216851|AlignEnd=216851
+
+# sent_id = Veronique_Jezewski.intervals.conll__19
+# text = et ensuite, euh bah du coup, euh donc euh, ils ont appelé l'obstétricienne.
+# sound_url = Veronique_Jezewski.wav
+1	et	et	_	_	_	_	_	_	AlignBegin=218536|AlignEnd=218931
+2	ensuite	ensuite	_	_	_	_	_	_	AlignBegin=218931|AlignEnd=219326
+3	,	,	_	_	_	_	_	_	AlignBegin=219326|AlignEnd=219326
+4	euh	euh	_	_	_	_	_	_	AlignBegin=219326|AlignEnd=219721
+5	bah	bah	_	_	_	_	_	_	AlignBegin=219721|AlignEnd=220116
+6	du	du	_	_	_	_	_	_	AlignBegin=220116|AlignEnd=220511
+7	coup	coup	_	_	_	_	_	_	AlignBegin=220511|AlignEnd=220906
+8	,	,	_	_	_	_	_	_	AlignBegin=220906|AlignEnd=220906
+9	euh	euh	_	_	_	_	_	_	AlignBegin=220906|AlignEnd=221300
+10	donc	donc	_	_	_	_	_	_	AlignBegin=221300|AlignEnd=221695
+11	euh	euh	_	_	_	_	_	_	AlignBegin=221695|AlignEnd=222090
+12	,	,	_	_	_	_	_	_	AlignBegin=222090|AlignEnd=222090
+13	ils	ils	_	_	_	_	_	_	AlignBegin=222090|AlignEnd=222485
+14	ont	ont	_	_	_	_	_	_	AlignBegin=222485|AlignEnd=222880
+15	appelé	appelé	_	_	_	_	_	_	AlignBegin=222880|AlignEnd=223275
+16	l'obstétricienne	l'obstétricienne	_	_	_	_	_	_	AlignBegin=223275|AlignEnd=223670
+17	.	.	_	_	_	_	_	_	AlignBegin=223670|AlignEnd=223670
+
+# sent_id = Veronique_Jezewski.intervals.conll__20
+# text = puisque euh en fait, Maia ne sortait pas.
+# sound_url = Veronique_Jezewski.wav
+1	puisque	puisque	_	_	_	_	_	_	AlignBegin=223670|AlignEnd=223913
+2	euh	euh	_	_	_	_	_	_	AlignBegin=223913|AlignEnd=224156
+3	en	en	_	_	_	_	_	_	AlignBegin=224156|AlignEnd=224399
+4	fait	fait	_	_	_	_	_	_	AlignBegin=224399|AlignEnd=224641
+5	,	,	_	_	_	_	_	_	AlignBegin=224641|AlignEnd=224641
+6	Maia	Maia	_	_	_	_	_	_	AlignBegin=224641|AlignEnd=224884
+7	ne	ne	_	_	_	_	_	_	AlignBegin=224884|AlignEnd=225127
+8	sortait	sortait	_	_	_	_	_	_	AlignBegin=225127|AlignEnd=225370
+9	pas	pas	_	_	_	_	_	_	AlignBegin=225370|AlignEnd=225613
+10	.	.	_	_	_	_	_	_	AlignBegin=225613|AlignEnd=225613
+
+# sent_id = Veronique_Jezewski.intervals.conll__21
+# text = et euh là donc, ils ont utilisé la ventouse.
+# sound_url = Veronique_Jezewski.wav
+1	et	et	_	_	_	_	_	_	AlignBegin=226204|AlignEnd=226443
+2	euh	euh	_	_	_	_	_	_	AlignBegin=226443|AlignEnd=226682
+3	là	là	_	_	_	_	_	_	AlignBegin=226682|AlignEnd=226921
+4	donc	donc	_	_	_	_	_	_	AlignBegin=226921|AlignEnd=227159
+5	,	,	_	_	_	_	_	_	AlignBegin=227159|AlignEnd=227159
+6	ils	ils	_	_	_	_	_	_	AlignBegin=227159|AlignEnd=227398
+7	ont	ont	_	_	_	_	_	_	AlignBegin=227398|AlignEnd=227637
+8	utilisé	utilisé	_	_	_	_	_	_	AlignBegin=227637|AlignEnd=227876
+9	la	la	_	_	_	_	_	_	AlignBegin=227876|AlignEnd=228115
+10	ventouse	ventouse	_	_	_	_	_	_	AlignBegin=228115|AlignEnd=228354
+11	.	.	_	_	_	_	_	_	AlignBegin=228354|AlignEnd=228354
+
+# sent_id = Veronique_Jezewski.intervals.conll__22
+# text = et au bout de deux fois, en fait, deux poussées,
+# sound_url = Veronique_Jezewski.wav
+1	et	et	_	_	_	_	_	_	AlignBegin=228354|AlignEnd=228539
+2	au	au	_	_	_	_	_	_	AlignBegin=228539|AlignEnd=228725
+3	bout	bout	_	_	_	_	_	_	AlignBegin=228725|AlignEnd=228911
+4	de	de	_	_	_	_	_	_	AlignBegin=228911|AlignEnd=229096
+5	deux	deux	_	_	_	_	_	_	AlignBegin=229096|AlignEnd=229282
+6	fois	fois	_	_	_	_	_	_	AlignBegin=229282|AlignEnd=229468
+7	,	,	_	_	_	_	_	_	AlignBegin=229468|AlignEnd=229468
+8	en	en	_	_	_	_	_	_	AlignBegin=229468|AlignEnd=229654
+9	fait	fait	_	_	_	_	_	_	AlignBegin=229654|AlignEnd=229839
+10	,	,	_	_	_	_	_	_	AlignBegin=229839|AlignEnd=229839
+11	deux	deux	_	_	_	_	_	_	AlignBegin=229839|AlignEnd=230025
+12	poussées	poussées	_	_	_	_	_	_	AlignBegin=230025|AlignEnd=230211
+13	,	,	_	_	_	_	_	_	AlignBegin=230211|AlignEnd=230211
+
+# sent_id = Veronique_Jezewski.intervals.conll__23
+# text = bah Maia est sortie.
+# sound_url = Veronique_Jezewski.wav
+1	bah	bah	_	_	_	_	_	_	AlignBegin=230211|AlignEnd=230453
+2	Maia	Maia	_	_	_	_	_	_	AlignBegin=230453|AlignEnd=230695
+3	est	est	_	_	_	_	_	_	AlignBegin=230695|AlignEnd=230937
+4	sortie	sortie	_	_	_	_	_	_	AlignBegin=230937|AlignEnd=231179
+5	.	.	_	_	_	_	_	_	AlignBegin=231179|AlignEnd=231179
+
+# sent_id = Veronique_Jezewski.intervals.conll__24
+# text = et là euh, je peux pas expliquer,
+# sound_url = Veronique_Jezewski.wav
+1	et	et	_	_	_	_	_	_	AlignBegin=231752|AlignEnd=231985
+2	là	là	_	_	_	_	_	_	AlignBegin=231985|AlignEnd=232218
+3	euh	euh	_	_	_	_	_	_	AlignBegin=232218|AlignEnd=232450
+4	,	,	_	_	_	_	_	_	AlignBegin=232450|AlignEnd=232450
+5	je	je	_	_	_	_	_	_	AlignBegin=232450|AlignEnd=232683
+6	peux	peux	_	_	_	_	_	_	AlignBegin=232683|AlignEnd=232916
+7	pas	pas	_	_	_	_	_	_	AlignBegin=232916|AlignEnd=233149
+8	expliquer	expliquer	_	_	_	_	_	_	AlignBegin=233149|AlignEnd=233382
+9	,	,	_	_	_	_	_	_	AlignBegin=233382|AlignEnd=233382
+
+# sent_id = Veronique_Jezewski.intervals.conll__25
+# text = en fait ce que j'ai ressenti.
+# sound_url = Veronique_Jezewski.wav
+1	en	en	_	_	_	_	_	_	AlignBegin=233382|AlignEnd=233562
+2	fait	fait	_	_	_	_	_	_	AlignBegin=233562|AlignEnd=233743
+3	ce	ce	_	_	_	_	_	_	AlignBegin=233743|AlignEnd=233923
+4	que	que	_	_	_	_	_	_	AlignBegin=233923|AlignEnd=234104
+5	j'ai	j'ai	_	_	_	_	_	_	AlignBegin=234104|AlignEnd=234284
+6	ressenti	ressenti	_	_	_	_	_	_	AlignBegin=234284|AlignEnd=234465
+7	.	.	_	_	_	_	_	_	AlignBegin=234465|AlignEnd=234465
+
+# sent_id = Veronique_Jezewski.intervals.conll__26
+# text = tellement c'était d'émotions euh extrêmement fortes.
+# sound_url = Veronique_Jezewski.wav
+1	tellement	tellement	_	_	_	_	_	_	AlignBegin=234465|AlignEnd=234897
+2	c'était	c'était	_	_	_	_	_	_	AlignBegin=234897|AlignEnd=235329
+3	d'émotions	d'émotions	_	_	_	_	_	_	AlignBegin=235329|AlignEnd=235762
+4	euh	euh	_	_	_	_	_	_	AlignBegin=235762|AlignEnd=236194
+5	extrêmement	extrêmement	_	_	_	_	_	_	AlignBegin=236194|AlignEnd=236626
+6	fortes	fortes	_	_	_	_	_	_	AlignBegin=236626|AlignEnd=237059
+7	.	.	_	_	_	_	_	_	AlignBegin=237059|AlignEnd=237059
+
+# sent_id = Veronique_Jezewski.intervals.conll__27
+# text = je me rappelle pas du tout,
+# sound_url = Veronique_Jezewski.wav
+1	je	je	_	_	_	_	_	_	AlignBegin=237059|AlignEnd=237238
+2	me	me	_	_	_	_	_	_	AlignBegin=237238|AlignEnd=237418
+3	rappelle	rappelle	_	_	_	_	_	_	AlignBegin=237418|AlignEnd=237598
+4	pas	pas	_	_	_	_	_	_	AlignBegin=237598|AlignEnd=237778
+5	du	du	_	_	_	_	_	_	AlignBegin=237778|AlignEnd=237958
+6	tout	tout	_	_	_	_	_	_	AlignBegin=237958|AlignEnd=238138
+7	,	,	_	_	_	_	_	_	AlignBegin=238138|AlignEnd=238138
+
+# sent_id = Veronique_Jezewski.intervals.conll__28
+# text = de tout ce qu'il s'est passé.
+# sound_url = Veronique_Jezewski.wav
+1	de	de	_	_	_	_	_	_	AlignBegin=238138|AlignEnd=238340
+2	tout	tout	_	_	_	_	_	_	AlignBegin=238340|AlignEnd=238542
+3	ce	ce	_	_	_	_	_	_	AlignBegin=238542|AlignEnd=238744
+4	qu'il	qu'il	_	_	_	_	_	_	AlignBegin=238744|AlignEnd=238946
+5	s'est	s'est	_	_	_	_	_	_	AlignBegin=238946|AlignEnd=239148
+6	passé	passé	_	_	_	_	_	_	AlignBegin=239148|AlignEnd=239350
+7	.	.	_	_	_	_	_	_	AlignBegin=239350|AlignEnd=239350
+
+# sent_id = Veronique_Jezewski.intervals.conll__29
+# text = et le seul moment dont je me rappelle,
+# sound_url = Veronique_Jezewski.wav
+1	et	et	_	_	_	_	_	_	AlignBegin=239350|AlignEnd=239533
+2	le	le	_	_	_	_	_	_	AlignBegin=239533|AlignEnd=239717
+3	seul	seul	_	_	_	_	_	_	AlignBegin=239717|AlignEnd=239900
+4	moment	moment	_	_	_	_	_	_	AlignBegin=239900|AlignEnd=240084
+5	dont	dont	_	_	_	_	_	_	AlignBegin=240084|AlignEnd=240267
+6	je	je	_	_	_	_	_	_	AlignBegin=240267|AlignEnd=240451
+7	me	me	_	_	_	_	_	_	AlignBegin=240451|AlignEnd=240634
+8	rappelle	rappelle	_	_	_	_	_	_	AlignBegin=240634|AlignEnd=240818
+9	,	,	_	_	_	_	_	_	AlignBegin=240818|AlignEnd=240818
+
+# sent_id = Veronique_Jezewski.intervals.conll__30
+# text = c'est vraiment quand ils l'ont posée.
+# sound_url = Veronique_Jezewski.wav
+1	c'est	c'est	_	_	_	_	_	_	AlignBegin=240818|AlignEnd=241072
+2	vraiment	vraiment	_	_	_	_	_	_	AlignBegin=241072|AlignEnd=241325
+3	quand	quand	_	_	_	_	_	_	AlignBegin=241325|AlignEnd=241579
+4	ils	ils	_	_	_	_	_	_	AlignBegin=241579|AlignEnd=241833
+5	l'ont	l'ont	_	_	_	_	_	_	AlignBegin=241833|AlignEnd=242087
+6	posée	posée	_	_	_	_	_	_	AlignBegin=242087|AlignEnd=242341
+7	.	.	_	_	_	_	_	_	AlignBegin=242341|AlignEnd=242341
+
+# sent_id = Veronique_Jezewski.intervals.conll__31
+# text = et elle a, en fait quand elle est sortie,
+# sound_url = Veronique_Jezewski.wav
+1	et	et	_	_	_	_	_	_	AlignBegin=242341|AlignEnd=242567
+2	elle	elle	_	_	_	_	_	_	AlignBegin=242567|AlignEnd=242794
+3	a	a	_	_	_	_	_	_	AlignBegin=242794|AlignEnd=243020
+4	,	,	_	_	_	_	_	_	AlignBegin=243020|AlignEnd=243020
+5	en	en	_	_	_	_	_	_	AlignBegin=243020|AlignEnd=243247
+6	fait	fait	_	_	_	_	_	_	AlignBegin=243247|AlignEnd=243473
+7	quand	quand	_	_	_	_	_	_	AlignBegin=243473|AlignEnd=243699
+8	elle	elle	_	_	_	_	_	_	AlignBegin=243699|AlignEnd=243926
+9	est	est	_	_	_	_	_	_	AlignBegin=243926|AlignEnd=244152
+10	sortie	sortie	_	_	_	_	_	_	AlignBegin=244152|AlignEnd=244379
+11	,	,	_	_	_	_	_	_	AlignBegin=244379|AlignEnd=244379
+
+# sent_id = Veronique_Jezewski.intervals.conll__32
+# text = elle a un peu crié.
+# sound_url = Veronique_Jezewski.wav
+1	elle	elle	_	_	_	_	_	_	AlignBegin=244379|AlignEnd=244566
+2	a	a	_	_	_	_	_	_	AlignBegin=244566|AlignEnd=244753
+3	un	un	_	_	_	_	_	_	AlignBegin=244753|AlignEnd=244940
+4	peu	peu	_	_	_	_	_	_	AlignBegin=244940|AlignEnd=245127
+5	crié	crié	_	_	_	_	_	_	AlignBegin=245127|AlignEnd=245314
+6	.	.	_	_	_	_	_	_	AlignBegin=245314|AlignEnd=245314
+
+# sent_id = Veronique_Jezewski.intervals.conll__33
+# text = et ils l'ont posée, en fait, sur moi.
+# sound_url = Veronique_Jezewski.wav
+1	et	et	_	_	_	_	_	_	AlignBegin=245813|AlignEnd=246041
+2	ils	ils	_	_	_	_	_	_	AlignBegin=246041|AlignEnd=246268
+3	l'ont	l'ont	_	_	_	_	_	_	AlignBegin=246268|AlignEnd=246496
+4	posée	posée	_	_	_	_	_	_	AlignBegin=246496|AlignEnd=246723
+5	,	,	_	_	_	_	_	_	AlignBegin=246723|AlignEnd=246723
+6	en	en	_	_	_	_	_	_	AlignBegin=246723|AlignEnd=246951
+7	fait	fait	_	_	_	_	_	_	AlignBegin=246951|AlignEnd=247178
+8	,	,	_	_	_	_	_	_	AlignBegin=247178|AlignEnd=247178
+9	sur	sur	_	_	_	_	_	_	AlignBegin=247178|AlignEnd=247406
+10	moi	moi	_	_	_	_	_	_	AlignBegin=247406|AlignEnd=247633
+11	.	.	_	_	_	_	_	_	AlignBegin=247633|AlignEnd=247633
+
+# sent_id = Veronique_Jezewski.intervals.conll__34
+# text = et euh, et j'ai senti comme une boule de chaleur.
+# sound_url = Veronique_Jezewski.wav
+1	et	et	_	_	_	_	_	_	AlignBegin=247633|AlignEnd=247924
+2	euh	euh	_	_	_	_	_	_	AlignBegin=247924|AlignEnd=248214
+3	,	,	_	_	_	_	_	_	AlignBegin=248214|AlignEnd=248214
+4	et	et	_	_	_	_	_	_	AlignBegin=248214|AlignEnd=248505
+5	j'ai	j'ai	_	_	_	_	_	_	AlignBegin=248505|AlignEnd=248795
+6	senti	senti	_	_	_	_	_	_	AlignBegin=248795|AlignEnd=249086
+7	comme	comme	_	_	_	_	_	_	AlignBegin=249086|AlignEnd=249376
+8	une	une	_	_	_	_	_	_	AlignBegin=249376|AlignEnd=249667
+9	boule	boule	_	_	_	_	_	_	AlignBegin=249667|AlignEnd=249957
+10	de	de	_	_	_	_	_	_	AlignBegin=249957|AlignEnd=250247
+11	chaleur	chaleur	_	_	_	_	_	_	AlignBegin=250247|AlignEnd=250538
+12	.	.	_	_	_	_	_	_	AlignBegin=250538|AlignEnd=250538
+
+# sent_id = Veronique_Jezewski.intervals.conll__35
+# text = euh, beaucoup d'émotions qui remontaient.
+# sound_url = Veronique_Jezewski.wav
+1	euh	euh	_	_	_	_	_	_	AlignBegin=250538|AlignEnd=250928
+2	,	,	_	_	_	_	_	_	AlignBegin=250928|AlignEnd=250928
+3	beaucoup	beaucoup	_	_	_	_	_	_	AlignBegin=250928|AlignEnd=251317
+4	d'émotions	d'émotions	_	_	_	_	_	_	AlignBegin=251317|AlignEnd=251707
+5	qui	qui	_	_	_	_	_	_	AlignBegin=251707|AlignEnd=252097
+6	remontaient	remontaient	_	_	_	_	_	_	AlignBegin=252097|AlignEnd=252487
+7	.	.	_	_	_	_	_	_	AlignBegin=252487|AlignEnd=252487
+
+# sent_id = Veronique_Jezewski.intervals.conll__36
+# text = c'était un mouvement,euh, c'était un moment euh extrêmement beau.
+# sound_url = Veronique_Jezewski.wav
+1	c'était	c'était	_	_	_	_	_	_	AlignBegin=252894|AlignEnd=253223
+2	un	un	_	_	_	_	_	_	AlignBegin=253223|AlignEnd=253552
+3	mouvement	mouvement	_	_	_	_	_	_	AlignBegin=253552|AlignEnd=253880
+4	,	,	_	_	_	_	_	_	AlignBegin=253880|AlignEnd=253880
+5	euh	euh	_	_	_	_	_	_	AlignBegin=253880|AlignEnd=254209
+6	,	,	_	_	_	_	_	_	AlignBegin=254209|AlignEnd=254209
+7	c'était	c'était	_	_	_	_	_	_	AlignBegin=254209|AlignEnd=254538
+8	un	un	_	_	_	_	_	_	AlignBegin=254538|AlignEnd=254866
+9	moment	moment	_	_	_	_	_	_	AlignBegin=254866|AlignEnd=255195
+10	euh	euh	_	_	_	_	_	_	AlignBegin=255195|AlignEnd=255524
+11	extrêmement	extrêmement	_	_	_	_	_	_	AlignBegin=255524|AlignEnd=255853
+12	beau	beau	_	_	_	_	_	_	AlignBegin=255853|AlignEnd=256181
+13	.	.	_	_	_	_	_	_	AlignBegin=256181|AlignEnd=256181
+
+# sent_id = Veronique_Jezewski.intervals.conll__37
+# text = et euh donc là, euh d'elle même,
+# sound_url = Veronique_Jezewski.wav
+1	et	et	_	_	_	_	_	_	AlignBegin=256181|AlignEnd=256432
+2	euh	euh	_	_	_	_	_	_	AlignBegin=256432|AlignEnd=256683
+3	donc	donc	_	_	_	_	_	_	AlignBegin=256683|AlignEnd=256934
+4	là	là	_	_	_	_	_	_	AlignBegin=256934|AlignEnd=257185
+5	,	,	_	_	_	_	_	_	AlignBegin=257185|AlignEnd=257185
+6	euh	euh	_	_	_	_	_	_	AlignBegin=257185|AlignEnd=257437
+7	d'elle	d'elle	_	_	_	_	_	_	AlignBegin=257437|AlignEnd=257688
+8	même	même	_	_	_	_	_	_	AlignBegin=257688|AlignEnd=257939
+9	,	,	_	_	_	_	_	_	AlignBegin=257939|AlignEnd=257939
+
+# sent_id = Veronique_Jezewski.intervals.conll__38
+# text = c'était très marrant,
+# sound_url = Veronique_Jezewski.wav
+1	c'était	c'était	_	_	_	_	_	_	AlignBegin=257939|AlignEnd=258212
+2	très	très	_	_	_	_	_	_	AlignBegin=258212|AlignEnd=258486
+3	marrant	marrant	_	_	_	_	_	_	AlignBegin=258486|AlignEnd=258759
+4	,	,	_	_	_	_	_	_	AlignBegin=258759|AlignEnd=258759
+
+# sent_id = Veronique_Jezewski.intervals.conll__39
+# text = puisque Maia cherchait elle même, euh le sein pour pouvoir têter.
+# sound_url = Veronique_Jezewski.wav
+1	puisque	puisque	_	_	_	_	_	_	AlignBegin=258759|AlignEnd=259056
+2	Maia	Maia	_	_	_	_	_	_	AlignBegin=259056|AlignEnd=259354
+3	cherchait	cherchait	_	_	_	_	_	_	AlignBegin=259354|AlignEnd=259651
+4	elle	elle	_	_	_	_	_	_	AlignBegin=259651|AlignEnd=259948
+5	même	même	_	_	_	_	_	_	AlignBegin=259948|AlignEnd=260245
+6	,	,	_	_	_	_	_	_	AlignBegin=260245|AlignEnd=260245
+7	euh	euh	_	_	_	_	_	_	AlignBegin=260245|AlignEnd=260543
+8	le	le	_	_	_	_	_	_	AlignBegin=260543|AlignEnd=260840
+9	sein	sein	_	_	_	_	_	_	AlignBegin=260840|AlignEnd=261137
+10	pour	pour	_	_	_	_	_	_	AlignBegin=261137|AlignEnd=261434
+11	pouvoir	pouvoir	_	_	_	_	_	_	AlignBegin=261434|AlignEnd=261732
+12	têter	têter	_	_	_	_	_	_	AlignBegin=261732|AlignEnd=262029
+13	.	.	_	_	_	_	_	_	AlignBegin=262029|AlignEnd=262029
+
+# sent_id = Veronique_Jezewski.intervals.conll__40
+# text = et euh du coup, donc après bah, on est resté
+# sound_url = Veronique_Jezewski.wav
+1	et	et	_	_	_	_	_	_	AlignBegin=262675|AlignEnd=262869
+2	euh	euh	_	_	_	_	_	_	AlignBegin=262869|AlignEnd=263064
+3	du	du	_	_	_	_	_	_	AlignBegin=263064|AlignEnd=263259
+4	coup	coup	_	_	_	_	_	_	AlignBegin=263259|AlignEnd=263453
+5	,	,	_	_	_	_	_	_	AlignBegin=263453|AlignEnd=263453
+6	donc	donc	_	_	_	_	_	_	AlignBegin=263453|AlignEnd=263648
+7	après	après	_	_	_	_	_	_	AlignBegin=263648|AlignEnd=263842
+8	bah	bah	_	_	_	_	_	_	AlignBegin=263842|AlignEnd=264037
+9	,	,	_	_	_	_	_	_	AlignBegin=264037|AlignEnd=264037
+10	on	on	_	_	_	_	_	_	AlignBegin=264037|AlignEnd=264231
+11	est	est	_	_	_	_	_	_	AlignBegin=264231|AlignEnd=264426
+12	resté	resté	_	_	_	_	_	_	AlignBegin=264426|AlignEnd=264621
+
+# sent_id = Veronique_Jezewski.intervals.conll__41
+# text = deux heures en salle de naissance, avec elle.
+# sound_url = Veronique_Jezewski.wav
+1	deux	deux	_	_	_	_	_	_	AlignBegin=264621|AlignEnd=264827
+2	heures	heures	_	_	_	_	_	_	AlignBegin=264827|AlignEnd=265033
+3	en	en	_	_	_	_	_	_	AlignBegin=265033|AlignEnd=265239
+4	salle	salle	_	_	_	_	_	_	AlignBegin=265239|AlignEnd=265445
+5	de	de	_	_	_	_	_	_	AlignBegin=265445|AlignEnd=265651
+6	naissance	naissance	_	_	_	_	_	_	AlignBegin=265651|AlignEnd=265858
+7	,	,	_	_	_	_	_	_	AlignBegin=265858|AlignEnd=265858
+8	avec	avec	_	_	_	_	_	_	AlignBegin=265858|AlignEnd=266064
+9	elle	elle	_	_	_	_	_	_	AlignBegin=266064|AlignEnd=266270
+10	.	.	_	_	_	_	_	_	AlignBegin=266270|AlignEnd=266270
+
+# sent_id = Veronique_Jezewski.intervals.conll__42
+# text = un peu plus de deux heures,
+# sound_url = Veronique_Jezewski.wav
+1	un	un	_	_	_	_	_	_	AlignBegin=266270|AlignEnd=266401
+2	peu	peu	_	_	_	_	_	_	AlignBegin=266401|AlignEnd=266532
+3	plus	plus	_	_	_	_	_	_	AlignBegin=266532|AlignEnd=266663
+4	de	de	_	_	_	_	_	_	AlignBegin=266663|AlignEnd=266793
+5	deux	deux	_	_	_	_	_	_	AlignBegin=266793|AlignEnd=266924
+6	heures	heures	_	_	_	_	_	_	AlignBegin=266924|AlignEnd=267055
+7	,	,	_	_	_	_	_	_	AlignBegin=267055|AlignEnd=267055
+
+# sent_id = Veronique_Jezewski.intervals.conll__43
+# text = en attendant qu'ils trouvent une chambre.
+# sound_url = Veronique_Jezewski.wav
+1	en	en	_	_	_	_	_	_	AlignBegin=267543|AlignEnd=267810
+2	attendant	attendant	_	_	_	_	_	_	AlignBegin=267810|AlignEnd=268078
+3	qu'ils	qu'ils	_	_	_	_	_	_	AlignBegin=268078|AlignEnd=268345
+4	trouvent	trouvent	_	_	_	_	_	_	AlignBegin=268345|AlignEnd=268612
+5	une	une	_	_	_	_	_	_	AlignBegin=268612|AlignEnd=268879
+6	chambre	chambre	_	_	_	_	_	_	AlignBegin=268879|AlignEnd=269147
+7	.	.	_	_	_	_	_	_	AlignBegin=269147|AlignEnd=269147
+
+# sent_id = Veronique_Jezewski.intervals.conll__44
+# text = donc, euh donc, c'était et c'est un moment vraiment magique,
+# sound_url = Veronique_Jezewski.wav
+1	donc	donc	_	_	_	_	_	_	AlignBegin=269147|AlignEnd=269421
+2	,	,	_	_	_	_	_	_	AlignBegin=269421|AlignEnd=269421
+3	euh	euh	_	_	_	_	_	_	AlignBegin=269421|AlignEnd=269694
+4	donc	donc	_	_	_	_	_	_	AlignBegin=269694|AlignEnd=269968
+5	,	,	_	_	_	_	_	_	AlignBegin=269968|AlignEnd=269968
+6	c'était	c'était	_	_	_	_	_	_	AlignBegin=269968|AlignEnd=270242
+7	et	et	_	_	_	_	_	_	AlignBegin=270242|AlignEnd=270516
+8	c'est	c'est	_	_	_	_	_	_	AlignBegin=270516|AlignEnd=270790
+9	un	un	_	_	_	_	_	_	AlignBegin=270790|AlignEnd=271063
+10	moment	moment	_	_	_	_	_	_	AlignBegin=271063|AlignEnd=271337
+11	vraiment	vraiment	_	_	_	_	_	_	AlignBegin=271337|AlignEnd=271611
+12	magique	magique	_	_	_	_	_	_	AlignBegin=271611|AlignEnd=271885
+13	,	,	_	_	_	_	_	_	AlignBegin=271885|AlignEnd=271885
+
+# sent_id = Veronique_Jezewski.intervals.conll__45
+# text = avec euh Maia et le papa.
+# sound_url = Veronique_Jezewski.wav
+1	avec	avec	_	_	_	_	_	_	AlignBegin=271885|AlignEnd=272126
+2	euh	euh	_	_	_	_	_	_	AlignBegin=272126|AlignEnd=272367
+3	Maia	Maia	_	_	_	_	_	_	AlignBegin=272367|AlignEnd=272608
+4	et	et	_	_	_	_	_	_	AlignBegin=272608|AlignEnd=272849
+5	le	le	_	_	_	_	_	_	AlignBegin=272849|AlignEnd=273090
+6	papa	papa	_	_	_	_	_	_	AlignBegin=273090|AlignEnd=273331
+7	.	.	_	_	_	_	_	_	AlignBegin=273331|AlignEnd=273331
+
+# sent_id = Veronique_Jezewski.intervals.conll__46
+# text = et euh donc on est resté,
+# sound_url = Veronique_Jezewski.wav
+1	et	et	_	_	_	_	_	_	AlignBegin=274109|AlignEnd=274382
+2	euh	euh	_	_	_	_	_	_	AlignBegin=274382|AlignEnd=274654
+3	donc	donc	_	_	_	_	_	_	AlignBegin=274654|AlignEnd=274927
+4	on	on	_	_	_	_	_	_	AlignBegin=274927|AlignEnd=275200
+5	est	est	_	_	_	_	_	_	AlignBegin=275200|AlignEnd=275472
+6	resté	resté	_	_	_	_	_	_	AlignBegin=275472|AlignEnd=275745
+7	,	,	_	_	_	_	_	_	AlignBegin=275745|AlignEnd=275745
+
+# sent_id = Veronique_Jezewski.intervals.conll__47
+# text = euh en salle de naissance, deux, deux trois heures.
+# sound_url = Veronique_Jezewski.wav
+1	euh	euh	_	_	_	_	_	_	AlignBegin=275745|AlignEnd=275986
+2	en	en	_	_	_	_	_	_	AlignBegin=275986|AlignEnd=276226
+3	salle	salle	_	_	_	_	_	_	AlignBegin=276226|AlignEnd=276467
+4	de	de	_	_	_	_	_	_	AlignBegin=276467|AlignEnd=276708
+5	naissance	naissance	_	_	_	_	_	_	AlignBegin=276708|AlignEnd=276948
+6	,	,	_	_	_	_	_	_	AlignBegin=276948|AlignEnd=276948
+7	deux	deux	_	_	_	_	_	_	AlignBegin=276948|AlignEnd=277189
+8	,	,	_	_	_	_	_	_	AlignBegin=277189|AlignEnd=277189
+9	deux	deux	_	_	_	_	_	_	AlignBegin=277189|AlignEnd=277430
+10	trois	trois	_	_	_	_	_	_	AlignBegin=277430|AlignEnd=277670
+11	heures	heures	_	_	_	_	_	_	AlignBegin=277670|AlignEnd=277911
+12	.	.	_	_	_	_	_	_	AlignBegin=277911|AlignEnd=277911
+
+# sent_id = Veronique_Jezewski.intervals.conll__48
+# text = en attendant, ils ont fait les premiers soins à Maia.
+# sound_url = Veronique_Jezewski.wav
+1	en	en	_	_	_	_	_	_	AlignBegin=278292|AlignEnd=278513
+2	attendant	attendant	_	_	_	_	_	_	AlignBegin=278513|AlignEnd=278734
+3	,	,	_	_	_	_	_	_	AlignBegin=278734|AlignEnd=278734
+4	ils	ils	_	_	_	_	_	_	AlignBegin=278734|AlignEnd=278956
+5	ont	ont	_	_	_	_	_	_	AlignBegin=278956|AlignEnd=279177
+6	fait	fait	_	_	_	_	_	_	AlignBegin=279177|AlignEnd=279398
+7	les	les	_	_	_	_	_	_	AlignBegin=279398|AlignEnd=279619
+8	premiers	premiers	_	_	_	_	_	_	AlignBegin=279619|AlignEnd=279840
+9	soins	soins	_	_	_	_	_	_	AlignBegin=279840|AlignEnd=280061
+10	à	à	_	_	_	_	_	_	AlignBegin=280061|AlignEnd=280282
+11	Maia	Maia	_	_	_	_	_	_	AlignBegin=280282|AlignEnd=280503
+12	.	.	_	_	_	_	_	_	AlignBegin=280503|AlignEnd=280503
+
+# sent_id = Veronique_Jezewski.intervals.conll__49
+# text = ils l'ont mesurée, euh, ils l'ont pesée.
+# sound_url = Veronique_Jezewski.wav
+1	ils	ils	_	_	_	_	_	_	AlignBegin=280503|AlignEnd=280852
+2	l'ont	l'ont	_	_	_	_	_	_	AlignBegin=280852|AlignEnd=281200
+3	mesurée	mesurée	_	_	_	_	_	_	AlignBegin=281200|AlignEnd=281548
+4	,	,	_	_	_	_	_	_	AlignBegin=281548|AlignEnd=281548
+5	euh	euh	_	_	_	_	_	_	AlignBegin=281548|AlignEnd=281897
+6	,	,	_	_	_	_	_	_	AlignBegin=281897|AlignEnd=281897
+7	ils	ils	_	_	_	_	_	_	AlignBegin=281897|AlignEnd=282245
+8	l'ont	l'ont	_	_	_	_	_	_	AlignBegin=282245|AlignEnd=282593
+9	pesée	pesée	_	_	_	_	_	_	AlignBegin=282593|AlignEnd=282942
+10	.	.	_	_	_	_	_	_	AlignBegin=282942|AlignEnd=282942
+

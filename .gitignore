@@ -4,13 +4,9 @@ auth_config.py
 
 # scrap
 z_sandbox/
-app/klang/data_dev
-app/klang/data_test
 
 # databases
 app/*.sqlite
-app/klang/data_dev
-app/klang/data_test
 
 .idea/
 *.pyc
@@ -135,3 +131,5 @@ misc/
 .Rproj.user
 
 app/app-test.db
+
+migrations/*
