@@ -1,0 +1,613 @@
+# sent_id = Thalia_Guevara_Puzma.intervals.conll__1
+# text = donc oui, euh. donc du coup, mon père, il est parti, euh.
+# sound_url = Thalia_Guevara_Puzma.wav
+1	donc	donc	_	_	_	_	_	_	AlignBegin=0|AlignEnd=454
+2	oui	oui	_	_	_	_	_	_	AlignBegin=454|AlignEnd=909
+3	,	,	_	_	_	_	_	_	AlignBegin=909|AlignEnd=909
+4	euh	euh	_	_	_	_	_	_	AlignBegin=909|AlignEnd=1363
+5	.	.	_	_	_	_	_	_	AlignBegin=1363|AlignEnd=1363
+6	donc	donc	_	_	_	_	_	_	AlignBegin=1363|AlignEnd=1818
+7	du	du	_	_	_	_	_	_	AlignBegin=1818|AlignEnd=2272
+8	coup	coup	_	_	_	_	_	_	AlignBegin=2272|AlignEnd=2726
+9	,	,	_	_	_	_	_	_	AlignBegin=2726|AlignEnd=2726
+10	mon	mon	_	_	_	_	_	_	AlignBegin=2726|AlignEnd=3181
+11	père	père	_	_	_	_	_	_	AlignBegin=3181|AlignEnd=3635
+12	,	,	_	_	_	_	_	_	AlignBegin=3635|AlignEnd=3635
+13	il	il	_	_	_	_	_	_	AlignBegin=3635|AlignEnd=4090
+14	est	est	_	_	_	_	_	_	AlignBegin=4090|AlignEnd=4544
+15	parti	parti	_	_	_	_	_	_	AlignBegin=4544|AlignEnd=4998
+16	,	,	_	_	_	_	_	_	AlignBegin=4998|AlignEnd=4998
+17	euh	euh	_	_	_	_	_	_	AlignBegin=4998|AlignEnd=5453
+18	.	.	_	_	_	_	_	_	AlignBegin=5453|AlignEnd=5453
+
+# sent_id = Thalia_Guevara_Puzma.intervals.conll__2
+# text = après quelque temps, ma mère, elle est partie aussi.
+# sound_url = Thalia_Guevara_Puzma.wav
+1	après	après	_	_	_	_	_	_	AlignBegin=5453|AlignEnd=5700
+2	quelque	quelque	_	_	_	_	_	_	AlignBegin=5700|AlignEnd=5948
+3	temps	temps	_	_	_	_	_	_	AlignBegin=5948|AlignEnd=6195
+4	,	,	_	_	_	_	_	_	AlignBegin=6195|AlignEnd=6195
+5	ma	ma	_	_	_	_	_	_	AlignBegin=6195|AlignEnd=6442
+6	mère	mère	_	_	_	_	_	_	AlignBegin=6442|AlignEnd=6690
+7	,	,	_	_	_	_	_	_	AlignBegin=6690|AlignEnd=6690
+8	elle	elle	_	_	_	_	_	_	AlignBegin=6690|AlignEnd=6937
+9	est	est	_	_	_	_	_	_	AlignBegin=6937|AlignEnd=7185
+10	partie	partie	_	_	_	_	_	_	AlignBegin=7185|AlignEnd=7432
+11	aussi	aussi	_	_	_	_	_	_	AlignBegin=7432|AlignEnd=7679
+12	.	.	_	_	_	_	_	_	AlignBegin=7679|AlignEnd=7679
+
+# sent_id = Thalia_Guevara_Puzma.intervals.conll__3
+# text = euh, euh
+# sound_url = Thalia_Guevara_Puzma.wav
+1	euh	euh	_	_	_	_	_	_	AlignBegin=7679|AlignEnd=9285
+2	,	,	_	_	_	_	_	_	AlignBegin=9285|AlignEnd=9285
+3	euh	euh	_	_	_	_	_	_	AlignBegin=9285|AlignEnd=10890
+
+# sent_id = Thalia_Guevara_Puzma.intervals.conll__4
+# text = voilà. après quelques années, quand j'avais sept ans,
+# sound_url = Thalia_Guevara_Puzma.wav
+1	voilà	voilà	_	_	_	_	_	_	AlignBegin=10890|AlignEnd=11341
+2	.	.	_	_	_	_	_	_	AlignBegin=11341|AlignEnd=11341
+3	après	après	_	_	_	_	_	_	AlignBegin=11341|AlignEnd=11793
+4	quelques	quelques	_	_	_	_	_	_	AlignBegin=11793|AlignEnd=12244
+5	années	années	_	_	_	_	_	_	AlignBegin=12244|AlignEnd=12695
+6	,	,	_	_	_	_	_	_	AlignBegin=12695|AlignEnd=12695
+7	quand	quand	_	_	_	_	_	_	AlignBegin=12695|AlignEnd=13147
+8	j'avais	j'avais	_	_	_	_	_	_	AlignBegin=13147|AlignEnd=13598
+9	sept	sept	_	_	_	_	_	_	AlignBegin=13598|AlignEnd=14049
+10	ans	ans	_	_	_	_	_	_	AlignBegin=14049|AlignEnd=14501
+11	,	,	_	_	_	_	_	_	AlignBegin=14501|AlignEnd=14501
+
+# sent_id = Thalia_Guevara_Puzma.intervals.conll__5
+# text = euh, mon frère, il avait un an de moins.
+# sound_url = Thalia_Guevara_Puzma.wav
+1	euh	euh	_	_	_	_	_	_	AlignBegin=14501|AlignEnd=14963
+2	,	,	_	_	_	_	_	_	AlignBegin=14963|AlignEnd=14963
+3	mon	mon	_	_	_	_	_	_	AlignBegin=14963|AlignEnd=15425
+4	frère	frère	_	_	_	_	_	_	AlignBegin=15425|AlignEnd=15888
+5	,	,	_	_	_	_	_	_	AlignBegin=15888|AlignEnd=15888
+6	il	il	_	_	_	_	_	_	AlignBegin=15888|AlignEnd=16350
+7	avait	avait	_	_	_	_	_	_	AlignBegin=16350|AlignEnd=16813
+8	un	un	_	_	_	_	_	_	AlignBegin=16813|AlignEnd=17275
+9	an	an	_	_	_	_	_	_	AlignBegin=17275|AlignEnd=17737
+10	de	de	_	_	_	_	_	_	AlignBegin=17737|AlignEnd=18200
+11	moins	moins	_	_	_	_	_	_	AlignBegin=18200|AlignEnd=18662
+12	.	.	_	_	_	_	_	_	AlignBegin=18662|AlignEnd=18662
+
+# sent_id = Thalia_Guevara_Puzma.intervals.conll__6
+# text = euh, bah mon père, il était décidé à nous, nous porter, euh
+# sound_url = Thalia_Guevara_Puzma.wav
+1	euh	euh	_	_	_	_	_	_	AlignBegin=18662|AlignEnd=19263
+2	,	,	_	_	_	_	_	_	AlignBegin=19263|AlignEnd=19263
+3	bah	bah	_	_	_	_	_	_	AlignBegin=19263|AlignEnd=19864
+4	mon	mon	_	_	_	_	_	_	AlignBegin=19864|AlignEnd=20464
+5	père	père	_	_	_	_	_	_	AlignBegin=20464|AlignEnd=21065
+6	,	,	_	_	_	_	_	_	AlignBegin=21065|AlignEnd=21065
+7	il	il	_	_	_	_	_	_	AlignBegin=21065|AlignEnd=21666
+8	était	était	_	_	_	_	_	_	AlignBegin=21666|AlignEnd=22266
+9	décidé	décidé	_	_	_	_	_	_	AlignBegin=22266|AlignEnd=22867
+10	à	à	_	_	_	_	_	_	AlignBegin=22867|AlignEnd=23468
+11	nous	nous	_	_	_	_	_	_	AlignBegin=23468|AlignEnd=24069
+12	,	,	_	_	_	_	_	_	AlignBegin=24069|AlignEnd=24069
+13	nous	nous	_	_	_	_	_	_	AlignBegin=24069|AlignEnd=24669
+14	porter	porter	_	_	_	_	_	_	AlignBegin=24669|AlignEnd=25270
+15	,	,	_	_	_	_	_	_	AlignBegin=25270|AlignEnd=25270
+16	euh	euh	_	_	_	_	_	_	AlignBegin=25270|AlignEnd=25871
+
+# sent_id = Thalia_Guevara_Puzma.intervals.conll__7
+# text = et aller tous ensemble en Équateur.
+# sound_url = Thalia_Guevara_Puzma.wav
+1	et	et	_	_	_	_	_	_	AlignBegin=25871|AlignEnd=26228
+2	aller	aller	_	_	_	_	_	_	AlignBegin=26228|AlignEnd=26585
+3	tous	tous	_	_	_	_	_	_	AlignBegin=26585|AlignEnd=26941
+4	ensemble	ensemble	_	_	_	_	_	_	AlignBegin=26941|AlignEnd=27298
+5	en	en	_	_	_	_	_	_	AlignBegin=27298|AlignEnd=27655
+6	Équateur	Équateur	_	_	_	_	_	_	AlignBegin=27655|AlignEnd=28012
+7	.	.	_	_	_	_	_	_	AlignBegin=28012|AlignEnd=28012
+
+# sent_id = Thalia_Guevara_Puzma.intervals.conll__8
+# text = ma mère, elle nous attendait en Espagne.
+# sound_url = Thalia_Guevara_Puzma.wav
+1	ma	ma	_	_	_	_	_	_	AlignBegin=28012|AlignEnd=28287
+2	mère	mère	_	_	_	_	_	_	AlignBegin=28287|AlignEnd=28563
+3	,	,	_	_	_	_	_	_	AlignBegin=28563|AlignEnd=28563
+4	elle	elle	_	_	_	_	_	_	AlignBegin=28563|AlignEnd=28838
+5	nous	nous	_	_	_	_	_	_	AlignBegin=28838|AlignEnd=29113
+6	attendait	attendait	_	_	_	_	_	_	AlignBegin=29113|AlignEnd=29388
+7	en	en	_	_	_	_	_	_	AlignBegin=29388|AlignEnd=29664
+8	Espagne	Espagne	_	_	_	_	_	_	AlignBegin=29664|AlignEnd=29939
+9	.	.	_	_	_	_	_	_	AlignBegin=29939|AlignEnd=29939
+
+# sent_id = Thalia_Guevara_Puzma.intervals.conll__9
+# text = euh, mon père, bah, il est, il, il est venu à la maison.
+# sound_url = Thalia_Guevara_Puzma.wav
+1	euh	euh	_	_	_	_	_	_	AlignBegin=29939|AlignEnd=30431
+2	,	,	_	_	_	_	_	_	AlignBegin=30431|AlignEnd=30431
+3	mon	mon	_	_	_	_	_	_	AlignBegin=30431|AlignEnd=30922
+4	père	père	_	_	_	_	_	_	AlignBegin=30922|AlignEnd=31414
+5	,	,	_	_	_	_	_	_	AlignBegin=31414|AlignEnd=31414
+6	bah	bah	_	_	_	_	_	_	AlignBegin=31414|AlignEnd=31906
+7	,	,	_	_	_	_	_	_	AlignBegin=31906|AlignEnd=31906
+8	il	il	_	_	_	_	_	_	AlignBegin=31906|AlignEnd=32397
+9	est	est	_	_	_	_	_	_	AlignBegin=32397|AlignEnd=32889
+10	,	,	_	_	_	_	_	_	AlignBegin=32889|AlignEnd=32889
+11	il	il	_	_	_	_	_	_	AlignBegin=32889|AlignEnd=33381
+12	,	,	_	_	_	_	_	_	AlignBegin=33381|AlignEnd=33381
+13	il	il	_	_	_	_	_	_	AlignBegin=33381|AlignEnd=33872
+14	est	est	_	_	_	_	_	_	AlignBegin=33872|AlignEnd=34364
+15	venu	venu	_	_	_	_	_	_	AlignBegin=34364|AlignEnd=34856
+16	à	à	_	_	_	_	_	_	AlignBegin=34856|AlignEnd=35347
+17	la	la	_	_	_	_	_	_	AlignBegin=35347|AlignEnd=35839
+18	maison	maison	_	_	_	_	_	_	AlignBegin=35839|AlignEnd=36331
+19	.	.	_	_	_	_	_	_	AlignBegin=36331|AlignEnd=36331
+
+# sent_id = Thalia_Guevara_Puzma.intervals.conll__10
+# text = moi, je savais. j'avais de la conscience que c'était mon père mais, euh
+# sound_url = Thalia_Guevara_Puzma.wav
+1	moi	moi	_	_	_	_	_	_	AlignBegin=36331|AlignEnd=36634
+2	,	,	_	_	_	_	_	_	AlignBegin=36634|AlignEnd=36634
+3	je	je	_	_	_	_	_	_	AlignBegin=36634|AlignEnd=36938
+4	savais	savais	_	_	_	_	_	_	AlignBegin=36938|AlignEnd=37242
+5	.	.	_	_	_	_	_	_	AlignBegin=37242|AlignEnd=37242
+6	j'avais	j'avais	_	_	_	_	_	_	AlignBegin=37242|AlignEnd=37546
+7	de	de	_	_	_	_	_	_	AlignBegin=37546|AlignEnd=37850
+8	la	la	_	_	_	_	_	_	AlignBegin=37850|AlignEnd=38154
+9	conscience	conscience	_	_	_	_	_	_	AlignBegin=38154|AlignEnd=38458
+10	que	que	_	_	_	_	_	_	AlignBegin=38458|AlignEnd=38762
+11	c'était	c'était	_	_	_	_	_	_	AlignBegin=38762|AlignEnd=39065
+12	mon	mon	_	_	_	_	_	_	AlignBegin=39065|AlignEnd=39369
+13	père	père	_	_	_	_	_	_	AlignBegin=39369|AlignEnd=39673
+14	mais	mais	_	_	_	_	_	_	AlignBegin=39673|AlignEnd=39977
+15	,	,	_	_	_	_	_	_	AlignBegin=39977|AlignEnd=39977
+16	euh	euh	_	_	_	_	_	_	AlignBegin=39977|AlignEnd=40281
+
+# sent_id = Thalia_Guevara_Puzma.intervals.conll__11
+# text = quand même, c'était quelqu'un de,
+# sound_url = Thalia_Guevara_Puzma.wav
+1	quand	quand	_	_	_	_	_	_	AlignBegin=40281|AlignEnd=40687
+2	même	même	_	_	_	_	_	_	AlignBegin=40687|AlignEnd=41092
+3	,	,	_	_	_	_	_	_	AlignBegin=41092|AlignEnd=41092
+4	c'était	c'était	_	_	_	_	_	_	AlignBegin=41092|AlignEnd=41498
+5	quelqu'un	quelqu'un	_	_	_	_	_	_	AlignBegin=41498|AlignEnd=41904
+6	de	de	_	_	_	_	_	_	AlignBegin=41904|AlignEnd=42309
+7	,	,	_	_	_	_	_	_	AlignBegin=42309|AlignEnd=42309
+
+# sent_id = Thalia_Guevara_Puzma.intervals.conll__12
+# text = de un petit peu inconnu parce qu'on le connaissait pas trop.
+# sound_url = Thalia_Guevara_Puzma.wav
+1	de	de	_	_	_	_	_	_	AlignBegin=42309|AlignEnd=42613
+2	un	un	_	_	_	_	_	_	AlignBegin=42613|AlignEnd=42917
+3	petit	petit	_	_	_	_	_	_	AlignBegin=42917|AlignEnd=43220
+4	peu	peu	_	_	_	_	_	_	AlignBegin=43220|AlignEnd=43524
+5	inconnu	inconnu	_	_	_	_	_	_	AlignBegin=43524|AlignEnd=43828
+6	parce	parce	_	_	_	_	_	_	AlignBegin=43828|AlignEnd=44131
+7	qu'on	qu'on	_	_	_	_	_	_	AlignBegin=44131|AlignEnd=44435
+8	le	le	_	_	_	_	_	_	AlignBegin=44435|AlignEnd=44739
+9	connaissait	connaissait	_	_	_	_	_	_	AlignBegin=44739|AlignEnd=45042
+10	pas	pas	_	_	_	_	_	_	AlignBegin=45042|AlignEnd=45346
+11	trop	trop	_	_	_	_	_	_	AlignBegin=45346|AlignEnd=45650
+12	.	.	_	_	_	_	_	_	AlignBegin=45650|AlignEnd=45650
+
+# sent_id = Thalia_Guevara_Puzma.intervals.conll__13
+# text = il, il avait pas vraiment passé, euh, beaucoup de temps avec moi.
+# sound_url = Thalia_Guevara_Puzma.wav
+1	il	il	_	_	_	_	_	_	AlignBegin=45650|AlignEnd=46118
+2	,	,	_	_	_	_	_	_	AlignBegin=46118|AlignEnd=46118
+3	il	il	_	_	_	_	_	_	AlignBegin=46118|AlignEnd=46585
+4	avait	avait	_	_	_	_	_	_	AlignBegin=46585|AlignEnd=47053
+5	pas	pas	_	_	_	_	_	_	AlignBegin=47053|AlignEnd=47521
+6	vraiment	vraiment	_	_	_	_	_	_	AlignBegin=47521|AlignEnd=47988
+7	passé	passé	_	_	_	_	_	_	AlignBegin=47988|AlignEnd=48456
+8	,	,	_	_	_	_	_	_	AlignBegin=48456|AlignEnd=48456
+9	euh	euh	_	_	_	_	_	_	AlignBegin=48456|AlignEnd=48924
+10	,	,	_	_	_	_	_	_	AlignBegin=48924|AlignEnd=48924
+11	beaucoup	beaucoup	_	_	_	_	_	_	AlignBegin=48924|AlignEnd=49392
+12	de	de	_	_	_	_	_	_	AlignBegin=49392|AlignEnd=49859
+13	temps	temps	_	_	_	_	_	_	AlignBegin=49859|AlignEnd=50327
+14	avec	avec	_	_	_	_	_	_	AlignBegin=50327|AlignEnd=50795
+15	moi	moi	_	_	_	_	_	_	AlignBegin=50795|AlignEnd=51262
+16	.	.	_	_	_	_	_	_	AlignBegin=51262|AlignEnd=51262
+
+# sent_id = Thalia_Guevara_Puzma.intervals.conll__14
+# text = je me rappelle plus de, de euh, de lui quand j'étais petite.
+# sound_url = Thalia_Guevara_Puzma.wav
+1	je	je	_	_	_	_	_	_	AlignBegin=51262|AlignEnd=51646
+2	me	me	_	_	_	_	_	_	AlignBegin=51646|AlignEnd=52030
+3	rappelle	rappelle	_	_	_	_	_	_	AlignBegin=52030|AlignEnd=52413
+4	plus	plus	_	_	_	_	_	_	AlignBegin=52413|AlignEnd=52797
+5	de	de	_	_	_	_	_	_	AlignBegin=52797|AlignEnd=53181
+6	,	,	_	_	_	_	_	_	AlignBegin=53181|AlignEnd=53181
+7	de	de	_	_	_	_	_	_	AlignBegin=53181|AlignEnd=53565
+8	euh	euh	_	_	_	_	_	_	AlignBegin=53565|AlignEnd=53948
+9	,	,	_	_	_	_	_	_	AlignBegin=53948|AlignEnd=53948
+10	de	de	_	_	_	_	_	_	AlignBegin=53948|AlignEnd=54332
+11	lui	lui	_	_	_	_	_	_	AlignBegin=54332|AlignEnd=54716
+12	quand	quand	_	_	_	_	_	_	AlignBegin=54716|AlignEnd=55099
+13	j'étais	j'étais	_	_	_	_	_	_	AlignBegin=55099|AlignEnd=55483
+14	petite	petite	_	_	_	_	_	_	AlignBegin=55483|AlignEnd=55867
+15	.	.	_	_	_	_	_	_	AlignBegin=55867|AlignEnd=55867
+
+# sent_id = Thalia_Guevara_Puzma.intervals.conll__15
+# text = je me rappelle de, euh, quand j'étais avec mes, mes, mes oncles, mes cousins.
+# sound_url = Thalia_Guevara_Puzma.wav
+1	je	je	_	_	_	_	_	_	AlignBegin=55867|AlignEnd=56175
+2	me	me	_	_	_	_	_	_	AlignBegin=56175|AlignEnd=56484
+3	rappelle	rappelle	_	_	_	_	_	_	AlignBegin=56484|AlignEnd=56793
+4	de	de	_	_	_	_	_	_	AlignBegin=56793|AlignEnd=57102
+5	,	,	_	_	_	_	_	_	AlignBegin=57102|AlignEnd=57102
+6	euh	euh	_	_	_	_	_	_	AlignBegin=57102|AlignEnd=57411
+7	,	,	_	_	_	_	_	_	AlignBegin=57411|AlignEnd=57411
+8	quand	quand	_	_	_	_	_	_	AlignBegin=57411|AlignEnd=57720
+9	j'étais	j'étais	_	_	_	_	_	_	AlignBegin=57720|AlignEnd=58029
+10	avec	avec	_	_	_	_	_	_	AlignBegin=58029|AlignEnd=58338
+11	mes	mes	_	_	_	_	_	_	AlignBegin=58338|AlignEnd=58647
+12	,	,	_	_	_	_	_	_	AlignBegin=58647|AlignEnd=58647
+13	mes	mes	_	_	_	_	_	_	AlignBegin=58647|AlignEnd=58956
+14	,	,	_	_	_	_	_	_	AlignBegin=58956|AlignEnd=58956
+15	mes	mes	_	_	_	_	_	_	AlignBegin=58956|AlignEnd=59265
+16	oncles	oncles	_	_	_	_	_	_	AlignBegin=59265|AlignEnd=59574
+17	,	,	_	_	_	_	_	_	AlignBegin=59574|AlignEnd=59574
+18	mes	mes	_	_	_	_	_	_	AlignBegin=59574|AlignEnd=59882
+19	cousins	cousins	_	_	_	_	_	_	AlignBegin=59882|AlignEnd=60191
+20	.	.	_	_	_	_	_	_	AlignBegin=60191|AlignEnd=60191
+
+# sent_id = Thalia_Guevara_Puzma.intervals.conll__16
+# text = euh j'ai pas de souvenirs avec lui quand j'étais petite.
+# sound_url = Thalia_Guevara_Puzma.wav
+1	euh	euh	_	_	_	_	_	_	AlignBegin=60191|AlignEnd=60607
+2	j'ai	j'ai	_	_	_	_	_	_	AlignBegin=60607|AlignEnd=61023
+3	pas	pas	_	_	_	_	_	_	AlignBegin=61023|AlignEnd=61438
+4	de	de	_	_	_	_	_	_	AlignBegin=61438|AlignEnd=61854
+5	souvenirs	souvenirs	_	_	_	_	_	_	AlignBegin=61854|AlignEnd=62269
+6	avec	avec	_	_	_	_	_	_	AlignBegin=62269|AlignEnd=62685
+7	lui	lui	_	_	_	_	_	_	AlignBegin=62685|AlignEnd=63101
+8	quand	quand	_	_	_	_	_	_	AlignBegin=63101|AlignEnd=63516
+9	j'étais	j'étais	_	_	_	_	_	_	AlignBegin=63516|AlignEnd=63932
+10	petite	petite	_	_	_	_	_	_	AlignBegin=63932|AlignEnd=64348
+11	.	.	_	_	_	_	_	_	AlignBegin=64348|AlignEnd=64348
+
+# sent_id = Thalia_Guevara_Puzma.intervals.conll__17
+# text = euh, j'ai des souvenirs avec lui
+# sound_url = Thalia_Guevara_Puzma.wav
+1	euh	euh	_	_	_	_	_	_	AlignBegin=64348|AlignEnd=64740
+2	,	,	_	_	_	_	_	_	AlignBegin=64740|AlignEnd=64740
+3	j'ai	j'ai	_	_	_	_	_	_	AlignBegin=64740|AlignEnd=65133
+4	des	des	_	_	_	_	_	_	AlignBegin=65133|AlignEnd=65526
+5	souvenirs	souvenirs	_	_	_	_	_	_	AlignBegin=65526|AlignEnd=65919
+6	avec	avec	_	_	_	_	_	_	AlignBegin=65919|AlignEnd=66311
+7	lui	lui	_	_	_	_	_	_	AlignBegin=66311|AlignEnd=66704
+
+# sent_id = Thalia_Guevara_Puzma.intervals.conll__18
+# text = à partir de, euh, de ma nouvelle vie en Espagne.
+# sound_url = Thalia_Guevara_Puzma.wav
+1	à	à	_	_	_	_	_	_	AlignBegin=66704|AlignEnd=67014
+2	partir	partir	_	_	_	_	_	_	AlignBegin=67014|AlignEnd=67325
+3	de	de	_	_	_	_	_	_	AlignBegin=67325|AlignEnd=67635
+4	,	,	_	_	_	_	_	_	AlignBegin=67635|AlignEnd=67635
+5	euh	euh	_	_	_	_	_	_	AlignBegin=67635|AlignEnd=67945
+6	,	,	_	_	_	_	_	_	AlignBegin=67945|AlignEnd=67945
+7	de	de	_	_	_	_	_	_	AlignBegin=67945|AlignEnd=68255
+8	ma	ma	_	_	_	_	_	_	AlignBegin=68255|AlignEnd=68566
+9	nouvelle	nouvelle	_	_	_	_	_	_	AlignBegin=68566|AlignEnd=68876
+10	vie	vie	_	_	_	_	_	_	AlignBegin=68876|AlignEnd=69186
+11	en	en	_	_	_	_	_	_	AlignBegin=69186|AlignEnd=69496
+12	Espagne	Espagne	_	_	_	_	_	_	AlignBegin=69496|AlignEnd=69807
+13	.	.	_	_	_	_	_	_	AlignBegin=69807|AlignEnd=69807
+
+# sent_id = Thalia_Guevara_Puzma.intervals.conll__19
+# text = euh, voilà le jour où il est venu, euh, en Équateur, euh
+# sound_url = Thalia_Guevara_Puzma.wav
+1	euh	euh	_	_	_	_	_	_	AlignBegin=69807|AlignEnd=70417
+2	,	,	_	_	_	_	_	_	AlignBegin=70417|AlignEnd=70417
+3	voilà	voilà	_	_	_	_	_	_	AlignBegin=70417|AlignEnd=71028
+4	le	le	_	_	_	_	_	_	AlignBegin=71028|AlignEnd=71638
+5	jour	jour	_	_	_	_	_	_	AlignBegin=71638|AlignEnd=72249
+6	où	où	_	_	_	_	_	_	AlignBegin=72249|AlignEnd=72859
+7	il	il	_	_	_	_	_	_	AlignBegin=72859|AlignEnd=73470
+8	est	est	_	_	_	_	_	_	AlignBegin=73470|AlignEnd=74080
+9	venu	venu	_	_	_	_	_	_	AlignBegin=74080|AlignEnd=74691
+10	,	,	_	_	_	_	_	_	AlignBegin=74691|AlignEnd=74691
+11	euh	euh	_	_	_	_	_	_	AlignBegin=74691|AlignEnd=75301
+12	,	,	_	_	_	_	_	_	AlignBegin=75301|AlignEnd=75301
+13	en	en	_	_	_	_	_	_	AlignBegin=75301|AlignEnd=75912
+14	Équateur	Équateur	_	_	_	_	_	_	AlignBegin=75912|AlignEnd=76522
+15	,	,	_	_	_	_	_	_	AlignBegin=76522|AlignEnd=76522
+16	euh	euh	_	_	_	_	_	_	AlignBegin=76522|AlignEnd=77133
+
+# sent_id = Thalia_Guevara_Puzma.intervals.conll__20
+# text = bah je savais j'étais consciente
+# sound_url = Thalia_Guevara_Puzma.wav
+1	bah	bah	_	_	_	_	_	_	AlignBegin=77133|AlignEnd=77666
+2	je	je	_	_	_	_	_	_	AlignBegin=77666|AlignEnd=78200
+3	savais	savais	_	_	_	_	_	_	AlignBegin=78200|AlignEnd=78734
+4	j'étais	j'étais	_	_	_	_	_	_	AlignBegin=78734|AlignEnd=79268
+5	consciente	consciente	_	_	_	_	_	_	AlignBegin=79268|AlignEnd=79801
+
+# sent_id = Thalia_Guevara_Puzma.intervals.conll__21
+# text = mais mon, mon frère, il savait pas parce que il était plus petit que moi, il savait pas vraiment
+# sound_url = Thalia_Guevara_Puzma.wav
+1	mais	mais	_	_	_	_	_	_	AlignBegin=79801|AlignEnd=80144
+2	mon	mon	_	_	_	_	_	_	AlignBegin=80144|AlignEnd=80487
+3	,	,	_	_	_	_	_	_	AlignBegin=80487|AlignEnd=80487
+4	mon	mon	_	_	_	_	_	_	AlignBegin=80487|AlignEnd=80830
+5	frère	frère	_	_	_	_	_	_	AlignBegin=80830|AlignEnd=81172
+6	,	,	_	_	_	_	_	_	AlignBegin=81172|AlignEnd=81172
+7	il	il	_	_	_	_	_	_	AlignBegin=81172|AlignEnd=81515
+8	savait	savait	_	_	_	_	_	_	AlignBegin=81515|AlignEnd=81858
+9	pas	pas	_	_	_	_	_	_	AlignBegin=81858|AlignEnd=82201
+10	parce	parce	_	_	_	_	_	_	AlignBegin=82201|AlignEnd=82543
+11	que	que	_	_	_	_	_	_	AlignBegin=82543|AlignEnd=82886
+12	il	il	_	_	_	_	_	_	AlignBegin=82886|AlignEnd=83229
+13	était	était	_	_	_	_	_	_	AlignBegin=83229|AlignEnd=83572
+14	plus	plus	_	_	_	_	_	_	AlignBegin=83572|AlignEnd=83914
+15	petit	petit	_	_	_	_	_	_	AlignBegin=83914|AlignEnd=84257
+16	que	que	_	_	_	_	_	_	AlignBegin=84257|AlignEnd=84600
+17	moi	moi	_	_	_	_	_	_	AlignBegin=84600|AlignEnd=84943
+18	,	,	_	_	_	_	_	_	AlignBegin=84943|AlignEnd=84943
+19	il	il	_	_	_	_	_	_	AlignBegin=84943|AlignEnd=85285
+20	savait	savait	_	_	_	_	_	_	AlignBegin=85285|AlignEnd=85628
+21	pas	pas	_	_	_	_	_	_	AlignBegin=85628|AlignEnd=85971
+22	vraiment	vraiment	_	_	_	_	_	_	AlignBegin=85971|AlignEnd=86314
+
+# sent_id = Thalia_Guevara_Puzma.intervals.conll__22
+# text = qui, euh, c'était mon père.
+# sound_url = Thalia_Guevara_Puzma.wav
+1	qui	qui	_	_	_	_	_	_	AlignBegin=86314|AlignEnd=87174
+2	,	,	_	_	_	_	_	_	AlignBegin=87174|AlignEnd=87174
+3	euh	euh	_	_	_	_	_	_	AlignBegin=87174|AlignEnd=88035
+4	,	,	_	_	_	_	_	_	AlignBegin=88035|AlignEnd=88035
+5	c'était	c'était	_	_	_	_	_	_	AlignBegin=88035|AlignEnd=88895
+6	mon	mon	_	_	_	_	_	_	AlignBegin=88895|AlignEnd=89756
+7	père	père	_	_	_	_	_	_	AlignBegin=89756|AlignEnd=90617
+8	.	.	_	_	_	_	_	_	AlignBegin=90617|AlignEnd=90617
+
+# sent_id = Thalia_Guevara_Puzma.intervals.conll__23
+# text = euh pour lui c'était un inconnu, donc, euh, il se cachait
+# sound_url = Thalia_Guevara_Puzma.wav
+1	euh	euh	_	_	_	_	_	_	AlignBegin=90617|AlignEnd=91203
+2	pour	pour	_	_	_	_	_	_	AlignBegin=91203|AlignEnd=91790
+3	lui	lui	_	_	_	_	_	_	AlignBegin=91790|AlignEnd=92377
+4	c'était	c'était	_	_	_	_	_	_	AlignBegin=92377|AlignEnd=92963
+5	un	un	_	_	_	_	_	_	AlignBegin=92963|AlignEnd=93550
+6	inconnu	inconnu	_	_	_	_	_	_	AlignBegin=93550|AlignEnd=94137
+7	,	,	_	_	_	_	_	_	AlignBegin=94137|AlignEnd=94137
+8	donc	donc	_	_	_	_	_	_	AlignBegin=94137|AlignEnd=94724
+9	,	,	_	_	_	_	_	_	AlignBegin=94724|AlignEnd=94724
+10	euh	euh	_	_	_	_	_	_	AlignBegin=94724|AlignEnd=95310
+11	,	,	_	_	_	_	_	_	AlignBegin=95310|AlignEnd=95310
+12	il	il	_	_	_	_	_	_	AlignBegin=95310|AlignEnd=95897
+13	se	se	_	_	_	_	_	_	AlignBegin=95897|AlignEnd=96484
+14	cachait	cachait	_	_	_	_	_	_	AlignBegin=96484|AlignEnd=97071
+
+# sent_id = Thalia_Guevara_Puzma.intervals.conll__24
+# text = au dessous du lit pour, pour que mon père il
+# sound_url = Thalia_Guevara_Puzma.wav
+1	au	au	_	_	_	_	_	_	AlignBegin=97071|AlignEnd=97681
+2	dessous	dessous	_	_	_	_	_	_	AlignBegin=97681|AlignEnd=98292
+3	du	du	_	_	_	_	_	_	AlignBegin=98292|AlignEnd=98902
+4	lit	lit	_	_	_	_	_	_	AlignBegin=98902|AlignEnd=99513
+5	pour	pour	_	_	_	_	_	_	AlignBegin=99513|AlignEnd=100123
+6	,	,	_	_	_	_	_	_	AlignBegin=100123|AlignEnd=100123
+7	pour	pour	_	_	_	_	_	_	AlignBegin=100123|AlignEnd=100734
+8	que	que	_	_	_	_	_	_	AlignBegin=100734|AlignEnd=101344
+9	mon	mon	_	_	_	_	_	_	AlignBegin=101344|AlignEnd=101955
+10	père	père	_	_	_	_	_	_	AlignBegin=101955|AlignEnd=102566
+11	il	il	_	_	_	_	_	_	AlignBegin=102566|AlignEnd=103176
+
+# sent_id = Thalia_Guevara_Puzma.intervals.conll__25
+# text = il part pas avec nous.
+# sound_url = Thalia_Guevara_Puzma.wav
+1	il	il	_	_	_	_	_	_	AlignBegin=103176|AlignEnd=103619
+2	part	part	_	_	_	_	_	_	AlignBegin=103619|AlignEnd=104062
+3	pas	pas	_	_	_	_	_	_	AlignBegin=104062|AlignEnd=104505
+4	avec	avec	_	_	_	_	_	_	AlignBegin=104505|AlignEnd=104949
+5	nous	nous	_	_	_	_	_	_	AlignBegin=104949|AlignEnd=105392
+6	.	.	_	_	_	_	_	_	AlignBegin=105392|AlignEnd=105392
+
+# sent_id = Thalia_Guevara_Puzma.intervals.conll__26
+# text = euh, Il était timide. nous, on était toujours timides.
+# sound_url = Thalia_Guevara_Puzma.wav
+1	euh	euh	_	_	_	_	_	_	AlignBegin=107559|AlignEnd=108032
+2	,	,	_	_	_	_	_	_	AlignBegin=108032|AlignEnd=108032
+3	Il	Il	_	_	_	_	_	_	AlignBegin=108032|AlignEnd=108505
+4	était	était	_	_	_	_	_	_	AlignBegin=108505|AlignEnd=108978
+5	timide	timide	_	_	_	_	_	_	AlignBegin=108978|AlignEnd=109450
+6	.	.	_	_	_	_	_	_	AlignBegin=109450|AlignEnd=109450
+7	nous	nous	_	_	_	_	_	_	AlignBegin=109450|AlignEnd=109923
+8	,	,	_	_	_	_	_	_	AlignBegin=109923|AlignEnd=109923
+9	on	on	_	_	_	_	_	_	AlignBegin=109923|AlignEnd=110396
+10	était	était	_	_	_	_	_	_	AlignBegin=110396|AlignEnd=110869
+11	toujours	toujours	_	_	_	_	_	_	AlignBegin=110869|AlignEnd=111342
+12	timides	timides	_	_	_	_	_	_	AlignBegin=111342|AlignEnd=111815
+13	.	.	_	_	_	_	_	_	AlignBegin=111815|AlignEnd=111815
+
+# sent_id = Thalia_Guevara_Puzma.intervals.conll__27
+# text = il é~, il a pas mal réagi mais il était triste
+# sound_url = Thalia_Guevara_Puzma.wav
+1	il	il	_	_	_	_	_	_	AlignBegin=111815|AlignEnd=112123
+2	é~	é~	_	_	_	_	_	_	AlignBegin=112123|AlignEnd=112431
+3	,	,	_	_	_	_	_	_	AlignBegin=112431|AlignEnd=112431
+4	il	il	_	_	_	_	_	_	AlignBegin=112431|AlignEnd=112739
+5	a	a	_	_	_	_	_	_	AlignBegin=112739|AlignEnd=113047
+6	pas	pas	_	_	_	_	_	_	AlignBegin=113047|AlignEnd=113355
+7	mal	mal	_	_	_	_	_	_	AlignBegin=113355|AlignEnd=113663
+8	réagi	réagi	_	_	_	_	_	_	AlignBegin=113663|AlignEnd=113970
+9	mais	mais	_	_	_	_	_	_	AlignBegin=113970|AlignEnd=114278
+10	il	il	_	_	_	_	_	_	AlignBegin=114278|AlignEnd=114586
+11	était	était	_	_	_	_	_	_	AlignBegin=114586|AlignEnd=114894
+12	triste	triste	_	_	_	_	_	_	AlignBegin=114894|AlignEnd=115202
+
+# sent_id = Thalia_Guevara_Puzma.intervals.conll__28
+# text = parce qu'il voulait pas quitter, euh, sa maison, ses parents, sa vie...
+# sound_url = Thalia_Guevara_Puzma.wav
+1	parce	parce	_	_	_	_	_	_	AlignBegin=115202|AlignEnd=115745
+2	qu'il	qu'il	_	_	_	_	_	_	AlignBegin=115745|AlignEnd=116288
+3	voulait	voulait	_	_	_	_	_	_	AlignBegin=116288|AlignEnd=116831
+4	pas	pas	_	_	_	_	_	_	AlignBegin=116831|AlignEnd=117374
+5	quitter	quitter	_	_	_	_	_	_	AlignBegin=117374|AlignEnd=117917
+6	,	,	_	_	_	_	_	_	AlignBegin=117917|AlignEnd=117917
+7	euh	euh	_	_	_	_	_	_	AlignBegin=117917|AlignEnd=118460
+8	,	,	_	_	_	_	_	_	AlignBegin=118460|AlignEnd=118460
+9	sa	sa	_	_	_	_	_	_	AlignBegin=118460|AlignEnd=119004
+10	maison	maison	_	_	_	_	_	_	AlignBegin=119004|AlignEnd=119547
+11	,	,	_	_	_	_	_	_	AlignBegin=119547|AlignEnd=119547
+12	ses	ses	_	_	_	_	_	_	AlignBegin=119547|AlignEnd=120090
+13	parents	parents	_	_	_	_	_	_	AlignBegin=120090|AlignEnd=120633
+14	,	,	_	_	_	_	_	_	AlignBegin=120633|AlignEnd=120633
+15	sa	sa	_	_	_	_	_	_	AlignBegin=120633|AlignEnd=121176
+16	vie	vie	_	_	_	_	_	_	AlignBegin=121176|AlignEnd=121719
+17	...	...	_	_	_	_	_	_	AlignBegin=121719|AlignEnd=121719
+
+# sent_id = Thalia_Guevara_Puzma.intervals.conll__29
+# text = mais il comprennait pas trop, bah c'est normal il était petit.
+# sound_url = Thalia_Guevara_Puzma.wav
+1	mais	mais	_	_	_	_	_	_	AlignBegin=121719|AlignEnd=122070
+2	il	il	_	_	_	_	_	_	AlignBegin=122070|AlignEnd=122422
+3	comprennait	comprennait	_	_	_	_	_	_	AlignBegin=122422|AlignEnd=122774
+4	pas	pas	_	_	_	_	_	_	AlignBegin=122774|AlignEnd=123126
+5	trop	trop	_	_	_	_	_	_	AlignBegin=123126|AlignEnd=123478
+6	,	,	_	_	_	_	_	_	AlignBegin=123478|AlignEnd=123478
+7	bah	bah	_	_	_	_	_	_	AlignBegin=123478|AlignEnd=123830
+8	c'est	c'est	_	_	_	_	_	_	AlignBegin=123830|AlignEnd=124181
+9	normal	normal	_	_	_	_	_	_	AlignBegin=124181|AlignEnd=124533
+10	il	il	_	_	_	_	_	_	AlignBegin=124533|AlignEnd=124885
+11	était	était	_	_	_	_	_	_	AlignBegin=124885|AlignEnd=125237
+12	petit	petit	_	_	_	_	_	_	AlignBegin=125237|AlignEnd=125589
+13	.	.	_	_	_	_	_	_	AlignBegin=125589|AlignEnd=125589
+
+# sent_id = Thalia_Guevara_Puzma.intervals.conll__30
+# text = il se rappelle pas beaucoup mais voilà, on est partis, euh,
+# sound_url = Thalia_Guevara_Puzma.wav
+1	il	il	_	_	_	_	_	_	AlignBegin=125589|AlignEnd=126262
+2	se	se	_	_	_	_	_	_	AlignBegin=126262|AlignEnd=126935
+3	rappelle	rappelle	_	_	_	_	_	_	AlignBegin=126935|AlignEnd=127609
+4	pas	pas	_	_	_	_	_	_	AlignBegin=127609|AlignEnd=128282
+5	beaucoup	beaucoup	_	_	_	_	_	_	AlignBegin=128282|AlignEnd=128956
+6	mais	mais	_	_	_	_	_	_	AlignBegin=128956|AlignEnd=129629
+7	voilà	voilà	_	_	_	_	_	_	AlignBegin=129629|AlignEnd=130302
+8	,	,	_	_	_	_	_	_	AlignBegin=130302|AlignEnd=130302
+9	on	on	_	_	_	_	_	_	AlignBegin=130302|AlignEnd=130976
+10	est	est	_	_	_	_	_	_	AlignBegin=130976|AlignEnd=131649
+11	partis	partis	_	_	_	_	_	_	AlignBegin=131649|AlignEnd=132323
+12	,	,	_	_	_	_	_	_	AlignBegin=132323|AlignEnd=132323
+13	euh	euh	_	_	_	_	_	_	AlignBegin=132323|AlignEnd=132996
+14	,	,	_	_	_	_	_	_	AlignBegin=132996|AlignEnd=132996
+
+# sent_id = Thalia_Guevara_Puzma.intervals.conll__31
+# text = on est partis avec mon père mais~, euh
+# sound_url = Thalia_Guevara_Puzma.wav
+1	on	on	_	_	_	_	_	_	AlignBegin=132996|AlignEnd=133293
+2	est	est	_	_	_	_	_	_	AlignBegin=133293|AlignEnd=133589
+3	partis	partis	_	_	_	_	_	_	AlignBegin=133589|AlignEnd=133886
+4	avec	avec	_	_	_	_	_	_	AlignBegin=133886|AlignEnd=134183
+5	mon	mon	_	_	_	_	_	_	AlignBegin=134183|AlignEnd=134479
+6	père	père	_	_	_	_	_	_	AlignBegin=134479|AlignEnd=134776
+7	mais~	mais~	_	_	_	_	_	_	AlignBegin=134776|AlignEnd=135073
+8	,	,	_	_	_	_	_	_	AlignBegin=135073|AlignEnd=135073
+9	euh	euh	_	_	_	_	_	_	AlignBegin=135073|AlignEnd=135369
+
+# sent_id = Thalia_Guevara_Puzma.intervals.conll__32
+# text = et après quand,
+# sound_url = Thalia_Guevara_Puzma.wav
+1	et	et	_	_	_	_	_	_	AlignBegin=135369|AlignEnd=135918
+2	après	après	_	_	_	_	_	_	AlignBegin=135918|AlignEnd=136466
+3	quand	quand	_	_	_	_	_	_	AlignBegin=136466|AlignEnd=137015
+4	,	,	_	_	_	_	_	_	AlignBegin=137015|AlignEnd=137015
+
+# sent_id = Thalia_Guevara_Puzma.intervals.conll__33
+# text = quand on est arrivés en Espagne, on a rencontré ma, euh, ma mère.
+# sound_url = Thalia_Guevara_Puzma.wav
+1	quand	quand	_	_	_	_	_	_	AlignBegin=137015|AlignEnd=137351
+2	on	on	_	_	_	_	_	_	AlignBegin=137351|AlignEnd=137687
+3	est	est	_	_	_	_	_	_	AlignBegin=137687|AlignEnd=138024
+4	arrivés	arrivés	_	_	_	_	_	_	AlignBegin=138024|AlignEnd=138360
+5	en	en	_	_	_	_	_	_	AlignBegin=138360|AlignEnd=138696
+6	Espagne	Espagne	_	_	_	_	_	_	AlignBegin=138696|AlignEnd=139033
+7	,	,	_	_	_	_	_	_	AlignBegin=139033|AlignEnd=139033
+8	on	on	_	_	_	_	_	_	AlignBegin=139033|AlignEnd=139369
+9	a	a	_	_	_	_	_	_	AlignBegin=139369|AlignEnd=139705
+10	rencontré	rencontré	_	_	_	_	_	_	AlignBegin=139705|AlignEnd=140042
+11	ma	ma	_	_	_	_	_	_	AlignBegin=140042|AlignEnd=140378
+12	,	,	_	_	_	_	_	_	AlignBegin=140378|AlignEnd=140378
+13	euh	euh	_	_	_	_	_	_	AlignBegin=140378|AlignEnd=140714
+14	,	,	_	_	_	_	_	_	AlignBegin=140714|AlignEnd=140714
+15	ma	ma	_	_	_	_	_	_	AlignBegin=140714|AlignEnd=141051
+16	mère	mère	_	_	_	_	_	_	AlignBegin=141051|AlignEnd=141387
+17	.	.	_	_	_	_	_	_	AlignBegin=141387|AlignEnd=141387
+
+# sent_id = Thalia_Guevara_Puzma.intervals.conll__34
+# text = elle était là comme si, euh,
+# sound_url = Thalia_Guevara_Puzma.wav
+1	elle	elle	_	_	_	_	_	_	AlignBegin=141387|AlignEnd=141905
+2	était	était	_	_	_	_	_	_	AlignBegin=141905|AlignEnd=142422
+3	là	là	_	_	_	_	_	_	AlignBegin=142422|AlignEnd=142939
+4	comme	comme	_	_	_	_	_	_	AlignBegin=142939|AlignEnd=143457
+5	si	si	_	_	_	_	_	_	AlignBegin=143457|AlignEnd=143974
+6	,	,	_	_	_	_	_	_	AlignBegin=143974|AlignEnd=143974
+7	euh	euh	_	_	_	_	_	_	AlignBegin=143974|AlignEnd=144491
+8	,	,	_	_	_	_	_	_	AlignBegin=144491|AlignEnd=144491
+
+# sent_id = Thalia_Guevara_Puzma.intervals.conll__35
+# text = comme si c'était un inconnu aussi parce que,
+# sound_url = Thalia_Guevara_Puzma.wav
+1	comme	comme	_	_	_	_	_	_	AlignBegin=144491|AlignEnd=144883
+2	si	si	_	_	_	_	_	_	AlignBegin=144883|AlignEnd=145274
+3	c'était	c'était	_	_	_	_	_	_	AlignBegin=145274|AlignEnd=145666
+4	un	un	_	_	_	_	_	_	AlignBegin=145666|AlignEnd=146057
+5	inconnu	inconnu	_	_	_	_	_	_	AlignBegin=146057|AlignEnd=146449
+6	aussi	aussi	_	_	_	_	_	_	AlignBegin=146449|AlignEnd=146840
+7	parce	parce	_	_	_	_	_	_	AlignBegin=146840|AlignEnd=147232
+8	que	que	_	_	_	_	_	_	AlignBegin=147232|AlignEnd=147623
+9	,	,	_	_	_	_	_	_	AlignBegin=147623|AlignEnd=147623
+
+# sent_id = Thalia_Guevara_Puzma.intervals.conll__36
+# text = on l'avait pas vu ça fait longtemps
+# sound_url = Thalia_Guevara_Puzma.wav
+1	on	on	_	_	_	_	_	_	AlignBegin=147623|AlignEnd=147989
+2	l'avait	l'avait	_	_	_	_	_	_	AlignBegin=147989|AlignEnd=148356
+3	pas	pas	_	_	_	_	_	_	AlignBegin=148356|AlignEnd=148722
+4	vu	vu	_	_	_	_	_	_	AlignBegin=148722|AlignEnd=149088
+5	ça	ça	_	_	_	_	_	_	AlignBegin=149088|AlignEnd=149454
+6	fait	fait	_	_	_	_	_	_	AlignBegin=149454|AlignEnd=149821
+7	longtemps	longtemps	_	_	_	_	_	_	AlignBegin=149821|AlignEnd=150187
+
+# sent_id = Thalia_Guevara_Puzma.intervals.conll__37
+# text = euh bah ça, ça, ça, ça s'apprend avec la vie, c'est avec le temps
+# sound_url = Thalia_Guevara_Puzma.wav
+1	euh	euh	_	_	_	_	_	_	AlignBegin=159154|AlignEnd=159563
+2	bah	bah	_	_	_	_	_	_	AlignBegin=159563|AlignEnd=159973
+3	ça	ça	_	_	_	_	_	_	AlignBegin=159973|AlignEnd=160382
+4	,	,	_	_	_	_	_	_	AlignBegin=160382|AlignEnd=160382
+5	ça	ça	_	_	_	_	_	_	AlignBegin=160382|AlignEnd=160792
+6	,	,	_	_	_	_	_	_	AlignBegin=160792|AlignEnd=160792
+7	ça	ça	_	_	_	_	_	_	AlignBegin=160792|AlignEnd=161202
+8	,	,	_	_	_	_	_	_	AlignBegin=161202|AlignEnd=161202
+9	ça	ça	_	_	_	_	_	_	AlignBegin=161202|AlignEnd=161611
+10	s'apprend	s'apprend	_	_	_	_	_	_	AlignBegin=161611|AlignEnd=162021
+11	avec	avec	_	_	_	_	_	_	AlignBegin=162021|AlignEnd=162431
+12	la	la	_	_	_	_	_	_	AlignBegin=162431|AlignEnd=162840
+13	vie	vie	_	_	_	_	_	_	AlignBegin=162840|AlignEnd=163250
+14	,	,	_	_	_	_	_	_	AlignBegin=163250|AlignEnd=163250
+15	c'est	c'est	_	_	_	_	_	_	AlignBegin=163250|AlignEnd=163659
+16	avec	avec	_	_	_	_	_	_	AlignBegin=163659|AlignEnd=164069
+17	le	le	_	_	_	_	_	_	AlignBegin=164069|AlignEnd=164479
+18	temps	temps	_	_	_	_	_	_	AlignBegin=164479|AlignEnd=164888
+
+# sent_id = Thalia_Guevara_Puzma.intervals.conll__38
+# text = avec euh, ouais, ça s'apprend, c'est comme ça, euh.
+# sound_url = Thalia_Guevara_Puzma.wav
+1	avec	avec	_	_	_	_	_	_	AlignBegin=164888|AlignEnd=165814
+2	euh	euh	_	_	_	_	_	_	AlignBegin=165814|AlignEnd=166740
+3	,	,	_	_	_	_	_	_	AlignBegin=166740|AlignEnd=166740
+4	ouais	ouais	_	_	_	_	_	_	AlignBegin=166740|AlignEnd=167666
+5	,	,	_	_	_	_	_	_	AlignBegin=167666|AlignEnd=167666
+6	ça	ça	_	_	_	_	_	_	AlignBegin=167666|AlignEnd=168593
+7	s'apprend	s'apprend	_	_	_	_	_	_	AlignBegin=168593|AlignEnd=169519
+8	,	,	_	_	_	_	_	_	AlignBegin=169519|AlignEnd=169519
+9	c'est	c'est	_	_	_	_	_	_	AlignBegin=169519|AlignEnd=170445
+10	comme	comme	_	_	_	_	_	_	AlignBegin=170445|AlignEnd=171371
+11	ça	ça	_	_	_	_	_	_	AlignBegin=171371|AlignEnd=172297
+12	,	,	_	_	_	_	_	_	AlignBegin=172297|AlignEnd=172297
+13	euh	euh	_	_	_	_	_	_	AlignBegin=172297|AlignEnd=173223
+14	.	.	_	_	_	_	_	_	AlignBegin=173223|AlignEnd=173223
+

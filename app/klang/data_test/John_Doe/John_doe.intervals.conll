@@ -1,0 +1,5 @@
+# sent_id = John_Doe.intervals.conll__1
+# text = it is
+# sound_url = John_Doe.wav
+1	it	it	_	_	_	_	_	_	AlignBegin=100|AlignEnd=500
+2	is	is	_	_	_	_	_	_	AlignBegin=600|AlignEnd=1000
