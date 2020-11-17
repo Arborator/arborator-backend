@@ -57,7 +57,8 @@ class SampleTreesResource(Resource):
             username = "anonymous"
             if current_user.is_authenticated:
                 username = current_user.username
-                sample_trees = add_user_tree(sample_trees, username)
+                if project_access <= 1:
+                    sample_trees = add_user_tree(sample_trees, username)
 
             if project_access <= 1:
                 restricted_users = [BASE_TREE, TEACHER, username]
