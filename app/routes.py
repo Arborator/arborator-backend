@@ -5,6 +5,7 @@ def register_routes(api, app, root="api"):
     from app.trees import register_routes as attach_trees
     from app.lexicon import register_routes as attach_lexicon
     from app.grew import register_routes as attach_grew
+    from app.klang import register_routes as attach_klang
 
     # Add routes
     attach_user(api, app, root)
@@ -13,3 +14,4 @@ def register_routes(api, app, root="api"):
     attach_trees(api, app, root)
     attach_lexicon(api, app, root)
     attach_grew(api, app, root)
+    attach_klang(api, app, root)
