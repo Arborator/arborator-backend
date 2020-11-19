@@ -10,7 +10,7 @@ Before starting to dive deep in the code, you should refer to these following im
 ## Setting the environment config
 Create a .flaskenv file with the following config 
 ```
-FLASK_ENV=env|prod|test
+FLASK_ENV=dev|prod|test
 ```
 
 
