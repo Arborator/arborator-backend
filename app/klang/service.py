@@ -76,18 +76,26 @@ class ConllService:
         return sentences_audio_token
 
     @staticmethod
-    def get_transcription(user_name, conll_name, original_trans):
-        trans = []
-        was_saved = False
+    def get_transcription(user_name, conll_name):
+        result = {
+            'transcription': [],
+        }
         try:
             record = Transcription.query.filter_by(
                     user = user_name, 
                     mp3 = conll_name).one()
             trans = json.loads(record.transcription)
+            result['transcription'] = trans
+            result['sound'] = record.sound
+            result['story'] = record.story
+            result['accent'] = record.accent
+            result['monodia'] = record.monodia
+            result['title'] = record.title
             pass
         except exc.SQLAlchemyError:
+            print(sys.exc_info()[0])
             pass
-        return trans
+        return result
 
     @staticmethod
     def get_users_list(is_admin):
@@ -99,7 +107,7 @@ class ConllService:
         return users
     
     @staticmethod
-    def save_transcription(conll_name, transcription):
+    def save_transcription(conll_name, transcription, sound, story, accent, monodia, title):
         user_name = current_user.username
         try:
             Transcription.query.filter_by(
@@ -110,7 +118,13 @@ class ConllService:
             record = Transcription(
                 user = user_name, 
                 mp3 = conll_name, 
-                transcription = trans_str)
+                transcription = trans_str,
+                sound = sound,
+                story = story,
+                accent = accent,
+                monodia = monodia,
+                title = title
+            )
             db.session.add(record)
             db.session.commit()
             pass
