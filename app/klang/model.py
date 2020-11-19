@@ -11,6 +11,6 @@ class Transcription(db.Model):
     # mp3 = models.CharField(max_length = 100)
     # transcription = models.TextField()
     id = Column(Integer, primary_key=True)
-    user = Column(String(100), unique=True, nullable=False)
-    mp3 = Column(String(100), unique=True, nullable=False)
+    user = Column(String(100), nullable=False)
+    mp3 = Column(String(100), nullable=False)
     transcription = Column(TEXT)

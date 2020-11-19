@@ -18,9 +18,6 @@ class ConllServiceResource(Resource):
     "ConllService"
 
     def get(self):
-        # check if the user is logged in
-        if not current_user.is_authenticated:  
-            return current_app.login_manager.unauthorized()
         return ConllService.get_all()
 
 
@@ -29,9 +26,6 @@ class ConllNameServiceResource(Resource):
     "ConllService"
 
     def get(self, conll_name):
-        # check if the user is logged in
-        if not current_user.is_authenticated:  
-            return current_app.login_manager.unauthorized()
         conll_string = ConllService.get_by_name(conll_name)
         sentences_string = ConllService.seperate_conll_sentences(conll_string)
         sentences_audio_token = []
@@ -52,6 +46,9 @@ class ConllNameServiceResource(Resource):
         return response
 
     def post(self, conll_name):
+        # check if the user is logged in
+        if not current_user.is_authenticated:  
+            return current_app.login_manager.unauthorized()
         data = request.get_json()
         transcription = data['transcription']
         if not transcription:

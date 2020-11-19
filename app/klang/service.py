@@ -5,6 +5,7 @@ from sqlalchemy import exc
 import sys
 import json
 from flask import abort
+import time
 
 from app import klang_config, db
 from .model import Transcription
@@ -77,6 +78,7 @@ class ConllService:
     @staticmethod
     def get_transcription(user_name, conll_name, original_trans):
         trans = []
+        was_saved = False
         try:
             record = Transcription.query.filter_by(
                     user = user_name, 
@@ -84,8 +86,6 @@ class ConllService:
             trans = json.loads(record.transcription)
             pass
         except exc.SQLAlchemyError:
-            for line in original_trans:
-                trans.append([word[0] for word in line])
             pass
         return trans
 
@@ -94,7 +94,7 @@ class ConllService:
         users = []
         if is_admin == 'true':
             users = [x.username for x in User.query.all()]
-        else:
+        elif current_user.is_authenticated:
             users = [current_user.username]
         return users
     
@@ -107,7 +107,6 @@ class ConllService:
                 mp3 = conll_name
             ).delete(synchronize_session = False)
             trans_str = json.dumps(transcription)
-            print(transcription)
             record = Transcription(
                 user = user_name, 
                 mp3 = conll_name, 
@@ -117,5 +116,6 @@ class ConllService:
             pass
         except:
             print(sys.exc_info()[0])
+            db.session.rollback()
             abort(400)
             pass
