@@ -270,7 +270,7 @@ def conll2tree(conllstring):
 	return tree
 
 
-def conllFile2trees(path, encoding="utf-8"):
+def conllFile2trees(path :str, encoding="utf-8"):
 	trees=[]
 	with open(path) as f:
 		conlltext=""

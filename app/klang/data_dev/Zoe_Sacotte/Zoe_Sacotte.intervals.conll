@@ -1,0 +1,810 @@
+# sent_id = Zoe_Sacotte.intervals.conll__1
+# text = Mais euh, quand tu l'as rencontré François, c'était comment ?
+# sound_url = Zoe_Sacotte.wav
+1	Mais	Mais	_	_	_	_	_	_	AlignBegin=770|AlignEnd=1024
+2	euh	euh	_	_	_	_	_	_	AlignBegin=1024|AlignEnd=1277
+3	,	,	_	_	_	_	_	_	AlignBegin=1277|AlignEnd=1277
+4	quand	quand	_	_	_	_	_	_	AlignBegin=1277|AlignEnd=1530
+5	tu	tu	_	_	_	_	_	_	AlignBegin=1530|AlignEnd=1783
+6	l'as	l'as	_	_	_	_	_	_	AlignBegin=1783|AlignEnd=2037
+7	rencontré	rencontré	_	_	_	_	_	_	AlignBegin=2037|AlignEnd=2290
+8	François	François	_	_	_	_	_	_	AlignBegin=2290|AlignEnd=2543
+9	,	,	_	_	_	_	_	_	AlignBegin=2543|AlignEnd=2543
+10	c'était	c'était	_	_	_	_	_	_	AlignBegin=2543|AlignEnd=2797
+11	comment	comment	_	_	_	_	_	_	AlignBegin=2797|AlignEnd=3050
+12	?	?	_	_	_	_	_	_	AlignBegin=3050|AlignEnd=3050
+
+# sent_id = Zoe_Sacotte.intervals.conll__2
+# text = C'était un peu tendu ou ça allait ?
+# sound_url = Zoe_Sacotte.wav
+1	C'était	C'était	_	_	_	_	_	_	AlignBegin=3050|AlignEnd=3211
+2	un	un	_	_	_	_	_	_	AlignBegin=3211|AlignEnd=3372
+3	peu	peu	_	_	_	_	_	_	AlignBegin=3372|AlignEnd=3533
+4	tendu	tendu	_	_	_	_	_	_	AlignBegin=3533|AlignEnd=3693
+5	ou	ou	_	_	_	_	_	_	AlignBegin=3693|AlignEnd=3854
+6	ça	ça	_	_	_	_	_	_	AlignBegin=3854|AlignEnd=4015
+7	allait	allait	_	_	_	_	_	_	AlignBegin=4015|AlignEnd=4176
+8	?	?	_	_	_	_	_	_	AlignBegin=4176|AlignEnd=4176
+
+# sent_id = Zoe_Sacotte.intervals.conll__3
+# text = T'imagines même pas.
+# sound_url = Zoe_Sacotte.wav
+1	T'imagines	T'imagines	_	_	_	_	_	_	AlignBegin=5211|AlignEnd=5496
+2	même	même	_	_	_	_	_	_	AlignBegin=5496|AlignEnd=5781
+3	pas	pas	_	_	_	_	_	_	AlignBegin=5781|AlignEnd=6066
+4	.	.	_	_	_	_	_	_	AlignBegin=6066|AlignEnd=6066
+
+# sent_id = Zoe_Sacotte.intervals.conll__4
+# text = Pire que tendu.
+# sound_url = Zoe_Sacotte.wav
+1	Pire	Pire	_	_	_	_	_	_	AlignBegin=6472|AlignEnd=6731
+2	que	que	_	_	_	_	_	_	AlignBegin=6731|AlignEnd=6989
+3	tendu	tendu	_	_	_	_	_	_	AlignBegin=6989|AlignEnd=7248
+4	.	.	_	_	_	_	_	_	AlignBegin=7248|AlignEnd=7248
+
+# sent_id = Zoe_Sacotte.intervals.conll__5
+# text = Horrible.
+# sound_url = Zoe_Sacotte.wav
+1	Horrible	Horrible	_	_	_	_	_	_	AlignBegin=7488|AlignEnd=7855
+2	.	.	_	_	_	_	_	_	AlignBegin=7855|AlignEnd=7855
+
+# sent_id = Zoe_Sacotte.intervals.conll__6
+# text = En gros , euh , ca faisait des des semaines et des semaines qu' on tanait ma mère pour pas le rencontrer parce que , euh , aucune envie qui vienne vivre chez nous fin , horrible .
+# sound_url = Zoe_Sacotte.wav
+1	En	En	_	_	_	_	_	_	AlignBegin=8304|AlignEnd=8537
+2	gros	gros	_	_	_	_	_	_	AlignBegin=8537|AlignEnd=8769
+3	,	,	_	_	_	_	_	_	AlignBegin=8769|AlignEnd=8769
+4	euh	euh	_	_	_	_	_	_	AlignBegin=8769|AlignEnd=9002
+5	,	,	_	_	_	_	_	_	AlignBegin=9002|AlignEnd=9002
+6	ca	ca	_	_	_	_	_	_	AlignBegin=9002|AlignEnd=9234
+7	faisait	faisait	_	_	_	_	_	_	AlignBegin=9234|AlignEnd=9467
+8	des	des	_	_	_	_	_	_	AlignBegin=9467|AlignEnd=9700
+9	des	des	_	_	_	_	_	_	AlignBegin=9700|AlignEnd=9932
+10	semaines	semaines	_	_	_	_	_	_	AlignBegin=9932|AlignEnd=10165
+11	et	et	_	_	_	_	_	_	AlignBegin=10165|AlignEnd=10397
+12	des	des	_	_	_	_	_	_	AlignBegin=10397|AlignEnd=10630
+13	semaines	semaines	_	_	_	_	_	_	AlignBegin=10630|AlignEnd=10863
+14	qu'	qu'	_	_	_	_	_	_	AlignBegin=10863|AlignEnd=11095
+15	on	on	_	_	_	_	_	_	AlignBegin=11095|AlignEnd=11328
+16	tanait	tanait	_	_	_	_	_	_	AlignBegin=11328|AlignEnd=11560
+17	ma	ma	_	_	_	_	_	_	AlignBegin=11560|AlignEnd=11793
+18	mère	mère	_	_	_	_	_	_	AlignBegin=11793|AlignEnd=12026
+19	pour	pour	_	_	_	_	_	_	AlignBegin=12026|AlignEnd=12258
+20	pas	pas	_	_	_	_	_	_	AlignBegin=12258|AlignEnd=12491
+21	le	le	_	_	_	_	_	_	AlignBegin=12491|AlignEnd=12723
+22	rencontrer	rencontrer	_	_	_	_	_	_	AlignBegin=12723|AlignEnd=12956
+23	parce	parce	_	_	_	_	_	_	AlignBegin=12956|AlignEnd=13188
+24	que	que	_	_	_	_	_	_	AlignBegin=13188|AlignEnd=13421
+25	,	,	_	_	_	_	_	_	AlignBegin=13421|AlignEnd=13421
+26	euh	euh	_	_	_	_	_	_	AlignBegin=13421|AlignEnd=13654
+27	,	,	_	_	_	_	_	_	AlignBegin=13654|AlignEnd=13654
+28	aucune	aucune	_	_	_	_	_	_	AlignBegin=13654|AlignEnd=13886
+29	envie	envie	_	_	_	_	_	_	AlignBegin=13886|AlignEnd=14119
+30	qui	qui	_	_	_	_	_	_	AlignBegin=14119|AlignEnd=14351
+31	vienne	vienne	_	_	_	_	_	_	AlignBegin=14351|AlignEnd=14584
+32	vivre	vivre	_	_	_	_	_	_	AlignBegin=14584|AlignEnd=14817
+33	chez	chez	_	_	_	_	_	_	AlignBegin=14817|AlignEnd=15049
+34	nous	nous	_	_	_	_	_	_	AlignBegin=15049|AlignEnd=15282
+35	fin	fin	_	_	_	_	_	_	AlignBegin=15282|AlignEnd=15514
+36	,	,	_	_	_	_	_	_	AlignBegin=15514|AlignEnd=15514
+37	horrible	horrible	_	_	_	_	_	_	AlignBegin=15514|AlignEnd=15747
+38	.	.	_	_	_	_	_	_	AlignBegin=15747|AlignEnd=15747
+
+# sent_id = Zoe_Sacotte.intervals.conll__7
+# text = Et, euh, et au bout d'un moment on a craqué.
+# sound_url = Zoe_Sacotte.wav
+1	Et	Et	_	_	_	_	_	_	AlignBegin=16472|AlignEnd=16645
+2	,	,	_	_	_	_	_	_	AlignBegin=16645|AlignEnd=16645
+3	euh	euh	_	_	_	_	_	_	AlignBegin=16645|AlignEnd=16819
+4	,	,	_	_	_	_	_	_	AlignBegin=16819|AlignEnd=16819
+5	et	et	_	_	_	_	_	_	AlignBegin=16819|AlignEnd=16992
+6	au	au	_	_	_	_	_	_	AlignBegin=16992|AlignEnd=17165
+7	bout	bout	_	_	_	_	_	_	AlignBegin=17165|AlignEnd=17338
+8	d'un	d'un	_	_	_	_	_	_	AlignBegin=17338|AlignEnd=17512
+9	moment	moment	_	_	_	_	_	_	AlignBegin=17512|AlignEnd=17685
+10	on	on	_	_	_	_	_	_	AlignBegin=17685|AlignEnd=17858
+11	a	a	_	_	_	_	_	_	AlignBegin=17858|AlignEnd=18031
+12	craqué	craqué	_	_	_	_	_	_	AlignBegin=18031|AlignEnd=18205
+13	.	.	_	_	_	_	_	_	AlignBegin=18205|AlignEnd=18205
+
+# sent_id = Zoe_Sacotte.intervals.conll__8
+# text = Parce que, bah, elle est, elle forçait, elle forcait.
+# sound_url = Zoe_Sacotte.wav
+1	Parce	Parce	_	_	_	_	_	_	AlignBegin=18314|AlignEnd=18607
+2	que	que	_	_	_	_	_	_	AlignBegin=18607|AlignEnd=18900
+3	,	,	_	_	_	_	_	_	AlignBegin=18900|AlignEnd=18900
+4	bah	bah	_	_	_	_	_	_	AlignBegin=18900|AlignEnd=19193
+5	,	,	_	_	_	_	_	_	AlignBegin=19193|AlignEnd=19193
+6	elle	elle	_	_	_	_	_	_	AlignBegin=19193|AlignEnd=19486
+7	est	est	_	_	_	_	_	_	AlignBegin=19486|AlignEnd=19780
+8	,	,	_	_	_	_	_	_	AlignBegin=19780|AlignEnd=19780
+9	elle	elle	_	_	_	_	_	_	AlignBegin=19780|AlignEnd=20073
+10	forçait	forçait	_	_	_	_	_	_	AlignBegin=20073|AlignEnd=20366
+11	,	,	_	_	_	_	_	_	AlignBegin=20366|AlignEnd=20366
+12	elle	elle	_	_	_	_	_	_	AlignBegin=20366|AlignEnd=20659
+13	forcait	forcait	_	_	_	_	_	_	AlignBegin=20659|AlignEnd=20952
+14	.	.	_	_	_	_	_	_	AlignBegin=20952|AlignEnd=20952
+
+# sent_id = Zoe_Sacotte.intervals.conll__9
+# text = Puis, elle était plus jamais à la maison et tout.
+# sound_url = Zoe_Sacotte.wav
+1	Puis	Puis	_	_	_	_	_	_	AlignBegin=20952|AlignEnd=21127
+2	,	,	_	_	_	_	_	_	AlignBegin=21127|AlignEnd=21127
+3	elle	elle	_	_	_	_	_	_	AlignBegin=21127|AlignEnd=21302
+4	était	était	_	_	_	_	_	_	AlignBegin=21302|AlignEnd=21477
+5	plus	plus	_	_	_	_	_	_	AlignBegin=21477|AlignEnd=21651
+6	jamais	jamais	_	_	_	_	_	_	AlignBegin=21651|AlignEnd=21826
+7	à	à	_	_	_	_	_	_	AlignBegin=21826|AlignEnd=22001
+8	la	la	_	_	_	_	_	_	AlignBegin=22001|AlignEnd=22176
+9	maison	maison	_	_	_	_	_	_	AlignBegin=22176|AlignEnd=22351
+10	et	et	_	_	_	_	_	_	AlignBegin=22351|AlignEnd=22526
+11	tout	tout	_	_	_	_	_	_	AlignBegin=22526|AlignEnd=22700
+12	.	.	_	_	_	_	_	_	AlignBegin=22700|AlignEnd=22700
+
+# sent_id = Zoe_Sacotte.intervals.conll__10
+# text = Pour mes petits-frères, c'était pas cool.
+# sound_url = Zoe_Sacotte.wav
+1	Pour	Pour	_	_	_	_	_	_	AlignBegin=22700|AlignEnd=22952
+2	mes	mes	_	_	_	_	_	_	AlignBegin=22952|AlignEnd=23204
+3	petits-frères	petits-frères	_	_	_	_	_	_	AlignBegin=23204|AlignEnd=23455
+4	,	,	_	_	_	_	_	_	AlignBegin=23455|AlignEnd=23455
+5	c'était	c'était	_	_	_	_	_	_	AlignBegin=23455|AlignEnd=23707
+6	pas	pas	_	_	_	_	_	_	AlignBegin=23707|AlignEnd=23959
+7	cool	cool	_	_	_	_	_	_	AlignBegin=23959|AlignEnd=24210
+8	.	.	_	_	_	_	_	_	AlignBegin=24210|AlignEnd=24210
+
+# sent_id = Zoe_Sacotte.intervals.conll__11
+# text = Ouai, puis t'avais pas trop le choix.
+# sound_url = Zoe_Sacotte.wav
+1	Ouai	Ouai	_	_	_	_	_	_	AlignBegin=24487|AlignEnd=24654
+2	,	,	_	_	_	_	_	_	AlignBegin=24654|AlignEnd=24654
+3	puis	puis	_	_	_	_	_	_	AlignBegin=24654|AlignEnd=24820
+4	t'avais	t'avais	_	_	_	_	_	_	AlignBegin=24820|AlignEnd=24987
+5	pas	pas	_	_	_	_	_	_	AlignBegin=24987|AlignEnd=25153
+6	trop	trop	_	_	_	_	_	_	AlignBegin=25153|AlignEnd=25320
+7	le	le	_	_	_	_	_	_	AlignBegin=25320|AlignEnd=25486
+8	choix	choix	_	_	_	_	_	_	AlignBegin=25486|AlignEnd=25652
+9	.	.	_	_	_	_	_	_	AlignBegin=25652|AlignEnd=25652
+
+# sent_id = Zoe_Sacotte.intervals.conll__12
+# text = Bah non, il y avait pas trop le choix quoi.
+# sound_url = Zoe_Sacotte.wav
+1	Bah	Bah	_	_	_	_	_	_	AlignBegin=25652|AlignEnd=25764
+2	non	non	_	_	_	_	_	_	AlignBegin=25764|AlignEnd=25876
+3	,	,	_	_	_	_	_	_	AlignBegin=25876|AlignEnd=25876
+4	il	il	_	_	_	_	_	_	AlignBegin=25876|AlignEnd=25988
+5	y	y	_	_	_	_	_	_	AlignBegin=25988|AlignEnd=26100
+6	avait	avait	_	_	_	_	_	_	AlignBegin=26100|AlignEnd=26212
+7	pas	pas	_	_	_	_	_	_	AlignBegin=26212|AlignEnd=26324
+8	trop	trop	_	_	_	_	_	_	AlignBegin=26324|AlignEnd=26436
+9	le	le	_	_	_	_	_	_	AlignBegin=26436|AlignEnd=26547
+10	choix	choix	_	_	_	_	_	_	AlignBegin=26547|AlignEnd=26659
+11	quoi	quoi	_	_	_	_	_	_	AlignBegin=26659|AlignEnd=26771
+12	.	.	_	_	_	_	_	_	AlignBegin=26771|AlignEnd=26771
+
+# sent_id = Zoe_Sacotte.intervals.conll__13
+# text = Et puis en soit, c'est son mec.
+# sound_url = Zoe_Sacotte.wav
+1	Et	Et	_	_	_	_	_	_	AlignBegin=26771|AlignEnd=26924
+2	puis	puis	_	_	_	_	_	_	AlignBegin=26924|AlignEnd=27077
+3	en	en	_	_	_	_	_	_	AlignBegin=27077|AlignEnd=27230
+4	soit	soit	_	_	_	_	_	_	AlignBegin=27230|AlignEnd=27383
+5	,	,	_	_	_	_	_	_	AlignBegin=27383|AlignEnd=27383
+6	c'est	c'est	_	_	_	_	_	_	AlignBegin=27383|AlignEnd=27536
+7	son	son	_	_	_	_	_	_	AlignBegin=27536|AlignEnd=27689
+8	mec	mec	_	_	_	_	_	_	AlignBegin=27689|AlignEnd=27842
+9	.	.	_	_	_	_	_	_	AlignBegin=27842|AlignEnd=27842
+
+# sent_id = Zoe_Sacotte.intervals.conll__14
+# text = Il y a pas le choix quoi.
+# sound_url = Zoe_Sacotte.wav
+1	Il	Il	_	_	_	_	_	_	AlignBegin=27842|AlignEnd=27936
+2	y	y	_	_	_	_	_	_	AlignBegin=27936|AlignEnd=28030
+3	a	a	_	_	_	_	_	_	AlignBegin=28030|AlignEnd=28124
+4	pas	pas	_	_	_	_	_	_	AlignBegin=28124|AlignEnd=28218
+5	le	le	_	_	_	_	_	_	AlignBegin=28218|AlignEnd=28312
+6	choix	choix	_	_	_	_	_	_	AlignBegin=28312|AlignEnd=28406
+7	quoi	quoi	_	_	_	_	_	_	AlignBegin=28406|AlignEnd=28500
+8	.	.	_	_	_	_	_	_	AlignBegin=28500|AlignEnd=28500
+
+# sent_id = Zoe_Sacotte.intervals.conll__15
+# text = Donc, ils ont organisé une soirée un samedi soir.
+# sound_url = Zoe_Sacotte.wav
+1	Donc	Donc	_	_	_	_	_	_	AlignBegin=29116|AlignEnd=29471
+2	,	,	_	_	_	_	_	_	AlignBegin=29471|AlignEnd=29471
+3	ils	ils	_	_	_	_	_	_	AlignBegin=29471|AlignEnd=29826
+4	ont	ont	_	_	_	_	_	_	AlignBegin=29826|AlignEnd=30181
+5	organisé	organisé	_	_	_	_	_	_	AlignBegin=30181|AlignEnd=30536
+6	une	une	_	_	_	_	_	_	AlignBegin=30536|AlignEnd=30891
+7	soirée	soirée	_	_	_	_	_	_	AlignBegin=30891|AlignEnd=31246
+8	un	un	_	_	_	_	_	_	AlignBegin=31246|AlignEnd=31601
+9	samedi	samedi	_	_	_	_	_	_	AlignBegin=31601|AlignEnd=31956
+10	soir	soir	_	_	_	_	_	_	AlignBegin=31956|AlignEnd=32311
+11	.	.	_	_	_	_	_	_	AlignBegin=32311|AlignEnd=32311
+
+# sent_id = Zoe_Sacotte.intervals.conll__16
+# text = Mais le pire samedi soir de toute ma vie.
+# sound_url = Zoe_Sacotte.wav
+1	Mais	Mais	_	_	_	_	_	_	AlignBegin=32630|AlignEnd=32822
+2	le	le	_	_	_	_	_	_	AlignBegin=32822|AlignEnd=33015
+3	pire	pire	_	_	_	_	_	_	AlignBegin=33015|AlignEnd=33207
+4	samedi	samedi	_	_	_	_	_	_	AlignBegin=33207|AlignEnd=33399
+5	soir	soir	_	_	_	_	_	_	AlignBegin=33399|AlignEnd=33592
+6	de	de	_	_	_	_	_	_	AlignBegin=33592|AlignEnd=33784
+7	toute	toute	_	_	_	_	_	_	AlignBegin=33784|AlignEnd=33976
+8	ma	ma	_	_	_	_	_	_	AlignBegin=33976|AlignEnd=34168
+9	vie	vie	_	_	_	_	_	_	AlignBegin=34168|AlignEnd=34361
+10	.	.	_	_	_	_	_	_	AlignBegin=34361|AlignEnd=34361
+
+# sent_id = Zoe_Sacotte.intervals.conll__17
+# text = En gros, ils se sont dits trop cool, on va aller faire une activité tous ensemble.
+# sound_url = Zoe_Sacotte.wav
+1	En	En	_	_	_	_	_	_	AlignBegin=34928|AlignEnd=35154
+2	gros	gros	_	_	_	_	_	_	AlignBegin=35154|AlignEnd=35380
+3	,	,	_	_	_	_	_	_	AlignBegin=35380|AlignEnd=35380
+4	ils	ils	_	_	_	_	_	_	AlignBegin=35380|AlignEnd=35606
+5	se	se	_	_	_	_	_	_	AlignBegin=35606|AlignEnd=35832
+6	sont	sont	_	_	_	_	_	_	AlignBegin=35832|AlignEnd=36059
+7	dits	dits	_	_	_	_	_	_	AlignBegin=36059|AlignEnd=36285
+8	trop	trop	_	_	_	_	_	_	AlignBegin=36285|AlignEnd=36511
+9	cool	cool	_	_	_	_	_	_	AlignBegin=36511|AlignEnd=36737
+10	,	,	_	_	_	_	_	_	AlignBegin=36737|AlignEnd=36737
+11	on	on	_	_	_	_	_	_	AlignBegin=36737|AlignEnd=36963
+12	va	va	_	_	_	_	_	_	AlignBegin=36963|AlignEnd=37189
+13	aller	aller	_	_	_	_	_	_	AlignBegin=37189|AlignEnd=37415
+14	faire	faire	_	_	_	_	_	_	AlignBegin=37415|AlignEnd=37641
+15	une	une	_	_	_	_	_	_	AlignBegin=37641|AlignEnd=37867
+16	activité	activité	_	_	_	_	_	_	AlignBegin=37867|AlignEnd=38094
+17	tous	tous	_	_	_	_	_	_	AlignBegin=38094|AlignEnd=38320
+18	ensemble	ensemble	_	_	_	_	_	_	AlignBegin=38320|AlignEnd=38546
+19	.	.	_	_	_	_	_	_	AlignBegin=38546|AlignEnd=38546
+
+# sent_id = Zoe_Sacotte.intervals.conll__18
+# text = Donc, on est parti faire du bowling.
+# sound_url = Zoe_Sacotte.wav
+1	Donc	Donc	_	_	_	_	_	_	AlignBegin=38853|AlignEnd=39142
+2	,	,	_	_	_	_	_	_	AlignBegin=39142|AlignEnd=39142
+3	on	on	_	_	_	_	_	_	AlignBegin=39142|AlignEnd=39432
+4	est	est	_	_	_	_	_	_	AlignBegin=39432|AlignEnd=39721
+5	parti	parti	_	_	_	_	_	_	AlignBegin=39721|AlignEnd=40010
+6	faire	faire	_	_	_	_	_	_	AlignBegin=40010|AlignEnd=40300
+7	du	du	_	_	_	_	_	_	AlignBegin=40300|AlignEnd=40589
+8	bowling	bowling	_	_	_	_	_	_	AlignBegin=40589|AlignEnd=40878
+9	.	.	_	_	_	_	_	_	AlignBegin=40878|AlignEnd=40878
+
+# sent_id = Zoe_Sacotte.intervals.conll__19
+# text = Horrible.
+# sound_url = Zoe_Sacotte.wav
+1	Horrible	Horrible	_	_	_	_	_	_	AlignBegin=42124|AlignEnd=42694
+2	.	.	_	_	_	_	_	_	AlignBegin=42694|AlignEnd=42694
+
+# sent_id = Zoe_Sacotte.intervals.conll__20
+# text = Mais franchement horrible !
+# sound_url = Zoe_Sacotte.wav
+1	Mais	Mais	_	_	_	_	_	_	AlignBegin=43103|AlignEnd=43376
+2	franchement	franchement	_	_	_	_	_	_	AlignBegin=43376|AlignEnd=43648
+3	horrible	horrible	_	_	_	_	_	_	AlignBegin=43648|AlignEnd=43920
+4	!	!	_	_	_	_	_	_	AlignBegin=43920|AlignEnd=43920
+
+# sent_id = Zoe_Sacotte.intervals.conll__21
+# text = Un traumatisme cette soirée.
+# sound_url = Zoe_Sacotte.wav
+1	Un	Un	_	_	_	_	_	_	AlignBegin=43920|AlignEnd=44236
+2	traumatisme	traumatisme	_	_	_	_	_	_	AlignBegin=44236|AlignEnd=44551
+3	cette	cette	_	_	_	_	_	_	AlignBegin=44551|AlignEnd=44866
+4	soirée	soirée	_	_	_	_	_	_	AlignBegin=44866|AlignEnd=45181
+5	.	.	_	_	_	_	_	_	AlignBegin=45181|AlignEnd=45181
+
+# sent_id = Zoe_Sacotte.intervals.conll__22
+# text = Du coup, je l'ai rencontré pour la première fois.
+# sound_url = Zoe_Sacotte.wav
+1	Du	Du	_	_	_	_	_	_	AlignBegin=45708|AlignEnd=45878
+2	coup	coup	_	_	_	_	_	_	AlignBegin=45878|AlignEnd=46048
+3	,	,	_	_	_	_	_	_	AlignBegin=46048|AlignEnd=46048
+4	je	je	_	_	_	_	_	_	AlignBegin=46048|AlignEnd=46219
+5	l'ai	l'ai	_	_	_	_	_	_	AlignBegin=46219|AlignEnd=46389
+6	rencontré	rencontré	_	_	_	_	_	_	AlignBegin=46389|AlignEnd=46559
+7	pour	pour	_	_	_	_	_	_	AlignBegin=46559|AlignEnd=46729
+8	la	la	_	_	_	_	_	_	AlignBegin=46729|AlignEnd=46899
+9	première	première	_	_	_	_	_	_	AlignBegin=46899|AlignEnd=47069
+10	fois	fois	_	_	_	_	_	_	AlignBegin=47069|AlignEnd=47239
+11	.	.	_	_	_	_	_	_	AlignBegin=47239|AlignEnd=47239
+
+# sent_id = Zoe_Sacotte.intervals.conll__23
+# text = Genre, il est venu nous chercher en voiture.
+# sound_url = Zoe_Sacotte.wav
+1	Genre	Genre	_	_	_	_	_	_	AlignBegin=47239|AlignEnd=47422
+2	,	,	_	_	_	_	_	_	AlignBegin=47422|AlignEnd=47422
+3	il	il	_	_	_	_	_	_	AlignBegin=47422|AlignEnd=47604
+4	est	est	_	_	_	_	_	_	AlignBegin=47604|AlignEnd=47787
+5	venu	venu	_	_	_	_	_	_	AlignBegin=47787|AlignEnd=47969
+6	nous	nous	_	_	_	_	_	_	AlignBegin=47969|AlignEnd=48152
+7	chercher	chercher	_	_	_	_	_	_	AlignBegin=48152|AlignEnd=48334
+8	en	en	_	_	_	_	_	_	AlignBegin=48334|AlignEnd=48517
+9	voiture	voiture	_	_	_	_	_	_	AlignBegin=48517|AlignEnd=48699
+10	.	.	_	_	_	_	_	_	AlignBegin=48699|AlignEnd=48699
+
+# sent_id = Zoe_Sacotte.intervals.conll__24
+# text = La la première discussion qu'on a eu, c'est y y critiquait les notes scolaires de mon frère.
+# sound_url = Zoe_Sacotte.wav
+1	La	La	_	_	_	_	_	_	AlignBegin=49725|AlignEnd=49947
+2	la	la	_	_	_	_	_	_	AlignBegin=49947|AlignEnd=50169
+3	première	première	_	_	_	_	_	_	AlignBegin=50169|AlignEnd=50391
+4	discussion	discussion	_	_	_	_	_	_	AlignBegin=50391|AlignEnd=50613
+5	qu'on	qu'on	_	_	_	_	_	_	AlignBegin=50613|AlignEnd=50835
+6	a	a	_	_	_	_	_	_	AlignBegin=50835|AlignEnd=51056
+7	eu	eu	_	_	_	_	_	_	AlignBegin=51056|AlignEnd=51278
+8	,	,	_	_	_	_	_	_	AlignBegin=51278|AlignEnd=51278
+9	c'est	c'est	_	_	_	_	_	_	AlignBegin=51278|AlignEnd=51500
+10	y	y	_	_	_	_	_	_	AlignBegin=51500|AlignEnd=51722
+11	y	y	_	_	_	_	_	_	AlignBegin=51722|AlignEnd=51944
+12	critiquait	critiquait	_	_	_	_	_	_	AlignBegin=51944|AlignEnd=52166
+13	les	les	_	_	_	_	_	_	AlignBegin=52166|AlignEnd=52388
+14	notes	notes	_	_	_	_	_	_	AlignBegin=52388|AlignEnd=52610
+15	scolaires	scolaires	_	_	_	_	_	_	AlignBegin=52610|AlignEnd=52831
+16	de	de	_	_	_	_	_	_	AlignBegin=52831|AlignEnd=53053
+17	mon	mon	_	_	_	_	_	_	AlignBegin=53053|AlignEnd=53275
+18	frère	frère	_	_	_	_	_	_	AlignBegin=53275|AlignEnd=53497
+19	.	.	_	_	_	_	_	_	AlignBegin=53497|AlignEnd=53497
+
+# sent_id = Zoe_Sacotte.intervals.conll__25
+# text = Donc, je me suis dit ok.
+# sound_url = Zoe_Sacotte.wav
+1	Donc	Donc	_	_	_	_	_	_	AlignBegin=54052|AlignEnd=54242
+2	,	,	_	_	_	_	_	_	AlignBegin=54242|AlignEnd=54242
+3	je	je	_	_	_	_	_	_	AlignBegin=54242|AlignEnd=54431
+4	me	me	_	_	_	_	_	_	AlignBegin=54431|AlignEnd=54621
+5	suis	suis	_	_	_	_	_	_	AlignBegin=54621|AlignEnd=54810
+6	dit	dit	_	_	_	_	_	_	AlignBegin=54810|AlignEnd=55000
+7	ok	ok	_	_	_	_	_	_	AlignBegin=55000|AlignEnd=55189
+8	.	.	_	_	_	_	_	_	AlignBegin=55189|AlignEnd=55189
+
+# sent_id = Zoe_Sacotte.intervals.conll__26
+# text = Bonne ambiance.
+# sound_url = Zoe_Sacotte.wav
+1	Bonne	Bonne	_	_	_	_	_	_	AlignBegin=55300|AlignEnd=55659
+2	ambiance	ambiance	_	_	_	_	_	_	AlignBegin=55659|AlignEnd=56017
+3	.	.	_	_	_	_	_	_	AlignBegin=56017|AlignEnd=56017
+
+# sent_id = Zoe_Sacotte.intervals.conll__27
+# text = Ca commence bien.
+# sound_url = Zoe_Sacotte.wav
+1	Ca	Ca	_	_	_	_	_	_	AlignBegin=56017|AlignEnd=56356
+2	commence	commence	_	_	_	_	_	_	AlignBegin=56356|AlignEnd=56696
+3	bien	bien	_	_	_	_	_	_	AlignBegin=56696|AlignEnd=57035
+4	.	.	_	_	_	_	_	_	AlignBegin=57035|AlignEnd=57035
+
+# sent_id = Zoe_Sacotte.intervals.conll__28
+# text = Donc mon frère, il y a un des deux était déja braqué.
+# sound_url = Zoe_Sacotte.wav
+1	Donc	Donc	_	_	_	_	_	_	AlignBegin=57535|AlignEnd=57697
+2	mon	mon	_	_	_	_	_	_	AlignBegin=57697|AlignEnd=57860
+3	frère	frère	_	_	_	_	_	_	AlignBegin=57860|AlignEnd=58022
+4	,	,	_	_	_	_	_	_	AlignBegin=58022|AlignEnd=58022
+5	il	il	_	_	_	_	_	_	AlignBegin=58022|AlignEnd=58184
+6	y	y	_	_	_	_	_	_	AlignBegin=58184|AlignEnd=58347
+7	a	a	_	_	_	_	_	_	AlignBegin=58347|AlignEnd=58509
+8	un	un	_	_	_	_	_	_	AlignBegin=58509|AlignEnd=58671
+9	des	des	_	_	_	_	_	_	AlignBegin=58671|AlignEnd=58834
+10	deux	deux	_	_	_	_	_	_	AlignBegin=58834|AlignEnd=58996
+11	était	était	_	_	_	_	_	_	AlignBegin=58996|AlignEnd=59158
+12	déja	déja	_	_	_	_	_	_	AlignBegin=59158|AlignEnd=59321
+13	braqué	braqué	_	_	_	_	_	_	AlignBegin=59321|AlignEnd=59483
+14	.	.	_	_	_	_	_	_	AlignBegin=59483|AlignEnd=59483
+
+# sent_id = Zoe_Sacotte.intervals.conll__29
+# text = Ensuite, on débarque au bowling.
+# sound_url = Zoe_Sacotte.wav
+1	Ensuite	Ensuite	_	_	_	_	_	_	AlignBegin=59747|AlignEnd=60054
+2	,	,	_	_	_	_	_	_	AlignBegin=60054|AlignEnd=60054
+3	on	on	_	_	_	_	_	_	AlignBegin=60054|AlignEnd=60360
+4	débarque	débarque	_	_	_	_	_	_	AlignBegin=60360|AlignEnd=60667
+5	au	au	_	_	_	_	_	_	AlignBegin=60667|AlignEnd=60973
+6	bowling	bowling	_	_	_	_	_	_	AlignBegin=60973|AlignEnd=61280
+7	.	.	_	_	_	_	_	_	AlignBegin=61280|AlignEnd=61280
+
+# sent_id = Zoe_Sacotte.intervals.conll__30
+# text = Hyper compétition.
+# sound_url = Zoe_Sacotte.wav
+1	Hyper	Hyper	_	_	_	_	_	_	AlignBegin=61766|AlignEnd=62310
+2	compétition	compétition	_	_	_	_	_	_	AlignBegin=62310|AlignEnd=62854
+3	.	.	_	_	_	_	_	_	AlignBegin=62854|AlignEnd=62854
+
+# sent_id = Zoe_Sacotte.intervals.conll__31
+# text = Ce qu'y fait que s'il était pas premier, il était à se plaindre à.
+# sound_url = Zoe_Sacotte.wav
+1	Ce	Ce	_	_	_	_	_	_	AlignBegin=63017|AlignEnd=63253
+2	qu'y	qu'y	_	_	_	_	_	_	AlignBegin=63253|AlignEnd=63490
+3	fait	fait	_	_	_	_	_	_	AlignBegin=63490|AlignEnd=63726
+4	que	que	_	_	_	_	_	_	AlignBegin=63726|AlignEnd=63962
+5	s'il	s'il	_	_	_	_	_	_	AlignBegin=63962|AlignEnd=64198
+6	était	était	_	_	_	_	_	_	AlignBegin=64198|AlignEnd=64434
+7	pas	pas	_	_	_	_	_	_	AlignBegin=64434|AlignEnd=64670
+8	premier	premier	_	_	_	_	_	_	AlignBegin=64670|AlignEnd=64906
+9	,	,	_	_	_	_	_	_	AlignBegin=64906|AlignEnd=64906
+10	il	il	_	_	_	_	_	_	AlignBegin=64906|AlignEnd=65143
+11	était	était	_	_	_	_	_	_	AlignBegin=65143|AlignEnd=65379
+12	à	à	_	_	_	_	_	_	AlignBegin=65379|AlignEnd=65615
+13	se	se	_	_	_	_	_	_	AlignBegin=65615|AlignEnd=65851
+14	plaindre	plaindre	_	_	_	_	_	_	AlignBegin=65851|AlignEnd=66087
+15	à	à	_	_	_	_	_	_	AlignBegin=66087|AlignEnd=66323
+16	.	.	_	_	_	_	_	_	AlignBegin=66323|AlignEnd=66323
+
+# sent_id = Zoe_Sacotte.intervals.conll__32
+# text = Et moi, je me, j'étais là, mon dieu mais c'est quoi ce gars mais, horrible.
+# sound_url = Zoe_Sacotte.wav
+1	Et	Et	_	_	_	_	_	_	AlignBegin=66947|AlignEnd=67165
+2	moi	moi	_	_	_	_	_	_	AlignBegin=67165|AlignEnd=67383
+3	,	,	_	_	_	_	_	_	AlignBegin=67383|AlignEnd=67383
+4	je	je	_	_	_	_	_	_	AlignBegin=67383|AlignEnd=67601
+5	me	me	_	_	_	_	_	_	AlignBegin=67601|AlignEnd=67819
+6	,	,	_	_	_	_	_	_	AlignBegin=67819|AlignEnd=67819
+7	j'étais	j'étais	_	_	_	_	_	_	AlignBegin=67819|AlignEnd=68038
+8	là	là	_	_	_	_	_	_	AlignBegin=68038|AlignEnd=68256
+9	,	,	_	_	_	_	_	_	AlignBegin=68256|AlignEnd=68256
+10	mon	mon	_	_	_	_	_	_	AlignBegin=68256|AlignEnd=68474
+11	dieu	dieu	_	_	_	_	_	_	AlignBegin=68474|AlignEnd=68692
+12	mais	mais	_	_	_	_	_	_	AlignBegin=68692|AlignEnd=68910
+13	c'est	c'est	_	_	_	_	_	_	AlignBegin=68910|AlignEnd=69128
+14	quoi	quoi	_	_	_	_	_	_	AlignBegin=69128|AlignEnd=69346
+15	ce	ce	_	_	_	_	_	_	AlignBegin=69346|AlignEnd=69564
+16	gars	gars	_	_	_	_	_	_	AlignBegin=69564|AlignEnd=69782
+17	mais	mais	_	_	_	_	_	_	AlignBegin=69782|AlignEnd=70001
+18	,	,	_	_	_	_	_	_	AlignBegin=70001|AlignEnd=70001
+19	horrible	horrible	_	_	_	_	_	_	AlignBegin=70001|AlignEnd=70219
+20	.	.	_	_	_	_	_	_	AlignBegin=70219|AlignEnd=70219
+
+# sent_id = Zoe_Sacotte.intervals.conll__33
+# text = Après, pendant tout le bowling, ils ont pas arrêté de s'asseoir l'un sur l'autre et tout.
+# sound_url = Zoe_Sacotte.wav
+1	Après	Après	_	_	_	_	_	_	AlignBegin=70830|AlignEnd=71146
+2	,	,	_	_	_	_	_	_	AlignBegin=71146|AlignEnd=71146
+3	pendant	pendant	_	_	_	_	_	_	AlignBegin=71146|AlignEnd=71461
+4	tout	tout	_	_	_	_	_	_	AlignBegin=71461|AlignEnd=71776
+5	le	le	_	_	_	_	_	_	AlignBegin=71776|AlignEnd=72091
+6	bowling	bowling	_	_	_	_	_	_	AlignBegin=72091|AlignEnd=72406
+7	,	,	_	_	_	_	_	_	AlignBegin=72406|AlignEnd=72406
+8	ils	ils	_	_	_	_	_	_	AlignBegin=72406|AlignEnd=72721
+9	ont	ont	_	_	_	_	_	_	AlignBegin=72721|AlignEnd=73036
+10	pas	pas	_	_	_	_	_	_	AlignBegin=73036|AlignEnd=73351
+11	arrêté	arrêté	_	_	_	_	_	_	AlignBegin=73351|AlignEnd=73666
+12	de	de	_	_	_	_	_	_	AlignBegin=73666|AlignEnd=73981
+13	s'asseoir	s'asseoir	_	_	_	_	_	_	AlignBegin=73981|AlignEnd=74296
+14	l'un	l'un	_	_	_	_	_	_	AlignBegin=74296|AlignEnd=74611
+15	sur	sur	_	_	_	_	_	_	AlignBegin=74611|AlignEnd=74926
+16	l'autre	l'autre	_	_	_	_	_	_	AlignBegin=74926|AlignEnd=75241
+17	et	et	_	_	_	_	_	_	AlignBegin=75241|AlignEnd=75556
+18	tout	tout	_	_	_	_	_	_	AlignBegin=75556|AlignEnd=75871
+19	.	.	_	_	_	_	_	_	AlignBegin=75871|AlignEnd=75871
+
+# sent_id = Zoe_Sacotte.intervals.conll__34
+# text = Sachant que j'avais jamais vu ma mère avec quelqu'un d'autre que mon père.
+# sound_url = Zoe_Sacotte.wav
+1	Sachant	Sachant	_	_	_	_	_	_	AlignBegin=75871|AlignEnd=76079
+2	que	que	_	_	_	_	_	_	AlignBegin=76079|AlignEnd=76287
+3	j'avais	j'avais	_	_	_	_	_	_	AlignBegin=76287|AlignEnd=76495
+4	jamais	jamais	_	_	_	_	_	_	AlignBegin=76495|AlignEnd=76702
+5	vu	vu	_	_	_	_	_	_	AlignBegin=76702|AlignEnd=76910
+6	ma	ma	_	_	_	_	_	_	AlignBegin=76910|AlignEnd=77118
+7	mère	mère	_	_	_	_	_	_	AlignBegin=77118|AlignEnd=77326
+8	avec	avec	_	_	_	_	_	_	AlignBegin=77326|AlignEnd=77533
+9	quelqu'un	quelqu'un	_	_	_	_	_	_	AlignBegin=77533|AlignEnd=77741
+10	d'autre	d'autre	_	_	_	_	_	_	AlignBegin=77741|AlignEnd=77949
+11	que	que	_	_	_	_	_	_	AlignBegin=77949|AlignEnd=78156
+12	mon	mon	_	_	_	_	_	_	AlignBegin=78156|AlignEnd=78364
+13	père	père	_	_	_	_	_	_	AlignBegin=78364|AlignEnd=78572
+14	.	.	_	_	_	_	_	_	AlignBegin=78572|AlignEnd=78572
+
+# sent_id = Zoe_Sacotte.intervals.conll__35
+# text = Donc horrible.
+# sound_url = Zoe_Sacotte.wav
+1	Donc	Donc	_	_	_	_	_	_	AlignBegin=78572|AlignEnd=79121
+2	horrible	horrible	_	_	_	_	_	_	AlignBegin=79121|AlignEnd=79670
+3	.	.	_	_	_	_	_	_	AlignBegin=79670|AlignEnd=79670
+
+# sent_id = Zoe_Sacotte.intervals.conll__36
+# text = Donc, nous nous, tous les trois, on était hyper gênés.
+# sound_url = Zoe_Sacotte.wav
+1	Donc	Donc	_	_	_	_	_	_	AlignBegin=80031|AlignEnd=80241
+2	,	,	_	_	_	_	_	_	AlignBegin=80241|AlignEnd=80241
+3	nous	nous	_	_	_	_	_	_	AlignBegin=80241|AlignEnd=80451
+4	nous	nous	_	_	_	_	_	_	AlignBegin=80451|AlignEnd=80661
+5	,	,	_	_	_	_	_	_	AlignBegin=80661|AlignEnd=80661
+6	tous	tous	_	_	_	_	_	_	AlignBegin=80661|AlignEnd=80872
+7	les	les	_	_	_	_	_	_	AlignBegin=80872|AlignEnd=81082
+8	trois	trois	_	_	_	_	_	_	AlignBegin=81082|AlignEnd=81292
+9	,	,	_	_	_	_	_	_	AlignBegin=81292|AlignEnd=81292
+10	on	on	_	_	_	_	_	_	AlignBegin=81292|AlignEnd=81502
+11	était	était	_	_	_	_	_	_	AlignBegin=81502|AlignEnd=81712
+12	hyper	hyper	_	_	_	_	_	_	AlignBegin=81712|AlignEnd=81922
+13	gênés	gênés	_	_	_	_	_	_	AlignBegin=81922|AlignEnd=82132
+14	.	.	_	_	_	_	_	_	AlignBegin=82132|AlignEnd=82132
+
+# sent_id = Zoe_Sacotte.intervals.conll__37
+# text = Pire soirée de ma vie !
+# sound_url = Zoe_Sacotte.wav
+1	Pire	Pire	_	_	_	_	_	_	AlignBegin=82822|AlignEnd=82982
+2	soirée	soirée	_	_	_	_	_	_	AlignBegin=82982|AlignEnd=83143
+3	de	de	_	_	_	_	_	_	AlignBegin=83143|AlignEnd=83303
+4	ma	ma	_	_	_	_	_	_	AlignBegin=83303|AlignEnd=83463
+5	vie	vie	_	_	_	_	_	_	AlignBegin=83463|AlignEnd=83623
+6	!	!	_	_	_	_	_	_	AlignBegin=83623|AlignEnd=83623
+
+# sent_id = Zoe_Sacotte.intervals.conll__38
+# text = Au final, le bowling se passe, mais c'était très long.
+# sound_url = Zoe_Sacotte.wav
+1	Au	Au	_	_	_	_	_	_	AlignBegin=84402|AlignEnd=84661
+2	final	final	_	_	_	_	_	_	AlignBegin=84661|AlignEnd=84921
+3	,	,	_	_	_	_	_	_	AlignBegin=84921|AlignEnd=84921
+4	le	le	_	_	_	_	_	_	AlignBegin=84921|AlignEnd=85180
+5	bowling	bowling	_	_	_	_	_	_	AlignBegin=85180|AlignEnd=85439
+6	se	se	_	_	_	_	_	_	AlignBegin=85439|AlignEnd=85698
+7	passe	passe	_	_	_	_	_	_	AlignBegin=85698|AlignEnd=85957
+8	,	,	_	_	_	_	_	_	AlignBegin=85957|AlignEnd=85957
+9	mais	mais	_	_	_	_	_	_	AlignBegin=85957|AlignEnd=86216
+10	c'était	c'était	_	_	_	_	_	_	AlignBegin=86216|AlignEnd=86475
+11	très	très	_	_	_	_	_	_	AlignBegin=86475|AlignEnd=86734
+12	long	long	_	_	_	_	_	_	AlignBegin=86734|AlignEnd=86994
+13	.	.	_	_	_	_	_	_	AlignBegin=86994|AlignEnd=86994
+
+# sent_id = Zoe_Sacotte.intervals.conll__39
+# text = Il voulait faire une deuxième partie.
+# sound_url = Zoe_Sacotte.wav
+1	Il	Il	_	_	_	_	_	_	AlignBegin=87936|AlignEnd=88144
+2	voulait	voulait	_	_	_	_	_	_	AlignBegin=88144|AlignEnd=88351
+3	faire	faire	_	_	_	_	_	_	AlignBegin=88351|AlignEnd=88559
+4	une	une	_	_	_	_	_	_	AlignBegin=88559|AlignEnd=88767
+5	deuxième	deuxième	_	_	_	_	_	_	AlignBegin=88767|AlignEnd=88974
+6	partie	partie	_	_	_	_	_	_	AlignBegin=88974|AlignEnd=89182
+7	.	.	_	_	_	_	_	_	AlignBegin=89182|AlignEnd=89182
+
+# sent_id = Zoe_Sacotte.intervals.conll__40
+# text = Heureusement, pas de deuxième partie.
+# sound_url = Zoe_Sacotte.wav
+1	Heureusement	Heureusement	_	_	_	_	_	_	AlignBegin=89182|AlignEnd=89491
+2	,	,	_	_	_	_	_	_	AlignBegin=89491|AlignEnd=89491
+3	pas	pas	_	_	_	_	_	_	AlignBegin=89491|AlignEnd=89801
+4	de	de	_	_	_	_	_	_	AlignBegin=89801|AlignEnd=90110
+5	deuxième	deuxième	_	_	_	_	_	_	AlignBegin=90110|AlignEnd=90419
+6	partie	partie	_	_	_	_	_	_	AlignBegin=90419|AlignEnd=90728
+7	.	.	_	_	_	_	_	_	AlignBegin=90728|AlignEnd=90728
+
+# sent_id = Zoe_Sacotte.intervals.conll__41
+# text = Le le supplice s'est arrêté là.
+# sound_url = Zoe_Sacotte.wav
+1	Le	Le	_	_	_	_	_	_	AlignBegin=90971|AlignEnd=91280
+2	le	le	_	_	_	_	_	_	AlignBegin=91280|AlignEnd=91589
+3	supplice	supplice	_	_	_	_	_	_	AlignBegin=91589|AlignEnd=91898
+4	s'est	s'est	_	_	_	_	_	_	AlignBegin=91898|AlignEnd=92207
+5	arrêté	arrêté	_	_	_	_	_	_	AlignBegin=92207|AlignEnd=92516
+6	là	là	_	_	_	_	_	_	AlignBegin=92516|AlignEnd=92825
+7	.	.	_	_	_	_	_	_	AlignBegin=92825|AlignEnd=92825
+
+# sent_id = Zoe_Sacotte.intervals.conll__42
+# text = Et ensuite, il a, ma mère l'a invité à manger, euh, chez nous, mais, horrible !
+# sound_url = Zoe_Sacotte.wav
+1	Et	Et	_	_	_	_	_	_	AlignBegin=93506|AlignEnd=93796
+2	ensuite	ensuite	_	_	_	_	_	_	AlignBegin=93796|AlignEnd=94087
+3	,	,	_	_	_	_	_	_	AlignBegin=94087|AlignEnd=94087
+4	il	il	_	_	_	_	_	_	AlignBegin=94087|AlignEnd=94377
+5	a	a	_	_	_	_	_	_	AlignBegin=94377|AlignEnd=94668
+6	,	,	_	_	_	_	_	_	AlignBegin=94668|AlignEnd=94668
+7	ma	ma	_	_	_	_	_	_	AlignBegin=94668|AlignEnd=94958
+8	mère	mère	_	_	_	_	_	_	AlignBegin=94958|AlignEnd=95249
+9	l'a	l'a	_	_	_	_	_	_	AlignBegin=95249|AlignEnd=95539
+10	invité	invité	_	_	_	_	_	_	AlignBegin=95539|AlignEnd=95829
+11	à	à	_	_	_	_	_	_	AlignBegin=95829|AlignEnd=96120
+12	manger	manger	_	_	_	_	_	_	AlignBegin=96120|AlignEnd=96410
+13	,	,	_	_	_	_	_	_	AlignBegin=96410|AlignEnd=96410
+14	euh	euh	_	_	_	_	_	_	AlignBegin=96410|AlignEnd=96701
+15	,	,	_	_	_	_	_	_	AlignBegin=96701|AlignEnd=96701
+16	chez	chez	_	_	_	_	_	_	AlignBegin=96701|AlignEnd=96991
+17	nous	nous	_	_	_	_	_	_	AlignBegin=96991|AlignEnd=97282
+18	,	,	_	_	_	_	_	_	AlignBegin=97282|AlignEnd=97282
+19	mais	mais	_	_	_	_	_	_	AlignBegin=97282|AlignEnd=97572
+20	,	,	_	_	_	_	_	_	AlignBegin=97572|AlignEnd=97572
+21	horrible	horrible	_	_	_	_	_	_	AlignBegin=97572|AlignEnd=97862
+22	!	!	_	_	_	_	_	_	AlignBegin=97862|AlignEnd=97862
+
+# sent_id = Zoe_Sacotte.intervals.conll__43
+# text = Et donc tout ça, c'était combien de temps après la séparation de tes parents ?
+# sound_url = Zoe_Sacotte.wav
+1	Et	Et	_	_	_	_	_	_	AlignBegin=98188|AlignEnd=98363
+2	donc	donc	_	_	_	_	_	_	AlignBegin=98363|AlignEnd=98538
+3	tout	tout	_	_	_	_	_	_	AlignBegin=98538|AlignEnd=98712
+4	ça	ça	_	_	_	_	_	_	AlignBegin=98712|AlignEnd=98887
+5	,	,	_	_	_	_	_	_	AlignBegin=98887|AlignEnd=98887
+6	c'était	c'était	_	_	_	_	_	_	AlignBegin=98887|AlignEnd=99062
+7	combien	combien	_	_	_	_	_	_	AlignBegin=99062|AlignEnd=99237
+8	de	de	_	_	_	_	_	_	AlignBegin=99237|AlignEnd=99412
+9	temps	temps	_	_	_	_	_	_	AlignBegin=99412|AlignEnd=99587
+10	après	après	_	_	_	_	_	_	AlignBegin=99587|AlignEnd=99762
+11	la	la	_	_	_	_	_	_	AlignBegin=99762|AlignEnd=99937
+12	séparation	séparation	_	_	_	_	_	_	AlignBegin=99937|AlignEnd=100111
+13	de	de	_	_	_	_	_	_	AlignBegin=100111|AlignEnd=100286
+14	tes	tes	_	_	_	_	_	_	AlignBegin=100286|AlignEnd=100461
+15	parents	parents	_	_	_	_	_	_	AlignBegin=100461|AlignEnd=100636
+16	?	?	_	_	_	_	_	_	AlignBegin=100636|AlignEnd=100636
+
+# sent_id = Zoe_Sacotte.intervals.conll__44
+# text = Bah, c'était, euh, six mois après, à peu près.
+# sound_url = Zoe_Sacotte.wav
+1	Bah	Bah	_	_	_	_	_	_	AlignBegin=100928|AlignEnd=101140
+2	,	,	_	_	_	_	_	_	AlignBegin=101140|AlignEnd=101140
+3	c'était	c'était	_	_	_	_	_	_	AlignBegin=101140|AlignEnd=101351
+4	,	,	_	_	_	_	_	_	AlignBegin=101351|AlignEnd=101351
+5	euh	euh	_	_	_	_	_	_	AlignBegin=101351|AlignEnd=101562
+6	,	,	_	_	_	_	_	_	AlignBegin=101562|AlignEnd=101562
+7	six	six	_	_	_	_	_	_	AlignBegin=101562|AlignEnd=101774
+8	mois	mois	_	_	_	_	_	_	AlignBegin=101774|AlignEnd=101985
+9	après	après	_	_	_	_	_	_	AlignBegin=101985|AlignEnd=102197
+10	,	,	_	_	_	_	_	_	AlignBegin=102197|AlignEnd=102197
+11	à	à	_	_	_	_	_	_	AlignBegin=102197|AlignEnd=102408
+12	peu	peu	_	_	_	_	_	_	AlignBegin=102408|AlignEnd=102620
+13	près	près	_	_	_	_	_	_	AlignBegin=102620|AlignEnd=102831
+14	.	.	_	_	_	_	_	_	AlignBegin=102831|AlignEnd=102831
+
+# sent_id = Zoe_Sacotte.intervals.conll__45
+# text = Donc, euh, ouai, chaud.
+# sound_url = Zoe_Sacotte.wav
+1	Donc	Donc	_	_	_	_	_	_	AlignBegin=102924|AlignEnd=103178
+2	,	,	_	_	_	_	_	_	AlignBegin=103178|AlignEnd=103178
+3	euh	euh	_	_	_	_	_	_	AlignBegin=103178|AlignEnd=103432
+4	,	,	_	_	_	_	_	_	AlignBegin=103432|AlignEnd=103432
+5	ouai	ouai	_	_	_	_	_	_	AlignBegin=103432|AlignEnd=103685
+6	,	,	_	_	_	_	_	_	AlignBegin=103685|AlignEnd=103685
+7	chaud	chaud	_	_	_	_	_	_	AlignBegin=103685|AlignEnd=103939
+8	.	.	_	_	_	_	_	_	AlignBegin=103939|AlignEnd=103939
+
+# sent_id = Zoe_Sacotte.intervals.conll__46
+# text = Mais horrible !
+# sound_url = Zoe_Sacotte.wav
+1	Mais	Mais	_	_	_	_	_	_	AlignBegin=104010|AlignEnd=104412
+2	horrible	horrible	_	_	_	_	_	_	AlignBegin=104412|AlignEnd=104815
+3	!	!	_	_	_	_	_	_	AlignBegin=104815|AlignEnd=104815
+
+# sent_id = Zoe_Sacotte.intervals.conll__47
+# text = Ce qui fait qu'il a débarqué dans la maison, dans la maison familiale.
+# sound_url = Zoe_Sacotte.wav
+1	Ce	Ce	_	_	_	_	_	_	AlignBegin=104883|AlignEnd=105094
+2	qui	qui	_	_	_	_	_	_	AlignBegin=105094|AlignEnd=105305
+3	fait	fait	_	_	_	_	_	_	AlignBegin=105305|AlignEnd=105515
+4	qu'il	qu'il	_	_	_	_	_	_	AlignBegin=105515|AlignEnd=105726
+5	a	a	_	_	_	_	_	_	AlignBegin=105726|AlignEnd=105937
+6	débarqué	débarqué	_	_	_	_	_	_	AlignBegin=105937|AlignEnd=106147
+7	dans	dans	_	_	_	_	_	_	AlignBegin=106147|AlignEnd=106358
+8	la	la	_	_	_	_	_	_	AlignBegin=106358|AlignEnd=106568
+9	maison	maison	_	_	_	_	_	_	AlignBegin=106568|AlignEnd=106779
+10	,	,	_	_	_	_	_	_	AlignBegin=106779|AlignEnd=106779
+11	dans	dans	_	_	_	_	_	_	AlignBegin=106779|AlignEnd=106990
+12	la	la	_	_	_	_	_	_	AlignBegin=106990|AlignEnd=107200
+13	maison	maison	_	_	_	_	_	_	AlignBegin=107200|AlignEnd=107411
+14	familiale	familiale	_	_	_	_	_	_	AlignBegin=107411|AlignEnd=107621
+15	.	.	_	_	_	_	_	_	AlignBegin=107621|AlignEnd=107621
+
+# sent_id = Zoe_Sacotte.intervals.conll__48
+# text = Là où j'ai vécu avec mes deux parents ensemble et tout.
+# sound_url = Zoe_Sacotte.wav
+1	Là	Là	_	_	_	_	_	_	AlignBegin=107621|AlignEnd=107837
+2	où	où	_	_	_	_	_	_	AlignBegin=107837|AlignEnd=108052
+3	j'ai	j'ai	_	_	_	_	_	_	AlignBegin=108052|AlignEnd=108267
+4	vécu	vécu	_	_	_	_	_	_	AlignBegin=108267|AlignEnd=108483
+5	avec	avec	_	_	_	_	_	_	AlignBegin=108483|AlignEnd=108698
+6	mes	mes	_	_	_	_	_	_	AlignBegin=108698|AlignEnd=108913
+7	deux	deux	_	_	_	_	_	_	AlignBegin=108913|AlignEnd=109129
+8	parents	parents	_	_	_	_	_	_	AlignBegin=109129|AlignEnd=109344
+9	ensemble	ensemble	_	_	_	_	_	_	AlignBegin=109344|AlignEnd=109559
+10	et	et	_	_	_	_	_	_	AlignBegin=109559|AlignEnd=109775
+11	tout	tout	_	_	_	_	_	_	AlignBegin=109775|AlignEnd=109990
+12	.	.	_	_	_	_	_	_	AlignBegin=109990|AlignEnd=109990
+
+# sent_id = Zoe_Sacotte.intervals.conll__49
+# text = Et là, on a cru, j'ai cru, on était chez lui !
+# sound_url = Zoe_Sacotte.wav
+1	Et	Et	_	_	_	_	_	_	AlignBegin=110792|AlignEnd=110998
+2	là	là	_	_	_	_	_	_	AlignBegin=110998|AlignEnd=111204
+3	,	,	_	_	_	_	_	_	AlignBegin=111204|AlignEnd=111204
+4	on	on	_	_	_	_	_	_	AlignBegin=111204|AlignEnd=111411
+5	a	a	_	_	_	_	_	_	AlignBegin=111411|AlignEnd=111617
+6	cru	cru	_	_	_	_	_	_	AlignBegin=111617|AlignEnd=111823
+7	,	,	_	_	_	_	_	_	AlignBegin=111823|AlignEnd=111823
+8	j'ai	j'ai	_	_	_	_	_	_	AlignBegin=111823|AlignEnd=112029
+9	cru	cru	_	_	_	_	_	_	AlignBegin=112029|AlignEnd=112236
+10	,	,	_	_	_	_	_	_	AlignBegin=112236|AlignEnd=112236
+11	on	on	_	_	_	_	_	_	AlignBegin=112236|AlignEnd=112442
+12	était	était	_	_	_	_	_	_	AlignBegin=112442|AlignEnd=112648
+13	chez	chez	_	_	_	_	_	_	AlignBegin=112648|AlignEnd=112854
+14	lui	lui	_	_	_	_	_	_	AlignBegin=112854|AlignEnd=113060
+15	!	!	_	_	_	_	_	_	AlignBegin=113060|AlignEnd=113060
+
+# sent_id = Zoe_Sacotte.intervals.conll__50
+# text = Il se levait.
+# sound_url = Zoe_Sacotte.wav
+1	Il	Il	_	_	_	_	_	_	AlignBegin=113388|AlignEnd=113659
+2	se	se	_	_	_	_	_	_	AlignBegin=113659|AlignEnd=113930
+3	levait	levait	_	_	_	_	_	_	AlignBegin=113930|AlignEnd=114202
+4	.	.	_	_	_	_	_	_	AlignBegin=114202|AlignEnd=114202
+
+# sent_id = Zoe_Sacotte.intervals.conll__51
+# text = Il, euh, préparait la bouffe, euh.
+# sound_url = Zoe_Sacotte.wav
+1	Il	Il	_	_	_	_	_	_	AlignBegin=114202|AlignEnd=114507
+2	,	,	_	_	_	_	_	_	AlignBegin=114507|AlignEnd=114507
+3	euh	euh	_	_	_	_	_	_	AlignBegin=114507|AlignEnd=114812
+4	,	,	_	_	_	_	_	_	AlignBegin=114812|AlignEnd=114812
+5	préparait	préparait	_	_	_	_	_	_	AlignBegin=114812|AlignEnd=115117
+6	la	la	_	_	_	_	_	_	AlignBegin=115117|AlignEnd=115421
+7	bouffe	bouffe	_	_	_	_	_	_	AlignBegin=115421|AlignEnd=115726
+8	,	,	_	_	_	_	_	_	AlignBegin=115726|AlignEnd=115726
+9	euh	euh	_	_	_	_	_	_	AlignBegin=115726|AlignEnd=116031
+10	.	.	_	_	_	_	_	_	AlignBegin=116031|AlignEnd=116031
+
+# sent_id = Zoe_Sacotte.intervals.conll__52
+# text = Il arrivait avec, euh, avec les assiettes.
+# sound_url = Zoe_Sacotte.wav
+1	Il	Il	_	_	_	_	_	_	AlignBegin=116031|AlignEnd=116303
+2	arrivait	arrivait	_	_	_	_	_	_	AlignBegin=116303|AlignEnd=116575
+3	avec	avec	_	_	_	_	_	_	AlignBegin=116575|AlignEnd=116847
+4	,	,	_	_	_	_	_	_	AlignBegin=116847|AlignEnd=116847
+5	euh	euh	_	_	_	_	_	_	AlignBegin=116847|AlignEnd=117118
+6	,	,	_	_	_	_	_	_	AlignBegin=117118|AlignEnd=117118
+7	avec	avec	_	_	_	_	_	_	AlignBegin=117118|AlignEnd=117390
+8	les	les	_	_	_	_	_	_	AlignBegin=117390|AlignEnd=117662
+9	assiettes	assiettes	_	_	_	_	_	_	AlignBegin=117662|AlignEnd=117934
+10	.	.	_	_	_	_	_	_	AlignBegin=117934|AlignEnd=117934
+
+# sent_id = Zoe_Sacotte.intervals.conll__53
+# text = Il allait chercher, euh, l'eau au frais fin.
+# sound_url = Zoe_Sacotte.wav
+1	Il	Il	_	_	_	_	_	_	AlignBegin=117934|AlignEnd=118225
+2	allait	allait	_	_	_	_	_	_	AlignBegin=118225|AlignEnd=118517
+3	chercher	chercher	_	_	_	_	_	_	AlignBegin=118517|AlignEnd=118809
+4	,	,	_	_	_	_	_	_	AlignBegin=118809|AlignEnd=118809
+5	euh	euh	_	_	_	_	_	_	AlignBegin=118809|AlignEnd=119100
+6	,	,	_	_	_	_	_	_	AlignBegin=119100|AlignEnd=119100
+7	l'eau	l'eau	_	_	_	_	_	_	AlignBegin=119100|AlignEnd=119392
+8	au	au	_	_	_	_	_	_	AlignBegin=119392|AlignEnd=119684
+9	frais	frais	_	_	_	_	_	_	AlignBegin=119684|AlignEnd=119975
+10	fin	fin	_	_	_	_	_	_	AlignBegin=119975|AlignEnd=120267
+11	.	.	_	_	_	_	_	_	AlignBegin=120267|AlignEnd=120267
+
+# sent_id = Zoe_Sacotte.intervals.conll__54
+# text = Mais.
+# sound_url = Zoe_Sacotte.wav
+1	Mais	Mais	_	_	_	_	_	_	AlignBegin=120661|AlignEnd=121410
+2	.	.	_	_	_	_	_	_	AlignBegin=121410|AlignEnd=121410
+
+# sent_id = Zoe_Sacotte.intervals.conll__55
+# text = Mais genre nous, on était invité chez lui, donc hyper génant.
+# sound_url = Zoe_Sacotte.wav
+1	Mais	Mais	_	_	_	_	_	_	AlignBegin=122072|AlignEnd=122309
+2	genre	genre	_	_	_	_	_	_	AlignBegin=122309|AlignEnd=122546
+3	nous	nous	_	_	_	_	_	_	AlignBegin=122546|AlignEnd=122782
+4	,	,	_	_	_	_	_	_	AlignBegin=122782|AlignEnd=122782
+5	on	on	_	_	_	_	_	_	AlignBegin=122782|AlignEnd=123019
+6	était	était	_	_	_	_	_	_	AlignBegin=123019|AlignEnd=123255
+7	invité	invité	_	_	_	_	_	_	AlignBegin=123255|AlignEnd=123492
+8	chez	chez	_	_	_	_	_	_	AlignBegin=123492|AlignEnd=123728
+9	lui	lui	_	_	_	_	_	_	AlignBegin=123728|AlignEnd=123965
+10	,	,	_	_	_	_	_	_	AlignBegin=123965|AlignEnd=123965
+11	donc	donc	_	_	_	_	_	_	AlignBegin=123965|AlignEnd=124201
+12	hyper	hyper	_	_	_	_	_	_	AlignBegin=124201|AlignEnd=124438
+13	génant	génant	_	_	_	_	_	_	AlignBegin=124438|AlignEnd=124675
+14	.	.	_	_	_	_	_	_	AlignBegin=124675|AlignEnd=124675
+
+# sent_id = Zoe_Sacotte.intervals.conll__56
+# text = Aucune discussion.
+# sound_url = Zoe_Sacotte.wav
+1	Aucune	Aucune	_	_	_	_	_	_	AlignBegin=125040|AlignEnd=125518
+2	discussion	discussion	_	_	_	_	_	_	AlignBegin=125518|AlignEnd=125995
+3	.	.	_	_	_	_	_	_	AlignBegin=125995|AlignEnd=125995
+
+# sent_id = Zoe_Sacotte.intervals.conll__57
+# text = Et t'en as parlé ?
+# sound_url = Zoe_Sacotte.wav
+1	Et	Et	_	_	_	_	_	_	AlignBegin=126239|AlignEnd=126340
+2	t'en	t'en	_	_	_	_	_	_	AlignBegin=126340|AlignEnd=126440
+3	as	as	_	_	_	_	_	_	AlignBegin=126440|AlignEnd=126540
+4	parlé	parlé	_	_	_	_	_	_	AlignBegin=126540|AlignEnd=126640
+5	?	?	_	_	_	_	_	_	AlignBegin=126640|AlignEnd=126640
+

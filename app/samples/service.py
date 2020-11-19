@@ -10,7 +10,7 @@ from app import db
 from app.config import Config
 from app.user.model import User
 from app.utils.conll3 import conllFile2trees, trees2conllFile
-from app.utils.grew_utils import grew_request
+from app.utils.grew_utils import GrewService, grew_request
 from flask import abort, current_app
 from sqlalchemy.sql.operators import startswith_op
 from werkzeug.utils import secure_filename
@@ -36,50 +36,15 @@ class SampleUploadService:
         fileobject.save(path_file)
 
         convert_users_ids(path_file, users_ids_convertor)
+        add_or_keep_timestamps(path_file)
+        # tmpfile = add_or_keep_timestamps(path_file)
 
         if sample_name not in existing_samples:
-            # create a new sample in the grew project
-            print("========== [newSample]")
-            reply = grew_request(
-                "newSample",
-                data={"project_id": project_name, "sample_id": sample_name},
-            )
-            print("reply = ", reply)
+            GrewService.create_sample(project_name, sample_name)
 
-        else:
-            print("/!\ sample already exists")
-
-        tmpfile = add_or_keep_timestamps(path_file)
-
-        with open(tmpfile, "rb") as inf:
-            print("========== [saveConll]")
-            reply = grew_request(
-                "saveConll",
-                data={"project_id": project_name, "sample_id": sample_name},
-                files={"conll_file": inf},
-            )
-
-        print("REPLY S+TATIUUUSS", reply)
-        if reply.get("status") == "OK":
-            return 200, sample_name + " saved successfully on Grew"
-        else:
-            abort(400, {"message": reply.get(
-                "message", "unknown error from grew")})
-            # mes = reply.get("data", {}).get("message", "")
-            # # error because reply.get('message',{}) is a string
-            # error_message = reply.get("message", {}).get("Conllx_error:")
-            # error_sent_id = (
-            #     reply.get("message", {}).get("Conllx_error:").get("sent_id", "")
-            # )
-            # if not mes:
-            #     mes = "unknown problem"
-            # li = reply.get("data", {}).get("line", "")
-            # if li:
-            #     li = " line " + str(li)
-            # else:
-            #     li = ""
-            # return 400, sample_name + " caused a problem: " + mes + li
-            # abort(400)
+        with open(path_file, "rb") as file_to_save:
+            GrewService.save_sample(project_name, sample_name, file_to_save)
+        
 
 
 # TODO : refactor this
@@ -299,21 +264,20 @@ def convert_users_ids(path_file, users_ids_convertor):
     #     tree.sentencefeatures[]
 
 
-def add_or_keep_timestamps(conll_file):
+def add_or_keep_timestamps(path_file: str):
     """ adds a timestamp on the tree if there is not one """
     # TODO : do this more efficiently
-    tmpfile = os.path.join(Config.UPLOAD_FOLDER, "tmp.conllu")
-    trees = conllFile2trees(conll_file)
+    # path_tmp_file = os.path.join(Config.UPLOAD_FOLDER, "tmp.conllu")
+    trees = conllFile2trees(path_file)
     for t in trees:
-        if t.sentencefeatures.get("timestamp"):
-            continue
-        else:
+        if not t.sentencefeatures.get("timestamp"):
             now = datetime.now()
             # int  millisecondes
             timestamp = datetime.timestamp(now) * 1000
             timestamp = round(timestamp)
             t.sentencefeatures["timestamp"] = str(timestamp)
-        # TODO check format of the conll while we're at it ?
-
-    trees2conllFile(trees, tmpfile)
-    return tmpfile
+    
+    trees2conllFile(trees, path_file)
+    return path_file
+    # trees2conllFile(trees, path_tmp_file)
+    # return path_tmp_file

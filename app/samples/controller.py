@@ -25,20 +25,20 @@ class SampleResource(Resource):
         grew_samples = GrewService.get_samples(project_name)
 
         processed_samples = []
-        for sa in grew_samples:
+        for grew_sample in grew_samples:
             sample = {
-                "sample_name": sa["name"],
-                "sentences": sa["number_sentences"],
-                "number_trees": sa["number_trees"],
-                "tokens": sa["number_tokens"],
-                "treesFrom": sa["users"],
+                "sample_name": grew_sample["name"],
+                "sentences": grew_sample["number_sentences"],
+                "number_trees": grew_sample["number_trees"],
+                "tokens": grew_sample["number_tokens"],
+                "treesFrom": grew_sample["users"],
                 "roles": {},
             }
             sample["roles"] = SampleRoleService.get_by_sample_name(
-                project.id, sa["name"]
+                project.id, grew_sample["name"]
             )
             sample_exercise_level = SampleExerciseLevelService.get_by_sample_name(
-                project.id, sa["name"]
+                project.id, grew_sample["name"]
             )
             if sample_exercise_level:
                 sample["exerciseLevel"] = sample_exercise_level.exercise_level.code
@@ -52,37 +52,33 @@ class SampleResource(Resource):
         """Upload a sample to the server"""
         project = ProjectService.get_by_name(project_name)
 
-        fichiers = request.files.to_dict(flat=False).get("files")
+        files = request.files.to_dict(flat=False).get("files")
         users_ids_convertor = {}
 
         for user_id_mapping in json.loads(request.form.get("usersIdsConvertor", "{}")):
             users_ids_convertor[user_id_mapping["old"]] = user_id_mapping["new"]
 
-        if fichiers:
+        if files:
             reextensions = re.compile(r"\.(conll(u|\d+)?|txt|tsv|csv)$")
             grew_samples = GrewService.get_samples(project_name)
             samples_names = [sa["name"] for sa in grew_samples]
 
-            for f in fichiers:
-                status, message = SampleUploadService.upload(
-                    f,
+            for file in files:
+                SampleUploadService.upload(
+                    file,
                     project_name,
                     reextensions=reextensions,
                     existing_samples=samples_names,
                     users_ids_convertor=users_ids_convertor,
                 )
-                if status != 200:
-                    resp = {"status": status, "message": message}
-                    return resp
-
-            # samples = {"samples": project_service.get_samples(project_name)}
-            samples = {"samples": "success"}
+            # samples = {"samples": Sam.get_samples(project_name)}
+            return {"status": "OK"}
             return samples
 
 
-@api.route("/<string:project_name>/samples/<string:sampleName>/role")
+@api.route("/<string:project_name>/samples/<string:sample_name>/role")
 class SampleRoleResource(Resource):
-    def post(self, project_name: str, sampleName: str):
+    def post(self, project_name: str, sample_name: str):
         parser = reqparse.RequestParser()
         parser.add_argument(name="username", type=str)
         parser.add_argument(name="targetrole", type=str)
@@ -96,24 +92,24 @@ class SampleRoleResource(Resource):
         if args.action == "add":
             new_attrs = {
                 "project_id": project_id,
-                "sample_name": sampleName,
+                "sample_name": sample_name,
                 "user_id": user_id,
                 "role": role,
             }
             SampleRoleService.create(new_attrs)
 
         if args.action == "remove":
-            SampleRoleService.delete_one(project_id, sampleName, user_id, role)
+            SampleRoleService.delete_one(project_id, sample_name, user_id, role)
 
         data = {
-            "roles": SampleRoleService.get_by_sample_name(project.id, sampleName),
+            "roles": SampleRoleService.get_by_sample_name(project.id, sample_name),
         }
         return data
 
 
-@api.route("/<string:project_name>/samples/<string:sampleName>/exercise-level")
+@api.route("/<string:project_name>/samples/<string:sample_name>/exercise-level")
 class SampleExerciseLevelResource(Resource):
-    def post(self, project_name: str, sampleName: str):
+    def post(self, project_name: str, sample_name: str):
         parser = reqparse.RequestParser()
         parser.add_argument(name="exerciseLevel", type=str)
         args = parser.parse_args()
@@ -122,12 +118,12 @@ class SampleExerciseLevelResource(Resource):
         project_id = project.id
 
         sample_exercise_level = SampleExerciseLevelService.get_by_sample_name(
-            project_id, sampleName
+            project_id, sample_name
         )
 
         new_attrs = {
             "project_id": project_id,
-            "sample_name": sampleName,
+            "sample_name": sample_name,
             "exercise_level": args.exerciseLevel,
         }
 
@@ -195,11 +191,7 @@ class DeleteSampleResource(Resource):
     def delete(self, project_name: str, sample_name: str):
         project = ProjectService.get_by_name(project_name)
         ProjectService.check_if_project_exist(project)
-
-        grew_request(
-            "eraseSample",
-            data={"project_id": project_name, "sample_id": sample_name},
-        )
+        GrewService.delete_sample(project_name, sample_name)
         SampleRoleService.delete_by_sample_name(project.id, sample_name)
         SampleExerciseLevelService.delete_by_sample_name(project.id, sample_name)
         return {

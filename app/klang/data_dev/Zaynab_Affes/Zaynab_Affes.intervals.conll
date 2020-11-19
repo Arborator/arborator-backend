@@ -1,0 +1,853 @@
+# sent_id = Zaynab_Affes.intervals.conll__1
+# text = ma soeur elle était venu chez nous
+# sound_url = Zaynab_Affes.wav
+1	ma	ma	_	_	_	_	_	_	AlignBegin=0|AlignEnd=2
+2	soeur	soeur	_	_	_	_	_	_	AlignBegin=2|AlignEnd=4
+3	elle	elle	_	_	_	_	_	_	AlignBegin=4|AlignEnd=6
+4	était	était	_	_	_	_	_	_	AlignBegin=6|AlignEnd=8
+5	venu	venu	_	_	_	_	_	_	AlignBegin=8|AlignEnd=10
+6	chez	chez	_	_	_	_	_	_	AlignBegin=10|AlignEnd=12
+7	nous	nous	_	_	_	_	_	_	AlignBegin=12|AlignEnd=14
+
+# sent_id = Zaynab_Affes.intervals.conll__2
+# text = Ma soeur,elle était venue chez nous.
+# sound_url = Zaynab_Affes.wav
+1	Ma	Ma	_	_	_	_	_	_	AlignBegin=14|AlignEnd=210
+2	soeur	soeur	_	_	_	_	_	_	AlignBegin=210|AlignEnd=406
+3	,	,	_	_	_	_	_	_	AlignBegin=406|AlignEnd=406
+4	elle	elle	_	_	_	_	_	_	AlignBegin=406|AlignEnd=602
+5	était	était	_	_	_	_	_	_	AlignBegin=602|AlignEnd=799
+6	venue	venue	_	_	_	_	_	_	AlignBegin=799|AlignEnd=995
+7	chez	chez	_	_	_	_	_	_	AlignBegin=995|AlignEnd=1191
+8	nous	nous	_	_	_	_	_	_	AlignBegin=1191|AlignEnd=1387
+9	.	.	_	_	_	_	_	_	AlignBegin=1387|AlignEnd=1387
+
+# sent_id = Zaynab_Affes.intervals.conll__3
+# text = tu vois,tout allait bien et tout. euh,
+# sound_url = Zaynab_Affes.wav
+1	tu	tu	_	_	_	_	_	_	AlignBegin=1387|AlignEnd=1623
+2	vois	vois	_	_	_	_	_	_	AlignBegin=1623|AlignEnd=1858
+3	,	,	_	_	_	_	_	_	AlignBegin=1858|AlignEnd=1858
+4	tout	tout	_	_	_	_	_	_	AlignBegin=1858|AlignEnd=2094
+5	allait	allait	_	_	_	_	_	_	AlignBegin=2094|AlignEnd=2329
+6	bien	bien	_	_	_	_	_	_	AlignBegin=2329|AlignEnd=2564
+7	et	et	_	_	_	_	_	_	AlignBegin=2564|AlignEnd=2800
+8	tout	tout	_	_	_	_	_	_	AlignBegin=2800|AlignEnd=3035
+9	.	.	_	_	_	_	_	_	AlignBegin=3035|AlignEnd=3035
+10	euh	euh	_	_	_	_	_	_	AlignBegin=3035|AlignEnd=3271
+11	,	,	_	_	_	_	_	_	AlignBegin=3271|AlignEnd=3271
+
+# sent_id = Zaynab_Affes.intervals.conll__4
+# text = on avait mangé le soir,
+# sound_url = Zaynab_Affes.wav
+1	on	on	_	_	_	_	_	_	AlignBegin=3271|AlignEnd=3505
+2	avait	avait	_	_	_	_	_	_	AlignBegin=3505|AlignEnd=3740
+3	mangé	mangé	_	_	_	_	_	_	AlignBegin=3740|AlignEnd=3975
+4	le	le	_	_	_	_	_	_	AlignBegin=3975|AlignEnd=4210
+5	soir	soir	_	_	_	_	_	_	AlignBegin=4210|AlignEnd=4444
+6	,	,	_	_	_	_	_	_	AlignBegin=4444|AlignEnd=4444
+
+# sent_id = Zaynab_Affes.intervals.conll__5
+# text = et d'un coup,elle commençait à avoir ses contractions.
+# sound_url = Zaynab_Affes.wav
+1	et	et	_	_	_	_	_	_	AlignBegin=5032|AlignEnd=5300
+2	d'un	d'un	_	_	_	_	_	_	AlignBegin=5300|AlignEnd=5568
+3	coup	coup	_	_	_	_	_	_	AlignBegin=5568|AlignEnd=5836
+4	,	,	_	_	_	_	_	_	AlignBegin=5836|AlignEnd=5836
+5	elle	elle	_	_	_	_	_	_	AlignBegin=5836|AlignEnd=6104
+6	commençait	commençait	_	_	_	_	_	_	AlignBegin=6104|AlignEnd=6372
+7	à	à	_	_	_	_	_	_	AlignBegin=6372|AlignEnd=6640
+8	avoir	avoir	_	_	_	_	_	_	AlignBegin=6640|AlignEnd=6908
+9	ses	ses	_	_	_	_	_	_	AlignBegin=6908|AlignEnd=7176
+10	contractions	contractions	_	_	_	_	_	_	AlignBegin=7176|AlignEnd=7444
+11	.	.	_	_	_	_	_	_	AlignBegin=7444|AlignEnd=7444
+
+# sent_id = Zaynab_Affes.intervals.conll__6
+# text = euh,on pensait que c'était pas encore le moment.
+# sound_url = Zaynab_Affes.wav
+1	euh	euh	_	_	_	_	_	_	AlignBegin=7444|AlignEnd=7673
+2	,	,	_	_	_	_	_	_	AlignBegin=7673|AlignEnd=7673
+3	on	on	_	_	_	_	_	_	AlignBegin=7673|AlignEnd=7902
+4	pensait	pensait	_	_	_	_	_	_	AlignBegin=7902|AlignEnd=8131
+5	que	que	_	_	_	_	_	_	AlignBegin=8131|AlignEnd=8360
+6	c'était	c'était	_	_	_	_	_	_	AlignBegin=8360|AlignEnd=8589
+7	pas	pas	_	_	_	_	_	_	AlignBegin=8589|AlignEnd=8818
+8	encore	encore	_	_	_	_	_	_	AlignBegin=8818|AlignEnd=9047
+9	le	le	_	_	_	_	_	_	AlignBegin=9047|AlignEnd=9276
+10	moment	moment	_	_	_	_	_	_	AlignBegin=9276|AlignEnd=9505
+11	.	.	_	_	_	_	_	_	AlignBegin=9505|AlignEnd=9505
+
+# sent_id = Zaynab_Affes.intervals.conll__7
+# text = et genre euh,
+# sound_url = Zaynab_Affes.wav
+1	et	et	_	_	_	_	_	_	AlignBegin=10341|AlignEnd=10506
+2	genre	genre	_	_	_	_	_	_	AlignBegin=10506|AlignEnd=10671
+3	euh	euh	_	_	_	_	_	_	AlignBegin=10671|AlignEnd=10836
+4	,	,	_	_	_	_	_	_	AlignBegin=10836|AlignEnd=10836
+
+# sent_id = Zaynab_Affes.intervals.conll__8
+# text = je pense une ou deux heures plus tard,
+# sound_url = Zaynab_Affes.wav
+1	je	je	_	_	_	_	_	_	AlignBegin=10836|AlignEnd=10982
+2	pense	pense	_	_	_	_	_	_	AlignBegin=10982|AlignEnd=11128
+3	une	une	_	_	_	_	_	_	AlignBegin=11128|AlignEnd=11274
+4	ou	ou	_	_	_	_	_	_	AlignBegin=11274|AlignEnd=11420
+5	deux	deux	_	_	_	_	_	_	AlignBegin=11420|AlignEnd=11566
+6	heures	heures	_	_	_	_	_	_	AlignBegin=11566|AlignEnd=11711
+7	plus	plus	_	_	_	_	_	_	AlignBegin=11711|AlignEnd=11857
+8	tard	tard	_	_	_	_	_	_	AlignBegin=11857|AlignEnd=12003
+9	,	,	_	_	_	_	_	_	AlignBegin=12003|AlignEnd=12003
+
+# sent_id = Zaynab_Affes.intervals.conll__9
+# text = elle est fini par euh,
+# sound_url = Zaynab_Affes.wav
+1	elle	elle	_	_	_	_	_	_	AlignBegin=12003|AlignEnd=12149
+2	est	est	_	_	_	_	_	_	AlignBegin=12149|AlignEnd=12295
+3	fini	fini	_	_	_	_	_	_	AlignBegin=12295|AlignEnd=12441
+4	par	par	_	_	_	_	_	_	AlignBegin=12441|AlignEnd=12587
+5	euh	euh	_	_	_	_	_	_	AlignBegin=12587|AlignEnd=12733
+6	,	,	_	_	_	_	_	_	AlignBegin=12733|AlignEnd=12733
+
+# sent_id = Zaynab_Affes.intervals.conll__10
+# text = elle a fini par aller à l'hôpital.
+# sound_url = Zaynab_Affes.wav
+1	elle	elle	_	_	_	_	_	_	AlignBegin=12733|AlignEnd=12947
+2	a	a	_	_	_	_	_	_	AlignBegin=12947|AlignEnd=13162
+3	fini	fini	_	_	_	_	_	_	AlignBegin=13162|AlignEnd=13376
+4	par	par	_	_	_	_	_	_	AlignBegin=13376|AlignEnd=13591
+5	aller	aller	_	_	_	_	_	_	AlignBegin=13591|AlignEnd=13805
+6	à	à	_	_	_	_	_	_	AlignBegin=13805|AlignEnd=14019
+7	l'hôpital	l'hôpital	_	_	_	_	_	_	AlignBegin=14019|AlignEnd=14234
+8	.	.	_	_	_	_	_	_	AlignBegin=14234|AlignEnd=14234
+
+# sent_id = Zaynab_Affes.intervals.conll__11
+# text = et euh,je me souviens toute la nuit,
+# sound_url = Zaynab_Affes.wav
+1	et	et	_	_	_	_	_	_	AlignBegin=15060|AlignEnd=15244
+2	euh	euh	_	_	_	_	_	_	AlignBegin=15244|AlignEnd=15429
+3	,	,	_	_	_	_	_	_	AlignBegin=15429|AlignEnd=15429
+4	je	je	_	_	_	_	_	_	AlignBegin=15429|AlignEnd=15614
+5	me	me	_	_	_	_	_	_	AlignBegin=15614|AlignEnd=15799
+6	souviens	souviens	_	_	_	_	_	_	AlignBegin=15799|AlignEnd=15983
+7	toute	toute	_	_	_	_	_	_	AlignBegin=15983|AlignEnd=16168
+8	la	la	_	_	_	_	_	_	AlignBegin=16168|AlignEnd=16353
+9	nuit	nuit	_	_	_	_	_	_	AlignBegin=16353|AlignEnd=16538
+10	,	,	_	_	_	_	_	_	AlignBegin=16538|AlignEnd=16538
+
+# sent_id = Zaynab_Affes.intervals.conll__12
+# text = il était euh,minuit une heure passée,
+# sound_url = Zaynab_Affes.wav
+1	il	il	_	_	_	_	_	_	AlignBegin=16538|AlignEnd=16850
+2	était	était	_	_	_	_	_	_	AlignBegin=16850|AlignEnd=17163
+3	euh	euh	_	_	_	_	_	_	AlignBegin=17163|AlignEnd=17476
+4	,	,	_	_	_	_	_	_	AlignBegin=17476|AlignEnd=17476
+5	minuit	minuit	_	_	_	_	_	_	AlignBegin=17476|AlignEnd=17789
+6	une	une	_	_	_	_	_	_	AlignBegin=17789|AlignEnd=18102
+7	heure	heure	_	_	_	_	_	_	AlignBegin=18102|AlignEnd=18414
+8	passée	passée	_	_	_	_	_	_	AlignBegin=18414|AlignEnd=18727
+9	,	,	_	_	_	_	_	_	AlignBegin=18727|AlignEnd=18727
+
+# sent_id = Zaynab_Affes.intervals.conll__13
+# text = une heure du matin passée.
+# sound_url = Zaynab_Affes.wav
+1	une	une	_	_	_	_	_	_	AlignBegin=18871|AlignEnd=19075
+2	heure	heure	_	_	_	_	_	_	AlignBegin=19075|AlignEnd=19280
+3	du	du	_	_	_	_	_	_	AlignBegin=19280|AlignEnd=19485
+4	matin	matin	_	_	_	_	_	_	AlignBegin=19485|AlignEnd=19689
+5	passée	passée	_	_	_	_	_	_	AlignBegin=19689|AlignEnd=19894
+6	.	.	_	_	_	_	_	_	AlignBegin=19894|AlignEnd=19894
+
+# sent_id = Zaynab_Affes.intervals.conll__14
+# text = pendant toute la soirée,je euh
+# sound_url = Zaynab_Affes.wav
+1	pendant	pendant	_	_	_	_	_	_	AlignBegin=20272|AlignEnd=20474
+2	toute	toute	_	_	_	_	_	_	AlignBegin=20474|AlignEnd=20675
+3	la	la	_	_	_	_	_	_	AlignBegin=20675|AlignEnd=20877
+4	soirée	soirée	_	_	_	_	_	_	AlignBegin=20877|AlignEnd=21078
+5	,	,	_	_	_	_	_	_	AlignBegin=21078|AlignEnd=21078
+6	je	je	_	_	_	_	_	_	AlignBegin=21078|AlignEnd=21280
+7	euh	euh	_	_	_	_	_	_	AlignBegin=21280|AlignEnd=21481
+
+# sent_id = Zaynab_Affes.intervals.conll__15
+# text = enfin toute la nuit plutôt, j'arrivais pas à dormir.
+# sound_url = Zaynab_Affes.wav
+1	enfin	enfin	_	_	_	_	_	_	AlignBegin=21481|AlignEnd=21727
+2	toute	toute	_	_	_	_	_	_	AlignBegin=21727|AlignEnd=21972
+3	la	la	_	_	_	_	_	_	AlignBegin=21972|AlignEnd=22217
+4	nuit	nuit	_	_	_	_	_	_	AlignBegin=22217|AlignEnd=22463
+5	plutôt	plutôt	_	_	_	_	_	_	AlignBegin=22463|AlignEnd=22708
+6	,	,	_	_	_	_	_	_	AlignBegin=22708|AlignEnd=22708
+7	j'arrivais	j'arrivais	_	_	_	_	_	_	AlignBegin=22708|AlignEnd=22954
+8	pas	pas	_	_	_	_	_	_	AlignBegin=22954|AlignEnd=23199
+9	à	à	_	_	_	_	_	_	AlignBegin=23199|AlignEnd=23444
+10	dormir	dormir	_	_	_	_	_	_	AlignBegin=23444|AlignEnd=23690
+11	.	.	_	_	_	_	_	_	AlignBegin=23690|AlignEnd=23690
+
+# sent_id = Zaynab_Affes.intervals.conll__16
+# text = tu vois,à chaque fois je dormais euh,
+# sound_url = Zaynab_Affes.wav
+1	tu	tu	_	_	_	_	_	_	AlignBegin=24313|AlignEnd=24488
+2	vois	vois	_	_	_	_	_	_	AlignBegin=24488|AlignEnd=24662
+3	,	,	_	_	_	_	_	_	AlignBegin=24662|AlignEnd=24662
+4	à	à	_	_	_	_	_	_	AlignBegin=24662|AlignEnd=24837
+5	chaque	chaque	_	_	_	_	_	_	AlignBegin=24837|AlignEnd=25012
+6	fois	fois	_	_	_	_	_	_	AlignBegin=25012|AlignEnd=25187
+7	je	je	_	_	_	_	_	_	AlignBegin=25187|AlignEnd=25361
+8	dormais	dormais	_	_	_	_	_	_	AlignBegin=25361|AlignEnd=25536
+9	euh	euh	_	_	_	_	_	_	AlignBegin=25536|AlignEnd=25711
+10	,	,	_	_	_	_	_	_	AlignBegin=25711|AlignEnd=25711
+
+# sent_id = Zaynab_Affes.intervals.conll__17
+# text = peut-être trente minutes. Je me réveillais euh,
+# sound_url = Zaynab_Affes.wav
+1	peut-être	peut-être	_	_	_	_	_	_	AlignBegin=25711|AlignEnd=25947
+2	trente	trente	_	_	_	_	_	_	AlignBegin=25947|AlignEnd=26183
+3	minutes	minutes	_	_	_	_	_	_	AlignBegin=26183|AlignEnd=26419
+4	.	.	_	_	_	_	_	_	AlignBegin=26419|AlignEnd=26419
+5	Je	Je	_	_	_	_	_	_	AlignBegin=26419|AlignEnd=26655
+6	me	me	_	_	_	_	_	_	AlignBegin=26655|AlignEnd=26891
+7	réveillais	réveillais	_	_	_	_	_	_	AlignBegin=26891|AlignEnd=27127
+8	euh	euh	_	_	_	_	_	_	AlignBegin=27127|AlignEnd=27363
+9	,	,	_	_	_	_	_	_	AlignBegin=27363|AlignEnd=27363
+
+# sent_id = Zaynab_Affes.intervals.conll__18
+# text = je demandais des nouvelles à mes parents,
+# sound_url = Zaynab_Affes.wav
+1	je	je	_	_	_	_	_	_	AlignBegin=27363|AlignEnd=27572
+2	demandais	demandais	_	_	_	_	_	_	AlignBegin=27572|AlignEnd=27782
+3	des	des	_	_	_	_	_	_	AlignBegin=27782|AlignEnd=27991
+4	nouvelles	nouvelles	_	_	_	_	_	_	AlignBegin=27991|AlignEnd=28201
+5	à	à	_	_	_	_	_	_	AlignBegin=28201|AlignEnd=28410
+6	mes	mes	_	_	_	_	_	_	AlignBegin=28410|AlignEnd=28620
+7	parents	parents	_	_	_	_	_	_	AlignBegin=28620|AlignEnd=28829
+8	,	,	_	_	_	_	_	_	AlignBegin=28829|AlignEnd=28829
+
+# sent_id = Zaynab_Affes.intervals.conll__19
+# text = parce qu'ils étaient allés avec elle.
+# sound_url = Zaynab_Affes.wav
+1	parce	parce	_	_	_	_	_	_	AlignBegin=28829|AlignEnd=29033
+2	qu'ils	qu'ils	_	_	_	_	_	_	AlignBegin=29033|AlignEnd=29237
+3	étaient	étaient	_	_	_	_	_	_	AlignBegin=29237|AlignEnd=29440
+4	allés	allés	_	_	_	_	_	_	AlignBegin=29440|AlignEnd=29644
+5	avec	avec	_	_	_	_	_	_	AlignBegin=29644|AlignEnd=29848
+6	elle	elle	_	_	_	_	_	_	AlignBegin=29848|AlignEnd=30052
+7	.	.	_	_	_	_	_	_	AlignBegin=30052|AlignEnd=30052
+
+# sent_id = Zaynab_Affes.intervals.conll__20
+# text = et,
+# sound_url = Zaynab_Affes.wav
+1	et	et	_	_	_	_	_	_	AlignBegin=30515|AlignEnd=30762
+2	,	,	_	_	_	_	_	_	AlignBegin=30762|AlignEnd=30762
+
+# sent_id = Zaynab_Affes.intervals.conll__21
+# text = moi et mon frère,on était resté à la maison.
+# sound_url = Zaynab_Affes.wav
+1	moi	moi	_	_	_	_	_	_	AlignBegin=30762|AlignEnd=30918
+2	et	et	_	_	_	_	_	_	AlignBegin=30918|AlignEnd=31075
+3	mon	mon	_	_	_	_	_	_	AlignBegin=31075|AlignEnd=31232
+4	frère	frère	_	_	_	_	_	_	AlignBegin=31232|AlignEnd=31389
+5	,	,	_	_	_	_	_	_	AlignBegin=31389|AlignEnd=31389
+6	on	on	_	_	_	_	_	_	AlignBegin=31389|AlignEnd=31546
+7	était	était	_	_	_	_	_	_	AlignBegin=31546|AlignEnd=31702
+8	resté	resté	_	_	_	_	_	_	AlignBegin=31702|AlignEnd=31859
+9	à	à	_	_	_	_	_	_	AlignBegin=31859|AlignEnd=32016
+10	la	la	_	_	_	_	_	_	AlignBegin=32016|AlignEnd=32173
+11	maison	maison	_	_	_	_	_	_	AlignBegin=32173|AlignEnd=32330
+12	.	.	_	_	_	_	_	_	AlignBegin=32330|AlignEnd=32330
+
+# sent_id = Zaynab_Affes.intervals.conll__22
+# text = et euh,
+# sound_url = Zaynab_Affes.wav
+1	et	et	_	_	_	_	_	_	AlignBegin=33230|AlignEnd=33771
+2	euh	euh	_	_	_	_	_	_	AlignBegin=33771|AlignEnd=34313
+3	,	,	_	_	_	_	_	_	AlignBegin=34313|AlignEnd=34313
+
+# sent_id = Zaynab_Affes.intervals.conll__23
+# text = du coup voilà,je demandais des nouvelles et tout.
+# sound_url = Zaynab_Affes.wav
+1	du	du	_	_	_	_	_	_	AlignBegin=34313|AlignEnd=34566
+2	coup	coup	_	_	_	_	_	_	AlignBegin=34566|AlignEnd=34820
+3	voilà	voilà	_	_	_	_	_	_	AlignBegin=34820|AlignEnd=35074
+4	,	,	_	_	_	_	_	_	AlignBegin=35074|AlignEnd=35074
+5	je	je	_	_	_	_	_	_	AlignBegin=35074|AlignEnd=35328
+6	demandais	demandais	_	_	_	_	_	_	AlignBegin=35328|AlignEnd=35581
+7	des	des	_	_	_	_	_	_	AlignBegin=35581|AlignEnd=35835
+8	nouvelles	nouvelles	_	_	_	_	_	_	AlignBegin=35835|AlignEnd=36089
+9	et	et	_	_	_	_	_	_	AlignBegin=36089|AlignEnd=36342
+10	tout	tout	_	_	_	_	_	_	AlignBegin=36342|AlignEnd=36596
+11	.	.	_	_	_	_	_	_	AlignBegin=36596|AlignEnd=36596
+
+# sent_id = Zaynab_Affes.intervals.conll__24
+# text = et ensuite je pense qu'il était né vers euh,
+# sound_url = Zaynab_Affes.wav
+1	et	et	_	_	_	_	_	_	AlignBegin=36596|AlignEnd=36878
+2	ensuite	ensuite	_	_	_	_	_	_	AlignBegin=36878|AlignEnd=37159
+3	je	je	_	_	_	_	_	_	AlignBegin=37159|AlignEnd=37441
+4	pense	pense	_	_	_	_	_	_	AlignBegin=37441|AlignEnd=37722
+5	qu'il	qu'il	_	_	_	_	_	_	AlignBegin=37722|AlignEnd=38004
+6	était	était	_	_	_	_	_	_	AlignBegin=38004|AlignEnd=38285
+7	né	né	_	_	_	_	_	_	AlignBegin=38285|AlignEnd=38566
+8	vers	vers	_	_	_	_	_	_	AlignBegin=38566|AlignEnd=38848
+9	euh	euh	_	_	_	_	_	_	AlignBegin=38848|AlignEnd=39129
+10	,	,	_	_	_	_	_	_	AlignBegin=39129|AlignEnd=39129
+
+# sent_id = Zaynab_Affes.intervals.conll__25
+# text = euh,
+# sound_url = Zaynab_Affes.wav
+1	euh	euh	_	_	_	_	_	_	AlignBegin=40940|AlignEnd=42497
+2	,	,	_	_	_	_	_	_	AlignBegin=42497|AlignEnd=42497
+
+# sent_id = Zaynab_Affes.intervals.conll__26
+# text = trois heures du matin un truc comme ça.
+# sound_url = Zaynab_Affes.wav
+1	trois	trois	_	_	_	_	_	_	AlignBegin=42497|AlignEnd=42700
+2	heures	heures	_	_	_	_	_	_	AlignBegin=42700|AlignEnd=42903
+3	du	du	_	_	_	_	_	_	AlignBegin=42903|AlignEnd=43107
+4	matin	matin	_	_	_	_	_	_	AlignBegin=43107|AlignEnd=43310
+5	un	un	_	_	_	_	_	_	AlignBegin=43310|AlignEnd=43513
+6	truc	truc	_	_	_	_	_	_	AlignBegin=43513|AlignEnd=43716
+7	comme	comme	_	_	_	_	_	_	AlignBegin=43716|AlignEnd=43920
+8	ça	ça	_	_	_	_	_	_	AlignBegin=43920|AlignEnd=44123
+9	.	.	_	_	_	_	_	_	AlignBegin=44123|AlignEnd=44123
+
+# sent_id = Zaynab_Affes.intervals.conll__27
+# text = trois heures ou quatre heures.
+# sound_url = Zaynab_Affes.wav
+1	trois	trois	_	_	_	_	_	_	AlignBegin=44442|AlignEnd=44592
+2	heures	heures	_	_	_	_	_	_	AlignBegin=44592|AlignEnd=44743
+3	ou	ou	_	_	_	_	_	_	AlignBegin=44743|AlignEnd=44893
+4	quatre	quatre	_	_	_	_	_	_	AlignBegin=44893|AlignEnd=45043
+5	heures	heures	_	_	_	_	_	_	AlignBegin=45043|AlignEnd=45193
+6	.	.	_	_	_	_	_	_	AlignBegin=45193|AlignEnd=45193
+
+# sent_id = Zaynab_Affes.intervals.conll__28
+# text = et,c'est à ce moment là où
+# sound_url = Zaynab_Affes.wav
+1	et	et	_	_	_	_	_	_	AlignBegin=45193|AlignEnd=45290
+2	,	,	_	_	_	_	_	_	AlignBegin=45290|AlignEnd=45290
+3	c'est	c'est	_	_	_	_	_	_	AlignBegin=45290|AlignEnd=45387
+4	à	à	_	_	_	_	_	_	AlignBegin=45387|AlignEnd=45485
+5	ce	ce	_	_	_	_	_	_	AlignBegin=45485|AlignEnd=45582
+6	moment	moment	_	_	_	_	_	_	AlignBegin=45582|AlignEnd=45679
+7	là	là	_	_	_	_	_	_	AlignBegin=45679|AlignEnd=45776
+8	où	où	_	_	_	_	_	_	AlignBegin=45776|AlignEnd=45873
+
+# sent_id = Zaynab_Affes.intervals.conll__29
+# text = j'ai enfin pu me,euh,rendormir.
+# sound_url = Zaynab_Affes.wav
+1	j'ai	j'ai	_	_	_	_	_	_	AlignBegin=45873|AlignEnd=46221
+2	enfin	enfin	_	_	_	_	_	_	AlignBegin=46221|AlignEnd=46569
+3	pu	pu	_	_	_	_	_	_	AlignBegin=46569|AlignEnd=46917
+4	me	me	_	_	_	_	_	_	AlignBegin=46917|AlignEnd=47265
+5	,	,	_	_	_	_	_	_	AlignBegin=47265|AlignEnd=47265
+6	euh	euh	_	_	_	_	_	_	AlignBegin=47265|AlignEnd=47613
+7	,	,	_	_	_	_	_	_	AlignBegin=47613|AlignEnd=47613
+8	rendormir	rendormir	_	_	_	_	_	_	AlignBegin=47613|AlignEnd=47961
+9	.	.	_	_	_	_	_	_	AlignBegin=47961|AlignEnd=47961
+
+# sent_id = Zaynab_Affes.intervals.conll__30
+# text = et le matin,
+# sound_url = Zaynab_Affes.wav
+1	et	et	_	_	_	_	_	_	AlignBegin=48902|AlignEnd=49223
+2	le	le	_	_	_	_	_	_	AlignBegin=49223|AlignEnd=49545
+3	matin	matin	_	_	_	_	_	_	AlignBegin=49545|AlignEnd=49866
+4	,	,	_	_	_	_	_	_	AlignBegin=49866|AlignEnd=49866
+
+# sent_id = Zaynab_Affes.intervals.conll__31
+# text = bah, dès que je me suis réveillée,
+# sound_url = Zaynab_Affes.wav
+1	bah	bah	_	_	_	_	_	_	AlignBegin=49866|AlignEnd=50031
+2	,	,	_	_	_	_	_	_	AlignBegin=50031|AlignEnd=50031
+3	dès	dès	_	_	_	_	_	_	AlignBegin=50031|AlignEnd=50196
+4	que	que	_	_	_	_	_	_	AlignBegin=50196|AlignEnd=50361
+5	je	je	_	_	_	_	_	_	AlignBegin=50361|AlignEnd=50525
+6	me	me	_	_	_	_	_	_	AlignBegin=50525|AlignEnd=50690
+7	suis	suis	_	_	_	_	_	_	AlignBegin=50690|AlignEnd=50855
+8	réveillée	réveillée	_	_	_	_	_	_	AlignBegin=50855|AlignEnd=51020
+9	,	,	_	_	_	_	_	_	AlignBegin=51020|AlignEnd=51020
+
+# sent_id = Zaynab_Affes.intervals.conll__32
+# text = on est directement parti à l'hôpital.
+# sound_url = Zaynab_Affes.wav
+1	on	on	_	_	_	_	_	_	AlignBegin=51020|AlignEnd=51298
+2	est	est	_	_	_	_	_	_	AlignBegin=51298|AlignEnd=51576
+3	directement	directement	_	_	_	_	_	_	AlignBegin=51576|AlignEnd=51854
+4	parti	parti	_	_	_	_	_	_	AlignBegin=51854|AlignEnd=52133
+5	à	à	_	_	_	_	_	_	AlignBegin=52133|AlignEnd=52411
+6	l'hôpital	l'hôpital	_	_	_	_	_	_	AlignBegin=52411|AlignEnd=52689
+7	.	.	_	_	_	_	_	_	AlignBegin=52689|AlignEnd=52689
+
+# sent_id = Zaynab_Affes.intervals.conll__33
+# text = et c'était trop marrant parce que,euh,
+# sound_url = Zaynab_Affes.wav
+1	et	et	_	_	_	_	_	_	AlignBegin=53465|AlignEnd=53725
+2	c'était	c'était	_	_	_	_	_	_	AlignBegin=53725|AlignEnd=53985
+3	trop	trop	_	_	_	_	_	_	AlignBegin=53985|AlignEnd=54245
+4	marrant	marrant	_	_	_	_	_	_	AlignBegin=54245|AlignEnd=54506
+5	parce	parce	_	_	_	_	_	_	AlignBegin=54506|AlignEnd=54766
+6	que	que	_	_	_	_	_	_	AlignBegin=54766|AlignEnd=55026
+7	,	,	_	_	_	_	_	_	AlignBegin=55026|AlignEnd=55026
+8	euh	euh	_	_	_	_	_	_	AlignBegin=55026|AlignEnd=55287
+9	,	,	_	_	_	_	_	_	AlignBegin=55287|AlignEnd=55287
+
+# sent_id = Zaynab_Affes.intervals.conll__34
+# text = tu vois genre,euh,
+# sound_url = Zaynab_Affes.wav
+1	tu	tu	_	_	_	_	_	_	AlignBegin=55287|AlignEnd=55490
+2	vois	vois	_	_	_	_	_	_	AlignBegin=55490|AlignEnd=55694
+3	genre	genre	_	_	_	_	_	_	AlignBegin=55694|AlignEnd=55898
+4	,	,	_	_	_	_	_	_	AlignBegin=55898|AlignEnd=55898
+5	euh	euh	_	_	_	_	_	_	AlignBegin=55898|AlignEnd=56102
+6	,	,	_	_	_	_	_	_	AlignBegin=56102|AlignEnd=56102
+
+# sent_id = Zaynab_Affes.intervals.conll__35
+# text = j'étais tout excitée ! euh,
+# sound_url = Zaynab_Affes.wav
+1	j'étais	j'étais	_	_	_	_	_	_	AlignBegin=56243|AlignEnd=56724
+2	tout	tout	_	_	_	_	_	_	AlignBegin=56724|AlignEnd=57205
+3	excitée	excitée	_	_	_	_	_	_	AlignBegin=57205|AlignEnd=57686
+4	!	!	_	_	_	_	_	_	AlignBegin=57686|AlignEnd=57686
+5	euh	euh	_	_	_	_	_	_	AlignBegin=57686|AlignEnd=58166
+6	,	,	_	_	_	_	_	_	AlignBegin=58166|AlignEnd=58166
+
+# sent_id = Zaynab_Affes.intervals.conll__36
+# text = tu vois, euh ça faisait trop plaisir et tout.
+# sound_url = Zaynab_Affes.wav
+1	tu	tu	_	_	_	_	_	_	AlignBegin=58166|AlignEnd=58355
+2	vois	vois	_	_	_	_	_	_	AlignBegin=58355|AlignEnd=58543
+3	,	,	_	_	_	_	_	_	AlignBegin=58543|AlignEnd=58543
+4	euh	euh	_	_	_	_	_	_	AlignBegin=58543|AlignEnd=58731
+5	ça	ça	_	_	_	_	_	_	AlignBegin=58731|AlignEnd=58919
+6	faisait	faisait	_	_	_	_	_	_	AlignBegin=58919|AlignEnd=59107
+7	trop	trop	_	_	_	_	_	_	AlignBegin=59107|AlignEnd=59296
+8	plaisir	plaisir	_	_	_	_	_	_	AlignBegin=59296|AlignEnd=59484
+9	et	et	_	_	_	_	_	_	AlignBegin=59484|AlignEnd=59672
+10	tout	tout	_	_	_	_	_	_	AlignBegin=59672|AlignEnd=59860
+11	.	.	_	_	_	_	_	_	AlignBegin=59860|AlignEnd=59860
+
+# sent_id = Zaynab_Affes.intervals.conll__37
+# text = et dès que je suis rentrée,
+# sound_url = Zaynab_Affes.wav
+1	et	et	_	_	_	_	_	_	AlignBegin=60564|AlignEnd=60769
+2	dès	dès	_	_	_	_	_	_	AlignBegin=60769|AlignEnd=60975
+3	que	que	_	_	_	_	_	_	AlignBegin=60975|AlignEnd=61181
+4	je	je	_	_	_	_	_	_	AlignBegin=61181|AlignEnd=61387
+5	suis	suis	_	_	_	_	_	_	AlignBegin=61387|AlignEnd=61593
+6	rentrée	rentrée	_	_	_	_	_	_	AlignBegin=61593|AlignEnd=61799
+7	,	,	_	_	_	_	_	_	AlignBegin=61799|AlignEnd=61799
+
+# sent_id = Zaynab_Affes.intervals.conll__38
+# text = j'avais vu ma soeur et tout.
+# sound_url = Zaynab_Affes.wav
+1	j'avais	j'avais	_	_	_	_	_	_	AlignBegin=61799|AlignEnd=62021
+2	vu	vu	_	_	_	_	_	_	AlignBegin=62021|AlignEnd=62242
+3	ma	ma	_	_	_	_	_	_	AlignBegin=62242|AlignEnd=62464
+4	soeur	soeur	_	_	_	_	_	_	AlignBegin=62464|AlignEnd=62685
+5	et	et	_	_	_	_	_	_	AlignBegin=62685|AlignEnd=62907
+6	tout	tout	_	_	_	_	_	_	AlignBegin=62907|AlignEnd=63128
+7	.	.	_	_	_	_	_	_	AlignBegin=63128|AlignEnd=63128
+
+# sent_id = Zaynab_Affes.intervals.conll__39
+# text = je voulais voir si elle a~ si elle allait bien.
+# sound_url = Zaynab_Affes.wav
+1	je	je	_	_	_	_	_	_	AlignBegin=63128|AlignEnd=63291
+2	voulais	voulais	_	_	_	_	_	_	AlignBegin=63291|AlignEnd=63454
+3	voir	voir	_	_	_	_	_	_	AlignBegin=63454|AlignEnd=63616
+4	si	si	_	_	_	_	_	_	AlignBegin=63616|AlignEnd=63779
+5	elle	elle	_	_	_	_	_	_	AlignBegin=63779|AlignEnd=63941
+6	a~	a~	_	_	_	_	_	_	AlignBegin=63941|AlignEnd=64104
+7	si	si	_	_	_	_	_	_	AlignBegin=64104|AlignEnd=64266
+8	elle	elle	_	_	_	_	_	_	AlignBegin=64266|AlignEnd=64429
+9	allait	allait	_	_	_	_	_	_	AlignBegin=64429|AlignEnd=64592
+10	bien	bien	_	_	_	_	_	_	AlignBegin=64592|AlignEnd=64754
+11	.	.	_	_	_	_	_	_	AlignBegin=64754|AlignEnd=64754
+
+# sent_id = Zaynab_Affes.intervals.conll__40
+# text = et ensuite, tu vois un tout petit truc. euh,
+# sound_url = Zaynab_Affes.wav
+1	et	et	_	_	_	_	_	_	AlignBegin=65296|AlignEnd=65544
+2	ensuite	ensuite	_	_	_	_	_	_	AlignBegin=65544|AlignEnd=65791
+3	,	,	_	_	_	_	_	_	AlignBegin=65791|AlignEnd=65791
+4	tu	tu	_	_	_	_	_	_	AlignBegin=65791|AlignEnd=66039
+5	vois	vois	_	_	_	_	_	_	AlignBegin=66039|AlignEnd=66287
+6	un	un	_	_	_	_	_	_	AlignBegin=66287|AlignEnd=66534
+7	tout	tout	_	_	_	_	_	_	AlignBegin=66534|AlignEnd=66782
+8	petit	petit	_	_	_	_	_	_	AlignBegin=66782|AlignEnd=67030
+9	truc	truc	_	_	_	_	_	_	AlignBegin=67030|AlignEnd=67277
+10	.	.	_	_	_	_	_	_	AlignBegin=67277|AlignEnd=67277
+11	euh	euh	_	_	_	_	_	_	AlignBegin=67277|AlignEnd=67525
+12	,	,	_	_	_	_	_	_	AlignBegin=67525|AlignEnd=67525
+
+# sent_id = Zaynab_Affes.intervals.conll__41
+# text = tu vois sous des couvertures,
+# sound_url = Zaynab_Affes.wav
+1	tu	tu	_	_	_	_	_	_	AlignBegin=67525|AlignEnd=67861
+2	vois	vois	_	_	_	_	_	_	AlignBegin=67861|AlignEnd=68196
+3	sous	sous	_	_	_	_	_	_	AlignBegin=68196|AlignEnd=68532
+4	des	des	_	_	_	_	_	_	AlignBegin=68532|AlignEnd=68868
+5	couvertures	couvertures	_	_	_	_	_	_	AlignBegin=68868|AlignEnd=69204
+6	,	,	_	_	_	_	_	_	AlignBegin=69204|AlignEnd=69204
+
+# sent_id = Zaynab_Affes.intervals.conll__42
+# text = c'était en,
+# sound_url = Zaynab_Affes.wav
+1	c'était	c'était	_	_	_	_	_	_	AlignBegin=69204|AlignEnd=69592
+2	en	en	_	_	_	_	_	_	AlignBegin=69592|AlignEnd=69980
+3	,	,	_	_	_	_	_	_	AlignBegin=69980|AlignEnd=69980
+
+# sent_id = Zaynab_Affes.intervals.conll__43
+# text = ouais, c'était en février
+# sound_url = Zaynab_Affes.wav
+1	ouais	ouais	_	_	_	_	_	_	AlignBegin=70508|AlignEnd=70692
+2	,	,	_	_	_	_	_	_	AlignBegin=70692|AlignEnd=70692
+3	c'était	c'était	_	_	_	_	_	_	AlignBegin=70692|AlignEnd=70877
+4	en	en	_	_	_	_	_	_	AlignBegin=70877|AlignEnd=71062
+5	février	février	_	_	_	_	_	_	AlignBegin=71062|AlignEnd=71247
+
+# sent_id = Zaynab_Affes.intervals.conll__44
+# text = mais il faisait quand même froid.
+# sound_url = Zaynab_Affes.wav
+1	mais	mais	_	_	_	_	_	_	AlignBegin=71247|AlignEnd=71406
+2	il	il	_	_	_	_	_	_	AlignBegin=71406|AlignEnd=71565
+3	faisait	faisait	_	_	_	_	_	_	AlignBegin=71565|AlignEnd=71724
+4	quand	quand	_	_	_	_	_	_	AlignBegin=71724|AlignEnd=71883
+5	même	même	_	_	_	_	_	_	AlignBegin=71883|AlignEnd=72042
+6	froid	froid	_	_	_	_	_	_	AlignBegin=72042|AlignEnd=72201
+7	.	.	_	_	_	_	_	_	AlignBegin=72201|AlignEnd=72201
+
+# sent_id = Zaynab_Affes.intervals.conll__45
+# text = tu vois, tu le voyais
+# sound_url = Zaynab_Affes.wav
+1	tu	tu	_	_	_	_	_	_	AlignBegin=72935|AlignEnd=73059
+2	vois	vois	_	_	_	_	_	_	AlignBegin=73059|AlignEnd=73183
+3	,	,	_	_	_	_	_	_	AlignBegin=73183|AlignEnd=73183
+4	tu	tu	_	_	_	_	_	_	AlignBegin=73183|AlignEnd=73308
+5	le	le	_	_	_	_	_	_	AlignBegin=73308|AlignEnd=73432
+6	voyais	voyais	_	_	_	_	_	_	AlignBegin=73432|AlignEnd=73556
+
+# sent_id = Zaynab_Affes.intervals.conll__46
+# text = il était tout petit tout rouge et tout. euh,
+# sound_url = Zaynab_Affes.wav
+1	il	il	_	_	_	_	_	_	AlignBegin=73556|AlignEnd=73797
+2	était	était	_	_	_	_	_	_	AlignBegin=73797|AlignEnd=74037
+3	tout	tout	_	_	_	_	_	_	AlignBegin=74037|AlignEnd=74277
+4	petit	petit	_	_	_	_	_	_	AlignBegin=74277|AlignEnd=74517
+5	tout	tout	_	_	_	_	_	_	AlignBegin=74517|AlignEnd=74757
+6	rouge	rouge	_	_	_	_	_	_	AlignBegin=74757|AlignEnd=74997
+7	et	et	_	_	_	_	_	_	AlignBegin=74997|AlignEnd=75237
+8	tout	tout	_	_	_	_	_	_	AlignBegin=75237|AlignEnd=75477
+9	.	.	_	_	_	_	_	_	AlignBegin=75477|AlignEnd=75477
+10	euh	euh	_	_	_	_	_	_	AlignBegin=75477|AlignEnd=75717
+11	,	,	_	_	_	_	_	_	AlignBegin=75717|AlignEnd=75717
+
+# sent_id = Zaynab_Affes.intervals.conll__47
+# text = c'était trop marrant !
+# sound_url = Zaynab_Affes.wav
+1	c'était	c'était	_	_	_	_	_	_	AlignBegin=77085|AlignEnd=77488
+2	trop	trop	_	_	_	_	_	_	AlignBegin=77488|AlignEnd=77891
+3	marrant	marrant	_	_	_	_	_	_	AlignBegin=77891|AlignEnd=78294
+4	!	!	_	_	_	_	_	_	AlignBegin=78294|AlignEnd=78294
+
+# sent_id = Zaynab_Affes.intervals.conll__48
+# text = je le voyais et tout.
+# sound_url = Zaynab_Affes.wav
+1	je	je	_	_	_	_	_	_	AlignBegin=78728|AlignEnd=78915
+2	le	le	_	_	_	_	_	_	AlignBegin=78915|AlignEnd=79103
+3	voyais	voyais	_	_	_	_	_	_	AlignBegin=79103|AlignEnd=79291
+4	et	et	_	_	_	_	_	_	AlignBegin=79291|AlignEnd=79479
+5	tout	tout	_	_	_	_	_	_	AlignBegin=79479|AlignEnd=79667
+6	.	.	_	_	_	_	_	_	AlignBegin=79667|AlignEnd=79667
+
+# sent_id = Zaynab_Affes.intervals.conll__49
+# text = et il était comme ça, il ouvrait
+# sound_url = Zaynab_Affes.wav
+1	et	et	_	_	_	_	_	_	AlignBegin=79667|AlignEnd=79837
+2	il	il	_	_	_	_	_	_	AlignBegin=79837|AlignEnd=80006
+3	était	était	_	_	_	_	_	_	AlignBegin=80006|AlignEnd=80176
+4	comme	comme	_	_	_	_	_	_	AlignBegin=80176|AlignEnd=80346
+5	ça	ça	_	_	_	_	_	_	AlignBegin=80346|AlignEnd=80516
+6	,	,	_	_	_	_	_	_	AlignBegin=80516|AlignEnd=80516
+7	il	il	_	_	_	_	_	_	AlignBegin=80516|AlignEnd=80686
+8	ouvrait	ouvrait	_	_	_	_	_	_	AlignBegin=80686|AlignEnd=80855
+
+# sent_id = Zaynab_Affes.intervals.conll__50
+# text = à peine ses yeux.
+# sound_url = Zaynab_Affes.wav
+1	à	à	_	_	_	_	_	_	AlignBegin=81113|AlignEnd=81386
+2	peine	peine	_	_	_	_	_	_	AlignBegin=81386|AlignEnd=81659
+3	ses	ses	_	_	_	_	_	_	AlignBegin=81659|AlignEnd=81932
+4	yeux	yeux	_	_	_	_	_	_	AlignBegin=81932|AlignEnd=82204
+5	.	.	_	_	_	_	_	_	AlignBegin=82204|AlignEnd=82204
+
+# sent_id = Zaynab_Affes.intervals.conll__51
+# text = mais à ce moment là, tu vois,
+# sound_url = Zaynab_Affes.wav
+1	mais	mais	_	_	_	_	_	_	AlignBegin=83209|AlignEnd=83348
+2	à	à	_	_	_	_	_	_	AlignBegin=83348|AlignEnd=83486
+3	ce	ce	_	_	_	_	_	_	AlignBegin=83486|AlignEnd=83625
+4	moment	moment	_	_	_	_	_	_	AlignBegin=83625|AlignEnd=83763
+5	là	là	_	_	_	_	_	_	AlignBegin=83763|AlignEnd=83902
+6	,	,	_	_	_	_	_	_	AlignBegin=83902|AlignEnd=83902
+7	tu	tu	_	_	_	_	_	_	AlignBegin=83902|AlignEnd=84040
+8	vois	vois	_	_	_	_	_	_	AlignBegin=84040|AlignEnd=84179
+9	,	,	_	_	_	_	_	_	AlignBegin=84179|AlignEnd=84179
+
+# sent_id = Zaynab_Affes.intervals.conll__52
+# text = il te regarde pas en face. i~
+# sound_url = Zaynab_Affes.wav
+1	il	il	_	_	_	_	_	_	AlignBegin=84179|AlignEnd=84384
+2	te	te	_	_	_	_	_	_	AlignBegin=84384|AlignEnd=84590
+3	regarde	regarde	_	_	_	_	_	_	AlignBegin=84590|AlignEnd=84795
+4	pas	pas	_	_	_	_	_	_	AlignBegin=84795|AlignEnd=85001
+5	en	en	_	_	_	_	_	_	AlignBegin=85001|AlignEnd=85206
+6	face	face	_	_	_	_	_	_	AlignBegin=85206|AlignEnd=85412
+7	.	.	_	_	_	_	_	_	AlignBegin=85412|AlignEnd=85412
+8	i~	i~	_	_	_	_	_	_	AlignBegin=85412|AlignEnd=85618
+
+# sent_id = Zaynab_Affes.intervals.conll__53
+# text = il a pas enc~ encore le contact visuel et tout.
+# sound_url = Zaynab_Affes.wav
+1	il	il	_	_	_	_	_	_	AlignBegin=86330|AlignEnd=86567
+2	a	a	_	_	_	_	_	_	AlignBegin=86567|AlignEnd=86804
+3	pas	pas	_	_	_	_	_	_	AlignBegin=86804|AlignEnd=87041
+4	enc~	enc~	_	_	_	_	_	_	AlignBegin=87041|AlignEnd=87278
+5	encore	encore	_	_	_	_	_	_	AlignBegin=87278|AlignEnd=87515
+6	le	le	_	_	_	_	_	_	AlignBegin=87515|AlignEnd=87752
+7	contact	contact	_	_	_	_	_	_	AlignBegin=87752|AlignEnd=87989
+8	visuel	visuel	_	_	_	_	_	_	AlignBegin=87989|AlignEnd=88226
+9	et	et	_	_	_	_	_	_	AlignBegin=88226|AlignEnd=88462
+10	tout	tout	_	_	_	_	_	_	AlignBegin=88462|AlignEnd=88699
+11	.	.	_	_	_	_	_	_	AlignBegin=88699|AlignEnd=88699
+
+# sent_id = Zaynab_Affes.intervals.conll__54
+# text = mais du coup, je le voyais.
+# sound_url = Zaynab_Affes.wav
+1	mais	mais	_	_	_	_	_	_	AlignBegin=89295|AlignEnd=89516
+2	du	du	_	_	_	_	_	_	AlignBegin=89516|AlignEnd=89738
+3	coup	coup	_	_	_	_	_	_	AlignBegin=89738|AlignEnd=89959
+4	,	,	_	_	_	_	_	_	AlignBegin=89959|AlignEnd=89959
+5	je	je	_	_	_	_	_	_	AlignBegin=89959|AlignEnd=90181
+6	le	le	_	_	_	_	_	_	AlignBegin=90181|AlignEnd=90402
+7	voyais	voyais	_	_	_	_	_	_	AlignBegin=90402|AlignEnd=90624
+8	.	.	_	_	_	_	_	_	AlignBegin=90624|AlignEnd=90624
+
+# sent_id = Zaynab_Affes.intervals.conll__55
+# text = au début, j'hésitais à le porter
+# sound_url = Zaynab_Affes.wav
+1	au	au	_	_	_	_	_	_	AlignBegin=90624|AlignEnd=90879
+2	début	début	_	_	_	_	_	_	AlignBegin=90879|AlignEnd=91134
+3	,	,	_	_	_	_	_	_	AlignBegin=91134|AlignEnd=91134
+4	j'hésitais	j'hésitais	_	_	_	_	_	_	AlignBegin=91134|AlignEnd=91389
+5	à	à	_	_	_	_	_	_	AlignBegin=91389|AlignEnd=91644
+6	le	le	_	_	_	_	_	_	AlignBegin=91644|AlignEnd=91899
+7	porter	porter	_	_	_	_	_	_	AlignBegin=91899|AlignEnd=92154
+
+# sent_id = Zaynab_Affes.intervals.conll__56
+# text = tu vois, parcequ'il est tout petit tout fragile.
+# sound_url = Zaynab_Affes.wav
+1	tu	tu	_	_	_	_	_	_	AlignBegin=92622|AlignEnd=92841
+2	vois	vois	_	_	_	_	_	_	AlignBegin=92841|AlignEnd=93059
+3	,	,	_	_	_	_	_	_	AlignBegin=93059|AlignEnd=93059
+4	parcequ'il	parcequ'il	_	_	_	_	_	_	AlignBegin=93059|AlignEnd=93278
+5	est	est	_	_	_	_	_	_	AlignBegin=93278|AlignEnd=93496
+6	tout	tout	_	_	_	_	_	_	AlignBegin=93496|AlignEnd=93715
+7	petit	petit	_	_	_	_	_	_	AlignBegin=93715|AlignEnd=93933
+8	tout	tout	_	_	_	_	_	_	AlignBegin=93933|AlignEnd=94152
+9	fragile	fragile	_	_	_	_	_	_	AlignBegin=94152|AlignEnd=94370
+10	.	.	_	_	_	_	_	_	AlignBegin=94370|AlignEnd=94370
+
+# sent_id = Zaynab_Affes.intervals.conll__57
+# text = après quand tu le portes, on dirait tu portes rien.
+# sound_url = Zaynab_Affes.wav
+1	après	après	_	_	_	_	_	_	AlignBegin=94898|AlignEnd=95111
+2	quand	quand	_	_	_	_	_	_	AlignBegin=95111|AlignEnd=95323
+3	tu	tu	_	_	_	_	_	_	AlignBegin=95323|AlignEnd=95536
+4	le	le	_	_	_	_	_	_	AlignBegin=95536|AlignEnd=95749
+5	portes	portes	_	_	_	_	_	_	AlignBegin=95749|AlignEnd=95961
+6	,	,	_	_	_	_	_	_	AlignBegin=95961|AlignEnd=95961
+7	on	on	_	_	_	_	_	_	AlignBegin=95961|AlignEnd=96174
+8	dirait	dirait	_	_	_	_	_	_	AlignBegin=96174|AlignEnd=96387
+9	tu	tu	_	_	_	_	_	_	AlignBegin=96387|AlignEnd=96599
+10	portes	portes	_	_	_	_	_	_	AlignBegin=96599|AlignEnd=96812
+11	rien	rien	_	_	_	_	_	_	AlignBegin=96812|AlignEnd=97025
+12	.	.	_	_	_	_	_	_	AlignBegin=97025|AlignEnd=97025
+
+# sent_id = Zaynab_Affes.intervals.conll__58
+# text = mais vraiment, c'est trop marrant ouais.
+# sound_url = Zaynab_Affes.wav
+1	mais	mais	_	_	_	_	_	_	AlignBegin=97733|AlignEnd=97970
+2	vraiment	vraiment	_	_	_	_	_	_	AlignBegin=97970|AlignEnd=98206
+3	,	,	_	_	_	_	_	_	AlignBegin=98206|AlignEnd=98206
+4	c'est	c'est	_	_	_	_	_	_	AlignBegin=98206|AlignEnd=98443
+5	trop	trop	_	_	_	_	_	_	AlignBegin=98443|AlignEnd=98680
+6	marrant	marrant	_	_	_	_	_	_	AlignBegin=98680|AlignEnd=98916
+7	ouais	ouais	_	_	_	_	_	_	AlignBegin=98916|AlignEnd=99153
+8	.	.	_	_	_	_	_	_	AlignBegin=99153|AlignEnd=99153
+
+# sent_id = Zaynab_Affes.intervals.conll__59
+# text = c'est tellement léger !
+# sound_url = Zaynab_Affes.wav
+1	c'est	c'est	_	_	_	_	_	_	AlignBegin=99153|AlignEnd=99531
+2	tellement	tellement	_	_	_	_	_	_	AlignBegin=99531|AlignEnd=99909
+3	léger	léger	_	_	_	_	_	_	AlignBegin=99909|AlignEnd=100287
+4	!	!	_	_	_	_	_	_	AlignBegin=100287|AlignEnd=100287
+
+# sent_id = Zaynab_Affes.intervals.conll__60
+# text = après c'est trop bien. genre, je l'ai porté.
+# sound_url = Zaynab_Affes.wav
+1	après	après	_	_	_	_	_	_	AlignBegin=100982|AlignEnd=101233
+2	c'est	c'est	_	_	_	_	_	_	AlignBegin=101233|AlignEnd=101484
+3	trop	trop	_	_	_	_	_	_	AlignBegin=101484|AlignEnd=101735
+4	bien	bien	_	_	_	_	_	_	AlignBegin=101735|AlignEnd=101986
+5	.	.	_	_	_	_	_	_	AlignBegin=101986|AlignEnd=101986
+6	genre	genre	_	_	_	_	_	_	AlignBegin=101986|AlignEnd=102238
+7	,	,	_	_	_	_	_	_	AlignBegin=102238|AlignEnd=102238
+8	je	je	_	_	_	_	_	_	AlignBegin=102238|AlignEnd=102489
+9	l'ai	l'ai	_	_	_	_	_	_	AlignBegin=102489|AlignEnd=102740
+10	porté	porté	_	_	_	_	_	_	AlignBegin=102740|AlignEnd=102991
+11	.	.	_	_	_	_	_	_	AlignBegin=102991|AlignEnd=102991
+
+# sent_id = Zaynab_Affes.intervals.conll__61
+# text = euh
+# sound_url = Zaynab_Affes.wav
+1	euh	euh	_	_	_	_	_	_	AlignBegin=102991|AlignEnd=103331
+
+# sent_id = Zaynab_Affes.intervals.conll__62
+# text = bon, au début ils disent, euh,
+# sound_url = Zaynab_Affes.wav
+1	bon	bon	_	_	_	_	_	_	AlignBegin=103658|AlignEnd=103862
+2	,	,	_	_	_	_	_	_	AlignBegin=103862|AlignEnd=103862
+3	au	au	_	_	_	_	_	_	AlignBegin=103862|AlignEnd=104066
+4	début	début	_	_	_	_	_	_	AlignBegin=104066|AlignEnd=104270
+5	ils	ils	_	_	_	_	_	_	AlignBegin=104270|AlignEnd=104474
+6	disent	disent	_	_	_	_	_	_	AlignBegin=104474|AlignEnd=104678
+7	,	,	_	_	_	_	_	_	AlignBegin=104678|AlignEnd=104678
+8	euh	euh	_	_	_	_	_	_	AlignBegin=104678|AlignEnd=104882
+9	,	,	_	_	_	_	_	_	AlignBegin=104882|AlignEnd=104882
+
+# sent_id = Zaynab_Affes.intervals.conll__63
+# text = bien sûr, vu qu'il vient de naître
+# sound_url = Zaynab_Affes.wav
+1	bien	bien	_	_	_	_	_	_	AlignBegin=104882|AlignEnd=105062
+2	sûr	sûr	_	_	_	_	_	_	AlignBegin=105062|AlignEnd=105243
+3	,	,	_	_	_	_	_	_	AlignBegin=105243|AlignEnd=105243
+4	vu	vu	_	_	_	_	_	_	AlignBegin=105243|AlignEnd=105423
+5	qu'il	qu'il	_	_	_	_	_	_	AlignBegin=105423|AlignEnd=105604
+6	vient	vient	_	_	_	_	_	_	AlignBegin=105604|AlignEnd=105784
+7	de	de	_	_	_	_	_	_	AlignBegin=105784|AlignEnd=105964
+8	naître	naître	_	_	_	_	_	_	AlignBegin=105964|AlignEnd=106145
+
+# sent_id = Zaynab_Affes.intervals.conll__64
+# text = tu dois pas lui donner des bisous.
+# sound_url = Zaynab_Affes.wav
+1	tu	tu	_	_	_	_	_	_	AlignBegin=106145|AlignEnd=106348
+2	dois	dois	_	_	_	_	_	_	AlignBegin=106348|AlignEnd=106551
+3	pas	pas	_	_	_	_	_	_	AlignBegin=106551|AlignEnd=106755
+4	lui	lui	_	_	_	_	_	_	AlignBegin=106755|AlignEnd=106958
+5	donner	donner	_	_	_	_	_	_	AlignBegin=106958|AlignEnd=107161
+6	des	des	_	_	_	_	_	_	AlignBegin=107161|AlignEnd=107364
+7	bisous	bisous	_	_	_	_	_	_	AlignBegin=107364|AlignEnd=107567
+8	.	.	_	_	_	_	_	_	AlignBegin=107567|AlignEnd=107567
+
+# sent_id = Zaynab_Affes.intervals.conll__65
+# text = tu dois pas trop te rapprocher et tout.
+# sound_url = Zaynab_Affes.wav
+1	tu	tu	_	_	_	_	_	_	AlignBegin=107567|AlignEnd=107778
+2	dois	dois	_	_	_	_	_	_	AlignBegin=107778|AlignEnd=107989
+3	pas	pas	_	_	_	_	_	_	AlignBegin=107989|AlignEnd=108199
+4	trop	trop	_	_	_	_	_	_	AlignBegin=108199|AlignEnd=108410
+5	te	te	_	_	_	_	_	_	AlignBegin=108410|AlignEnd=108621
+6	rapprocher	rapprocher	_	_	_	_	_	_	AlignBegin=108621|AlignEnd=108831
+7	et	et	_	_	_	_	_	_	AlignBegin=108831|AlignEnd=109042
+8	tout	tout	_	_	_	_	_	_	AlignBegin=109042|AlignEnd=109253
+9	.	.	_	_	_	_	_	_	AlignBegin=109253|AlignEnd=109253
+
+# sent_id = Zaynab_Affes.intervals.conll__66
+# text = parce que, euh,
+# sound_url = Zaynab_Affes.wav
+1	parce	parce	_	_	_	_	_	_	AlignBegin=109253|AlignEnd=109409
+2	que	que	_	_	_	_	_	_	AlignBegin=109409|AlignEnd=109565
+3	,	,	_	_	_	_	_	_	AlignBegin=109565|AlignEnd=109565
+4	euh	euh	_	_	_	_	_	_	AlignBegin=109565|AlignEnd=109720
+5	,	,	_	_	_	_	_	_	AlignBegin=109720|AlignEnd=109720
+
+# sent_id = Zaynab_Affes.intervals.conll__67
+# text = tu vois pour éviter les microbes et tout.
+# sound_url = Zaynab_Affes.wav
+1	tu	tu	_	_	_	_	_	_	AlignBegin=109990|AlignEnd=110174
+2	vois	vois	_	_	_	_	_	_	AlignBegin=110174|AlignEnd=110357
+3	pour	pour	_	_	_	_	_	_	AlignBegin=110357|AlignEnd=110540
+4	éviter	éviter	_	_	_	_	_	_	AlignBegin=110540|AlignEnd=110723
+5	les	les	_	_	_	_	_	_	AlignBegin=110723|AlignEnd=110907
+6	microbes	microbes	_	_	_	_	_	_	AlignBegin=110907|AlignEnd=111090
+7	et	et	_	_	_	_	_	_	AlignBegin=111090|AlignEnd=111273
+8	tout	tout	_	_	_	_	_	_	AlignBegin=111273|AlignEnd=111457
+9	.	.	_	_	_	_	_	_	AlignBegin=111457|AlignEnd=111457
+
+# sent_id = Zaynab_Affes.intervals.conll__68
+# text = mais bon,
+# sound_url = Zaynab_Affes.wav
+1	mais	mais	_	_	_	_	_	_	AlignBegin=111875|AlignEnd=112003
+2	bon	bon	_	_	_	_	_	_	AlignBegin=112003|AlignEnd=112131
+3	,	,	_	_	_	_	_	_	AlignBegin=112131|AlignEnd=112131
+
+# sent_id = Zaynab_Affes.intervals.conll__69
+# text = j'ai fini par lui donner des bisous quand même.
+# sound_url = Zaynab_Affes.wav
+1	j'ai	j'ai	_	_	_	_	_	_	AlignBegin=112131|AlignEnd=112324
+2	fini	fini	_	_	_	_	_	_	AlignBegin=112324|AlignEnd=112517
+3	par	par	_	_	_	_	_	_	AlignBegin=112517|AlignEnd=112711
+4	lui	lui	_	_	_	_	_	_	AlignBegin=112711|AlignEnd=112904
+5	donner	donner	_	_	_	_	_	_	AlignBegin=112904|AlignEnd=113097
+6	des	des	_	_	_	_	_	_	AlignBegin=113097|AlignEnd=113291
+7	bisous	bisous	_	_	_	_	_	_	AlignBegin=113291|AlignEnd=113484
+8	quand	quand	_	_	_	_	_	_	AlignBegin=113484|AlignEnd=113677
+9	même	même	_	_	_	_	_	_	AlignBegin=113677|AlignEnd=113871
+10	.	.	_	_	_	_	_	_	AlignBegin=113871|AlignEnd=113871
+
+# sent_id = Zaynab_Affes.intervals.conll__70
+# text = tu vois. genre tu,
+# sound_url = Zaynab_Affes.wav
+1	tu	tu	_	_	_	_	_	_	AlignBegin=114668|AlignEnd=114879
+2	vois	vois	_	_	_	_	_	_	AlignBegin=114879|AlignEnd=115090
+3	.	.	_	_	_	_	_	_	AlignBegin=115090|AlignEnd=115090
+4	genre	genre	_	_	_	_	_	_	AlignBegin=115090|AlignEnd=115300
+5	tu	tu	_	_	_	_	_	_	AlignBegin=115300|AlignEnd=115511
+6	,	,	_	_	_	_	_	_	AlignBegin=115511|AlignEnd=115511
+
+# sent_id = Zaynab_Affes.intervals.conll__71
+# text = je pouvais pas ,euh, m'en empêcher.
+# sound_url = Zaynab_Affes.wav
+1	je	je	_	_	_	_	_	_	AlignBegin=115511|AlignEnd=115766
+2	pouvais	pouvais	_	_	_	_	_	_	AlignBegin=115766|AlignEnd=116021
+3	pas	pas	_	_	_	_	_	_	AlignBegin=116021|AlignEnd=116275
+4	,	,	_	_	_	_	_	_	AlignBegin=116275|AlignEnd=116275
+5	euh	euh	_	_	_	_	_	_	AlignBegin=116275|AlignEnd=116530
+6	,	,	_	_	_	_	_	_	AlignBegin=116530|AlignEnd=116530
+7	m'en	m'en	_	_	_	_	_	_	AlignBegin=116530|AlignEnd=116785
+8	empêcher	empêcher	_	_	_	_	_	_	AlignBegin=116785|AlignEnd=117040
+9	.	.	_	_	_	_	_	_	AlignBegin=117040|AlignEnd=117040
+
+# sent_id = Zaynab_Affes.intervals.conll__72
+# text = et après voilà, c'était trop marrant.
+# sound_url = Zaynab_Affes.wav
+1	et	et	_	_	_	_	_	_	AlignBegin=118446|AlignEnd=118708
+2	après	après	_	_	_	_	_	_	AlignBegin=118708|AlignEnd=118970
+3	voilà	voilà	_	_	_	_	_	_	AlignBegin=118970|AlignEnd=119232
+4	,	,	_	_	_	_	_	_	AlignBegin=119232|AlignEnd=119232
+5	c'était	c'était	_	_	_	_	_	_	AlignBegin=119232|AlignEnd=119494
+6	trop	trop	_	_	_	_	_	_	AlignBegin=119494|AlignEnd=119756
+7	marrant	marrant	_	_	_	_	_	_	AlignBegin=119756|AlignEnd=120018
+8	.	.	_	_	_	_	_	_	AlignBegin=120018|AlignEnd=120018
+
+# sent_id = Zaynab_Affes.intervals.conll__73
+# text = on avait passé la journée là-bas.
+# sound_url = Zaynab_Affes.wav
+1	on	on	_	_	_	_	_	_	AlignBegin=120018|AlignEnd=120267
+2	avait	avait	_	_	_	_	_	_	AlignBegin=120267|AlignEnd=120515
+3	passé	passé	_	_	_	_	_	_	AlignBegin=120515|AlignEnd=120763
+4	la	la	_	_	_	_	_	_	AlignBegin=120763|AlignEnd=121011
+5	journée	journée	_	_	_	_	_	_	AlignBegin=121011|AlignEnd=121260
+6	là-bas	là-bas	_	_	_	_	_	_	AlignBegin=121260|AlignEnd=121508
+7	.	.	_	_	_	_	_	_	AlignBegin=121508|AlignEnd=121508
+
