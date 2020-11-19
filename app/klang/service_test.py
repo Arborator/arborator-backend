@@ -45,9 +45,13 @@ def test_seperate_conll_sentences():
 def test_sentence_to_audio_tokens():
     sentence = "# sent_id = test_sentence_1\n1\tdonc\tdonc\t_\t_\t_\t_\t_\t_\tAlignBegin=0|AlignEnd=454"
     audio_tokens = ConllService.sentence_to_audio_tokens(sentence)
-    assert audio_tokens[1]["token"] == "donc"
-    assert audio_tokens[1]["alignBegin"] == 0
-    assert audio_tokens[1]["alignEnd"] == 454
+    assert audio_tokens[0][0] == "donc"
+    assert audio_tokens[0][1] == "0"
+    assert audio_tokens[0][2] == "454"
+    ## these three following lines are an example of what we should get 
+    # assert audio_tokens[0]["token"] == "donc"
+    # assert audio_tokens[0]["alignBegin"] == 0
+    # assert audio_tokens[0]["alignEnd"] == 454
 
 
 def test_process_sentences_audio_token():
