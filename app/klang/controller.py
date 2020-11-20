@@ -35,11 +35,17 @@ class ConllNameServiceResource(Resource):
                 sentence_string)
             sentences_audio_token.append(audio_tokens)
         response['original'] = sentences_audio_token
+        if not current_user.is_authenticated:
+            return response
+            
         for user in users:
             transcription = ConllService.get_transcription(
                 user, conll_name
             )
-            response[user] = transcription
+            
+
+            if transcription["transcription"] != [] or user==current_user.username:
+                response[user] = transcription
         
         return response
 
