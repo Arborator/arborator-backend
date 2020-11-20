@@ -5,6 +5,7 @@ from sqlalchemy import exc
 import sys
 import json
 from flask import abort
+import time
 
 from app import klang_config, db
 from .model import Transcription
@@ -75,31 +76,38 @@ class ConllService:
         return sentences_audio_token
 
     @staticmethod
-    def get_transcription(user_name, conll_name, original_trans):
-        trans = []
+    def get_transcription(user_name, conll_name):
+        result = {
+            'transcription': [],
+        }
         try:
             record = Transcription.query.filter_by(
                     user = user_name, 
                     mp3 = conll_name).one()
             trans = json.loads(record.transcription)
+            result['transcription'] = trans
+            result['sound'] = record.sound
+            result['story'] = record.story
+            result['accent'] = record.accent
+            result['monodia'] = record.monodia
+            result['title'] = record.title
             pass
         except exc.SQLAlchemyError:
-            for line in original_trans:
-                trans.append([word[0] for word in line])
+            print(sys.exc_info()[0])
             pass
-        return trans
+        return result
 
     @staticmethod
     def get_users_list(is_admin):
         users = []
         if is_admin == 'true':
             users = [x.username for x in User.query.all()]
-        else:
+        elif current_user.is_authenticated:
             users = [current_user.username]
         return users
     
     @staticmethod
-    def save_transcription(conll_name, transcription):
+    def save_transcription(conll_name, transcription, sound, story, accent, monodia, title):
         user_name = current_user.username
         try:
             Transcription.query.filter_by(
@@ -107,15 +115,21 @@ class ConllService:
                 mp3 = conll_name
             ).delete(synchronize_session = False)
             trans_str = json.dumps(transcription)
-            print(transcription)
             record = Transcription(
                 user = user_name, 
                 mp3 = conll_name, 
-                transcription = trans_str)
+                transcription = trans_str,
+                sound = sound,
+                story = story,
+                accent = accent,
+                monodia = monodia,
+                title = title
+            )
             db.session.add(record)
             db.session.commit()
             pass
         except:
             print(sys.exc_info()[0])
+            db.session.rollback()
             abort(400)
             pass

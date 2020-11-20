@@ -1,14 +1,15 @@
 from datetime import datetime
-from typing import List
+from typing import List, Any
+import requests
 
 from flask import session, request, abort
 from flask_accepts.decorators.decorators import responds
 from flask_restx import Namespace, Resource, reqparse
 from flask import request, current_app
+from flask_login import current_user, login_required
 
 from .service import ConllService
-from flask_login import current_user, login_required
-import requests
+
 
 api = Namespace("Klang", description="Single namespace, single entity")  # noqa
 
@@ -18,9 +19,6 @@ class ConllServiceResource(Resource):
     "ConllService"
 
     def get(self):
-        # check if the user is logged in
-        if not current_user.is_authenticated:  
-            return current_app.login_manager.unauthorized()
         return ConllService.get_all()
 
 
@@ -29,9 +27,6 @@ class ConllNameServiceResource(Resource):
     "ConllService"
 
     def get(self, conll_name):
-        # check if the user is logged in
-        if not current_user.is_authenticated:  
-            return current_app.login_manager.unauthorized()
         conll_string = ConllService.get_by_name(conll_name)
         sentences_string = ConllService.seperate_conll_sentences(conll_string)
         sentences_audio_token = []
@@ -46,15 +41,29 @@ class ConllNameServiceResource(Resource):
         response['original'] = sentences_audio_token
         for user in users:
             transcription = ConllService.get_transcription(
-                user, conll_name,  sentences_audio_token)
+                user, conll_name
+            )
             response[user] = transcription
         
         return response
 
     def post(self, conll_name):
+        # check if the user is logged in
+        if not current_user.is_authenticated:  
+            return current_app.login_manager.unauthorized()
         data = request.get_json()
         transcription = data['transcription']
+        sound = data['sound']
+        story = data['story']
+        accent = data['accent']
+        monodia = data['monodia']
+        title = data['title']
+
         if not transcription:
             abort(400)
-        ConllService.save_transcription(conll_name, transcription)
-        return {'transcription': transcription}
+        ConllService.save_transcription(
+            conll_name, 
+            transcription,
+            sound, story, accent, monodia, title,
+        )
+        return data
