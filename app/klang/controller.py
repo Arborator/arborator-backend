@@ -1,12 +1,8 @@
-from datetime import datetime
-from typing import List, Any
-import requests
 
-from flask import session, request, abort
-from flask_accepts.decorators.decorators import responds
-from flask_restx import Namespace, Resource, reqparse
+from flask import request, abort
+from flask_restx import Namespace, Resource
 from flask import request, current_app
-from flask_login import current_user, login_required
+from flask_login import current_user
 
 from .service import ConllService
 

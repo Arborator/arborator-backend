@@ -1,6 +1,4 @@
-from sqlalchemy import BLOB, Boolean, Column, Integer, String, Boolean, TEXT
-from sqlalchemy.ext.declarative import DeclarativeMeta
-from sqlalchemy_utils import ChoiceType
+from sqlalchemy import Column, Integer, String, TEXT
 
 from app import db  # noqa
 
