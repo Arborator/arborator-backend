@@ -24,26 +24,26 @@ class KlangService:
         return path_data
 
     @staticmethod
-    def get_path_project(project_name):
+    def get_path_project(project_name) -> str:
         path_data = KlangService.get_path_data()
         path_project = os.path.join(path_data, project_name)
         return path_project
-    
+
     @staticmethod
-    def get_path_sample(project_name, sample_name):
+    def get_path_sample(project_name, sample_name) -> str:
         path_project = KlangService.get_path_project(project_name)
         path_sample = os.path.join(path_project, sample_name)
         return path_sample
 
     @staticmethod
-    def get_path_sample_conll(project_name, sample_name):
+    def get_path_sample_conll(project_name, sample_name) -> str:
         path_sample = KlangService.get_path_sample(project_name, sample_name)
         conll_name = sample_name + ".intervals.conll"
         path_sample_conll = os.path.join(path_sample, conll_name)
         return path_sample_conll
 
     @staticmethod
-    def get_path_conll(file_name_suffix):
+    def get_path_conll(file_name_suffix) -> str:
         file_name = file_name_suffix + ".intervals.conll"
         path_data = KlangService.get_path_data()
         path_conll = os.path.join(path_data, file_name_suffix, file_name)
@@ -81,7 +81,6 @@ class KlangService:
                     audio_token = [m.group(1), m.group(2), m.group(3)]
                     audio_tokens.append(audio_token)
 
-        
         return audio_tokens
 
     @staticmethod
@@ -90,26 +89,24 @@ class KlangService:
         sentences_string = KlangService.seperate_conll_sentences(conll_string)
         sentences_audio_token = []
         for sentence_string in sentences_string:
-          audio_tokens = KlangService.sentence_to_audio_tokens(sentence_string)
-          sentences_audio_token.append(audio_tokens)
+            audio_tokens = KlangService.sentence_to_audio_tokens(sentence_string)
+            sentences_audio_token.append(audio_tokens)
         return sentences_audio_token
 
     @staticmethod
     def get_transcription(user_name, conll_name):
         result = {
-            'transcription': [],
+            "transcription": [],
         }
         try:
-            record = Transcription.query.filter_by(
-                    user = user_name, 
-                    mp3 = conll_name).one()
+            record = Transcription.query.filter_by(user=user_name, mp3=conll_name).one()
             trans = json.loads(record.transcription)
-            result['transcription'] = trans
-            result['sound'] = record.sound
-            result['story'] = record.story
-            result['accent'] = record.accent
-            result['monodia'] = record.monodia
-            result['title'] = record.title
+            result["transcription"] = trans
+            result["sound"] = record.sound
+            result["story"] = record.story
+            result["accent"] = record.accent
+            result["monodia"] = record.monodia
+            result["title"] = record.title
             pass
         except exc.SQLAlchemyError:
             print(sys.exc_info()[0])
@@ -119,30 +116,31 @@ class KlangService:
     @staticmethod
     def get_users_list(is_admin):
         users = []
-        if is_admin == 'true':
+        if is_admin == "true":
             users = [x.username for x in User.query.all()]
         elif current_user.is_authenticated:
             users = [current_user.username]
         return users
-    
+
     @staticmethod
-    def save_transcription(conll_name, transcription, sound, story, accent, monodia, title):
+    def save_transcription(
+        conll_name, transcription, sound, story, accent, monodia, title
+    ):
         user_name = current_user.username
         try:
-            Transcription.query.filter_by(
-                user = user_name, 
-                mp3 = conll_name
-            ).delete(synchronize_session = False)
+            Transcription.query.filter_by(user=user_name, mp3=conll_name).delete(
+                synchronize_session=False
+            )
             trans_str = json.dumps(transcription)
             record = Transcription(
-                user = user_name, 
-                mp3 = conll_name, 
-                transcription = trans_str,
-                sound = sound,
-                story = story,
-                accent = accent,
-                monodia = monodia,
-                title = title
+                user=user_name,
+                mp3=conll_name,
+                transcription=trans_str,
+                sound=sound,
+                story=story,
+                accent=accent,
+                monodia=monodia,
+                title=title,
             )
             db.session.add(record)
             db.session.commit()
