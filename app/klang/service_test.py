@@ -18,16 +18,20 @@ def test_get_path_data():
 def test_get_path_project():
     path_project = KlangService.get_path_project(project_name)
     assert os.path.isdir(path_project)
+    assert path_project.endswith(project_name)
 
 
 def test_get_path_sample():
-    path_project = KlangService.get_path_sample(project_name, sample_name)
-    assert os.path.isdir(path_project)
+    path_sample = KlangService.get_path_sample(project_name, sample_name)
+    assert os.path.isdir(path_sample)
+    assert path_sample.endswith(sample_name)
+
 
 def test_get_path_sample_conll():
     path_sample_conll = KlangService.get_path_sample_conll(project_name, sample_name)
     assert os.path.isfile(path_sample_conll)
-    # assert path_project.endwith
+    assert path_sample_conll.endswith(".conll")
+
 
 def test_get_path_conll():
     path_conll = KlangService.get_path_conll(file_name)
