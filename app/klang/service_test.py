@@ -33,14 +33,14 @@ def test_get_path_sample_conll():
     assert path_sample_conll.endswith(".conll")
 
 
-def test_get_path_conll():
-    path_conll = KlangService.get_path_conll(file_name)
-    assert os.path.isfile(path_conll)
+# def test_get_path_conll():
+#     path_conll = KlangService.get_path_conll(file_name)
+#     assert os.path.isfile(path_conll)
 
 
 def test_read_conll():
-    path_conll = KlangService.get_path_conll(file_name)
-    conll_string = KlangService.read_conll(path_conll)
+    path_sample_conll = KlangService.get_path_sample_conll(project_name, sample_name)
+    conll_string = KlangService.read_conll(path_sample_conll)
     assert type(conll_string) == str
 
 
