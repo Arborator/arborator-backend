@@ -36,6 +36,13 @@ class KlangService:
         return path_sample
 
     @staticmethod
+    def get_path_sample_conll(project_name, sample_name):
+        path_sample = KlangService.get_path_sample(project_name, sample_name)
+        conll_name = sample_name + ".intervals.conll"
+        path_sample_conll = os.path.join(path_sample, conll_name)
+        return path_sample_conll
+
+    @staticmethod
     def get_path_conll(file_name_suffix):
         file_name = file_name_suffix + ".intervals.conll"
         path_data = KlangService.get_path_data()

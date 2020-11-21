@@ -24,6 +24,11 @@ def test_get_path_sample():
     path_project = KlangService.get_path_sample(project_name, sample_name)
     assert os.path.isdir(path_project)
 
+def test_get_path_sample_conll():
+    path_sample_conll = KlangService.get_path_sample_conll(project_name, sample_name)
+    print(path_sample_conll)
+    assert os.path.isfile(path_sample_conll)
+    # assert path_project.endwith
 
 def test_get_path_conll():
     path_conll = KlangService.get_path_conll(file_name)
