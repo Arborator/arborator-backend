@@ -26,7 +26,7 @@ def test_read_conll():
 
 
 def test_get_all():
-    conlls = ConllService.get_all()
+    conlls = ConllService.get_all_name()
     assert conlls == ["John_Doe"]
 
 

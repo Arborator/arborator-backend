@@ -15,7 +15,7 @@ class ConllServiceResource(Resource):
     "ConllService"
 
     def get(self):
-        return ConllService.get_all()
+        return ConllService.get_all_name()
 
 
 @api.route("/conlls/<string:conll_name>")
@@ -37,12 +37,11 @@ class ConllNameServiceResource(Resource):
         response['original'] = sentences_audio_token
         if not current_user.is_authenticated:
             return response
-            
+
         for user in users:
             transcription = ConllService.get_transcription(
                 user, conll_name
             )
-            
 
             if transcription["transcription"] != [] or user==current_user.username:
                 response[user] = transcription
@@ -63,6 +62,7 @@ class ConllNameServiceResource(Resource):
 
         if not transcription:
             abort(400)
+            
         ConllService.save_transcription(
             conll_name, 
             transcription,

@@ -37,7 +37,7 @@ class ConllService:
         return conll
 
     @staticmethod
-    def get_all():
+    def get_all_name():
         path_data = ConllService.get_path_data()
         conlls = os.listdir(path_data)
         return conlls
