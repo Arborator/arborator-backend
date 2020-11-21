@@ -16,7 +16,7 @@ align_begin_and_end_regex = re.compile(
 )
 
 
-class ConllService:
+class KlangService:
     @staticmethod
     def get_path_data():
         path_data = klang_config.path
@@ -24,14 +24,14 @@ class ConllService:
 
     @staticmethod
     def get_path_project(project_name):
-        path_data = ConllService.get_path_data()
+        path_data = KlangService.get_path_data()
         path_project = os.path.join(path_data, project_name)
         return path_project
 
     @staticmethod
     def get_path_conll(file_name_suffix):
         file_name = file_name_suffix + ".intervals.conll"
-        path_data = ConllService.get_path_data()
+        path_data = KlangService.get_path_data()
         path_conll = os.path.join(path_data, file_name_suffix, file_name)
         return path_conll
 
@@ -43,14 +43,14 @@ class ConllService:
 
     @staticmethod
     def get_all_name():
-        path_data = ConllService.get_path_data()
+        path_data = KlangService.get_path_data()
         conlls = os.listdir(path_data)
         return conlls
 
     @staticmethod
     def get_by_name(conll_name):
-        path_conll = ConllService.get_path_conll(conll_name)
-        conll_string = ConllService.read_conll(path_conll)
+        path_conll = KlangService.get_path_conll(conll_name)
+        conll_string = KlangService.read_conll(path_conll)
         return conll_string
 
     @staticmethod
@@ -72,11 +72,11 @@ class ConllService:
 
     @staticmethod
     def process_sentences_audio_token(conll_name: str):
-        conll_string = ConllService.get_by_name(conll_name)
-        sentences_string = ConllService.seperate_conll_sentences(conll_string)
+        conll_string = KlangService.get_by_name(conll_name)
+        sentences_string = KlangService.seperate_conll_sentences(conll_string)
         sentences_audio_token = []
         for sentence_string in sentences_string:
-          audio_tokens = ConllService.sentence_to_audio_tokens(sentence_string)
+          audio_tokens = KlangService.sentence_to_audio_tokens(sentence_string)
           sentences_audio_token.append(audio_tokens)
         return sentences_audio_token
 

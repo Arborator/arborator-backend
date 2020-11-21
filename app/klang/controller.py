@@ -4,34 +4,34 @@ from flask_restx import Namespace, Resource
 from flask import request, current_app
 from flask_login import current_user
 
-from .service import ConllService
+from .service import KlangService
 
 
 api = Namespace("Klang", description="Single namespace, single entity")  # noqa
 
 
 @api.route("/conlls")
-class ConllServiceResource(Resource):
-    "ConllService"
+class KlangServiceResource(Resource):
+    "KlangService"
 
     def get(self):
-        return ConllService.get_all_name()
+        return KlangService.get_all_name()
 
 
 @api.route("/conlls/<string:conll_name>")
 class ConllNameServiceResource(Resource):
-    "ConllService"
+    "KlangService"
 
     def get(self, conll_name):
-        conll_string = ConllService.get_by_name(conll_name)
-        sentences_string = ConllService.seperate_conll_sentences(conll_string)
+        conll_string = KlangService.get_by_name(conll_name)
+        sentences_string = KlangService.seperate_conll_sentences(conll_string)
         sentences_audio_token = []
         is_admin = request.args.get('is_admin')
-        users = ConllService.get_users_list(is_admin)
+        users = KlangService.get_users_list(is_admin)
         response = {}
 
         for sentence_string in sentences_string:
-            audio_tokens = ConllService.sentence_to_audio_tokens(
+            audio_tokens = KlangService.sentence_to_audio_tokens(
                 sentence_string)
             sentences_audio_token.append(audio_tokens)
         response['original'] = sentences_audio_token
@@ -39,7 +39,7 @@ class ConllNameServiceResource(Resource):
             return response
 
         for user in users:
-            transcription = ConllService.get_transcription(
+            transcription = KlangService.get_transcription(
                 user, conll_name
             )
 
@@ -63,7 +63,7 @@ class ConllNameServiceResource(Resource):
         if not transcription:
             abort(400)
             
-        ConllService.save_transcription(
+        KlangService.save_transcription(
             conll_name, 
             transcription,
             sound, story, accent, monodia, title,
