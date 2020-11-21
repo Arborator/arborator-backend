@@ -43,6 +43,9 @@ def test_read_conll():
     conll_string = KlangService.read_conll(path_sample_conll)
     assert type(conll_string) == str
 
+def test_get_projects():
+    projects = KlangService.get_projects()
+    assert projects == ["project1"]
 
 def test_get_all():
     conlls = KlangService.get_all_name()

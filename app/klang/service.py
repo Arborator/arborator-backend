@@ -43,11 +43,8 @@ class KlangService:
         return path_sample_conll
 
     @staticmethod
-    def get_path_conll(file_name_suffix) -> str:
-        file_name = file_name_suffix + ".intervals.conll"
-        path_data = KlangService.get_path_data()
-        path_conll = os.path.join(path_data, file_name_suffix, file_name)
-        return path_conll
+    def get_projects():
+        return os.listdir(KlangService.get_path_data())
 
     @staticmethod
     def read_conll(path_conll):
