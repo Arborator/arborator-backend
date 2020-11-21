@@ -5,7 +5,6 @@ from sqlalchemy import exc
 import sys
 import json
 from flask import abort
-import time
 
 from app import klang_config, db
 from .model import Transcription
@@ -22,6 +21,12 @@ class ConllService:
     def get_path_data():
         path_data = klang_config.path
         return path_data
+
+    @staticmethod
+    def get_path_project(project_name):
+        path_data = ConllService.get_path_data()
+        path_project = os.path.join(path_data, project_name)
+        return path_project
 
     @staticmethod
     def get_path_conll(file_name_suffix):

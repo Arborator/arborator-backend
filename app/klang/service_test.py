@@ -5,6 +5,7 @@ from app.test.fixtures import app, db  # noqa
 from .service import ConllService
 
 folder_name = "data_test"
+project_name = "project1"
 file_name = "John_Doe"
 
 
@@ -13,6 +14,10 @@ def test_get_path_data():
     print("KK path_data", path_data)
     assert os.path.isdir(path_data)
 
+def test_get_path_project():
+    path_project = ConllService.get_path_project(project_name)
+    print(path_project)
+    assert os.path.isdir(path_project)
 
 def test_get_path_conll():
     path_conll = ConllService.get_path_conll(file_name)
