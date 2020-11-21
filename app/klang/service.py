@@ -30,14 +30,20 @@ class KlangService:
         return path_project
 
     @staticmethod
-    def get_path_sample(project_name, sample_name) -> str:
+    def get_path_project_samples(project_name) -> str:
         path_project = KlangService.get_path_project(project_name)
-        path_sample = os.path.join(path_project, sample_name)
-        return path_sample
+        path_samples = os.path.join(path_project, "samples")
+        return path_samples
+
+    @staticmethod
+    def get_path_project_sample(project_name, sample_name) -> str:
+        path_project_samples = KlangService.get_path_project_samples(project_name)
+        path_project_sample = os.path.join(path_project_samples, sample_name)
+        return path_project_sample
 
     @staticmethod
     def get_path_sample_conll(project_name, sample_name) -> str:
-        path_sample = KlangService.get_path_sample(project_name, sample_name)
+        path_sample = KlangService.get_path_project_sample(project_name, sample_name)
         conll_name = sample_name + ".intervals.conll"
         path_sample_conll = os.path.join(path_sample, conll_name)
         return path_sample_conll
@@ -45,6 +51,10 @@ class KlangService:
     @staticmethod
     def get_projects():
         return os.listdir(KlangService.get_path_data())
+
+    @staticmethod
+    def get_project_samples(project_name):
+        return os.listdir(KlangService.get_path_project(project_name))
 
     @staticmethod
     def read_conll(path_conll):

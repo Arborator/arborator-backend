@@ -21,8 +21,14 @@ def test_get_path_project():
     assert path_project.endswith(project_name)
 
 
-def test_get_path_sample():
-    path_sample = KlangService.get_path_sample(project_name, sample_name)
+def test_get_path_project_samples():
+    path_samples = KlangService.get_path_project_samples(project_name)
+    assert os.path.isdir(path_samples)
+
+
+def test_get_path_project_sample():
+    path_sample = KlangService.get_path_project_sample(project_name, sample_name)
+    print(path_sample)
     assert os.path.isdir(path_sample)
     assert path_sample.endswith(sample_name)
 
@@ -33,19 +39,21 @@ def test_get_path_sample_conll():
     assert path_sample_conll.endswith(".conll")
 
 
-# def test_get_path_conll():
-#     path_conll = KlangService.get_path_conll(file_name)
-#     assert os.path.isfile(path_conll)
-
-
 def test_read_conll():
     path_sample_conll = KlangService.get_path_sample_conll(project_name, sample_name)
     conll_string = KlangService.read_conll(path_sample_conll)
     assert type(conll_string) == str
 
+
 def test_get_projects():
     projects = KlangService.get_projects()
     assert projects == ["project1"]
+
+
+def test_get_project_samples():
+    samples = KlangService.get_project_samples(project_name)
+    assert samples == ["sample1"]
+
 
 def test_get_all():
     conlls = KlangService.get_all_name()
