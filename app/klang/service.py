@@ -42,7 +42,7 @@ class KlangService:
         return path_project_sample
 
     @staticmethod
-    def get_path_sample_conll(project_name, sample_name) -> str:
+    def get_path_project_sample_conll(project_name, sample_name) -> str:
         path_sample = KlangService.get_path_project_sample(project_name, sample_name)
         conll_name = sample_name + ".intervals.conll"
         path_sample_conll = os.path.join(path_sample, conll_name)
@@ -54,7 +54,7 @@ class KlangService:
 
     @staticmethod
     def get_project_samples(project_name):
-        return os.listdir(KlangService.get_path_project(project_name))
+        return os.listdir(KlangService.get_path_project_samples(project_name))
 
     @staticmethod
     def read_conll(path_conll):
@@ -63,25 +63,31 @@ class KlangService:
         return conll
 
     @staticmethod
-    def get_all_name():
-        path_data = KlangService.get_path_data()
-        conlls = os.listdir(path_data)
-        return conlls
+    def get_project_sample_conll(project_name, sample_name):
+        path_conll = KlangService.get_path_project_sample_conll(project_name, sample_name)
+        conll_str = KlangService.read_conll(path_conll)
+        return conll_str
+
+    # @staticmethod
+    # def get_all_name():
+    #     path_data = KlangService.get_path_data()
+    #     conlls = os.listdir(path_data)
+    #     return conlls
+
+    # @staticmethod
+    # def get_by_name(conll_name):
+    #     path_conll = KlangService.get_path_conll(conll_name)
+    #     conll = KlangService.read_conll(path_conll)
+    #     return conll
 
     @staticmethod
-    def get_by_name(conll_name):
-        path_conll = KlangService.get_path_conll(conll_name)
-        conll_string = KlangService.read_conll(path_conll)
-        return conll_string
+    def conll_to_sentences(conll: str) -> List[str]:
+        return list(filter(lambda x: x != "", conll.split("\n\n")))
 
     @staticmethod
-    def seperate_conll_sentences(conll_string: str) -> List[str]:
-        return list(filter(lambda x: x != "", conll_string.split("\n\n")))
-
-    @staticmethod
-    def sentence_to_audio_tokens(sentence_string: str):
+    def sentence_to_audio_tokens(sentence: str):
         audio_tokens = []
-        for line in sentence_string.split("\n"):
+        for line in sentence.split("\n"):
             if line:
                 if not line.startswith("#"):
                     m = align_begin_and_end_regex.search(line)
@@ -91,14 +97,23 @@ class KlangService:
         return audio_tokens
 
     @staticmethod
-    def process_sentences_audio_token(conll_name: str):
-        conll_string = KlangService.get_by_name(conll_name)
-        sentences_string = KlangService.seperate_conll_sentences(conll_string)
-        sentences_audio_token = []
-        for sentence_string in sentences_string:
-            audio_tokens = KlangService.sentence_to_audio_tokens(sentence_string)
-            sentences_audio_token.append(audio_tokens)
-        return sentences_audio_token
+    def compute_conll_audio_tokens(conll: str):
+        sentences = KlangService.conll_to_sentences(conll)
+        conll_audio_tokens = []
+        for sentence in sentences:
+            audio_tokens = KlangService.sentence_to_audio_tokens(sentence)
+            conll_audio_tokens.append(audio_tokens)
+        return conll_audio_tokens
+
+    # @staticmethod
+    # def process_sentences_audio_token(conll_name: str):
+    #     conll = KlangService.get_project_sample_conll(conll_name)
+    #     sentences = KlangService.conll_to_sentences(conll)
+    #     sentences_audio_token = []
+    #     for sentence in sentences:
+    #         audio_tokens = KlangService.sentence_to_audio_tokens(sentence)
+    #         sentences_audio_token.append(audio_tokens)
+    #     return sentences_audio_token
 
     @staticmethod
     def get_transcription(user_name, conll_name):

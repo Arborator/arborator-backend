@@ -9,13 +9,28 @@ from .service import KlangService
 
 api = Namespace("Klang", description="Single namespace, single entity")  # noqa
 
-
-@api.route("/conlls")
-class KlangServiceResource(Resource):
-    "KlangService"
+@api.route("/projects")
+class ProjectsServiceResource(Resource):
+    "Klang projects"
 
     def get(self):
-        return KlangService.get_all_name()
+        return KlangService.get_projects()
+    
+@api.route("/projects/<string:project_name>/samples")
+class SamplesServiceResource(Resource):
+    "Klang samples (by project)"
+
+    def get(self, project_name):
+        return KlangService.get_project_samples(project_name)
+
+
+
+# @api.route("/conlls")
+# class KlangServiceResource(Resource):
+#     "KlangService"
+
+#     def get(self):
+#         return KlangService.get_all_name()
 
 
 @api.route("/conlls/<string:conll_name>")
@@ -24,7 +39,7 @@ class ConllNameServiceResource(Resource):
 
     def get(self, conll_name):
         conll_string = KlangService.get_by_name(conll_name)
-        sentences_string = KlangService.seperate_conll_sentences(conll_string)
+        sentences_string = KlangService.conll_to_sentences(conll_string)
         sentences_audio_token = []
         is_admin = request.args.get('is_admin')
         users = KlangService.get_users_list(is_admin)
