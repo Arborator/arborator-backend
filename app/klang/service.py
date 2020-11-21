@@ -1,4 +1,5 @@
 import os
+from os import stat
 import re
 from typing import List
 from sqlalchemy import exc
@@ -27,6 +28,12 @@ class KlangService:
         path_data = KlangService.get_path_data()
         path_project = os.path.join(path_data, project_name)
         return path_project
+    
+    @staticmethod
+    def get_path_sample(project_name, sample_name):
+        path_project = KlangService.get_path_project(project_name)
+        path_sample = os.path.join(path_project, sample_name)
+        return path_sample
 
     @staticmethod
     def get_path_conll(file_name_suffix):

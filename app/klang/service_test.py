@@ -6,6 +6,7 @@ from .service import KlangService
 
 folder_name = "data_test"
 project_name = "project1"
+sample_name = "sample1"
 file_name = "John_Doe"
 
 
@@ -16,7 +17,11 @@ def test_get_path_data():
 
 def test_get_path_project():
     path_project = KlangService.get_path_project(project_name)
-    print(path_project)
+    assert os.path.isdir(path_project)
+
+
+def test_get_path_sample():
+    path_project = KlangService.get_path_sample(project_name, sample_name)
     assert os.path.isdir(path_project)
 
 
