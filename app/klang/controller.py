@@ -27,14 +27,36 @@ class SamplesServiceResource(Resource):
 
 @api.route("/projects/<string:project_name>/samples/<string:sample_name>/timed-tokens")
 class TimedTokensServiceResource(Resource):
-    "Klang sample"
+    "Timed tokens"
 
     def get(self, project_name, sample_name):
-        path_conll = KlangService.get_path_project_sample_conll(project_name, sample_name)
+        path_conll = KlangService.get_path_project_sample_conll(
+            project_name, sample_name
+        )
+        conll = KlangService.read_conll(path_conll)
+        conll_audio_tokens = KlangService.compute_conll_audio_tokens(conll)
+        return conll_audio_tokens
+
+
+@api.route("/projects/<string:project_name>/samples/<string:sample_name>/tanscription")
+class TranscriptionServiceResource(Resource):
+    "Transcriptions"
+
+    def get(self, project_name, sample_name):
+        path_conll = KlangService.get_path_project_sample_conll(
+            project_name, sample_name
+        )
         conll = KlangService.read_conll(path_conll)
         conll_audio_tokens = KlangService.compute_conll_audio_tokens(conll)
         response = {"original": conll_audio_tokens}
         return response
+
+
+# @api.route("/projects/<string:project_name>/samples/<string:sample_name>/tanscription-all")
+# class TranscriptionServiceResource(Resource):
+#     "Transcriptions"
+
+#     def get
 
 
 # @api.route("/conlls")

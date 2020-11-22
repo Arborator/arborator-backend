@@ -1,9 +1,0 @@
-# sent_id = John_Doe.intervals.conll__1
-# text = it is a test conll
-# sound_url = Veronique_Jezewski.wav
-1	it	it	_	_	_	_	_	_	AlignBegin=162330|AlignEnd=162590
-2	is	is	_	_	_	_	_	_	AlignBegin=162590|AlignEnd=162849
-3	a	a	_	_	_	_	_	_	AlignBegin=162849|AlignEnd=163109
-4	test	test	_	_	_	_	_	_	AlignBegin=163368|AlignEnd=163628
-5	que	que	_	_	_	_	_	_	AlignBegin=163628|AlignEnd=163887
-6	conll	conll	_	_	_	_	_	_	AlignBegin=163887|AlignEnd=164147

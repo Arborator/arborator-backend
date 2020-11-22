@@ -64,7 +64,9 @@ class KlangService:
 
     @staticmethod
     def get_project_sample_conll(project_name, sample_name):
-        path_conll = KlangService.get_path_project_sample_conll(project_name, sample_name)
+        path_conll = KlangService.get_path_project_sample_conll(
+            project_name, sample_name
+        )
         conll_str = KlangService.read_conll(path_conll)
         return conll_str
 
@@ -172,3 +174,52 @@ class KlangService:
             db.session.rollback()
             abort(400)
             pass
+
+
+class TranscriptionService:
+    @staticmethod
+    def get_path_transcriptions(project_name, sample_name) -> str:
+        path_project_sample = KlangService.get_path_project_sample(
+            project_name, sample_name
+        )
+        path_transcriptions = os.path.join(path_project_sample, "transcriptions.json")
+        return path_transcriptions
+
+    @staticmethod
+    def load_transcriptions(project_name, sample_name):
+        path_transcriptions = TranscriptionService.get_path_transcriptions(
+            project_name, sample_name
+        )
+        with open(path_transcriptions, "r", encoding="utf-8") as infile:
+            transcriptions = json.load(infile)
+        return transcriptions
+
+    @staticmethod
+    def check_if_transcriptions_exist(project_name, sample_name):
+        path_transcriptions = TranscriptionService.get_path_transcriptions(
+            project_name, sample_name
+        )
+        return os.path.isfile(path_transcriptions)
+
+    @staticmethod
+    def create_transcriptions_file(project_name, sample_name):
+        path_transcriptions = TranscriptionService.get_path_transcriptions(
+            project_name, sample_name
+        )
+        with open(path_transcriptions, "w", encoding="utf-8") as outfile:
+            outfile.write(json.dumps({}))
+
+    @staticmethod
+    def delete_transcriptions_file(project_name, sample_name):
+        path_transcriptions = TranscriptionService.get_path_transcriptions(
+            project_name, sample_name
+        )
+        os.remove(path_transcriptions)
+
+    @staticmethod
+    def update_transcriptions_file(project_name, sample_name, new_transcriptions):
+        path_transcriptions = TranscriptionService.get_path_transcriptions(
+            project_name, sample_name
+        )
+        with open(path_transcriptions, "w", encoding="utf-8") as outfile:
+            outfile.write(json.dumps(new_transcriptions))
