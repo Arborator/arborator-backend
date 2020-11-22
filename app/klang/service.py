@@ -210,6 +210,9 @@ class TranscriptionService:
 
     @staticmethod
     def update_transcriptions_file(project_name, sample_name, new_transcriptions):
+        if not TranscriptionService.check_if_transcriptions_exist(project_name, sample_name):
+            TranscriptionService.create_transcriptions_file(project_name, sample_name)
+            
         path_transcriptions = TranscriptionService.get_path_transcriptions(
             project_name, sample_name
         )
@@ -218,6 +221,9 @@ class TranscriptionService:
 
     @staticmethod
     def load_transcriptions(project_name, sample_name):
+        if not TranscriptionService.check_if_transcriptions_exist(project_name, sample_name):
+            TranscriptionService.create_transcriptions_file(project_name, sample_name)
+
         path_transcriptions = TranscriptionService.get_path_transcriptions(
             project_name, sample_name
         )

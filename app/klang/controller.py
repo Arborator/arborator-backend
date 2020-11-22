@@ -3,7 +3,7 @@ from flask_restx import Namespace, Resource
 from flask import request, current_app
 from flask_login import current_user
 
-from .service import KlangService
+from .service import KlangService, TranscriptionService
 
 
 api = Namespace("Klang", description="Single namespace, single entity")  # noqa
@@ -38,18 +38,25 @@ class TimedTokensServiceResource(Resource):
         return conll_audio_tokens
 
 
-@api.route("/projects/<string:project_name>/samples/<string:sample_name>/tanscription")
-class TranscriptionServiceResource(Resource):
+@api.route("/projects/<string:project_name>/samples/<string:sample_name>/tanscriptions")
+class TranscriptionsServiceResource(Resource):
     "Transcriptions"
 
     def get(self, project_name, sample_name):
-        path_conll = KlangService.get_path_project_sample_conll(
-            project_name, sample_name
-        )
-        conll = KlangService.read_conll(path_conll)
-        conll_audio_tokens = KlangService.compute_conll_audio_tokens(conll)
-        response = {"original": conll_audio_tokens}
-        return response
+        transcriptions = TranscriptionService.load_transcriptions(project_name, sample_name)
+        return transcriptions
+
+
+@api.route("/projects/<string:project_name>/samples/<string:sample_name>/tanscriptions/<string:user>")
+class TranscriptionUserServiceResource(Resource):
+    "Transcription for one user"
+
+    def get(self, project_name, sample_name, user):
+        transcriptions = TranscriptionService.load_transcriptions(project_name, sample_name)
+        transcription_user = transcriptions.get(user, {})
+        return transcription_user
+    
+
 
 
 # @api.route("/projects/<string:project_name>/samples/<string:sample_name>/tanscription-all")
