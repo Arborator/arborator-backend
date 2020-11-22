@@ -13,6 +13,7 @@ sample_name = "sample1"
 sample_create_transcriptions = "sampleCreateTranscriptions"
 
 sample_without_transcriptions = "sampleWithoutTranscriptions"
+new_transcriptions = {"user1": "test"}
 
 
 def test_get_path_data():
@@ -129,11 +130,6 @@ def test_get_path_transcriptions():
     assert path_transcriptions.endswith("transcriptions.json")
 
 
-def test_load_transcriptions():
-    transcriptions = TranscriptionService.load_transcriptions(project_name, sample_name)
-    assert transcriptions
-
-
 def test_check_if_transcriptions_exist():
     sample1_transcriptions_exist = TranscriptionService.check_if_transcriptions_exist(
         project_name, sample_name
@@ -166,13 +162,19 @@ def test_update_transcriptions():
     path_transcriptions = TranscriptionService.get_path_transcriptions(
         project_name, sample_without_transcriptions
     )
-    new_transcriptions = {"user1": "test"}
     TranscriptionService.update_transcriptions_file(
         project_name, sample_without_transcriptions, new_transcriptions
     )
     with open(path_transcriptions, "r", encoding="utf-8") as infile:
         updated_transcriptions = json.load(infile)
     assert new_transcriptions == updated_transcriptions
+
+
+def test_load_transcriptions():
+    transcriptions = TranscriptionService.load_transcriptions(project_name, sample_name)
+    assert transcriptions
+    loaded_transcriptions = TranscriptionService.load_transcriptions(project_name, sample_without_transcriptions)
+    assert loaded_transcriptions == new_transcriptions
 
 
 def test_delete_transcriptions():

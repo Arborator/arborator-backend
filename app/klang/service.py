@@ -185,14 +185,6 @@ class TranscriptionService:
         path_transcriptions = os.path.join(path_project_sample, "transcriptions.json")
         return path_transcriptions
 
-    @staticmethod
-    def load_transcriptions(project_name, sample_name):
-        path_transcriptions = TranscriptionService.get_path_transcriptions(
-            project_name, sample_name
-        )
-        with open(path_transcriptions, "r", encoding="utf-8") as infile:
-            transcriptions = json.load(infile)
-        return transcriptions
 
     @staticmethod
     def check_if_transcriptions_exist(project_name, sample_name):
@@ -223,3 +215,12 @@ class TranscriptionService:
         )
         with open(path_transcriptions, "w", encoding="utf-8") as outfile:
             outfile.write(json.dumps(new_transcriptions))
+
+    @staticmethod
+    def load_transcriptions(project_name, sample_name):
+        path_transcriptions = TranscriptionService.get_path_transcriptions(
+            project_name, sample_name
+        )
+        with open(path_transcriptions, "r", encoding="utf-8") as infile:
+            transcriptions = json.load(infile)
+        return transcriptions
