@@ -1,10 +1,11 @@
-from flask import request, abort
-from flask_restx import Namespace, Resource
-from flask import request, current_app
+from app.klang.interface import TranscriptionInterface
+from app.klang.schema import TranscriptionSchema
+from flask import abort, current_app, request
+from flask_accepts.decorators.decorators import accepts, responds
 from flask_login import current_user
+from flask_restx import Namespace, Resource
 
 from .service import KlangService, TranscriptionService
-
 
 api = Namespace("Klang", description="Single namespace, single entity")  # noqa
 
@@ -43,20 +44,63 @@ class TranscriptionsServiceResource(Resource):
     "Transcriptions"
 
     def get(self, project_name, sample_name):
-        transcriptions = TranscriptionService.load_transcriptions(project_name, sample_name)
+        transcriptions = TranscriptionService.load_transcriptions(
+            project_name, sample_name
+        )
         return transcriptions
 
+    @accepts(schema=TranscriptionSchema, api=api)
+    def post(self, project_name, sample_name):
+        print("KK request.parsed_obj", request.parsed_obj)
+        if not current_user.is_authenticated:
+            abort(403, "user must be authentificated")
 
-@api.route("/projects/<string:project_name>/samples/<string:sample_name>/tanscriptions/<string:user>")
+        user = current_user.username
+        user_trancription: TranscriptionInterface = request.parsed_obj
+
+        transcriptions = TranscriptionService.load_transcriptions(
+            project_name, sample_name
+        )
+        transcriptions[user] = user_trancription
+
+        TranscriptionService.update_transcriptions_file(
+            project_name, sample_name, transcriptions
+        )
+        return user_trancription
+
+
+@api.route("/projects/<string:project_name>/samples/<string:sample_name>/tanscription/")
 class TranscriptionUserServiceResource(Resource):
     "Transcription for one user"
 
-    def get(self, project_name, sample_name, user):
-        transcriptions = TranscriptionService.load_transcriptions(project_name, sample_name)
-        transcription_user = transcriptions.get(user, {})
+    @responds(schema=TranscriptionSchema, api=api)
+    def get(self, project_name, sample_name):
+        username = "__anonymous__"
+        if current_user.is_authenticated:
+            username = current_user.username
+        transcriptions = TranscriptionService.load_transcriptions(
+            project_name, sample_name
+        )
+        transcription_user = transcriptions.get(username, {})
         return transcription_user
-    
 
+    @accepts(schema=TranscriptionSchema, api=api)
+    def put(self, project_name, sample_name):
+        if not current_user.is_authenticated:
+            abort(403, "user must be authentificated")
+
+        user = current_user.username
+        user_trancription: TranscriptionInterface = request.parsed_obj
+
+        transcriptions = TranscriptionService.load_transcriptions(
+            project_name, sample_name
+        )
+        transcriptions[user] = user_trancription
+
+        TranscriptionService.update_transcriptions_file(
+            project_name, sample_name, transcriptions
+        )
+        return user_trancription
 
 
 # @api.route("/projects/<string:project_name>/samples/<string:sample_name>/tanscription-all")
@@ -74,55 +118,55 @@ class TranscriptionUserServiceResource(Resource):
 #         return KlangService.get_all_name()
 
 
-@api.route("/conlls/<string:conll_name>")
-class ConllNameServiceResource(Resource):
-    "KlangService"
+# @api.route("/conlls/<string:conll_name>")
+# class ConllNameServiceResource(Resource):
+#     "KlangService"
 
-    def get(self, conll_name):
-        conll_string = KlangService.get_by_name(conll_name)
-        sentences_string = KlangService.conll_to_sentences(conll_string)
-        sentences_audio_token = []
-        is_admin = request.args.get("is_admin")
-        users = KlangService.get_users_list(is_admin)
-        response = {}
+#     def get(self, conll_name):
+#         conll_string = KlangService.get_by_name(conll_name)
+#         sentences_string = KlangService.conll_to_sentences(conll_string)
+#         sentences_audio_token = []
+#         is_admin = request.args.get("is_admin")
+#         users = KlangService.get_users_list(is_admin)
+#         response = {}
 
-        for sentence_string in sentences_string:
-            audio_tokens = KlangService.sentence_to_audio_tokens(sentence_string)
-            sentences_audio_token.append(audio_tokens)
-        response["original"] = sentences_audio_token
-        if not current_user.is_authenticated:
-            return response
+#         for sentence_string in sentences_string:
+#             audio_tokens = KlangService.sentence_to_audio_tokens(sentence_string)
+#             sentences_audio_token.append(audio_tokens)
+#         response["original"] = sentences_audio_token
+#         if not current_user.is_authenticated:
+#             return response
 
-        for user in users:
-            transcription = KlangService.get_transcription(user, conll_name)
+#         for user in users:
+#             transcription = KlangService.get_transcription(user, conll_name)
 
-            if transcription["transcription"] != [] or user == current_user.username:
-                response[user] = transcription
+#             if transcription["transcription"] != [] or user == current_user.username:
+#                 response[user] = transcription
 
-        return response
+#         return response
 
-    def post(self, conll_name):
-        # check if the user is logged in
-        if not current_user.is_authenticated:
-            return current_app.login_manager.unauthorized()
-        data = request.get_json()
-        transcription = data["transcription"]
-        sound = data["sound"]
-        story = data["story"]
-        accent = data["accent"]
-        monodia = data["monodia"]
-        title = data["title"]
+#     def post(self, conll_name):
+#         # check if the user is logged in
+#         if not current_user.is_authenticated:
+#             return current_app.login_manager.unauthorized()
+#         data = request.get_json()
+#         transcription = data["transcription"]
+#         sound = data["sound"]
+#         story = data["story"]
+#         accent = data["accent"]
+#         monodia = data["monodia"]
+#         title = data["title"]
 
-        if not transcription:
-            abort(400)
+#         if not transcription:
+#             abort(400)
 
-        KlangService.save_transcription(
-            conll_name,
-            transcription,
-            sound,
-            story,
-            accent,
-            monodia,
-            title,
-        )
-        return data
+#         KlangService.save_transcription(
+#             conll_name,
+#             transcription,
+#             sound,
+#             story,
+#             accent,
+#             monodia,
+#             title,
+#         )
+#         return data
