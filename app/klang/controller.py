@@ -45,7 +45,9 @@ class TimedTokensServiceResource(Resource):
         return conll_audio_tokens
 
 
-@api.route("/projects/<string:project_name>/samples/<string:sample_name>/transcriptions")
+@api.route(
+    "/projects/<string:project_name>/samples/<string:sample_name>/transcriptions"
+)
 class TranscriptionsServiceResource(Resource):
     "Transcriptions"
 
@@ -55,6 +57,22 @@ class TranscriptionsServiceResource(Resource):
             project_name, sample_name
         )
         return transcriptions
+
+
+@api.route(
+    "/projects/<string:project_name>/samples/<string:sample_name>/transcription/<string:username>"
+)
+class TranscriptionUserServiceResource(Resource):
+    "Transcription for one user"
+
+    @responds(schema=TranscriptionSchema, api=api)
+    def get(self, project_name, sample_name, username):
+        "get the transcription of a user"
+        transcriptions = TranscriptionService.load_transcriptions(
+            project_name, sample_name
+        )
+        transcription_user = transcriptions.get(username, {})
+        return transcription_user
 
     @accepts(schema=TranscriptionSchema, api=api)
     def post(self, project_name, sample_name):
@@ -75,20 +93,6 @@ class TranscriptionsServiceResource(Resource):
         )
         return user_trancription
 
-
-@api.route("/projects/<string:project_name>/samples/<string:sample_name>/transcription/<string:username>")
-class TranscriptionUserServiceResource(Resource):
-    "Transcription for one user"
-
-    @responds(schema=TranscriptionSchema, api=api)
-    def get(self, project_name, sample_name, username):
-        "get the transcription of a user"
-        transcriptions = TranscriptionService.load_transcriptions(
-            project_name, sample_name
-        )
-        transcription_user = transcriptions.get(username, {})
-        return transcription_user
-
     # @accepts(schema=TranscriptionSchema, api=api)
     # def put(self, project_name, sample_name):
     #     if not current_user.is_authenticated:
@@ -107,14 +111,15 @@ class TranscriptionUserServiceResource(Resource):
     #     return user_trancription
 
 
-
 @api.route("/projects/<string:project_name>/samples/<string:sample_name>/mp3")
 class Mp3ServiceResource(Resource):
     "MP3 Resources"
 
     def get(self, project_name, sample_name):
         "get the mp3 for a given sample"
-        path_project_sample = KlangService.get_path_project_sample(project_name, sample_name)
+        path_project_sample = KlangService.get_path_project_sample(
+            project_name, sample_name
+        )
         path_mp3 = os.path.join(path_project_sample, sample_name + ".mp3")
         return send_file(path_mp3)
 
