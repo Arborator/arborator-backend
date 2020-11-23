@@ -199,7 +199,7 @@ class TranscriptionService:
             project_name, sample_name
         )
         with open(path_transcriptions, "w", encoding="utf-8") as outfile:
-            outfile.write(json.dumps({}))
+            outfile.write(json.dumps([]))
 
     @staticmethod
     def delete_transcriptions_file(project_name, sample_name):

@@ -71,27 +71,34 @@ class TranscriptionUserServiceResource(Resource):
         transcriptions = TranscriptionService.load_transcriptions(
             project_name, sample_name
         )
-        transcription_user = transcriptions.get(username, {})
-        return transcription_user
+        transcription = next(
+            filter(lambda x: x["user"] == username, transcriptions), {}
+        )
+        return transcription
 
     @accepts(schema=TranscriptionSchema, api=api)
-    def post(self, project_name, sample_name):
+    def put(self, project_name, sample_name, username):
         "create/update the transcription of a user"
-        if not current_user.is_authenticated:
+        if not current_user.is_authenticated or current_user.username != username:
             return current_app.login_manager.unauthorized()
 
-        user = current_user.username
-        user_trancription: TranscriptionInterface = request.parsed_obj
+        data: TranscriptionInterface = request.parsed_obj
 
         transcriptions = TranscriptionService.load_transcriptions(
             project_name, sample_name
         )
-        transcriptions[user] = user_trancription
+        transcription = next(
+            filter(lambda x: x["user"] == username, transcriptions), None
+        )
+        if transcription == None:
+            transcriptions.append(data)
+        else:
+            transcription.update(data)
 
         TranscriptionService.update_transcriptions_file(
             project_name, sample_name, transcriptions
         )
-        return user_trancription
+        return transcription
 
     # @accepts(schema=TranscriptionSchema, api=api)
     # def put(self, project_name, sample_name):
