@@ -3,7 +3,7 @@ from mypy_extensions import TypedDict
 
 class TranscriptionInterface(TypedDict, total=False):
     # id: str
-    # user: str
+    user: str
     mp3: str
     sound: str
     story: str
