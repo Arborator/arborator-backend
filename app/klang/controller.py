@@ -76,16 +76,13 @@ class TranscriptionsServiceResource(Resource):
         return user_trancription
 
 
-@api.route("/projects/<string:project_name>/samples/<string:sample_name>/transcriptions/current-user")
+@api.route("/projects/<string:project_name>/samples/<string:sample_name>/transcription/<string:username>")
 class TranscriptionUserServiceResource(Resource):
     "Transcription for one user"
 
     @responds(schema=TranscriptionSchema, api=api)
-    def get(self, project_name, sample_name):
-        "get the transcription of the current_user"
-        username = "__anonymous__"
-        if current_user.is_authenticated:
-            username = current_user.username
+    def get(self, project_name, sample_name, username):
+        "get the transcription of a user"
         transcriptions = TranscriptionService.load_transcriptions(
             project_name, sample_name
         )
