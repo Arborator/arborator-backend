@@ -49,6 +49,13 @@ class KlangService:
         return path_sample_conll
 
     @staticmethod
+    def get_path_project_sample_mp3(project_name, sample_name) -> str:
+        path_sample = KlangService.get_path_project_sample(project_name, sample_name)
+        mp3_name = sample_name + ".mp3"
+        path_sample_mp3 = os.path.join(path_sample, mp3_name)
+        return path_sample_mp3
+
+    @staticmethod
     def get_projects():
         return os.listdir(KlangService.get_path_data())
 
@@ -117,63 +124,63 @@ class KlangService:
     #         sentences_audio_token.append(audio_tokens)
     #     return sentences_audio_token
 
-    @staticmethod
-    def get_transcription(user_name, conll_name):
-        result = {
-            "transcription": [],
-        }
-        try:
-            record = Transcription.query.filter_by(user=user_name, mp3=conll_name).one()
-            trans = json.loads(record.transcription)
-            result["transcription"] = trans
-            result["sound"] = record.sound
-            result["story"] = record.story
-            result["accent"] = record.accent
-            result["monodia"] = record.monodia
-            result["title"] = record.title
-            pass
-        except exc.SQLAlchemyError:
-            print(sys.exc_info()[0])
-            pass
-        return result
+    # @staticmethod
+    # def get_transcription(user_name, conll_name):
+    #     result = {
+    #         "transcription": [],
+    #     }
+    #     try:
+    #         record = Transcription.query.filter_by(user=user_name, mp3=conll_name).one()
+    #         trans = json.loads(record.transcription)
+    #         result["transcription"] = trans
+    #         result["sound"] = record.sound
+    #         result["story"] = record.story
+    #         result["accent"] = record.accent
+    #         result["monodia"] = record.monodia
+    #         result["title"] = record.title
+    #         pass
+    #     except exc.SQLAlchemyError:
+    #         print(sys.exc_info()[0])
+    #         pass
+    #     return result
 
-    @staticmethod
-    def get_users_list(is_admin):
-        users = []
-        if is_admin == "true":
-            users = [x.username for x in User.query.all()]
-        elif current_user.is_authenticated:
-            users = [current_user.username]
-        return users
+    # @staticmethod
+    # def get_users_list(is_admin):
+    #     users = []
+    #     if is_admin == "true":
+    #         users = [x.username for x in User.query.all()]
+    #     elif current_user.is_authenticated:
+    #         users = [current_user.username]
+    #     return users
 
-    @staticmethod
-    def save_transcription(
-        conll_name, transcription, sound, story, accent, monodia, title
-    ):
-        user_name = current_user.username
-        try:
-            Transcription.query.filter_by(user=user_name, mp3=conll_name).delete(
-                synchronize_session=False
-            )
-            trans_str = json.dumps(transcription)
-            record = Transcription(
-                user=user_name,
-                mp3=conll_name,
-                transcription=trans_str,
-                sound=sound,
-                story=story,
-                accent=accent,
-                monodia=monodia,
-                title=title,
-            )
-            db.session.add(record)
-            db.session.commit()
-            pass
-        except:
-            print(sys.exc_info()[0])
-            db.session.rollback()
-            abort(400)
-            pass
+    # @staticmethod
+    # def save_transcription(
+    #     conll_name, transcription, sound, story, accent, monodia, title
+    # ):
+    #     user_name = current_user.username
+    #     try:
+    #         Transcription.query.filter_by(user=user_name, mp3=conll_name).delete(
+    #             synchronize_session=False
+    #         )
+    #         trans_str = json.dumps(transcription)
+    #         record = Transcription(
+    #             user=user_name,
+    #             mp3=conll_name,
+    #             transcription=trans_str,
+    #             sound=sound,
+    #             story=story,
+    #             accent=accent,
+    #             monodia=monodia,
+    #             title=title,
+    #         )
+    #         db.session.add(record)
+    #         db.session.commit()
+    #         pass
+    #     except:
+    #         print(sys.exc_info()[0])
+    #         db.session.rollback()
+    #         abort(400)
+    #         pass
 
 
 class TranscriptionService:
@@ -184,7 +191,6 @@ class TranscriptionService:
         )
         path_transcriptions = os.path.join(path_project_sample, "transcriptions.json")
         return path_transcriptions
-
 
     @staticmethod
     def check_if_transcriptions_exist(project_name, sample_name):
@@ -210,9 +216,11 @@ class TranscriptionService:
 
     @staticmethod
     def update_transcriptions_file(project_name, sample_name, new_transcriptions):
-        if not TranscriptionService.check_if_transcriptions_exist(project_name, sample_name):
+        if not TranscriptionService.check_if_transcriptions_exist(
+            project_name, sample_name
+        ):
             TranscriptionService.create_transcriptions_file(project_name, sample_name)
-            
+
         path_transcriptions = TranscriptionService.get_path_transcriptions(
             project_name, sample_name
         )
@@ -221,7 +229,9 @@ class TranscriptionService:
 
     @staticmethod
     def load_transcriptions(project_name, sample_name):
-        if not TranscriptionService.check_if_transcriptions_exist(project_name, sample_name):
+        if not TranscriptionService.check_if_transcriptions_exist(
+            project_name, sample_name
+        ):
             TranscriptionService.create_transcriptions_file(project_name, sample_name)
 
         path_transcriptions = TranscriptionService.get_path_transcriptions(

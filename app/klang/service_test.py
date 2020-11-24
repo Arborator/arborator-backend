@@ -46,6 +46,14 @@ def test_get_path_project_sample_conll():
     assert path_sample_conll.endswith(".conll")
 
 
+def test_get_path_project_sample_mp3():
+    path_project_sample_mp3 = KlangService.get_path_project_sample_mp3(
+        project_name, sample_name
+    )
+    assert os.path.isfile(path_project_sample_mp3)
+    assert path_project_sample_mp3.endswith(".mp3")
+
+
 def test_get_projects():
     projects = KlangService.get_projects()
     assert projects == ["project1"]
@@ -173,7 +181,9 @@ def test_update_transcriptions():
 def test_load_transcriptions():
     transcriptions = TranscriptionService.load_transcriptions(project_name, sample_name)
     assert transcriptions
-    loaded_transcriptions = TranscriptionService.load_transcriptions(project_name, sample_without_transcriptions)
+    loaded_transcriptions = TranscriptionService.load_transcriptions(
+        project_name, sample_without_transcriptions
+    )
     assert loaded_transcriptions == new_transcriptions
 
 
