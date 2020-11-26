@@ -237,11 +237,22 @@ class SampleEvaluationService:
     @staticmethod
     def evaluate_sample(sample_conlls):
         corrects = {}
-        total = {}
+        total = {"upos": 0, "deprel": 0, "head": 0}
         for sentence_id, sentence_conlls in sample_conlls.items():
             teacher_conll = sentence_conlls.get("teacher")
             if teacher_conll:
                 teacher_tree = conll2tree(sentence_conlls.get("teacher"))
+                for teacher_token in teacher_tree.values():
+                    if teacher_token["tag"] != "_":
+                        total["upos"] += 1
+                    
+                    teacher_head = list(teacher_token["gov"].keys())[0]
+                    if teacher_head != -1:
+                        total["head"] += 1
+                        
+                    teacher_deprel = list(teacher_token["gov"].values())[0]
+                    if teacher_deprel != "_":
+                        total["deprel"] += 1
             else:
                 continue
             for user_id, user_conll in sentence_conlls.items():
@@ -258,7 +269,6 @@ class SampleEvaluationService:
                         user_token = user_tree.get(token_id)
 
                         if teacher_token["tag"] != "_":
-                            total[user_id]["upos"] += 1
                             corrects[user_id]["upos"] += (
                                 teacher_token["tag"] == user_token["tag"]
                             )
@@ -270,18 +280,16 @@ class SampleEvaluationService:
                         user_deprel = list(user_token["gov"].values())[0]
 
                         if teacher_head != -1:
-                            total[user_id]["head"] += 1
                             corrects[user_id]["head"] += teacher_head == user_head
 
                         if teacher_deprel != "_":
-                            total[user_id]["deprel"] += 1
                             corrects[user_id]["deprel"] += teacher_deprel == user_deprel
 
         evaluations = {}
         for user_id in corrects.keys():
             evaluations[user_id] = {}
             for label in ["upos", "deprel", "head"]:
-                evaluations[user_id][label] = corrects[user_id][label] / total[user_id][label]
+                evaluations[user_id][label] = corrects[user_id][label] / total[label]
         
         return evaluations
 
