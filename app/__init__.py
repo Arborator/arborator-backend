@@ -6,21 +6,24 @@ from flask_login import LoginManager, current_user
 from flask_migrate import Migrate
 
 from app.klang.config import KlangConfig
+from app.utils.grew_config import GrewConfig
 
 db = SQLAlchemy()
 login_manager = LoginManager()
 migrate = Migrate()
 
 klang_config = KlangConfig()
-
+grew_config = GrewConfig()
 
 def create_app(env=None):
     from app.config import config_by_name
     from app.routes import register_routes
-
+    app_env = env or "test"
     app = Flask(__name__, instance_relative_config=False)
     app.config.from_object(config_by_name[env or "test"])
     klang_config.set_path(env or "test")
+    grew_config.set_url(env or "test")
+
     api = Api(
         app,
         title="Arborator-Grew Backend",

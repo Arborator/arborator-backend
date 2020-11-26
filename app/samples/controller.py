@@ -8,7 +8,7 @@ from flask import Response, abort, current_app, request
 from flask_restx import Namespace, Resource, reqparse
 
 from .model import SampleRole
-from .service import (SampleExerciseLevelService, SampleExportService,
+from .service import (SampleEvaluationService, SampleExerciseLevelService, SampleExportService,
                       SampleRoleService, SampleUploadService)
 
 api = Namespace(
@@ -133,6 +133,15 @@ class SampleExerciseLevelResource(Resource):
             SampleExerciseLevelService.create(new_attrs)
 
         return {"status": "success"}
+
+
+@api.route("/<string:project_name>/samples/<string:sample_name>/evaluation")
+class SampleEvaluationResource(Resource):
+    def get(self, project_name, sample_name):
+        sample_conlls = GrewService.get_sample_trees(project_name, sample_name)
+        evaluations = SampleEvaluationService.evaluate_sample(sample_conlls)
+        return evaluations
+
 
 
 @api.route("/<string:project_name>/samples/export")

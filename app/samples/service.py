@@ -44,7 +44,6 @@ class SampleUploadService:
 
         with open(path_file, "rb") as file_to_save:
             GrewService.save_sample(project_name, sample_name, file_to_save)
-        
 
 
 # TODO : refactor this
@@ -77,8 +76,7 @@ class SampleExportService:
 
     @staticmethod
     def get_last_user(tree):
-        timestamps = [(user, get_timestamp(conll))
-                      for (user, conll) in tree.items()]
+        timestamps = [(user, get_timestamp(conll)) for (user, conll) in tree.items()]
         if len(timestamps) == 1:
             last = timestamps[0][0]
         else:
@@ -93,8 +91,7 @@ class SampleExportService:
         with zipfile.ZipFile(memory_file, "w") as zf:
             for sample_name, sample in zip(sample_names, sampletrees):
                 for fuser, filecontent in sample.items():
-                    data = zipfile.ZipInfo(
-                        "{}.{}.conllu".format(sample_name, fuser))
+                    data = zipfile.ZipInfo("{}.{}.conllu".format(sample_name, fuser))
                     data.date_time = time.localtime(time.time())[:6]
                     data.compress_type = zipfile.ZIP_DEFLATED
                     zf.writestr(data, filecontent)
@@ -171,8 +168,7 @@ class SampleRoleService:
                 .filter(SampleRole.role == r)
                 .all()
             )
-            roles[label] = [{"key": a.username, "value": a.username}
-                            for a, b in role]
+            roles[label] = [{"key": a.username, "value": a.username} for a, b in role]
 
         return roles
 
@@ -234,6 +230,62 @@ class SampleExerciseLevelService:
         return
 
 
+from app.utils.conll3 import conll2tree
+
+
+class SampleEvaluationService:
+    @staticmethod
+    def evaluate_sample(sample_conlls):
+        corrects = {}
+        total = {}
+        for sentence_id, sentence_conlls in sample_conlls.items():
+            teacher_conll = sentence_conlls.get("teacher")
+            if teacher_conll:
+                teacher_tree = conll2tree(sentence_conlls.get("teacher"))
+            else:
+                continue
+            for user_id, user_conll in sentence_conlls.items():
+
+                if user_id != "teacher":
+                    if not corrects.get(user_id):
+                        corrects[user_id] = {"upos": 0, "deprel": 0, "head": 0}
+                        total[user_id] = {"upos": 0, "deprel": 0, "head": 0}
+
+                    user_tree = conll2tree(user_conll)
+
+                    for token_id in user_tree.keys():
+                        teacher_token = teacher_tree.get(token_id)
+                        user_token = user_tree.get(token_id)
+
+                        if teacher_token["tag"] != "_":
+                            total[user_id]["upos"] += 1
+                            corrects[user_id]["upos"] += (
+                                teacher_token["tag"] == user_token["tag"]
+                            )
+
+                        teacher_head = list(teacher_token["gov"].keys())[0]
+                        user_head = list(user_token["gov"].keys())[0]
+
+                        teacher_deprel = list(teacher_token["gov"].values())[0]
+                        user_deprel = list(user_token["gov"].values())[0]
+
+                        if teacher_head != -1:
+                            total[user_id]["head"] += 1
+                            corrects[user_id]["head"] += teacher_head == user_head
+
+                        if teacher_deprel != "_":
+                            total[user_id]["deprel"] += 1
+                            corrects[user_id]["deprel"] += teacher_deprel == user_deprel
+
+        evaluations = {}
+        for user_id in corrects.keys():
+            evaluations[user_id] = {}
+            for label in ["upos", "deprel", "head"]:
+                evaluations[user_id][label] = corrects[user_id][label] / total[user_id][label]
+        
+        return evaluations
+
+
 #
 #
 #############    Helpers Function    #############
@@ -276,7 +328,7 @@ def add_or_keep_timestamps(path_file: str):
             timestamp = datetime.timestamp(now) * 1000
             timestamp = round(timestamp)
             t.sentencefeatures["timestamp"] = str(timestamp)
-    
+
     trees2conllFile(trees, path_file)
     return path_file
     # trees2conllFile(trees, path_tmp_file)

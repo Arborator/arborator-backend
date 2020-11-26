@@ -5,15 +5,12 @@ from typing import Dict, List
 import requests
 from flask import abort, current_app
 from werkzeug.utils import secure_filename
+from app import grew_config
 
 
 def grew_request(fct_name, data={}, files={}):
-    if current_app.config["ENV"] == "prod":
-        server = "http://arborator.grew.fr"
-    else:  # if env is dev or test
-        server = "http://arborator-dev.grew.fr"
     try:
-        response = requests.post("%s/%s" % (server, fct_name), files=files, data=data)
+        response = requests.post("%s/%s" % (grew_config.server, fct_name), files=files, data=data)
 
     except requests.ConnectionError:
         error_message = "<Grew requests handler> : Connection refused"
