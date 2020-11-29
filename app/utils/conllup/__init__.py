@@ -1,4 +1,4 @@
-from os import path
+from os import path, stat
 from typing import Dict, List, Tuple
 
 
@@ -33,14 +33,34 @@ class ConllProcessor:
         return sentence_conll_meta, sentence_conll_tree
 
     @staticmethod
+    def sentence_conll_to_sentence_json(sentence_conll: str):
+        sentence_json = SentenceJson()
+        sentence_json.from_sentence_conll(sentence_conll)
+        return sentence_json
+
+    @staticmethod
+    def sentences_conll_to_sentences_json(sentences_conll):
+        sentences_json = []
+        for sentence_conll in sentences_conll:
+            sentence_json = ConllProcessor.sentence_conll_to_sentence_json(
+                sentence_conll
+            )
+            sentences_json.append(sentence_json)
+
+        return sentences_json
+
+    @staticmethod
+    def conll_document_to_sentences_json(conll_document: str):
+        conll_sentences = ConllProcessor.document_to_sentences(conll_document)
+        sentences_json = ConllProcessor.sentences_conll_to_sentences_json(
+            conll_sentences
+        )
+        return sentences_json
+
+    @staticmethod
     def conll_document_path_to_sentences_json(conll_document_path):
         conll_document = ConllProcessor.get_document(conll_document_path)
-        conll_sentences = ConllProcessor.document_to_sentences(conll_document)
-        sentences_json = []
-        for sentence_conll in conll_sentences:
-            sentence_json = SentenceJson()
-            sentence_json.from_sentence_conll(sentence_conll)
-            sentences_json.append(sentence_json)
+        sentences_json = ConllProcessor.conll_document_to_sentences_json(conll_document)
         return sentences_json
 
 
