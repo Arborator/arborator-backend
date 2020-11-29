@@ -1,15 +1,17 @@
 import json
 import re
 
+import pandas as pd
 from app.projects.service import ProjectService
 from app.user.service import UserService
 from app.utils.grew_utils import GrewService, grew_request
-from flask import Response, abort, current_app, request
+from flask import Response, abort, current_app, request, send_from_directory
 from flask_restx import Namespace, Resource, reqparse
 
 from .model import SampleRole
-from .service import (SampleEvaluationService, SampleExerciseLevelService, SampleExportService,
-                      SampleRoleService, SampleUploadService)
+from .service import (SampleEvaluationService, SampleExerciseLevelService,
+                      SampleExportService, SampleRoleService,
+                      SampleUploadService)
 
 api = Namespace(
     "Samples", description="Endpoints for dealing with samples of project"
@@ -134,13 +136,16 @@ class SampleExerciseLevelResource(Resource):
 
         return {"status": "success"}
 
-
 @api.route("/<string:project_name>/samples/<string:sample_name>/evaluation")
 class SampleEvaluationResource(Resource):
     def get(self, project_name, sample_name):
         sample_conlls = GrewService.get_sample_trees(project_name, sample_name)
         evaluations = SampleEvaluationService.evaluate_sample(sample_conlls)
-        return evaluations
+        df = pd.DataFrame.from_dict(evaluations)
+        file_name = f"{sample_name}.xlsx"
+        path = f"app/public/tmp/{file_name}"
+        df.to_excel(path)
+        return send_from_directory(directory="public/tmp", filename=file_name, as_attachment=True)
 
 
 

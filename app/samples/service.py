@@ -1,3 +1,5 @@
+import pandas
+from app.utils.conllup import ConllProcessor
 import io
 import json
 import os
@@ -54,7 +56,7 @@ class SampleExportService:
         trees = {}
         for sentId, users in samples.items():
             for user_id, conll in users.items():
-                # tree = conll3.conll2tree(conll)
+                # tree = conll3.ConllProcessor.sentence_conll_to_sentence_json(conll)
                 if sentId not in trees:
                     trees[sentId] = {"conlls": {}}
                 trees[sentId]["conlls"][user_id] = conll
@@ -231,28 +233,24 @@ class SampleExerciseLevelService:
 
 
 from app.utils.conll3 import conll2tree
-
+import pandas as pd
 
 class SampleEvaluationService:
     @staticmethod
     def evaluate_sample(sample_conlls):
         corrects = {}
+        submitted = {}
         total = {"upos": 0, "deprel": 0, "head": 0}
         for sentence_id, sentence_conlls in sample_conlls.items():
             teacher_conll = sentence_conlls.get("teacher")
             if teacher_conll:
-                teacher_tree = conll2tree(sentence_conlls.get("teacher"))
+                teacher_sentence_json = ConllProcessor.sentence_conll_to_sentence_json(sentence_conlls.get("teacher"))
+                teacher_tree = teacher_sentence_json["tree"]
                 for teacher_token in teacher_tree.values():
-                    if teacher_token["tag"] != "_":
-                        total["upos"] += 1
+                    for label in ['upos', "head", "deprel"]:
+                        if teacher_token[label] != "_":
+                            total[label] += 1
                     
-                    teacher_head = list(teacher_token["gov"].keys())[0]
-                    if teacher_head != -1:
-                        total["head"] += 1
-                        
-                    teacher_deprel = list(teacher_token["gov"].values())[0]
-                    if teacher_deprel != "_":
-                        total["deprel"] += 1
             else:
                 continue
             for user_id, user_conll in sentence_conlls.items():
@@ -260,37 +258,37 @@ class SampleEvaluationService:
                 if user_id != "teacher":
                     if not corrects.get(user_id):
                         corrects[user_id] = {"upos": 0, "deprel": 0, "head": 0}
-                        total[user_id] = {"upos": 0, "deprel": 0, "head": 0}
+                    if not submitted.get(user_id):
+                        submitted[user_id] = {"upos": 0, "deprel": 0, "head": 0}
 
-                    user_tree = conll2tree(user_conll)
+                    user_sentence_json = ConllProcessor.sentence_conll_to_sentence_json(user_conll)
+                    user_tree = user_sentence_json["tree"]
 
                     for token_id in user_tree.keys():
                         teacher_token = teacher_tree.get(token_id)
                         user_token = user_tree.get(token_id)
 
-                        if teacher_token["tag"] != "_":
-                            corrects[user_id]["upos"] += (
-                                teacher_token["tag"] == user_token["tag"]
+                        for label in ['upos', "head", "deprel"]:
+                            if teacher_token[label] != "_":
+                                if user_token[label] != "_":
+                                    submitted[user_id][label] += 1
+                                corrects[user_id][label] += (
+                                teacher_token[label] == user_token[label]
                             )
-
-                        teacher_head = list(teacher_token["gov"].keys())[0]
-                        user_head = list(user_token["gov"].keys())[0]
-
-                        teacher_deprel = list(teacher_token["gov"].values())[0]
-                        user_deprel = list(user_token["gov"].values())[0]
-
-                        if teacher_head != -1:
-                            corrects[user_id]["head"] += teacher_head == user_head
-
-                        if teacher_deprel != "_":
-                            corrects[user_id]["deprel"] += teacher_deprel == user_deprel
-
+        GRADE = 100                 
         evaluations = {}
         for user_id in corrects.keys():
             evaluations[user_id] = {}
             for label in ["upos", "deprel", "head"]:
-                evaluations[user_id][label] = corrects[user_id][label] / total[label]
+                score = corrects[user_id][label] / total[label]
+                score_on_twenty = score * GRADE
+                rounded_score = int(score_on_twenty)
+                evaluations[user_id][f"{label}_total"] = total[label]
+                evaluations[user_id][f"{label}_submitted"] = submitted[user_id][label]
+                evaluations[user_id][f"{label}_correct"] = corrects[user_id][label]
+                evaluations[user_id][f"{label}_grade_on_{GRADE}"] = rounded_score
         
+
         return evaluations
 
 

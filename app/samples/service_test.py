@@ -6,5 +6,5 @@ sample_name_test = "1a.prof.trees.all"
 
 def test_evaluate_sample_trees():
     sample_trees = GrewService.get_sample_trees(project_name_test, sample_name_test)
-    evaluation = SampleEvaluationService.evaluate_sample(sample_trees)
-    assert evaluation
+    evaluations = SampleEvaluationService.evaluate_sample(sample_trees)
+    assert evaluations

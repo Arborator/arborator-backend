@@ -10,7 +10,6 @@ file_name = "John_Doe"
 
 def test_get_path_data():
     path_data = ConllService.get_path_data()
-    print("KK path_data", path_data)
     assert os.path.isdir(path_data)
 
 
