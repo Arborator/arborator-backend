@@ -1,0 +1,68 @@
+{
+  "meta": {
+    "sent_id": "test",
+    "meta_key": "meta_value"
+  },
+  "tree": {
+    "1": {
+      "id": "1",
+      "form": "it",
+      "lemma": "_",
+      "upos": "_",
+      "xpos": "_",
+      "feats": {},
+      "head": "_",
+      "deprel": "_",
+      "deps": {},
+      "misc": {}
+    },
+    "2": {
+      "id": "2",
+      "form": "is",
+      "lemma": "_",
+      "upos": "_",
+      "xpos": "_",
+      "feats": {},
+      "head": "_",
+      "deprel": "_",
+      "deps": {},
+      "misc": {}
+    },
+    "3": {
+      "id": "3",
+      "form": "a",
+      "lemma": "_",
+      "upos": "_",
+      "xpos": "_",
+      "feats": {},
+      "head": "_",
+      "deprel": "_",
+      "deps": {},
+      "misc": {}
+    },
+    "4": {
+      "id": "4",
+      "form": "test",
+      "lemma": "_",
+      "upos": "_",
+      "xpos": "_",
+      "feats": {},
+      "head": "_",
+      "deprel": "_",
+      "deps": {},
+      "misc": {}
+    },
+    "5": {
+      "id": "5",
+      "form": ".",
+      "lemma": "_",
+      "upos": "_",
+      "xpos": "_",
+      "feats": {},
+      "head": "_",
+      "deprel": "_",
+      "deps": {},
+      "misc": {}
+    }
+  }
+}
