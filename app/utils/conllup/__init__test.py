@@ -11,7 +11,8 @@ from . import (
     healthy,
 )
 
-path_conll_test = os.path.join(".", "test.conllu")
+BASEDIR = os.path.dirname(os.path.abspath(__file__))
+path_conll_test = os.path.join(BASEDIR, "test.conllu")
 
 sentence_conll_test = """# sent_id = test
 # meta_key = meta_value
@@ -61,8 +62,8 @@ splitted_empty_token_conll_test = [
 ]
 
 sentence_json_test_folder_name = "sentence_test.json"
-
-with open(sentence_json_test_folder_name, "r", encoding="utf-8") as infile:
+sentence_json_test_folder_path = os.path.join(BASEDIR, sentence_json_test_folder_name)
+with open(sentence_json_test_folder_path, "r", encoding="utf-8") as infile:
     sentence_json_test = json.loads(infile.read())
 
 
