@@ -8,6 +8,8 @@ z_sandbox/
 # databases
 app/*.sqlite
 
+app/public/tmp/*
+
 .idea/
 *.pyc
 py3/
