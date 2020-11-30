@@ -12,4 +12,4 @@ class TranscriptionSchema(Schema):
     accent = fields.String(attribute="accent")
     monodia = fields.String(attribute="monodia")
     title = fields.String(attribute="title")
-    transcription = fields.String(attribute="transcription")
+    transcription = fields.List(fields.List(fields.String), attribute="transcription")

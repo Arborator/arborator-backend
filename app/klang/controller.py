@@ -1,6 +1,6 @@
 import os
 
-from flask.helpers import send_file
+from flask.helpers import send_from_directory
 from app.klang.interface import TranscriptionInterface
 from app.klang.schema import TranscriptionSchema
 from flask import abort, current_app, request
@@ -98,7 +98,7 @@ class TranscriptionUserServiceResource(Resource):
         TranscriptionService.update_transcriptions_file(
             project_name, sample_name, transcriptions
         )
-        return transcription
+        return data
 
     # @accepts(schema=TranscriptionSchema, api=api)
     # def put(self, project_name, sample_name):
@@ -127,8 +127,9 @@ class Mp3ServiceResource(Resource):
         path_project_sample = KlangService.get_path_project_sample(
             project_name, sample_name
         )
-        path_mp3 = os.path.join(path_project_sample, sample_name + ".mp3")
-        return send_file(path_mp3)
+        mp3_filename = sample_name + ".mp3"
+        return send_from_directory(path_project_sample, mp3_filename)
+
 
 
 # @api.route("/projects/<string:project_name>/samples/<string:sample_name>/transcription-all")
