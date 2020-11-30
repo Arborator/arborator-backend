@@ -1,4 +1,3 @@
-import pandas
 from app.utils.conllup import ConllProcessor
 import io
 import json
@@ -233,7 +232,6 @@ class SampleExerciseLevelService:
 
 
 from app.utils.conll3 import conll2tree
-import pandas as pd
 
 class SampleEvaluationService:
     @staticmethod

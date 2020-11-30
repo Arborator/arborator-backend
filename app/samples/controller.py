@@ -6,7 +6,7 @@ from app.user.service import UserService
 from app.utils.grew_utils import GrewService, grew_request
 from flask import Response, abort, current_app, request, send_from_directory
 from flask_restx import Namespace, Resource, reqparse
-from openpyxl import Workbook
+# from openpyxl import Workbook
 
 from .model import SampleRole
 from .service import (
@@ -146,35 +146,36 @@ class SampleEvaluationResource(Resource):
     def get(self, project_name, sample_name):
         sample_conlls = GrewService.get_sample_trees(project_name, sample_name)
         evaluations = SampleEvaluationService.evaluate_sample(sample_conlls)
-        file_name = f"{sample_name}.xlsx"
-        path = f"app/public/tmp/{file_name}"
+        return evaluations
+        # file_name = f"{sample_name}.xlsx"
+        # path = f"app/public/tmp/{file_name}"
 
-        wb = Workbook()
-        ws = wb.active
-        ws.title = "grades"
-        first_username = list(evaluations.keys())[0]
-        columns = list(evaluations[first_username].keys())
-        ws.cell(row=1, column=1, value="name")
+        # wb = Workbook()
+        # ws = wb.active
+        # ws.title = "grades"
+        # first_username = list(evaluations.keys())[0]
+        # columns = list(evaluations[first_username].keys())
+        # ws.cell(row=1, column=1, value="name")
 
-        for index_column, column_name in enumerate(columns):
-            index_column = index_column + 2  # because line 1 is name
-            ws.cell(row=1, column=index_column, value=column_name)
+        # for index_column, column_name in enumerate(columns):
+        #     index_column = index_column + 2  # because line 1 is name
+        #     ws.cell(row=1, column=index_column, value=column_name)
 
-        row_index = 2
-        for user, evaluation in evaluations.items():
-            ws.cell(row=row_index, column=1, value=user)
+        # row_index = 2
+        # for user, evaluation in evaluations.items():
+        #     ws.cell(row=row_index, column=1, value=user)
 
-            for index_column, column_name in enumerate(columns):
-                index_column = index_column + 2  # because line 1 is name
-                value = evaluation[column_name]
-                ws.cell(row=row_index, column=index_column, value=value)
+        #     for index_column, column_name in enumerate(columns):
+        #         index_column = index_column + 2  # because line 1 is name
+        #         value = evaluation[column_name]
+        #         ws.cell(row=row_index, column=index_column, value=value)
 
-            row_index += 1
-        wb.save(path)
+        #     row_index += 1
+        # wb.save(path)
 
-        return send_from_directory(
-            directory="public/tmp", filename=file_name, as_attachment=True
-        )
+        # return send_from_directory(
+        #     directory="public/tmp", filename=file_name, as_attachment=True
+        # )
 
 
 @api.route("/<string:project_name>/samples/export")
