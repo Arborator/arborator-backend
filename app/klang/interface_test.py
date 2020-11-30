@@ -6,8 +6,6 @@ from .interface import TranscriptionInterface
 @fixture
 def interface() -> TranscriptionInterface:
     return TranscriptionInterface(
-        # id="1",
-        # user="test",
         mp3="test",
         sound="test",
         story="test",

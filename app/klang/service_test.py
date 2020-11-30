@@ -1,5 +1,4 @@
 import json
-from app.klang.controller import SamplesServiceResource
 import os
 
 from app.test.fixtures import app, db  # noqa
@@ -82,17 +81,6 @@ def test_get_project_sample_conll():
         conll
         == "# sent_id = John_Doe.intervals.conll__1\n# text = it is\n# sound_url = John_Doe.wav\n1	it	it	_	_	_	_	_	_	AlignBegin=100|AlignEnd=500\n2	is	is	_	_	_	_	_	_	AlignBegin=600|AlignEnd=1000"
     )
-
-
-# def test_get_all():
-#     conlls = KlangService.get_all_name()
-#     assert conlls == ["John_Doe"]
-
-
-# def test_get_by_name():
-#     path_conll = KlangService.get_path_conll(file_name)
-#     conll_string = KlangService.read_conll(path_conll)
-#     assert conll_string == KlangService.get_by_name(file_name)
 
 
 def test_conll_to_sentences():

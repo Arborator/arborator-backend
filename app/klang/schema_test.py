@@ -17,7 +17,6 @@ def test_TranscriptionSchema_create(schema: TranscriptionSchema):
 def test_TranscriptionSchema_works(schema: TranscriptionSchema):
     params: TranscriptionInterface = schema.load(
         {
-            # "id": "test",
             "user": "test",
             "mp3": "test",
             "sound": "test",
@@ -30,7 +29,6 @@ def test_TranscriptionSchema_works(schema: TranscriptionSchema):
     )
     user = Transcription(**params)
 
-    # assert user.id == "test"
     assert user.user == "test"
     assert user.mp3 == "test"
     assert user.sound == "test"

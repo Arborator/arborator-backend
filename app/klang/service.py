@@ -1,16 +1,9 @@
 import os
-from os import stat
 import re
 from typing import List
-from sqlalchemy import exc
-import sys
 import json
-from flask import abort
 
-from app import klang_config, db
-from .model import Transcription
-from app.user.model import User
-from flask_login import current_user
+from app import klang_config
 
 align_begin_and_end_regex = re.compile(
     r"^\d+\t(.+?)\t.*AlignBegin=(\d+).*AlignEnd=(\d+)"
@@ -77,18 +70,6 @@ class KlangService:
         conll_str = KlangService.read_conll(path_conll)
         return conll_str
 
-    # @staticmethod
-    # def get_all_name():
-    #     path_data = KlangService.get_path_data()
-    #     conlls = os.listdir(path_data)
-    #     return conlls
-
-    # @staticmethod
-    # def get_by_name(conll_name):
-    #     path_conll = KlangService.get_path_conll(conll_name)
-    #     conll = KlangService.read_conll(path_conll)
-    #     return conll
-
     @staticmethod
     def conll_to_sentences(conll: str) -> List[str]:
         return list(filter(lambda x: x != "", conll.split("\n\n")))
@@ -113,74 +94,6 @@ class KlangService:
             audio_tokens = KlangService.sentence_to_audio_tokens(sentence)
             conll_audio_tokens.append(audio_tokens)
         return conll_audio_tokens
-
-    # @staticmethod
-    # def process_sentences_audio_token(conll_name: str):
-    #     conll = KlangService.get_project_sample_conll(conll_name)
-    #     sentences = KlangService.conll_to_sentences(conll)
-    #     sentences_audio_token = []
-    #     for sentence in sentences:
-    #         audio_tokens = KlangService.sentence_to_audio_tokens(sentence)
-    #         sentences_audio_token.append(audio_tokens)
-    #     return sentences_audio_token
-
-    # @staticmethod
-    # def get_transcription(user_name, conll_name):
-    #     result = {
-    #         "transcription": [],
-    #     }
-    #     try:
-    #         record = Transcription.query.filter_by(user=user_name, mp3=conll_name).one()
-    #         trans = json.loads(record.transcription)
-    #         result["transcription"] = trans
-    #         result["sound"] = record.sound
-    #         result["story"] = record.story
-    #         result["accent"] = record.accent
-    #         result["monodia"] = record.monodia
-    #         result["title"] = record.title
-    #         pass
-    #     except exc.SQLAlchemyError:
-    #         print(sys.exc_info()[0])
-    #         pass
-    #     return result
-
-    # @staticmethod
-    # def get_users_list(is_admin):
-    #     users = []
-    #     if is_admin == "true":
-    #         users = [x.username for x in User.query.all()]
-    #     elif current_user.is_authenticated:
-    #         users = [current_user.username]
-    #     return users
-
-    # @staticmethod
-    # def save_transcription(
-    #     conll_name, transcription, sound, story, accent, monodia, title
-    # ):
-    #     user_name = current_user.username
-    #     try:
-    #         Transcription.query.filter_by(user=user_name, mp3=conll_name).delete(
-    #             synchronize_session=False
-    #         )
-    #         trans_str = json.dumps(transcription)
-    #         record = Transcription(
-    #             user=user_name,
-    #             mp3=conll_name,
-    #             transcription=trans_str,
-    #             sound=sound,
-    #             story=story,
-    #             accent=accent,
-    #             monodia=monodia,
-    #             title=title,
-    #         )
-    #         db.session.add(record)
-    #         db.session.commit()
-    #         pass
-    #     except:
-    #         print(sys.exc_info()[0])
-    #         db.session.rollback()
-    #         abort(400)
-    #         pass
 
 
 class TranscriptionService:
