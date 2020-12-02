@@ -179,8 +179,18 @@ class TranscriptionService:
         )
         with open(path_transcriptions, "r", encoding="utf-8") as infile:
             transcriptions = json.load(infile)
+        
+        transcriptions = TranscriptionService.validate_transcriptions(transcriptions)
+
         return transcriptions
     
+    @staticmethod
+    def validate_transcriptions(transcriptions):
+        if type(transcriptions) != list:
+            transcriptions = []
+        
+        return transcriptions
+
     @staticmethod
     def new_conll_from_transcription(original_conll, new_transcription, sample_name, soundfile_name):
         new_conll = newtranscription(original_conll, new_transcription, sample_name, soundfile_name)

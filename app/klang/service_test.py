@@ -12,7 +12,7 @@ sample_name = "sample1"
 sample_create_transcriptions = "sampleCreateTranscriptions"
 
 sample_without_transcriptions = "sampleWithoutTranscriptions"
-new_transcriptions = {"user1": "test"}
+new_transcriptions = [{"user1": "test"}]
 
 project_name_with_changing_config = "projectWithChangingConfig"
 
@@ -171,6 +171,12 @@ def test_update_transcriptions():
         updated_transcriptions = json.load(infile)
     assert new_transcriptions == updated_transcriptions
 
+def test_validate_transcriptions():
+    unvalid_transcriptions = {}
+
+    valid_transcriptions = TranscriptionService.validate_transcriptions(unvalid_transcriptions)
+
+    assert valid_transcriptions == []
 
 def test_load_transcriptions():
     transcriptions = TranscriptionService.load_transcriptions(project_name, sample_name)
