@@ -1,6 +1,6 @@
 import os
 
-from flask.helpers import send_from_directory
+from flask.helpers import send_file, send_from_directory
 from app.klang.interface import TranscriptionInterface
 from app.klang.schema import TranscriptionSchema
 from flask import abort, current_app, request
@@ -128,8 +128,8 @@ class Mp3ServiceResource(Resource):
             project_name, sample_name
         )
         mp3_filename = sample_name + ".mp3"
-        return send_from_directory(path_project_sample, mp3_filename)
 
+        return send_file(os.path.join(path_project_sample, mp3_filename), conditional=True)
 
 
 # @api.route("/projects/<string:project_name>/samples/<string:sample_name>/transcription-all")
