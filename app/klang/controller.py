@@ -1,14 +1,15 @@
+import io
 import os
 from os import path
 
-from flask.helpers import send_file, send_from_directory
-from flask_restx import reqparse
 from app.klang.interface import TranscriptionInterface
 from app.klang.schema import TranscriptionSchema
+from app.shared.service import SharedService
 from flask import abort, current_app, request
+from flask.helpers import send_file, send_from_directory
 from flask_accepts.decorators.decorators import accepts, responds
 from flask_login import current_user
-from flask_restx import Namespace, Resource
+from flask_restx import Namespace, Resource, reqparse
 
 from .service import KlangService, TranscriptionService
 
@@ -139,9 +140,14 @@ class Mp3ServiceResource(Resource):
         return send_file(
             os.path.join(path_project_sample, mp3_filename), conditional=True
         )
-@api.route("/projects/<string:project_name>/samples/<string:sample_name>/export-conll/<string:username>")
+
+
+@api.route(
+    "/projects/<string:project_name>/samples/<string:sample_name>/export-conll/<string:username>"
+)
 class ExportConllServiceResource(Resource):
     "Export Conll Resources"
+
     def get(self, project_name, sample_name, username):
         "download the conll (as attachement) with the transcription of a user"
         path_original_conll = KlangService.get_path_project_sample_conll(
@@ -151,15 +157,14 @@ class ExportConllServiceResource(Resource):
             project_name, sample_name
         )
         transcription = next(
-            filter(
-                lambda x: x["user"] == username, transcriptions
-            ),
+            filter(lambda x: x["user"] == username, transcriptions),
             None,
         )
         if not transcription:
             abort(403, f"transcription for user '{username}' was not found")
-            
+
         new_transcription = transcription["transcription"]
+
         new_conll = TranscriptionService.new_conll_from_transcription(
             path_original_conll,
             new_transcription,
@@ -167,11 +172,10 @@ class ExportConllServiceResource(Resource):
             f"{sample_name}.mp3",
         )
 
-        path_tmp = "app/public/tmp"
         new_conll_name = f"{sample_name}.{username}.intervals.conll"
-        path_new_conll = os.path.join(path_tmp, new_conll_name)
-        with open(path_new_conll, "w", encoding="utf-8") as outfile:
-            outfile.write(new_conll)
-        return send_from_directory("public/tmp", new_conll_name, as_attachment=True)
 
+        sendable_new_conll = SharedService.get_sendable_data(new_conll)
 
+        return send_file(
+            sendable_new_conll, attachment_filename=new_conll_name, as_attachment=True
+        )
