@@ -24,7 +24,7 @@ def test_TranscriptionSchema_works(schema: TranscriptionSchema):
             "accent": "test",
             "monodia": "test",
             "title": "test",
-            "transcription": "test",
+            "transcription": [["test"]],
         }
     )
     user = Transcription(**params)
@@ -36,4 +36,4 @@ def test_TranscriptionSchema_works(schema: TranscriptionSchema):
     assert user.accent == "test"
     assert user.monodia == "test"
     assert user.title == "test"
-    assert user.transcription == "test"
+    assert user.transcription == [["test"]]
