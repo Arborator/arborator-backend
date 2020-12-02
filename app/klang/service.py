@@ -5,6 +5,8 @@ import json
 
 from app import klang_config
 
+from app.utils.conllmaker import newtranscription
+
 align_begin_and_end_regex = re.compile(
     r"^\d+\t(.+?)\t.*AlignBegin=(\d+).*AlignEnd=(\d+)"
 )
@@ -17,13 +19,38 @@ class KlangService:
         return path_data
 
     @staticmethod
-    def get_path_project(project_name) -> str:
+    def get_path_project(project_name: str) -> str:
         path_data = KlangService.get_path_data()
         path_project = os.path.join(path_data, project_name)
         return path_project
 
     @staticmethod
-    def get_path_project_samples(project_name) -> str:
+    def get_path_project_config(project_name: str) -> str:
+        path_project = KlangService.get_path_project(project_name)
+        path_project_config = os.path.join(path_project, "config.json")
+        return path_project_config
+
+    @staticmethod
+    def get_project_config(project_name: str):
+        path_project_config = KlangService.get_path_project_config(project_name)
+        with open(path_project_config, "r", encoding="utf-8") as infile:
+            project_config = json.load(infile)
+        return project_config
+    
+    @staticmethod
+    def update_project_config(project_name, project_config):
+        path_project_config = KlangService.get_path_project_config(project_name)
+        with open(path_project_config, "w", encoding="utf-8") as outfile:
+            outfile.write( json.dumps(project_config))
+
+    @staticmethod
+    def get_project_admins(project_name: str) -> List[str]:
+        project_config = KlangService.get_project_config(project_name)
+        admins = project_config["admins"]
+        return admins
+
+    @staticmethod
+    def get_path_project_samples(project_name: str) -> str:
         path_project = KlangService.get_path_project(project_name)
         path_samples = os.path.join(path_project, "samples")
         return path_samples
@@ -53,7 +80,7 @@ class KlangService:
         return os.listdir(KlangService.get_path_data())
 
     @staticmethod
-    def get_project_samples(project_name):
+    def get_project_samples(project_name: str):
         return os.listdir(KlangService.get_path_project_samples(project_name))
 
     @staticmethod
@@ -153,3 +180,8 @@ class TranscriptionService:
         with open(path_transcriptions, "r", encoding="utf-8") as infile:
             transcriptions = json.load(infile)
         return transcriptions
+    
+    @staticmethod
+    def new_conll_from_transcription(original_conll, new_transcription, sample_name, soundfile_name):
+        new_conll = newtranscription(original_conll, new_transcription, sample_name, soundfile_name)
+        return new_conll

@@ -14,6 +14,11 @@ sample_create_transcriptions = "sampleCreateTranscriptions"
 sample_without_transcriptions = "sampleWithoutTranscriptions"
 new_transcriptions = {"user1": "test"}
 
+project_name_with_changing_config = "projectWithChangingConfig"
+
+sample_new_conll_from_transcription = "sampleNewConllFromTranscription"
+username_new_conll_from_transcription = "user1"
+
 
 def test_get_path_data():
     path_data = KlangService.get_path_data()
@@ -55,7 +60,7 @@ def test_get_path_project_sample_mp3():
 
 def test_get_projects():
     projects = KlangService.get_projects()
-    assert projects == ["project1"]
+    assert projects == ["project1", "projectWithChangingConfig"]
 
 
 def test_get_project_samples():
@@ -63,6 +68,7 @@ def test_get_project_samples():
     assert set(samples) == {
         "sample1",
         sample_without_transcriptions,
+        sample_new_conll_from_transcription,
         sample_create_transcriptions,
     }
 
@@ -185,3 +191,64 @@ def test_delete_transcriptions():
         project_name, sample_without_transcriptions
     )
     assert not os.path.isfile(path_transcriptions)
+
+
+def test_get_path_project_config():
+    path_project_config = KlangService.get_path_project_config(project_name)
+    assert path_project_config
+    assert path_project_config.endswith("config.json")
+
+
+def test_get_project_config():
+    project_config = KlangService.get_project_config(project_name)
+    assert project_config == {"admins": ["userTest"]}
+
+
+def test_get_admins():
+    admins = KlangService.get_project_admins(project_name)
+    assert type(admins) == list
+
+
+# Kirian : this test is probably not well done. I need to learn more about testing procedure when dealing
+#          with file storage database
+def test_update_project_config():
+    project_config = KlangService.get_project_config(project_name_with_changing_config)
+    project_config["admins"] = ["user2"]
+    KlangService.update_project_config(
+        project_name_with_changing_config, project_config
+    )
+
+    admins = KlangService.get_project_admins(project_name_with_changing_config)
+    assert admins == ["user2"]
+
+    project_config["admins"] = ["user1"]
+    KlangService.update_project_config(
+        project_name_with_changing_config, project_config
+    )
+    admins = KlangService.get_project_admins(project_name_with_changing_config)
+    assert admins == ["user1"]
+
+
+# todo :
+# - add error if transcriptions is not valit (it has to be a list of transcription json)
+def test_new_conll_from_transcription():
+    path_original_conll = KlangService.get_path_project_sample_conll(
+        project_name, sample_new_conll_from_transcription
+    )
+    transcriptions = TranscriptionService.load_transcriptions(
+        project_name, sample_new_conll_from_transcription
+    )
+    transcription = next(
+        filter(
+            lambda x: x["user"] == username_new_conll_from_transcription, transcriptions
+        ),
+        None,
+    )
+    new_transcription = transcription["transcription"]
+    new_conll = TranscriptionService.new_conll_from_transcription(
+        path_original_conll,
+        new_transcription,
+        sample_new_conll_from_transcription,
+        "soundfile_test.mp3",
+    )
+    assert new_conll

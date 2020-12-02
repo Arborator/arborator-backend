@@ -1,6 +1,8 @@
 import os
+from os import path
 
-from flask.helpers import send_file
+from flask.helpers import send_file, send_from_directory
+from flask_restx import reqparse
 from app.klang.interface import TranscriptionInterface
 from app.klang.schema import TranscriptionSchema
 from flask import abort, current_app, request
@@ -29,6 +31,28 @@ class SamplesServiceResource(Resource):
     def get(self, project_name):
         "get all samples of a project"
         return KlangService.get_project_samples(project_name)
+
+
+@api.route("/projects/<string:project_name>/admins")
+class ProjectAdminsServiceResource(Resource):
+    "Klang admins (by project)"
+
+    def get(self, project_name):
+        "get all admins of a project"
+        return KlangService.get_project_admins(project_name)
+
+    def post(self, project_name):
+        "post a list of admins (replace the old one)"
+        parser = reqparse.RequestParser()
+        parser.add_argument(name="admins", type=str, action="append")
+        args = parser.parse_args()
+        admins = args.get("admins")
+
+        project_config = KlangService.get_project_config(project_name)
+        project_config["admins"] = admins
+        KlangService.update_project_config(project_name, project_config)
+
+        return admins
 
 
 @api.route("/projects/<string:project_name>/samples/<string:sample_name>/timed-tokens")
@@ -115,3 +139,39 @@ class Mp3ServiceResource(Resource):
         return send_file(
             os.path.join(path_project_sample, mp3_filename), conditional=True
         )
+@api.route("/projects/<string:project_name>/samples/<string:sample_name>/export-conll/<string:username>")
+class ExportConllServiceResource(Resource):
+    "Export Conll Resources"
+    def get(self, project_name, sample_name, username):
+        "download the conll (as attachement) with the transcription of a user"
+        path_original_conll = KlangService.get_path_project_sample_conll(
+            project_name, sample_name
+        )
+        transcriptions = TranscriptionService.load_transcriptions(
+            project_name, sample_name
+        )
+        transcription = next(
+            filter(
+                lambda x: x["user"] == username, transcriptions
+            ),
+            None,
+        )
+        if not transcription:
+            abort(403, f"transcription for user '{username}' was not found")
+            
+        new_transcription = transcription["transcription"]
+        new_conll = TranscriptionService.new_conll_from_transcription(
+            path_original_conll,
+            new_transcription,
+            sample_name,
+            f"{sample_name}.mp3",
+        )
+
+        path_tmp = "app/public/tmp"
+        new_conll_name = f"{sample_name}.{username}.intervals.conll"
+        path_new_conll = os.path.join(path_tmp, new_conll_name)
+        with open(path_new_conll, "w", encoding="utf-8") as outfile:
+            outfile.write(new_conll)
+        return send_from_directory("public/tmp", new_conll_name, as_attachment=True)
+
+

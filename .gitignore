@@ -9,6 +9,8 @@ z_sandbox/
 app/*.sqlite
 app/klang/data_dev/
 
+app/public/tmp/*
+
 .idea/
 *.pyc
 py3/
