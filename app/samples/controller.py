@@ -1,6 +1,8 @@
 import json
 import re
 
+from flask.helpers import send_file
+
 from app.projects.service import ProjectService
 from app.user.service import UserService
 from app.utils.grew_utils import GrewService, grew_request
@@ -139,43 +141,23 @@ class SampleExerciseLevelResource(Resource):
             SampleExerciseLevelService.create(new_attrs)
 
         return {"status": "success"}
-
+from app.shared.service import SharedService
 
 @api.route("/<string:project_name>/samples/<string:sample_name>/evaluation")
 class SampleEvaluationResource(Resource):
     def get(self, project_name, sample_name):
         sample_conlls = GrewService.get_sample_trees(project_name, sample_name)
         evaluations = SampleEvaluationService.evaluate_sample(sample_conlls)
-        return evaluations
-        # file_name = f"{sample_name}.xlsx"
-        # path = f"app/public/tmp/{file_name}"
+        
+        if evaluations:
+            evaluations_tsv = SampleEvaluationService.evaluations_json_to_tsv(evaluations)
 
-        # wb = Workbook()
-        # ws = wb.active
-        # ws.title = "grades"
-        # first_username = list(evaluations.keys())[0]
-        # columns = list(evaluations[first_username].keys())
-        # ws.cell(row=1, column=1, value="name")
-
-        # for index_column, column_name in enumerate(columns):
-        #     index_column = index_column + 2  # because line 1 is name
-        #     ws.cell(row=1, column=index_column, value=column_name)
-
-        # row_index = 2
-        # for user, evaluation in evaluations.items():
-        #     ws.cell(row=row_index, column=1, value=user)
-
-        #     for index_column, column_name in enumerate(columns):
-        #         index_column = index_column + 2  # because line 1 is name
-        #         value = evaluation[column_name]
-        #         ws.cell(row=row_index, column=index_column, value=value)
-
-        #     row_index += 1
-        # wb.save(path)
-
-        # return send_from_directory(
-        #     directory="public/tmp", filename=file_name, as_attachment=True
-        # )
+            uploadable_evaluations_tsv = SharedService.get_sendable_data(evaluations_tsv)
+            
+            file_name = f"{sample_name}_evaluations.tsv"
+            return send_file(uploadable_evaluations_tsv, attachment_filename = file_name, as_attachment=True)
+        else:
+            abort(404, "No user worked on this sample")
 
 
 @api.route("/<string:project_name>/samples/export")

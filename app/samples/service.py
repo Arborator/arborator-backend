@@ -289,6 +289,22 @@ class SampleEvaluationService:
 
         return evaluations
 
+    @staticmethod
+    def evaluations_json_to_tsv(evaluations):
+        list_usernames = list(evaluations.keys())
+        first_username = list(evaluations.keys())[0]
+        columns = list(evaluations[first_username].keys())
+
+        evaluations_tsv = "\t".join(["usernames"] + list_usernames)
+        
+        for label in columns:
+            user_tsv_line_list = [label]
+            for username in list_usernames:
+                user_tsv_line_list.append(str(evaluations[username][label]))
+            user_tsv_line_string = "\t".join(user_tsv_line_list)
+            evaluations_tsv += '\n' + user_tsv_line_string
+        return evaluations_tsv
+
 
 #
 #
