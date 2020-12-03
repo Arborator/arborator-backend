@@ -7,6 +7,10 @@ z_sandbox/
 
 # databases
 app/*.sqlite
+app/klang/data_dev/
+app/klang/data_prod/
+
+app/public/tmp/*
 
 app/public/tmp/*
 
