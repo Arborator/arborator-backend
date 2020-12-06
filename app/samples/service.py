@@ -16,8 +16,9 @@ from flask import abort, current_app
 from sqlalchemy.sql.operators import startswith_op
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
-
 from .model import SampleExerciseLevel, SampleRole
+
+BASE_TREE = "base_tree"
 
 
 class SampleUploadService:
@@ -233,6 +234,7 @@ class SampleExerciseLevelService:
 
 from app.utils.conll3 import conll2tree
 
+
 class SampleEvaluationService:
     @staticmethod
     def evaluate_sample(sample_conlls):
@@ -242,15 +244,33 @@ class SampleEvaluationService:
         for sentence_id, sentence_conlls in sample_conlls.items():
             teacher_conll = sentence_conlls.get("teacher")
             if teacher_conll:
-                teacher_sentence_json = ConllProcessor.sentence_conll_to_sentence_json(sentence_conlls.get("teacher"))
+                teacher_sentence_json = ConllProcessor.sentence_conll_to_sentence_json(
+                    teacher_conll
+                )
                 teacher_tree = teacher_sentence_json["tree"]
-                for teacher_token in teacher_tree.values():
-                    for label in ['upos', "head", "deprel"]:
-                        if teacher_token[label] != "_":
+
+                basetree_conll = sentence_conlls.get(BASE_TREE)
+                if basetree_conll:
+                    basetree_sentence_json = (
+                        ConllProcessor.sentence_conll_to_sentence_json(basetree_conll)
+                    )
+                    basetree_tree = basetree_sentence_json["tree"]
+                else:
+                    basetree_tree = {}
+
+                for token_id in teacher_tree.keys():
+                    teacher_token = teacher_tree.get(token_id)
+                    basetree_token = basetree_tree.get(token_id, {})
+                    for label in ["upos", "head", "deprel"]:
+                        if (
+                            teacher_token[label] != "_"
+                            and basetree_token.get(label) != teacher_token[label]
+                        ):
                             total[label] += 1
-                    
+
             else:
                 continue
+
             for user_id, user_conll in sentence_conlls.items():
 
                 if user_id != "teacher":
@@ -259,21 +279,27 @@ class SampleEvaluationService:
                     if not submitted.get(user_id):
                         submitted[user_id] = {"upos": 0, "deprel": 0, "head": 0}
 
-                    user_sentence_json = ConllProcessor.sentence_conll_to_sentence_json(user_conll)
+                    user_sentence_json = ConllProcessor.sentence_conll_to_sentence_json(
+                        user_conll
+                    )
                     user_tree = user_sentence_json["tree"]
 
                     for token_id in user_tree.keys():
                         teacher_token = teacher_tree.get(token_id)
                         user_token = user_tree.get(token_id)
+                        basetree_token = basetree_tree.get(token_id, {})
 
-                        for label in ['upos', "head", "deprel"]:
-                            if teacher_token[label] != "_":
+                        for label in ["upos", "head", "deprel"]:
+                            if (
+                                teacher_token[label] != "_"
+                                and basetree_token.get(label) != teacher_token[label]
+                            ):
                                 if user_token[label] != "_":
                                     submitted[user_id][label] += 1
                                 corrects[user_id][label] += (
-                                teacher_token[label] == user_token[label]
-                            )
-        GRADE = 100                 
+                                    teacher_token[label] == user_token[label]
+                                )
+        GRADE = 100
         evaluations = {}
         for user_id in corrects.keys():
             evaluations[user_id] = {}
@@ -285,7 +311,6 @@ class SampleEvaluationService:
                 evaluations[user_id][f"{label}_submitted"] = submitted[user_id][label]
                 evaluations[user_id][f"{label}_correct"] = corrects[user_id][label]
                 evaluations[user_id][f"{label}_grade_on_{GRADE}"] = rounded_score
-        
 
         return evaluations
 
@@ -296,13 +321,13 @@ class SampleEvaluationService:
         columns = list(evaluations[first_username].keys())
 
         evaluations_tsv = "\t".join(["usernames"] + list_usernames)
-        
+
         for label in columns:
             user_tsv_line_list = [label]
             for username in list_usernames:
                 user_tsv_line_list.append(str(evaluations[username][label]))
             user_tsv_line_string = "\t".join(user_tsv_line_list)
-            evaluations_tsv += '\n' + user_tsv_line_string
+            evaluations_tsv += "\n" + user_tsv_line_string
         return evaluations_tsv
 
 
