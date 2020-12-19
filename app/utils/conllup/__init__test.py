@@ -4,7 +4,7 @@ import os
 from . import (
     ConllProcessor,
     MetaJson,
-    SentenceJson,
+    SentenceJson, StringProcessor,
     TokenJson,
     TokenProcessor,
     TreeJson,
@@ -268,3 +268,8 @@ def test_conll_document_to_sentences_json():
     )
     assert sentences_json
     assert len(sentences_json) == 2
+
+def test_process_key_value():
+    assert StringProcessor.process_key_value("a=b", seperator="=") == ("a","b")
+    assert StringProcessor.process_key_value("a = b", seperator=" = ") == ("a","b")
+    assert StringProcessor.process_key_value("a=b", seperator="==") == ("","")

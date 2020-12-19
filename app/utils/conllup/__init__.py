@@ -74,8 +74,11 @@ class TokenProcessor:
             key_value_couples = conll_mapping.split("|")
 
             for key_value in key_value_couples:
-                key, value = key_value.split("=")
-                dict_mapping[key] = value
+                key, value = StringProcessor.process_key_value(key_value, "=")
+                if key and value:
+                    dict_mapping[key] = value
+                else:
+                    print(f"<CONLLUP> parsing error : '{conll_mapping}' is not a valid conll_mapping")
 
         return dict_mapping
 
@@ -190,10 +193,11 @@ class MetaJson(dict):
 
     def add_meta(self, line):
         stripped_line = line.strip("# ").rstrip("\n")
-        splitted_line = stripped_line.split(" = ")
-        meta = splitted_line[0]
-        value = splitted_line[1]
-        self[meta] = value
+        meta_key, meta_value = StringProcessor.process_key_value(stripped_line, " = ")
+        if meta_key and meta_value:
+            self[meta_key] = meta_value
+        else:
+            print(f"<CONLLUP> parsing error : '{stripped_line}' is not a valid meta")
 
     def from_meta_conll(self, meta_conll: str) -> None:
         for line in meta_conll.split("\n"):
@@ -273,3 +277,13 @@ class SentenceJson(dict):
 
         sentence_conll = f"{meta_conll}\n{tree_conll}\n"
         return sentence_conll
+
+
+class StringProcessor:
+    @staticmethod
+    def process_key_value(key_value_string: str, seperator: str) -> Tuple[str, str]:
+        if seperator not in key_value_string:
+            return ("", "")
+        else:
+            key, value = key_value_string.split(seperator)
+            return key, value
