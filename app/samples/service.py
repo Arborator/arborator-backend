@@ -304,7 +304,11 @@ class SampleEvaluationService:
         for user_id in corrects.keys():
             evaluations[user_id] = {}
             for label in ["upos", "deprel", "head"]:
-                score = corrects[user_id][label] / total[label]
+                if total[label] == 0:
+                    score = 0
+                else:
+                    score = corrects[user_id][label] / total[label]
+
                 score_on_twenty = score * GRADE
                 rounded_score = int(score_on_twenty)
                 evaluations[user_id][f"{label}_total"] = total[label]
