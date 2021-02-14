@@ -1,5 +1,6 @@
 import json
 import re
+import os
 
 from app.projects.service import ProjectService
 from app.user.service import UserService
@@ -7,7 +8,15 @@ from app.utils.grew_utils import GrewService, grew_request
 from flask import Response, abort, current_app, request
 from flask_login import current_user
 from flask_restx import Namespace, Resource, reqparse
-from app.utils.conll3 import conll2tree
+from app.utils.conll3 import conll2tree, trees2conllFile
+from app.config import Config
+from app.samples.service import (
+    SampleEvaluationService,
+    SampleExerciseLevelService,
+    SampleExportService,
+    SampleRoleService,
+    SampleUploadService,
+)
 
 api = Namespace(
     "Lexicon", description="Endpoints for dealing with samples of project"
@@ -123,7 +132,7 @@ class TransformationGrewResource(Resource):
         return resp
 
 
-# TODO : It seems that this function is not finished. Ask Lila what should be done -> oui
+# TODO : It seems that this function is not finished. Ask Lila what should be done 
 @api.route("/<project_name>/upload/validator", methods=["POST", "OPTIONS"])
 class LexiconUploadValidatorResource(Resource):
     def post(self, project_name):
@@ -295,35 +304,45 @@ class TryRulesResource(Resource):
 
 
 
-# @api.route("/<string:project_name>/apply-rules")
-# class ApplyRulesResource(Resource):
-#     def post(self, project_name: str):
+@api.route("/<string:project_name>/saveConll")
+class SaveConll(Resource):
+    def post(self, project_name: str):
+        parser = reqparse.RequestParser()
+        parser.add_argument(name="data", type=dict, action="append")
+        args = parser.parse_args()
+        data = args.get("data")
+        sample_names = [ sampleId for sampleId in data[0] ]
+        # print(sample_names)
 
-        
-#         project = ProjectService.get_by_name(project_name)
-#         ProjectService.check_if_project_exist(project)
+        for sample_name in sample_names:
+            reply = grew_request(
+                "getConll",
+                data={"project_id": project_name, "sample_id": sample_name},
+            )
+            if reply.get("status") == "OK":
 
-#         parser = reqparse.RequestParser()
-#         parser.add_argument(name="results", type=str)
-#         parser.add_argument(name="sentenceIds", type=str, action="append")
-#         args = parser.parse_args()
-#         results = args.get("results")
-#         sentence_ids = args.get("sentenceIds")
+                # {"sent_id_1":{"conlls":{"user_1":"conllstring"}}}
+                sample_tree = SampleExportService.servSampleTrees(reply.get("data", {}))
+                trees = list()
+                for sent in sample_tree:
+                    tree = dict()
+                    if sent in data[0][sample_name]:
+                        # print(sample_tree[sent])
+                        sample_tree[sent] = data[0][sample_name][sent]
+                        tree[sent] = sample_tree[sent]
+                    trees.append(sample_tree[sent])
 
-#         print(project_name, sentence_ids, results)
-#         results = results.replace("\'", "\"")
-#         results = json.loads(results)
+                file_name = sample_name + "essai.conllu"
+                path_file = os.path.join(Config.UPLOAD_FOLDER, file_name)
+                trees2conllFile(trees, path_file)
+                # print(sample_name)
+                # print(sample_tree)
 
-#         # for sentence_id in sentence_ids:
-#         #     sample_id = sentence_id.split("__")[0]
-#         #     for projet in results:
-#         #         if projet == sample_id:
-#         #             if projet[sentence_id]:
-#         #                 print(projet)
-#         #             else:
-#         #                 print("hum", projet)
-#         #         else:
-#         #             print(projet, sample_id)
+                with open(path_file, "rb") as file_to_save:
+                    GrewService.save_sample(project_name, sample_name, file_to_save)
+
+            else:
+                print("Error: {}".format(reply.get("message")))
 
 
 

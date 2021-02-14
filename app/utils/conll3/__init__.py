@@ -302,7 +302,7 @@ def trees2conllFile(trees, outfile, sentencefeatures=True, columns="u"): # chang
 	with open(outfile,"w") as f:
 		for tree in trees:
 			if columns=="u": # conllu format
-				treestring = tree.conllu()
+				treestring = Tree.conllu(tree)
 				if not sentencefeatures:
 					# print(treestring)
 					treestring = treestring.split("\n")
