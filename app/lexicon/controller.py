@@ -313,6 +313,7 @@ class SaveConll(Resource):
         data = args.get("data")
         sample_names = [ sampleId for sampleId in data[0] ]
         # print(sample_names)
+        conll = str()
 
         for sample_name in sample_names:
             reply = grew_request(
@@ -330,14 +331,17 @@ class SaveConll(Resource):
                         # print(sample_tree[sent])
                         sample_tree[sent] = data[0][sample_name][sent]
                         tree[sent] = sample_tree[sent]
-                    trees.append(sample_tree[sent])
+                    for user in sample_tree[sent]["conlls"]:
+                        conll += sample_tree[sent]["conlls"][user] + "\n\n"
 
-                file_name = sample_name + "essai.conllu"
+                file_name = sample_name + "_modified.conllu"
                 path_file = os.path.join(Config.UPLOAD_FOLDER, file_name)
-                trees2conllFile(trees, path_file)
+                with open(path_file, "w") as file:
+                    file.write(conll)
+                # trees2conllFile(trees, path_file)
                 # print(sample_name)
                 # print(sample_tree)
-
+            
                 with open(path_file, "rb") as file_to_save:
                     GrewService.save_sample(project_name, sample_name, file_to_save)
 
