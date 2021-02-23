@@ -247,58 +247,69 @@ class TryRulesResource(Resource):
 
         parser = reqparse.RequestParser()
         parser.add_argument(name="rules", type=str)
+        parser.add_argument(name="sampleId", type=str)
         args = parser.parse_args()
         rules = args.get("rules")
+        sampleId = args.get("sampleId")
         
         print(rules)
+        print("sampleID :", sampleId)
+        list_sampleIds = [id for id in sampleId.split(", ")]
         list_rules = [rule for rule in rules.split(",\n")]
 
         print("liste des règles : ",list_rules)
-
-        reply = grew_request(
-            "tryRules",
-            data={
-                "project_id":project_name,
-                "rules":json.dumps(list_rules)
-            },
-        )
-        # print(8989,reply)
-        # tryRule(<string> project_id, [<string> sample_id], [<string> user_id], <string> pattern, <string> commands)
-
-        if reply["status"] != "OK":
-            if "message" in reply:
-                resp = {
-                    "status_code": 444,
-                    "status": reply["status"],
-                    "message": reply["message"],
-                }
-                status_code = 444
-                return resp
-            abort(400)
+        print("liste des ids : ", list_sampleIds)
         trees = {}
-        # matches={}
-        # reendswithnumbers = re.compile(r"_(\d+)$")
-        # {'WAZL_15_MC-Abi_MG': {'WAZL_15_MC-Abi_MG__8': {'sentence': '# kalapotedly < you see < # ehn ...', 'conlls': {'kimgerdes': ..
-        for m in reply["data"]:
-            if m["user_id"] == "":
-                abort(409)
-            print("___")
-            # for x in m:
-            # 	print('mmmm',x)
-            trees[m["sample_id"]] = trees.get(m["sample_id"], {})
-            trees[m["sample_id"]][m["sent_id"]] = trees[m["sample_id"]].get(
-                m["sent_id"], {"conlls": {}, "nodes": {}, "edges": {}}
+        
+        for sampleId in list_sampleIds:
+            reply = grew_request(
+                "tryRules",
+                data={
+                    "project_id":project_name,
+                    "sample_id":sampleId,
+                    "rules":json.dumps(list_rules)
+                },
             )
-            trees[m["sample_id"]][m["sent_id"]]["conlls"][m["user_id"]] = m["conll"]
-            # trees['sample_id']['sent_id']['matches'][m['user_id']]=[{"edges":{},"nodes":{}}] # TODO: get the nodes and edges from the grew server!
-            if "sentence" not in trees[m["sample_id"]][m["sent_id"]]:
-                trees[m["sample_id"]][m["sent_id"]]["sentence"] = conll2tree(
-                    m["conll"]
-                ).sentence()
+            # print(8989,reply)
+            # tryRule(<string> project_id, [<string> sample_id], [<string> user_id], <string> pattern, <string> commands)
+
+            if reply["status"] != "OK":
+                if "message" in reply:
+                    resp = {
+                        "status_code": 444,
+                        "status": reply["status"],
+                        "message": reply["message"],
+                    }
+                    status_code = 444
+                    return resp
+                abort(400)
+            # matches={}
+            # reendswithnumbers = re.compile(r"_(\d+)$")
+            # {'WAZL_15_MC-Abi_MG': {'WAZL_15_MC-Abi_MG__8': {'sentence': '# kalapotedly < you see < # ehn ...', 'conlls': {'kimgerdes': ..
+            for m in reply["data"]:
+                
+                if m["user_id"] == "":
+                    abort(409)
+                print("___")
+                if sampleId not in m["sent_id"]: continue
+                # for x in m:
+                # 	print('mmmm',m[x])
+                trees[m["sample_id"]] = trees.get(m["sample_id"], {})
+                trees[m["sample_id"]][m["sent_id"]] = trees[m["sample_id"]].get(
+                    m["sent_id"], {"conlls": {}, "nodes": {}, "edges": {}}
+                )
+                trees[m["sample_id"]][m["sent_id"]]["conlls"][m["user_id"]] = m["conll"]
+                # trees['sample_id']['sent_id']['matches'][m['user_id']]=[{"edges":{},"nodes":{}}] # TODO: get the nodes and edges from the grew server!
+                if "sentence" not in trees[m["sample_id"]][m["sent_id"]]:
+                    trees[m["sample_id"]][m["sent_id"]]["sentence"] = conll2tree(
+                        m["conll"]
+                    ).sentence()
             # print('mmmm',trees['sample_id']['sent_id'])
-            print(trees)
-        print(len(trees))
-        print(len(reply['data']))
+
+            # print(trees)
+        # print(len(trees))
+        # print(trees)
+        # print(len(reply['data']))
         resp = {"status_code": 200, "trees": trees, "rules": list_rules}
         return resp
 
