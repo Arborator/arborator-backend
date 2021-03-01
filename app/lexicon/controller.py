@@ -105,10 +105,8 @@ class TransformationGrewResource(Resource):
             pattern = "pattern { "
             command = "commands { "
             without = "without { "
-            #print(i['info2Change'])
             line1 = i['currentInfo'].split(' ')
             line2 = i['info2Change'].split(' ')
-            #print(line2)
             comp+=1
             pattern += transform_grew_get_pattern(line1, dic, comp) + " }"
             resultat = transform_grew_verif(line1, line2)
@@ -182,7 +180,6 @@ class LexiconAddValidatorResource(Resource):
                     "key":a[-1],
                     }
                 list_validator.append(newjson)
-        # print("lexicon = \n", list_lexicon, "\n\nval = \n", list_validator)
 
         for x in lexicon:
             if 'frequency' in x: 
@@ -208,15 +205,12 @@ class LexiconAddValidatorResource(Resource):
             if y not in AB_Ok and y not in AB_Diff and x not in B: 
                 B.append(y)
 
-        # print("AAAAAAA ",A,"\n\nBBBBBBBB ",B, "\n\nAB OK", AB_Ok, "\n\nAB Diff", AB_Diff)
-        
         for i in list_types:
             for s in list_types[i]:
                 s['type'] = i
                 line.append(s)
                 if 'toChange' not in s:
                     s['toChange'] = '_'
-        # print(line)
         resp = {"dics": line, "message": "hello"}
         resp["status_code"] = 200
         return resp
@@ -270,8 +264,6 @@ class TryRulesResource(Resource):
                     "rules":json.dumps(list_rules)
                 },
             )
-            # print(8989,reply)
-            # tryRule(<string> project_id, [<string> sample_id], [<string> user_id], <string> pattern, <string> commands)
 
             if reply["status"] != "OK":
                 if "message" in reply:
@@ -283,33 +275,22 @@ class TryRulesResource(Resource):
                     status_code = 444
                     return resp
                 abort(400)
-            # matches={}
-            # reendswithnumbers = re.compile(r"_(\d+)$")
-            # {'WAZL_15_MC-Abi_MG': {'WAZL_15_MC-Abi_MG__8': {'sentence': '# kalapotedly < you see < # ehn ...', 'conlls': {'kimgerdes': ..
+
             for m in reply["data"]:
                 
                 if m["user_id"] == "":
                     abort(409)
                 print("___")
                 if sampleId not in m["sample_id"]: continue
-                # for x in m:
-                # 	print('mmmm',m[x])
                 trees[m["sample_id"]] = trees.get(m["sample_id"], {})
                 trees[m["sample_id"]][m["sent_id"]] = trees[m["sample_id"]].get(
                     m["sent_id"], {"conlls": {}, "nodes": {}, "edges": {}}
                 )
                 trees[m["sample_id"]][m["sent_id"]]["conlls"][m["user_id"]] = m["conll"]
-                # trees['sample_id']['sent_id']['matches'][m['user_id']]=[{"edges":{},"nodes":{}}] # TODO: get the nodes and edges from the grew server!
                 if "sentence" not in trees[m["sample_id"]][m["sent_id"]]:
                     trees[m["sample_id"]][m["sent_id"]]["sentence"] = conll2tree(
                         m["conll"]
                     ).sentence()
-            # print('mmmm',trees['sample_id']['sent_id'])
-
-            # print(trees)
-        # print(len(trees))
-        # print(trees)
-        # print(len(reply['data']))
         resp = {"status_code": 200, "trees": trees, "rules": list_rules}
         return resp
 
@@ -323,7 +304,6 @@ class SaveConll(Resource):
         args = parser.parse_args()
         data = args.get("data")
         sample_names = [ sampleId for sampleId in data[0] ]
-        # print(sample_names)
         conll = str()
 
         for sample_name in sample_names:
@@ -333,13 +313,11 @@ class SaveConll(Resource):
             )
             if reply.get("status") == "OK":
 
-                # {"sent_id_1":{"conlls":{"user_1":"conllstring"}}}
                 sample_tree = SampleExportService.servSampleTrees(reply.get("data", {}))
                 trees = list()
                 for sent in sample_tree:
                     tree = dict()
                     if sent in data[0][sample_name]:
-                        # print(sample_tree[sent])
                         sample_tree[sent] = data[0][sample_name][sent]
                         tree[sent] = sample_tree[sent]
                     for user in sample_tree[sent]["conlls"]:
@@ -349,9 +327,6 @@ class SaveConll(Resource):
                 path_file = os.path.join(Config.UPLOAD_FOLDER, file_name)
                 with open(path_file, "w") as file:
                     file.write(conll)
-                # trees2conllFile(trees, path_file)
-                # print(sample_name)
-                # print(sample_tree)
             
                 with open(path_file, "rb") as file_to_save:
                     GrewService.save_sample(project_name, sample_name, file_to_save)
@@ -381,7 +356,6 @@ def transform_grew_verif(ligne1, ligne2): #Voir différences entre deux lignes
 				liste.append(i)
 		except IndexError:
 			liste.append(i)
-	#print("transform_grew_verif",liste)
 	return liste
 
 
@@ -389,7 +363,6 @@ def transform_grew_get_pattern(ligne, dic, comp):
 	pattern = "X" + str(comp) + '[form=\"' + ligne[0] + '\"'
 	for element in range(1,len(ligne)):
 		if element == len(ligne)-1:
-			# print(element, ligne[element], dic[element])
 			if ligne[element] != "_" and '=' in ligne[element]: #features
 				mot = ligne[element].split("|") #Number=Sing, PronType=Dem
 				pattern = pattern + ", " + ", ".join(mot)
@@ -413,8 +386,6 @@ def transform_grew_get_without(l, l2, comp):
 	for i in mot2:
 		if i not in mot and i != "_": # ajout traits2 non existant dans traits1
 			liste_traits.append(i)
-	# print(les_traits, liste_traits)
-	# print (without, liste_traits, len(liste_traits))
 	if len(liste_traits) == 0:
 		feats_str = False
 	if liste_traits:
@@ -423,19 +394,6 @@ def transform_grew_get_without(l, l2, comp):
 			feats_str += "X" + str(comp) + "." + feat + "; "
 	return les_traits, feats_str
 
-# def transform_grew_get_features(l2, comp):
-# 	les_traits=""
-# 	mot2 = l2.split("|")
-# 	without = "without { X["
-# 	liste_traits = []
-# 	for i in mot2 :
-# 		les_traits = les_traits+" X"+str(comp)+"."+i+";"
-# 		liste_traits.append(i)
-# 	without=without+", ".join(liste_traits)+"]}\n"
-# 	#print (without, liste_traits, len(liste_traits))
-# 	if len(liste_traits)==0 :
-# 		without = False
-# 	return les_traits, without
 
 
 def transform_grew_traits_corriges(l, l2, comp): # différence entre deux feats
@@ -457,27 +415,19 @@ def transform_grew_traits_corriges(l, l2, comp): # différence entre deux feats
 def transform_grew_get_commands(resultat, ligne1, ligne2, dic, comp):
 	correction = ""
 	commands = ""
-	# without_traits = ""
 	list_traits2 = []
 	without = ""
 	for e in resultat:
 		if e == 4: #si traits sont différents
-			# try :
-			#print(len(ligne1[e].split("|")), len(ligne2[e].split("|")))
 			if ligne2[e] != "_" and len(ligne1[e].split("|")) < len(ligne2[e].split("|")) or ligne1[e] == "_":
 				if ligne2[e] != "": #insertion des traits
 					list_traits2, feats_str = transform_grew_get_without(ligne1[e], ligne2[e], comp)
 					without = ",".join(list_traits2)
-					#print(temp_var,"123123", list_traits2)
 					commands = commands + feats_str
-					#print(without_traits,"1112222333", list_traits2)
 			else: #si on doit supprimer les traits de ligne1 :
-				#print("transform_grew_get_commands vers traits_a_supprimer", ligne1[e],ligne2[e], comp)
 				traits_a_supprimer = transform_grew_traits_corriges(ligne1[e], ligne2[e], comp)
 				commands = commands + traits_a_supprimer
 		else: # si la différence n'est pas trait
-			#print(e, dic, comp, ligne1, ligne2)
 			commands = commands + "X" + str(comp) + "." + dic[e] + '=\"' + ligne2[e] + '\"; '
 	correction = correction + commands
-	#print(correction, "------", commands)
 	return correction, without
