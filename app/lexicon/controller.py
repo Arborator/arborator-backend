@@ -1,12 +1,22 @@
 import json
 import re
+import os
 
 from app.projects.service import ProjectService
 from app.user.service import UserService
-from app.utils.grew_utils import grew_request
+from app.utils.grew_utils import GrewService, grew_request
 from flask import Response, abort, current_app, request
 from flask_login import current_user
 from flask_restx import Namespace, Resource, reqparse
+from app.utils.conll3 import conll2tree, trees2conllFile
+from app.config import Config
+from app.samples.service import (
+    SampleEvaluationService,
+    SampleExerciseLevelService,
+    SampleExportService,
+    SampleRoleService,
+    SampleUploadService,
+)
 
 api = Namespace(
     "Lexicon", description="Endpoints for dealing with samples of project"
@@ -53,7 +63,7 @@ class LexiconExportJson(Resource):
 
 
 @api.route("/<string:project_name>/export/tsv")
-class LexiconExportJson(Resource):
+class LexiconExportTsv(Resource):
     def post(self, project_name: str):
         parser = reqparse.RequestParser()
         parser.add_argument(name="data", type=dict, action="append")
@@ -81,50 +91,52 @@ class TransformationGrewResource(Resource):
         args = parser.parse_args()
         lexicon = args.get("data")
         comp = 0
-        patterns = []
-        commands = []
-        without = ""
-        dic = {0: "form", 1: "lemma", 2: "upos", 3: "_MISC_Gloss", 4: "trait"}
-        for i in lexicon:
-            line1 = i["currentInfo"].split(" ")
-            line2 = i["info2Change"].split(" ")
-            comp += 1
-            patterns.append(transform_grew_get_pattern(line1, dic, comp))
+        list_rules = str()
+        rule = str()
+        dic = {
+            0: "form",
+            1 : "lemma",
+            2 : "upos",
+            3 :"Gloss",
+            4 : "trait"
+            }
+
+        for i in lexicon :
+            pattern = "pattern { "
+            command = "commands { "
+            without = "without { "
+            line1 = i['currentInfo'].split(' ')
+            line2 = i['info2Change'].split(' ')
+            comp+=1
+            pattern += transform_grew_get_pattern(line1, dic, comp) + " }"
             resultat = transform_grew_verif(line1, line2)
-            co, without_traits = transform_grew_get_commands(
-                resultat, line1, line2, dic, comp
-            )
-            commands.append(co)
-            if without_traits != "":
-                without = without + without_traits
-        patterns[0] = (
-            "% click the button 'Correct lexicon' to update the queries\n\npattern { "
-            + patterns[0][0:]
-        )
-        commands[0] = "commands { " + commands[0][0:]
-        patterns[len(lexicon["data"]) - 1] += " }"
-        commands.append("}")
-        if len(without) != 0:
-            without = "\nwithout { " + without + "}"
-        patterns_output = ",".join(patterns)
-        commands_output = "".join(commands)
+            co, without_traits = (transform_grew_get_commands(resultat, line1, line2, dic, comp))
+            command += co + "}"
+            if without_traits == "":
+                rule = pattern + " " + command
+            else:
+                without += without_traits + " }"
+                rule = pattern + " " + without + " " + command
+            if i == lexicon[0]:
+                list_rules += rule
+            else:
+                list_rules += ",\n" + rule
+        
         resp = {
-            "patterns": patterns_output,
-            "commands": commands_output,
-            "without": without,
+            "rules": list_rules,
         }
-        # print("patterns :", ','.join(patterns), "\ncommands :", ''.join(commands))
+        print(list_rules)
         resp["status_code"] = 200
         return resp
 
 
-# TODO : It seems that this function is not finished. Ask Lila what should be done
+# TODO : It seems that this function is not finished. Ask Lila what should be done 
 @api.route("/<project_name>/upload/validator", methods=["POST", "OPTIONS"])
 class LexiconUploadValidatorResource(Resource):
     def post(self, project_name):
-        fichier = request.files["files"]
-        f = fichier.read()
-        resp = {"validator": f, "message": "hello"}
+        file = request.files['files'].read()
+        file = json.dumps(file.decode("utf-8"))
+        resp = {"validator": file, "message": "hello"}
         resp["status_code"] = 200
         return resp
 
@@ -134,13 +146,12 @@ class LexiconAddValidatorResource(Resource):
     def post(self, project_name: str):
         parser = reqparse.RequestParser()
         parser.add_argument(name="data", type=dict, action="append")
-        parser.add_argument(name="validator", type=dict, action="append")
+        parser.add_argument(name="validator", type=str, action="append")
+        print("ok")
+
         args = parser.parse_args()
         lexicon = args.get("data")
-
-        
-        lexicon = args.get("data")
-        validator = args.get("validator")
+        validator = json.loads(args.get("validator")[0])
         list_validator = []
         line = []
         A = []
@@ -148,60 +159,182 @@ class LexiconAddValidatorResource(Resource):
         AB_Ok = []
         AB_Diff = []
         list_types = {
-            "In the two dictionaries with the same information": AB_Ok,
-            "In the two dictionaries with different information": AB_Diff,
-            "Only in the old dictionary": A,
-            "Only in the imported dictionary": B,
+            "In the two dictionaries with the same information" : AB_Ok,
+            "Identical form in both dictionaries with different information" : AB_Diff,
+            "Only in the old dictionary" : A,
+            "Only in the imported dictionary" : B
         }
-
-        for i in validator["validator"].split("\n"):
+        
+        for i in validator.split('\n'):
             a = i.split("\t")
-            if a[-1] == "":
+            if a[-1] == '': 
                 a.pop()
-            if a != []:
+            if a != []: 
                 a[-1] = a[0] + a[1] + a[2] + a[3] + a[4]
                 newjson = {
-                    "form": a[0],
-                    "lemma": a[1],
-                    "POS": a[2],
-                    "features": a[3],
-                    "gloss": a[4],
-                    "key": a[-1],
-                }
+                    "form":a[0],
+                    "lemma":a[1],
+                    "POS":a[2],
+                    "features":a[3],
+                    "gloss":a[4],
+                    "key":a[-1],
+                    }
                 list_validator.append(newjson)
-        # print("lexicon = \n", list_lexicon, "\n\nval = \n", list_validator)
 
-        for x in lexicon["data"]:
-            if "frequency" in x:
-                del x["frequency"]
+        for x in lexicon:
+            if 'frequency' in x: 
+                del x['frequency']
             for y in list_validator:
-                if x["key"] == y["key"] and x not in AB_Ok and x not in AB_Diff:
+                # le token existe dans les deux dicts avec les mêmes feats
+                if x['key'] == y['key'] and x not in AB_Ok and x not in AB_Diff: 
                     AB_Ok.append(x)
-                elif (
-                    x["key"] != y["key"]
-                    and x["form"] == y["form"]
-                    and x not in AB_Ok
-                    and x not in AB_Diff
-                    and y not in AB_Ok
-                    and y not in AB_Diff
-                ):
-                    AB_Diff.extend((x, y))
+                    
+                # le terme existe dans les deux dictionnaires mais avec de différents feats
+                elif x['key'] != y['key'] and x['form'] == y['form'] and x not in AB_Ok and x not in AB_Diff and y not in AB_Ok and y not in AB_Diff: 
+                    x['toChange'] = y['form'] + ' ' + y['lemma'] + ' ' + y['POS'] + ' ' + y['gloss'] + ' ' + y['features']
+                    AB_Diff.extend((x,y))
+                    print(x, "------->", y)
 
-        for x in lexicon["data"]:
+        # le token n'existe pas dans le dict B
+        for x in lexicon:
             if x not in AB_Ok and x not in AB_Diff and x not in A:
                 A.append(x)
+
+        # le token n'existe pas dans le dict A
         for y in list_validator:
-            if y not in AB_Ok and y not in AB_Diff and x not in B:
+            if y not in AB_Ok and y not in AB_Diff and x not in B: 
                 B.append(y)
 
         for i in list_types:
             for s in list_types[i]:
-                s["type"] = i
+                s['type'] = i
                 line.append(s)
-        # print(line)
+                if 'toChange' not in s:
+                    s['toChange'] = '_'
         resp = {"dics": line, "message": "hello"}
         resp["status_code"] = 200
         return resp
+
+
+
+@api.route("/<string:project_name>/try-rules")
+class TryRulesResource(Resource):
+    def post(self, project_name: str):
+        """
+        expects json with grew pattern such as
+        {
+        "pattern":"pattern { N [upos=\"NUM\"] }"
+        "rewriteCommands":"commands { N [upos=\"NUM\"] }"
+        }
+        important: simple and double quotes must be escaped!
+
+        returns:
+        {'sample_id': 'P_WAZP_07_Imonirhuas.Life.Story_PRO', 'sent_id': 'P_WAZP_07_Imonirhuas-Life-Story_PRO_97', 'nodes': {'N': 'Bernard_11'}, 'edges': {}}, {'sample_id':...
+        """
+
+        project = ProjectService.get_by_name(project_name)
+        ProjectService.check_if_project_exist(project)
+
+        # TODO : to change
+        if not request.json:
+            abort(400)
+
+        parser = reqparse.RequestParser()
+        parser.add_argument(name="rules", type=str)
+        parser.add_argument(name="sampleId", type=str)
+        args = parser.parse_args()
+        rules = args.get("rules")
+        sampleId = args.get("sampleId")
+        
+        print(rules)
+        print("sampleID :", sampleId)
+        list_sampleIds = [id for id in sampleId.split(", ")]
+        list_rules = [rule for rule in rules.split(",\n")]
+
+        print("liste des règles : ",list_rules)
+        print("liste des ids : ", list_sampleIds)
+        trees = {}
+        
+        for sampleId in list_sampleIds:
+            reply = grew_request(
+                "tryRules",
+                data={
+                    "project_id":project_name,
+                    "sample_id":sampleId,
+                    "rules":json.dumps(list_rules)
+                },
+            )
+
+            if reply["status"] != "OK":
+                if "message" in reply:
+                    resp = {
+                        "status_code": 444,
+                        "status": reply["status"],
+                        "message": reply["message"],
+                    }
+                    status_code = 444
+                    return resp
+                abort(400)
+
+            for m in reply["data"]:
+                
+                if m["user_id"] == "":
+                    abort(409)
+                print("___")
+                if sampleId not in m["sample_id"]: continue
+                trees[m["sample_id"]] = trees.get(m["sample_id"], {})
+                trees[m["sample_id"]][m["sent_id"]] = trees[m["sample_id"]].get(
+                    m["sent_id"], {"conlls": {}, "nodes": {}, "edges": {}}
+                )
+                trees[m["sample_id"]][m["sent_id"]]["conlls"][m["user_id"]] = m["conll"]
+                if "sentence" not in trees[m["sample_id"]][m["sent_id"]]:
+                    trees[m["sample_id"]][m["sent_id"]]["sentence"] = conll2tree(
+                        m["conll"]
+                    ).sentence()
+        resp = {"status_code": 200, "trees": trees, "rules": list_rules}
+        return resp
+
+
+
+@api.route("/<string:project_name>/saveConll")
+class SaveConll(Resource):
+    def post(self, project_name: str):
+        parser = reqparse.RequestParser()
+        parser.add_argument(name="data", type=dict, action="append")
+        args = parser.parse_args()
+        data = args.get("data")
+        sample_names = [ sampleId for sampleId in data[0] ]
+        conll = str()
+
+        for sample_name in sample_names:
+            reply = grew_request(
+                "getConll",
+                data={"project_id": project_name, "sample_id": sample_name},
+            )
+            if reply.get("status") == "OK":
+
+                sample_tree = SampleExportService.servSampleTrees(reply.get("data", {}))
+                trees = list()
+                for sent in sample_tree:
+                    tree = dict()
+                    if sent in data[0][sample_name]:
+                        sample_tree[sent] = data[0][sample_name][sent]
+                        tree[sent] = sample_tree[sent]
+                    for user in sample_tree[sent]["conlls"]:
+                        conll += sample_tree[sent]["conlls"][user] + "\n\n"
+
+                file_name = sample_name + "_modified.conllu"
+                path_file = os.path.join(Config.UPLOAD_FOLDER, file_name)
+                with open(path_file, "w") as file:
+                    file.write(conll)
+            
+                with open(path_file, "rb") as file_to_save:
+                    GrewService.save_sample(project_name, sample_name, file_to_save)
+
+            else:
+                print("Error: {}".format(reply.get("message")))
+
+
 
 
 ################################################################################
@@ -211,110 +344,90 @@ class LexiconAddValidatorResource(Resource):
 ################################################################################
 
 
-def transform_grew_verif(ligne1, ligne2):  # Voir différences entre deux lignes
-    liste = []
-    if len(ligne1) > len(ligne2):
-        maximum = len(ligne1)
-    else:
-        maximum = len(ligne2)
-    for i in range(maximum):
-        try:
-            if ligne1[i] != ligne2[i]:
-                liste.append(i)
-        except IndexError:
-            liste.append(i)
-    return liste
+def transform_grew_verif(ligne1, ligne2): #Voir différences entre deux lignes
+	liste=[]
+	if len(ligne1) > len(ligne2): 
+		maximum = len(ligne1)
+	else: 
+		maximum = len(ligne2)
+	for i in range(maximum):
+		try:
+			if ligne1[i] != ligne2[i]:
+				liste.append(i)
+		except IndexError:
+			liste.append(i)
+	return liste
 
 
-def transform_grew_get_pattern(ligne, dic, comp):
-    pattern = "X" + str(comp) + '[form="' + ligne[0] + '"'
-    for element in range(1, len(ligne)):
-        if element == len(ligne) - 1:
-            # print(element, ligne[element], dic[element])
-            if ligne[element] != "_" and "=" in ligne[element]:  # features
-                # upos="DET", Number=Sing, PronType=Dem, lemma="dat"
-                mot = ligne[element].split("|")
-                pattern = pattern + ", " + ", ".join(mot)
-        else:
-            pattern = pattern + ", " + dic[element] + '="' + ligne[element] + '"'
-    pattern = pattern + "]"
-    return pattern
+def transform_grew_get_pattern(ligne, dic, comp): 
+	pattern = "X" + str(comp) + '[form=\"' + ligne[0] + '\"'
+	for element in range(1,len(ligne)):
+		if element == len(ligne)-1:
+			if ligne[element] != "_" and '=' in ligne[element]: #features
+				mot = ligne[element].split("|") #Number=Sing, PronType=Dem
+				pattern = pattern + ", " + ", ".join(mot)
+		elif element == 2: # upos = PRON
+			pattern = pattern + ", " + dic[element] + "=" + ligne[element]
+		else:
+			pattern = pattern + ", " + dic[element] + '=\"' + ligne[element] + '\"' # forme=\"dat\", lemma=\"dat\"
+	pattern = pattern + "]"
+	return pattern
 
 
 def transform_grew_get_without(l, l2, comp):
-    les_traits = ""
-    mot = l.split("|")
-    mot2 = l2.split("|")
-    liste_traits = []
-    # for i in mot :
-    # 	if i not in mot2 and i !="_": # suppression de traits 1 non existant dans traits2
-    # 		les_traits = les_traits+"del_feat X"+str(comp)+"."+i.split("=")[0]+';'
-    for i in mot2:
-        if i not in mot and i != "_":  # ajout traits2 non existant dans traits1
-            les_traits = les_traits + "X" + str(comp) + "." + i + "; "
-            liste_traits.append(i)
-    # print(les_traits, liste_traits)
-    # print (without, liste_traits, len(liste_traits))
-    if len(liste_traits) == 0:
-        liste_traits = False
-    return les_traits, liste_traits
+	mot = l.split("|")
+	mot2 = l2.split("|")
+	les_traits = []
+	liste_traits = []
+	feats_str = ""
+	# for i in mot :
+	# 	if i not in mot2 and i !="_": # suppression de traits 1 non existant dans traits2
+	# 		les_traits = les_traits+"del_feat X"+str(comp)+"."+i.split("=")[0]+';'
+	for i in mot2:
+		if i not in mot and i != "_": # ajout traits2 non existant dans traits1
+			liste_traits.append(i)
+	if len(liste_traits) == 0:
+		feats_str = False
+	if liste_traits:
+		les_traits.append("X" + str(comp) + "[" + ",".join(liste_traits) + "]")
+		for feat in liste_traits:
+			feats_str += "X" + str(comp) + "." + feat + "; "
+	return les_traits, feats_str
 
 
-# def transform_grew_get_features(l2, comp):
-# 	les_traits=""
-# 	mot2 = l2.split("|")
-# 	without = "without { X["
-# 	liste_traits = []
-# 	for i in mot2 :
-# 		les_traits = les_traits+" X"+str(comp)+"."+i+";"
-# 		liste_traits.append(i)
-# 	without=without+", ".join(liste_traits)+"]}\n"
-# 	#print (without, liste_traits, len(liste_traits))
-# 	if len(liste_traits)==0 :
-# 		without = False
-# 	return les_traits, without
 
-
-def transform_grew_traits_corriges(l, comp):  # lignes2[4]=="_"
-    traits = ""
-    mot = l.split("|")
-    for i in mot:  # suppression des traits 1
-        traits = traits + "del_feat X" + str(comp) + "." + i.split("=")[0] + "; "
-    return traits
+def transform_grew_traits_corriges(l, l2, comp): # différence entre deux feats
+	traits = ''
+	mot1 = l.split("|")
+	print(mot1, l,l2)
+	if l2 == "_":
+		for i in mot1:
+			traits = traits + "del_feat X" + str(comp) + "." + i.split("=")[0] + '; '
+	else:
+		mot2 = l2.split("|")
+		print(mot2)
+		for i in mot1:  # suppression des traits 1
+			if i not in mot2:
+				traits = traits + "del_feat X" + str(comp) + "." + i.split("=")[0] + '; '
+	return traits
 
 
 def transform_grew_get_commands(resultat, ligne1, ligne2, dic, comp):
-    correction = ""
-    commands = ""
-    without_traits = ""
-    list_traits2 = ""
-    for e in resultat:
-        if e == 4:  # si traits sont différents
-            # try :
-            if ligne2[e] != "_":
-                if ligne2[e] != "":  # insertion des traits
-                    list_traits2, without_traits = transform_grew_get_without(
-                        ligne1[e], ligne2[e], comp
-                    )
-                    commands = commands + list_traits2
-                    # print(without_traits) OK
-            else:  # si on doit supprimer les traits de ligne1
-                traits_a_supprimer = transform_grew_traits_corriges(ligne1[e], comp)
-                commands = commands + traits_a_supprimer
-            # except IndexError:
-            # 	if len(ligne2) < 5:
-            # 		traits_a_supprimer = transform_grew_traits_corriges(ligne1[e], comp)
-            # 		commands=commands+traits_a_supprimer
-            # 	elif len(ligne1) < 5:
-            # 		list_traits2, without_traits = transform_grew_get_features(ligne2[e], comp)
-            # 		commands=commands+list_traits2
-            # 	pass
-        else:  # si la différence n'est pas trait
-            commands = (
-                commands + "X" + str(comp) + "." + dic[e] + '="' + ligne2[e] + '"; '
-            )
-    if without_traits == False:
-        correction = correction + commands
-    else:
-        correction = correction + commands
-    return correction, list_traits2
+	correction = ""
+	commands = ""
+	list_traits2 = []
+	without = ""
+	for e in resultat:
+		if e == 4: #si traits sont différents
+			if ligne2[e] != "_" and len(ligne1[e].split("|")) < len(ligne2[e].split("|")) or ligne1[e] == "_":
+				if ligne2[e] != "": #insertion des traits
+					list_traits2, feats_str = transform_grew_get_without(ligne1[e], ligne2[e], comp)
+					without = ",".join(list_traits2)
+					commands = commands + feats_str
+			else: #si on doit supprimer les traits de ligne1 :
+				traits_a_supprimer = transform_grew_traits_corriges(ligne1[e], ligne2[e], comp)
+				commands = commands + traits_a_supprimer
+		else: # si la différence n'est pas trait
+			commands = commands + "X" + str(comp) + "." + dic[e] + '=\"' + ligne2[e] + '\"; '
+	correction = correction + commands
+	return correction, without
