@@ -21,6 +21,9 @@ class Project(db.Model, BaseM):
     visibility = Column(Integer)
     show_all_trees = Column(Boolean, default=True)
     exercise_mode = Column(Boolean, default=False)
+    diff_mode = Column(Boolean, default=False)
+    diff_user_id = Column(String(256), nullable=True)
+
     # default_user_trees = db.relationship('DefaultUserTrees')
 
     def update(self, changes: ProjectInterface):
@@ -74,6 +77,14 @@ class DefaultUserTrees(db.Model, BaseM):
     user_id = Column(String(256), db.ForeignKey("users.id"))
     username = Column(String(256), nullable=False)
     robot = Column(Boolean, default=False)
+
+
+# class DefaultUserDiffTree(db.Model, BaseM):
+#     __tablename__ = "defaultuserdifftree"
+#     id = Column(Integer, primary_key=True)
+#     project_id = Column(Integer, db.ForeignKey("projects.id"))
+#     project = db.relationship("Project")
+#     user_id = Column(String(256), db.ForeignKey("users.id"))
 
 
 class Robot(db.Model, BaseM):

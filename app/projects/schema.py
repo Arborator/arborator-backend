@@ -57,3 +57,5 @@ class ProjectSchemaCamel(Schema):
     visibility = fields.Integer(attribute="visibility")
     showAllTrees = fields.Boolean(attribute="show_all_trees")
     exerciseMode = fields.Boolean(attribute="exercise_mode")
+    diffMode = fields.Boolean(attribute="diff_mode")
+    diffUserId = fields.String(attribute="diff_user_id")
