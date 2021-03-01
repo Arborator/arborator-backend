@@ -291,7 +291,7 @@ class TryRulesResource(Resource):
                 if m["user_id"] == "":
                     abort(409)
                 print("___")
-                if sampleId not in m["sent_id"]: continue
+                if sampleId not in m["sample_id"]: continue
                 # for x in m:
                 # 	print('mmmm',m[x])
                 trees[m["sample_id"]] = trees.get(m["sample_id"], {})
