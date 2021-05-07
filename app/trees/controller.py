@@ -98,7 +98,6 @@ class SampleTreesResource(Resource):
         user_id = args.user_id
         conll = args.conll
         sent_id = args.sent_id
-
         if not conll:
             abort(400)
 
@@ -117,6 +116,7 @@ class SampleTreesResource(Resource):
             "sent_id": sent_id,
             "conll_graph": conll,
         }
+
         grew_request("saveGraph", data=data)
 
         return {"status": "success"}
