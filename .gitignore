@@ -139,3 +139,4 @@ misc/
 app/app-test.db
 
 migrations/*
+migrations/

@@ -130,6 +130,7 @@ class ProjectIdResource(Resource):
     def put(self, projectName: str):
         """Modify a single project (by it's name)"""
         changes: ProjectInterface = request.parsed_obj
+        print("KK changes", changes)
         project = ProjectService.get_by_name(projectName)
 
         return ProjectService.update(project, changes)
