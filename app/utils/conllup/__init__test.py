@@ -273,3 +273,4 @@ def test_process_key_value():
     assert StringProcessor.process_key_value("a=b", seperator="=") == ("a","b")
     assert StringProcessor.process_key_value("a = b", seperator=" = ") == ("a","b")
     assert StringProcessor.process_key_value("a=b", seperator="==") == ("","")
+    assert StringProcessor.process_key_value("a=b=c", seperator="=") == ("a","b=c")

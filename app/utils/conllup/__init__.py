@@ -285,5 +285,7 @@ class StringProcessor:
         if seperator not in key_value_string:
             return ("", "")
         else:
-            key, value = key_value_string.split(seperator)
+            splitted_couple = key_value_string.split(seperator)
+            key = splitted_couple[0]
+            value = "=".join(splitted_couple[1:])
             return key, value
