@@ -33,8 +33,11 @@ class KlangService:
     @staticmethod
     def get_project_config(project_name: str):
         path_project_config = KlangService.get_path_project_config(project_name)
-        with open(path_project_config, "r", encoding="utf-8") as infile:
-            project_config = json.load(infile)
+        if os.path.isfile(path_project_config):
+            with open(path_project_config, "r", encoding="utf-8") as infile:
+                project_config = json.load(infile)
+        else:
+            project_config = {}
         return project_config
     
     @staticmethod
