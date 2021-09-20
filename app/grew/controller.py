@@ -177,6 +177,7 @@ class RelationTableResource(Resource):
                 "project_id": project_name,
                 "pattern": "pattern { e: GOV -> DEP}",
                 "clusters": ["e.label; GOV.upos; DEP.upos"],
+                "user_ids": "[]",
             },
         )
         if reply["status"] != "OK":

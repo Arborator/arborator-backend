@@ -131,16 +131,10 @@ class GrewService:
 
     @staticmethod
     def search_pattern_in_graphs(project_id: str, pattern: str, user_ids = []):
-        if current_app.config["ENV"] == "prod":
-            data = {
-                "project_id": project_id,
-                "pattern": pattern,
-            }
-        else:
-            data = {
-                "project_id": project_id,
-                "pattern": pattern,
-                "user_ids": "[{}]".format(",".join(user_ids)),
-            }
+        data = {
+            "project_id": project_id,
+            "pattern": pattern,
+            "user_ids": "[{}]".format(",".join(user_ids)),
+        }
         reply = grew_request("searchPatternInGraphs", data=data)
         return reply
