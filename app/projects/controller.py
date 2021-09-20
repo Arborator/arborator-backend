@@ -1,4 +1,4 @@
-import json
+import json, re
 from typing import List
 
 import werkzeug
@@ -80,8 +80,12 @@ class ProjectResource(Resource):
         parser.add_argument(name="exerciseMode", type=bool)
         parser.add_argument(name="visibility", type=int)
         args = parser.parse_args()
+        
+        # Sanitize the project name to correspond to Grew folders requirements
+        projectName = re.sub('[^0-9a-zA-Z]+', '_', args.projectName)
+
         new_project_attrs: ProjectInterface = {
-            "project_name": args.projectName,
+            "project_name": projectName,
             "description": args.description,
             "show_all_trees": args.showAllTrees,
             "exercise_mode": args.exerciseMode,
