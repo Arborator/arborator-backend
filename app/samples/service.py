@@ -39,7 +39,6 @@ class SampleUploadService:
 
         convert_users_ids(path_file, users_ids_convertor)
         add_or_keep_timestamps(path_file)
-        # tmpfile = add_or_keep_timestamps(path_file)
 
         if sample_name not in existing_samples:
             GrewService.create_sample(project_name, sample_name)
@@ -343,42 +342,70 @@ class SampleEvaluationService:
 
 
 def convert_users_ids(path_file, users_ids_convertor):
-    # with open(path_file, "r", encoding="utf-8") as infile, open(path_file + "out", "w", encoding="utf-8") as outfile:
-    #     for line in infile.readlines():
-    #         if line.startswith("# user_id"):
-    #             old_user_id = line.strip("# user_id = ").rstrip("\n")
-    #             new_user_id = users_ids_convertor[old_user_id]
-    #             line = "# user_id = " + new_user_id + "\n"
+    with open(path_file, "r") as infile:
+        file_string = infile.read()
 
-    #         outfile.write(line)
-    # os.rename(path_file + "out", path_file)
-    trees = conllFile2trees(path_file)
+    conlls_string =  file_string.split("\n\n")
+    conlls_string_modified = []
+    for conll_string in conlls_string:
+        if conll_string == "":
+            continue
+        
+        conll_lines_modified = []
+        user_id = "default"
+        for line in conll_string.rstrip().split("\n"):
+            if "# user_id = " in line:
+                user_id = line.split("# user_id = ")[-1]
+            else:
+                conll_lines_modified.append(line)
 
-    for tree in trees:
-        tree_current_user_id = tree.sentencefeatures.get("user_id", "default")
-        tree.sentencefeatures["user_id"] = users_ids_convertor[tree_current_user_id]
+        user_id_converted = users_ids_convertor[user_id]
+        conll_lines_modified = ["# user_id = {}".format(user_id_converted)] + conll_lines_modified
 
-    trees2conllFile(trees, path_file)
+        conlls_string_modified.append("\n".join(conll_lines_modified))
+
+    new_file_string = "\n\n".join(conlls_string_modified)
+    new_file_string.rstrip()
+
+    new_file_string += "\n\n"
+
+    with open(path_file, "w") as outfile:
+        outfile.write(new_file_string)
     return
 
-    # if tree_current_user_id in users_ids_convertor.keys():
-    #     tree.sentencefeatures[]
 
 
 def add_or_keep_timestamps(path_file: str):
     """ adds a timestamp on the tree if there is not one """
-    # TODO : do this more efficiently
-    # path_tmp_file = os.path.join(Config.UPLOAD_FOLDER, "tmp.conllu")
-    trees = conllFile2trees(path_file)
-    for t in trees:
-        if not t.sentencefeatures.get("timestamp"):
-            now = datetime.now()
-            # int  millisecondes
-            timestamp = datetime.timestamp(now) * 1000
-            timestamp = round(timestamp)
-            t.sentencefeatures["timestamp"] = str(timestamp)
+    with open(path_file, "r") as infile:
+        file_string = infile.read()
 
-    trees2conllFile(trees, path_file)
-    return path_file
-    # trees2conllFile(trees, path_tmp_file)
-    # return path_tmp_file
+    conlls_string =  file_string.split("\n\n")
+    conlls_string_modified = []
+    for conll_string in conlls_string:
+        if conll_string == "":
+            continue
+        
+        conll_lines_modified = []
+        now = datetime.now()
+        # int  millisecondes
+        timestamp = datetime.timestamp(now) * 1000
+        for line in conll_string.rstrip().split("\n"):
+            if "# timestamp = " in line:
+                timestamp = line.split("# timestamp = ")[-1]
+            else:
+                conll_lines_modified.append(line)
+
+        conll_lines_modified = ["# timestamp = {}".format(timestamp)] + conll_lines_modified
+
+        conlls_string_modified.append("\n".join(conll_lines_modified))
+
+    new_file_string = "\n\n".join(conlls_string_modified)
+
+    new_file_string.rstrip()
+
+    new_file_string += "\n\n"
+    with open(path_file, "w") as outfile:
+        outfile.write(new_file_string)
+
+    return 
