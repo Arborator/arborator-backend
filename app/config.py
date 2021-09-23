@@ -4,7 +4,10 @@ from typing import List, Type
 from cryptography.hazmat.backends import default_backend
 
 basedir = os.path.abspath(os.path.dirname(__file__))
+UPLOAD_FOLDER = "app/tmp/data/"
 
+if not os.path.isdir(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
 
 class Config:
     CONFIG_NAME = "base"
@@ -15,7 +18,7 @@ class Config:
     SECRET_KEY = 'p9Bv<3Eid9%$i01jge87rt32trig87'
     basedir = os.path.dirname(os.path.abspath(__file__))
     FIRSTADMINKEY="azer"
-    UPLOAD_FOLDER = "app/tmp/data/"
+    UPLOAD_FOLDER = UPLOAD_FOLDER
     SESSION_COOKIE_HTTPONLY = False
     SESSION_COOKIE_SECURE = True
 
