@@ -1,3 +1,4 @@
+from typing import List
 from app.utils.conllup import ConllProcessor
 import io
 import json
@@ -339,18 +340,32 @@ class SampleEvaluationService:
 #############    Helpers Function    #############
 #
 #
+def read_conll_from_disk(path_file: str) -> str:
+    with open(path_file, "r") as infile:
+        conll_string = infile.read()
+    return conll_string
+
+
+def split_conll_string_to_conlls_list(conll_string) -> List(str):
+    conlls_strings = conll_string.split("\n\n")
+    return conlls_strings
+
+
+def write_conll_on_disk(path_file: str, conll_string: str) -> None:
+    conll_string.rstrip()
+    conll_string += "\n\n"
+    with open(path_file, "w") as outfile:
+        outfile.write(conll_string)
+    return
 
 
 def convert_users_ids(path_file, users_ids_convertor):
-    with open(path_file, "r") as infile:
-        file_string = infile.read()
-
-    conlls_string =  file_string.split("\n\n")
+    conll_string = read_conll_from_disk(path_file)
+    conlls_strings = split_conll_string_to_conlls_list(conll_string)
     conlls_string_modified = []
-    for conll_string in conlls_string:
+    for conll_string in conlls_strings:
         if conll_string == "":
             continue
-        
         conll_lines_modified = []
         user_id = "default"
         for line in conll_string.rstrip().split("\n"):
@@ -358,34 +373,23 @@ def convert_users_ids(path_file, users_ids_convertor):
                 user_id = line.split("# user_id = ")[-1]
             else:
                 conll_lines_modified.append(line)
-
         user_id_converted = users_ids_convertor[user_id]
         conll_lines_modified = ["# user_id = {}".format(user_id_converted)] + conll_lines_modified
-
         conlls_string_modified.append("\n".join(conll_lines_modified))
 
     new_file_string = "\n\n".join(conlls_string_modified)
-    new_file_string.rstrip()
-
-    new_file_string += "\n\n"
-
-    with open(path_file, "w") as outfile:
-        outfile.write(new_file_string)
+    write_conll_on_disk(new_file_string)
     return
-
 
 
 def add_or_keep_timestamps(path_file: str):
     """ adds a timestamp on the tree if there is not one """
-    with open(path_file, "r") as infile:
-        file_string = infile.read()
-
-    conlls_string =  file_string.split("\n\n")
+    conll_string = read_conll_from_disk(path_file)
+    conlls_strings = split_conll_string_to_conlls_list(conll_string)
     conlls_string_modified = []
-    for conll_string in conlls_string:
+    for conll_string in conlls_strings:
         if conll_string == "":
             continue
-        
         conll_lines_modified = []
         now = datetime.now()
         # int  millisecondes
@@ -395,17 +399,9 @@ def add_or_keep_timestamps(path_file: str):
                 timestamp = line.split("# timestamp = ")[-1]
             else:
                 conll_lines_modified.append(line)
-
         conll_lines_modified = ["# timestamp = {}".format(timestamp)] + conll_lines_modified
-
         conlls_string_modified.append("\n".join(conll_lines_modified))
 
     new_file_string = "\n\n".join(conlls_string_modified)
-
-    new_file_string.rstrip()
-
-    new_file_string += "\n\n"
-    with open(path_file, "w") as outfile:
-        outfile.write(new_file_string)
-
+    write_conll_on_disk(new_file_string)
     return 
