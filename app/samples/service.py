@@ -30,7 +30,7 @@ class SampleUploadService:
         reextensions=None,
         existing_samples=[],
         users_ids_convertor={},
-    ):
+    ):		
         if reextensions == None:
             reextensions = re.compile(r"\.(conll(u|\d+)?|txt|tsv|csv)$")
         filename = secure_filename(fileobject.filename)
@@ -346,7 +346,7 @@ def read_conll_from_disk(path_file: str) -> str:
     return conll_string
 
 
-def split_conll_string_to_conlls_list(conll_string) -> List(str):
+def split_conll_string_to_conlls_list(conll_string) -> List[str]:
     conlls_strings = conll_string.split("\n\n")
     return conlls_strings
 
@@ -378,7 +378,7 @@ def convert_users_ids(path_file, users_ids_convertor):
         conlls_string_modified.append("\n".join(conll_lines_modified))
 
     new_file_string = "\n\n".join(conlls_string_modified)
-    write_conll_on_disk(new_file_string)
+    write_conll_on_disk(path_file, new_file_string)
     return
 
 
@@ -403,5 +403,5 @@ def add_or_keep_timestamps(path_file: str):
         conlls_string_modified.append("\n".join(conll_lines_modified))
 
     new_file_string = "\n\n".join(conlls_string_modified)
-    write_conll_on_disk(new_file_string)
+    write_conll_on_disk(path_file, new_file_string)
     return 

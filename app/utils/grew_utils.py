@@ -28,13 +28,21 @@ def grew_request(fct_name, data={}, files={}):
         if "data" in response:
             message = str(response["data"])
         elif "message" in response:
-            message = str(response["message"])
+            message = str(response["message"]) # should already be a string
+            if 'Conllx_error' in message:
+                try:
+                    jsonmess = json.loads(message.replace('Conllx_error: ',''))
+                    messages = ['Problem in your Conll file “{filename}”'.format(filename=data['sample_id'])]
+                    messages+= [jsonmess['message']]
+                    # line numbers might not match because of additional metadata lines per tree:
+                    # messages+= ['line '+str(jsonmess['line'])] 
+                    # TODO: get the problematic line instead of the line number in the grew error response
+                    message = '<br>'.join(messages)
+                except:
+                    pass # just dump the message as raw. better than nothing...
         else:
             message = "unknown grew servor error"
-
-        response = {"message": message}
-        abort(400, response)
-
+        abort(400, message)
     return response
 
 
