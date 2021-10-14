@@ -5,6 +5,7 @@ from cryptography.hazmat.backends import default_backend
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 UPLOAD_FOLDER = "app/tmp/data/"
+MAX_TOKENS = 200000
 
 if not os.path.isdir(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
@@ -21,7 +22,7 @@ class Config:
     UPLOAD_FOLDER = UPLOAD_FOLDER
     SESSION_COOKIE_HTTPONLY = False
     SESSION_COOKIE_SECURE = True
-
+    MAX_TOKENS = MAX_TOKENS
 
 class DevelopmentConfig(Config):
     CONFIG_NAME = "dev"

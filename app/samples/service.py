@@ -9,7 +9,7 @@ import zipfile
 from datetime import datetime
 
 from app import db
-from app.config import Config
+from app.config import MAX_TOKENS, Config
 from app.user.model import User
 from app.utils.conll3 import conllFile2trees, trees2conllFile
 from app.utils.grew_utils import GrewService, grew_request
@@ -38,9 +38,10 @@ class SampleUploadService:
         path_file = os.path.join(Config.UPLOAD_FOLDER, filename)
         fileobject.save(path_file)
 
-        convert_users_ids(path_file, users_ids_convertor)
+        nrtoks = convert_users_ids(path_file, users_ids_convertor)
         add_or_keep_timestamps(path_file)
-
+        if nrtoks>Config.MAX_TOKENS:
+            abort(406, "Too big: Sample files on ArboratorGrew should have less than {max} tokens<br>Your file {fn} has {nrtoks} tokens. Split your file into smaller samples.".format(max=Config.MAX_TOKENS, fn=fileobject.filename, nrtoks=nrtoks))
         if sample_name not in existing_samples:
             GrewService.create_sample(project_name, sample_name)
 
@@ -360,6 +361,7 @@ def write_conll_on_disk(path_file: str, conll_string: str) -> None:
 
 
 def convert_users_ids(path_file, users_ids_convertor):
+    nrtoks = 0
     conll_string = read_conll_from_disk(path_file)
     conlls_strings = split_conll_string_to_conlls_list(conll_string)
     conlls_string_modified = []
@@ -373,13 +375,16 @@ def convert_users_ids(path_file, users_ids_convertor):
                 user_id = line.split("# user_id = ")[-1]
             else:
                 conll_lines_modified.append(line)
+                if line[0]!='#':
+                    nrtoks+=1
+
         user_id_converted = users_ids_convertor[user_id]
         conll_lines_modified = ["# user_id = {}".format(user_id_converted)] + conll_lines_modified
         conlls_string_modified.append("\n".join(conll_lines_modified))
 
     new_file_string = "\n\n".join(conlls_string_modified)
     write_conll_on_disk(path_file, new_file_string)
-    return
+    return nrtoks
 
 
 def add_or_keep_timestamps(path_file: str):

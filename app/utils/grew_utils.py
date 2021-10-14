@@ -30,13 +30,21 @@ def grew_request(fct_name, data={}, files={}):
         elif "message" in response:
             message = str(response["message"]) # should already be a string
             if 'Conllx_error' in message:
+                
+              
                 try:
                     jsonmess = json.loads(message.replace('Conllx_error: ',''))
                     messages = ['Problem in your Conll file “{filename}”'.format(filename=data['sample_id'])]
                     messages+= [jsonmess['message']]
-                    # line numbers might not match because of additional metadata lines per tree:
-                    # messages+= ['line '+str(jsonmess['line'])] 
-                    # TODO: get the problematic line instead of the line number in the grew error response
+                    # line numbers might not match because of additional metadata lines per tree.
+                    # so things get complicated:
+                    badline = None
+                    with open(files['conll_file'].name) as fp:
+                        for i, line in enumerate(fp):
+                            if i == jsonmess['line']-1:
+                                badline = line
+                                break
+                    messages+= ['This line looks fishy:<br><code>'+badline+'</code>'] 
                     message = '<br>'.join(messages)
                 except:
                     pass # just dump the message as raw. better than nothing...
