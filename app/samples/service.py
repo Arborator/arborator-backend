@@ -346,7 +346,7 @@ def read_conll_from_disk(path_file: str) -> str:
     return conll_string
 
 
-def split_conll_string_to_conlls_list(conll_string) -> List(str):
+def split_conll_string_to_conlls_list(conll_string) -> List[str]:
     conlls_strings = conll_string.split("\n\n")
     return conlls_strings
 
