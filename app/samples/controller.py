@@ -59,13 +59,12 @@ class SampleResource(Resource):
     def post(self, project_name: str):
         """Upload a sample to the server"""
         project = ProjectService.get_by_name(project_name)
-
-        files = request.files.to_dict(flat=False).get("files")
+        
         users_ids_convertor = {}
-
-        for user_id_mapping in json.loads(request.form.get("usersIdsConvertor", "{}")):
+        for user_id_mapping in json.loads(request.form.get("userIdsConvertor", "{}")):
             users_ids_convertor[user_id_mapping["old"]] = user_id_mapping["new"]
-
+            
+        files = request.files.to_dict(flat=False).get("files")
         if files:
             reextensions = re.compile(r"\.(conll(u|\d+)?|txt|tsv|csv)$")
             grew_samples = GrewService.get_samples(project_name)
