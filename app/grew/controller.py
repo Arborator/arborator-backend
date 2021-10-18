@@ -103,18 +103,7 @@ class SearchResource(Resource):
         for m in reply["data"]:
             if m["user_id"] == "":
                 abort(409)
-            conll = grew_request(
-                "getConll",
-                data={
-                    "project_id": project_name,
-                    "sample_id": m["sample_id"],
-                    "sent_id": m["sent_id"],
-                    "user_id": m["user_id"],
-                },
-            )
-            if conll["status"] != "OK":
-                abort(404)
-            conll = conll["data"]
+            conll = m["conll"]
             trees = formatTrees_new(m, trees, conll)
         return trees
 
@@ -143,19 +132,7 @@ class SearchInSampleResource(Resource):
                 continue
             if m["user_id"] == "":
                 abort(409)
-
-            conll = grew_request(
-                "getConll",
-                data={
-                    "sample_id": m["sample_id"],
-                    "project_id": project_name,
-                    "sent_id": m["sent_id"],
-                    "user_id": m["user_id"],
-                },
-            )
-            if conll["status"] != "OK":
-                abort(404)
-            conll = conll["data"]
+            conll = m["conll"]
             trees = formatTrees_new(m, trees, conll)
         return trees
 
