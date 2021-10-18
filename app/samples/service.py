@@ -52,7 +52,7 @@ class SampleUploadService:
 # TODO : refactor this
 class SampleExportService:
     @staticmethod
-    def servSampleTrees(samples):
+    def servSampleTrees(samples, timestamps=True, user_ids=True):
         """ get samples in form of json trees """
         trees = {}
         for sentId, users in samples.items():
@@ -60,6 +60,11 @@ class SampleExportService:
                 # tree = conll3.ConllProcessor.sentence_conll_to_sentence_json(conll)
                 if sentId not in trees:
                     trees[sentId] = {"conlls": {}}
+                
+                # Adapt user_id or timestamps lines depending on options
+                if not user_ids: conll = re.sub("# user_id = .+\n", '', conll)
+                if not timestamps: conll = re.sub("# timestamp = .+\n", '', conll)
+
                 trees[sentId]["conlls"][user_id] = conll
         return trees
 

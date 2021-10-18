@@ -178,13 +178,15 @@ class ExportSampleResource(Resource):
 
                 # {"sent_id_1":{"conlls":{"user_1":"conllstring"}}}
                 sample_tree = SampleExportService.servSampleTrees(reply.get("data", {}))
-                sample_content = SampleExportService.sampletree2contentfile(sample_tree)
+                sample_tree_nots_noui = SampleExportService.servSampleTrees(reply.get("data", {}), timestamps=False, user_ids=False)
+                print("sample_tree", sample_tree)
+                sample_content = SampleExportService.sampletree2contentfile(sample_tree_nots_noui)
                 for sent_id in sample_tree:
                     last = SampleExportService.get_last_user(
                         sample_tree[sent_id]["conlls"]
                     )
                     sample_content["last"] = sample_content.get("last", []) + [
-                        sample_tree[sent_id]["conlls"][last]
+                        sample_tree_nots_noui[sent_id]["conlls"][last]
                     ]
 
                 # gluing back the trees
