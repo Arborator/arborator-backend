@@ -13,6 +13,12 @@ Create a .flaskenv file with the following config
 FLASK_ENV=dev|prod|test
 ```
 
+## (Linux) Installing python-dev packages 
+If on Linux, you will probably need the version of python-dev package associated to your python version
+```
+sudo apt-get install python3.<X>-dev
+```
+with `<X>` equal to your python version
 
 ## Setting the python virtual environment
 
@@ -26,11 +32,18 @@ source venv/bin/activate
 Next, run
 
 ```
+pip install --upgrade pip wheel
 pip install -r requirements.txt
 ```
 
 to get the dependencies.
 
+## Handle keys + auth_config
+Ask an admin of Arborator the keys.zip and the auth_config.py, and locate them in (from root)
+```
+app/auth/auth_config.py
+keys/
+```
 
 ### Manage the database
 
