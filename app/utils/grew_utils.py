@@ -30,8 +30,6 @@ def grew_request(fct_name, data={}, files={}):
         elif "message" in response:
             message = str(response["message"]) # should already be a string
             if 'Conllx_error' in message:
-                
-              
                 try:
                     jsonmess = json.loads(message.replace('Conllx_error: ',''))
                     messages = ['Problem in your Conll file “{filename}”'.format(filename=data['sample_id'])]
@@ -50,7 +48,7 @@ def grew_request(fct_name, data={}, files={}):
                     pass # just dump the message as raw. better than nothing...
         else:
             message = "unknown grew servor error"
-        abort(400, message)
+        abort(418, message) # GREW ERROR = 418
     return response
 
 

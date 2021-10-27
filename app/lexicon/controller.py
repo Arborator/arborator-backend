@@ -237,7 +237,7 @@ class TryRulesResource(Resource):
 
         # TODO : to change
         if not request.json:
-            abort(400)
+            abort(400, " JSON is missing from the request")
 
         parser = reqparse.RequestParser()
         parser.add_argument(name="rules", type=str)
@@ -254,7 +254,6 @@ class TryRulesResource(Resource):
         print("liste des règles : ",list_rules)
         print("liste des ids : ", list_sampleIds)
         trees = {}
-        
         for sampleId in list_sampleIds:
             reply = grew_request(
                 "tryRules",
@@ -264,22 +263,10 @@ class TryRulesResource(Resource):
                     "rules":json.dumps(list_rules)
                 },
             )
-
-            if reply["status"] != "OK":
-                if "message" in reply:
-                    resp = {
-                        "status_code": 444,
-                        "status": reply["status"],
-                        "message": reply["message"],
-                    }
-                    status_code = 444
-                    return resp
-                abort(400)
-
+            
             for m in reply["data"]:
-                
                 if m["user_id"] == "":
-                    abort(409)
+                    abort(409, " user_id is empty, not valid")
                 print("___")
                 if sampleId not in m["sample_id"]: continue
                 trees[m["sample_id"]] = trees.get(m["sample_id"], {})
