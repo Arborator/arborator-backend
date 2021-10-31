@@ -1,4 +1,5 @@
-from sqlalchemy import BLOB, Boolean, Column, Integer, String, Boolean
+from sqlalchemy import BLOB, Boolean, Column, Integer, String, Boolean, DateTime
+from sqlalchemy.sql import func
 from sqlalchemy.ext.declarative import DeclarativeMeta
 from sqlalchemy_utils import ChoiceType
 
@@ -67,6 +68,23 @@ class ProjectAccess(db.Model):
         return "<projectAccess,project={},user={},access={} >".format(
             self.project_id, self.user_id, self.access_level
         )
+
+
+class Access(db.Model):
+    """
+        userid projectid writeaccess datetime
+        userid : contient une ref de l'id du tableau user
+        projectid : contient une de ref l'id du tableau projet
+        writeaccess contient une boolean (0 only read access, 1 write access)
+    """
+    __tablename__ = "access"
+    id = Column(Integer, primary_key=True)
+    user_id = Column(String(256), db.ForeignKey("users.id"))
+    project_id = Column(Integer, db.ForeignKey("projects.id"))
+    writeaccess = Column(Boolean)
+    # Those two columns should be used to detect unused projects : time_created will become the starting point from the migration date
+    time_created = Column(DateTime(timezone=True), server_default=func.now())
+    time_updated = Column(DateTime(timezone=True), onupdate=func.now())
 
 
 class DefaultUserTrees(db.Model, BaseM):

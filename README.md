@@ -55,6 +55,20 @@ python manage.py seed_db
 
 Type "Y" to accept the message (which is just there to prevent you accidentally deleting things -- it's just a local SQLite database)
 
+#### Database automatic migration
+
+An migration is set using [Flask-Migrate](https://flask-migrate.readthedocs.io/en/latest/). For the moment this migration should only be done on dev mode.
+
+To enable the migrations run the following commands after the git pull:
+```flask db init```
+The register it and enabling automatic migrations by setting a name (here it is "access migration")
+```flask db migrate -m "access migration."``` 
+Apply the migration
+```flask db upgrade```
+
+This migration adds a table `alembic_version` in the database in order to track migration history. 
+To display migration history please run `flask db history`.
+
 
 ### Handling superadmin
 For adding a superadmin, run the following command
@@ -135,3 +149,5 @@ sudo chown -Rf <admin>:<group> /var/www/flask_api_example/
 source : https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-uswgi-and-nginx-on-ubuntu-18-04
 
 Navigate to the posted URL in your terminal to be greeted with Swagger, where you can test out the API.
+
+
