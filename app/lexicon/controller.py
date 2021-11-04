@@ -20,8 +20,7 @@ from app.samples.service import (
 
 api = Namespace(
     "Lexicon", description="Endpoints for dealing with samples of project"
-)  # noqa
-
+)  
 
 @api.route("/<string:project_name>/lexicon")
 class LexiconResource(Resource):
@@ -40,6 +39,7 @@ class LexiconResource(Resource):
             "getLexicon",
             data={"project_id": project_name, "sample_ids": json.dumps(sample_names)},
         )
+        print("KK reply", reply)
         for i in reply["data"]:
             x = {"key": i["form"] + i["lemma"] + i["POS"] + i["features"] + i["gloss"]}
             i.update(x)
