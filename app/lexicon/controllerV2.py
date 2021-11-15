@@ -38,7 +38,7 @@ class LexiconResource(Resource):
                 pos=lexiconItemGrew["POS"],
                 gloss=lexiconItemGrew["gloss"],
                 features=TokenProcessor.conll_mapping_to_dict_mapping(
-                    lexiconItemGrew["features"]
+                    lexiconItemGrew.get("features", "_")
                 ),  # for now, grew send features as a string (conll format)
                 frequency=lexiconItemGrew["frequency"],
             )
