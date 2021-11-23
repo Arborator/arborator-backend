@@ -66,8 +66,8 @@ class TimedTokensServiceResource(Resource):
             project_name, sample_name
         )
         conll = KlangService.read_conll(path_conll)
-        conll_audio_tokens = KlangService.compute_conll_audio_tokens(conll)
-        return conll_audio_tokens
+        conll_audio_tokens, conll_speakers = KlangService.compute_conll_audio_tokens(conll)
+        return {'tokens':conll_audio_tokens, 'speakers':conll_speakers}#, 
 
 
 @api.route(

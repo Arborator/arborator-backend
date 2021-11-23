@@ -11,6 +11,11 @@ align_begin_and_end_regex = re.compile(
     r"^\d+\t(.+?)\t.*AlignBegin=(\d+).*AlignEnd=(\d+)"
 )
 
+# speaker = L1
+speaker_regex = re.compile(
+    r"speaker = (.*)"
+)
+
 
 class KlangService:
     @staticmethod
@@ -80,6 +85,7 @@ class KlangService:
 
     @staticmethod
     def get_projects():
+        os.makedirs(KlangService.get_path_data(), mode=0o777, exist_ok=True)
         return os.listdir(KlangService.get_path_data())
 
     @staticmethod
@@ -107,23 +113,30 @@ class KlangService:
     @staticmethod
     def sentence_to_audio_tokens(sentence: str):
         audio_tokens = []
+        speaker_info = 0 
         for line in sentence.split("\n"):
             if line:
-                if not line.startswith("#"):
+                if line.startswith("#"):
+                    m = speaker_regex.search(line)
+                    if m:
+                        speaker_info = m.group(1)
+                else:
                     m = align_begin_and_end_regex.search(line)
                     audio_token = [m.group(1), m.group(2), m.group(3)]
                     audio_tokens.append(audio_token)
 
-        return audio_tokens
+        return audio_tokens, speaker_info
 
     @staticmethod
     def compute_conll_audio_tokens(conll: str):
         sentences = KlangService.conll_to_sentences(conll)
         conll_audio_tokens = []
+        conll_speakers = []
         for sentence in sentences:
-            audio_tokens = KlangService.sentence_to_audio_tokens(sentence)
+            audio_tokens, speaker_info = KlangService.sentence_to_audio_tokens(sentence)
             conll_audio_tokens.append(audio_tokens)
-        return conll_audio_tokens
+            conll_speakers.append(speaker_info)
+        return conll_audio_tokens, conll_speakers
 
 
 class TranscriptionService:

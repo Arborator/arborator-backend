@@ -97,7 +97,7 @@ def test_conll_to_sentences():
 
 def test_sentence_to_audio_tokens():
     sentence = "# sent_id = test_sentence_1\n1\tdonc\tdonc\t_\t_\t_\t_\t_\t_\tAlignBegin=0|AlignEnd=454"
-    audio_tokens = KlangService.sentence_to_audio_tokens(sentence)
+    audio_tokens, speaker_info = KlangService.sentence_to_audio_tokens(sentence)
     assert audio_tokens[0][0] == "donc"
     assert audio_tokens[0][1] == "0"
     assert audio_tokens[0][2] == "454"
