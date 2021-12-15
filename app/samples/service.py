@@ -266,6 +266,8 @@ class SampleEvaluationService:
 
                 for token_id in teacher_tree.keys():
                     teacher_token = teacher_tree.get(token_id)
+                    if teacher_token == None:
+                        continue
                     basetree_token = basetree_tree.get(token_id, {})
                     for label in ["upos", "head", "deprel"]:
                         if (
@@ -273,7 +275,6 @@ class SampleEvaluationService:
                             and basetree_token.get(label) != teacher_token[label]
                         ):
                             total[label] += 1
-
             else:
                 continue
 
@@ -292,6 +293,9 @@ class SampleEvaluationService:
 
                     for token_id in user_tree.keys():
                         teacher_token = teacher_tree.get(token_id)
+                        if teacher_token == None:
+                            continue
+
                         user_token = user_tree.get(token_id)
                         basetree_token = basetree_tree.get(token_id, {})
 
