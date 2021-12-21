@@ -90,7 +90,10 @@ class KlangService:
 
     @staticmethod
     def get_project_samples(project_name: str):
-        return os.listdir(KlangService.get_path_project_samples(project_name))
+        """returns all klang project naturally sorted"""
+        files = os.listdir(KlangService.get_path_project_samples(project_name))
+        splitfiles = sorted([[ (int(c) if c.isdigit() else c) for c in re.split(r'(\d+)', f) ] for f in files])
+        return [''.join([str(c) for c in sf]) for sf in splitfiles]
 
     @staticmethod
     def read_conll(path_conll):
