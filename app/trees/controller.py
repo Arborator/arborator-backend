@@ -1,5 +1,5 @@
 from app.utils.conll3 import changeMetaField, conll2tree, emptyConllu
-from app.projects.service import ProjectAccessService, ProjectService
+from app.projects.service import LastAccessService, ProjectAccessService, ProjectService
 from app.samples.service import SampleExerciseLevelService
 from app.utils.grew_utils import grew_request, GrewService
 from flask import abort, current_app, jsonify
@@ -82,6 +82,8 @@ class SampleTreesResource(Resource):
                         sampleName,
                         current_user,
                     )
+
+        LastAccessService.update_last_access_per_user_and_project(current_user.id, projectName, "read")
         data = {"sample_trees": sample_trees, "exercise_level": exercise_level}
         return data
 
@@ -118,6 +120,7 @@ class SampleTreesResource(Resource):
         }
 
         grew_request("saveGraph", data=data)
+        LastAccessService.update_last_access_per_user_and_project(current_user.id, projectName, "write")
 
         return {"status": "success"}
 

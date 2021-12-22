@@ -1,6 +1,7 @@
-from sqlalchemy import BLOB, Boolean, Column, Integer, String, Boolean, DateTime
+from sqlalchemy import BLOB, Boolean, Column, Integer, String, Boolean, DateTime, Float
 from sqlalchemy.sql import func
 from sqlalchemy.ext.declarative import DeclarativeMeta
+from sqlalchemy.sql.schema import UniqueConstraint
 from sqlalchemy_utils import ChoiceType
 
 from app import db  # noqa
@@ -70,21 +71,27 @@ class ProjectAccess(db.Model):
         )
 
 
-class Access(db.Model):
+class LastAccess(db.Model):
     """
         userid projectid writeaccess datetime
         userid : contient une ref de l'id du tableau user
         projectid : contient une de ref l'id du tableau projet
-        writeaccess contient une boolean (0 only read access, 1 write access)
+        last_read : last read of the project from the user 
+        last_write : last write of the project from the user 
     """
-    __tablename__ = "access"
+    __tablename__ = "last_access"
     id = Column(Integer, primary_key=True)
-    user_id = Column(String(256), db.ForeignKey("users.id"))
-    project_id = Column(Integer, db.ForeignKey("projects.id"))
-    writeaccess = Column(Boolean)
-    # Those two columns should be used to detect unused projects : time_created will become the starting point from the migration date
-    time_created = Column(DateTime(timezone=True), server_default=func.now())
-    time_updated = Column(DateTime(timezone=True), onupdate=func.now())
+    user_id = Column(String(256), db.ForeignKey("users.id")) # unique
+    project_id = Column(Integer, db.ForeignKey("projects.id")) # unique
+    last_read = Column(Float, nullable=True )
+    last_write = Column(Float, nullable=True)
+
+    __table_args__ = (UniqueConstraint('user_id', 'project_id', name='user_project_unique_constraint'),
+                     )
+
+    # # Those two columns should be used to detect unused projects : time_created will become the starting point from the migration date
+    # time_created = Column(DateTime(timezone=True), server_default=func.now()) # what is this created concept ?
+    # time_updated = Column(DateTime(timezone=True), onupdate=func.now())
 
 
 class DefaultUserTrees(db.Model, BaseM):

@@ -1,13 +1,17 @@
-from typing import Dict, List
+from datetime import datetime
+from typing import Dict, List, NewType, Union
 import json
 import base64
+
+from sqlalchemy.sql.sqltypes import Date, DateTime
 
 from app import db
 from flask import abort, current_app
 from flask_login import current_user
 
+from ..user.model import User
 from .interface import ProjectExtendedInterface, ProjectInterface
-from .model import Project, ProjectAccess, ProjectFeature, ProjectMetaFeature, DefaultUserTrees
+from .model import Project, ProjectAccess, ProjectFeature, ProjectMetaFeature, DefaultUserTrees, LastAccess
 from ..samples.model import SampleRole
 
 
@@ -252,3 +256,109 @@ class ProjectMetaFeatureService:
             db.session.delete(feature)
             db.session.commit()
         return project_id
+
+
+class LastAccessService:
+    @staticmethod
+    def get_last_access_time_per_project(project_name, access_type="any"):
+        """return the last access for a project
+        project_id: string, id of the project
+        access_type: "write" , "read", "any"
+        """
+        if access_type not in ["any", "read", "write"]:
+            raise f"ERROR by the coder in LastAccessService, access_type not in 'any' 'read' 'write'"
+        last_accesss: List[LastAccess] = LastAccess.join(Project).query.filter(Project.project_name == project_name).all()
+        
+        last_read = 0
+        last_write = 0
+        for last_access in last_accesss:
+            if last_access.last_read or 0 > last_read:
+                last_read = last_access.last_read
+            if last_access.last_write or 0 > last_write:
+                last_write = last_access.last_write
+        
+        if access_type == "any":
+            return max(last_read, last_write)
+        elif access_type == "write":
+            return last_write
+        elif access_type == "read":
+            return last_read
+
+
+    @staticmethod
+    def get_last_access_time_per_user(username, access_type="any"):
+        if access_type not in ["any", "read", "write"]:
+            raise f"ERROR by the coder in LastAccessService, access_type not in 'any' 'read' 'write'"
+
+        last_accesss: List[LastAccess] = LastAccess.join(User).query.filter(User.username == username).all()
+
+        last_read = 0
+        last_write = 0
+        for last_access in last_accesss:
+            if last_access.last_read or 0 > last_read:
+                last_read = last_access.last_read
+            if last_access.last_write or 0 > last_write:
+                last_write = last_access.last_write
+        
+        if access_type == "any":
+            return max(last_read, last_write)
+        elif access_type == "write":
+            return last_write
+        elif access_type == "read":
+            return last_read
+
+    @staticmethod
+    def get_last_access_time_per_user_and_project(username, project_name, access_type="any"):
+        if access_type not in ["any", "read", "write"]:
+            raise f"ERROR by the coder in LastAccessService, access_type not in 'any' 'read' 'write'"
+
+        last_accesss: LastAccess = LastAccess.join(User).query.filter(User.username == username).join(Project).query.filter(Project.project_name == project_name).first()
+        # TODO : is the datetime in the database a integer ? Or a special datetime object ? Be careful for the comparaison
+        last_read = 0
+        last_write = 0
+
+
+        if last_accesss:
+            last_read = last_accesss.last_read
+            last_write = last_accesss.last_write
+
+        if access_type == "any":
+            return max(last_read, last_write)
+        elif access_type == "write":
+            return last_write
+        elif access_type == "read":
+            return last_read
+        
+
+    @staticmethod
+    def update_last_access_per_user_and_project(user_id, project_name, access_type):
+        if access_type not in ["read", "write"]:
+            raise f"ERROR by the coder in LastAccessService, access_type not in 'read' 'write'"
+
+        project: Project = Project.query.filter(Project.project_name == project_name).first()
+        if not user_id and not project:
+            print("user or project missing")
+            return None
+
+        last_accesss: LastAccess = LastAccess.query.filter(LastAccess.user_id == user_id).filter(LastAccess.project_id == project.id).first()
+        
+        time_now_ts = datetime.now().timestamp()
+
+        if not last_accesss:
+            new_data = {
+                "project_id": project.id,
+                "user_id": user_id,
+                "last_write": None if (access_type == "read") else time_now_ts,
+                "last_read": None if (access_type == "write") else time_now_ts,
+            }
+            new_last_access = LastAccess(**new_data)
+            db.session.add(new_last_access)
+            db.session.commit()
+
+        else:
+            if access_type == "read":
+                last_accesss.last_read = time_now_ts
+            else:
+                last_accesss.last_write = time_now_ts
+            db.session.commit()
+            

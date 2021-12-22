@@ -1,5 +1,6 @@
 import json, re
 from typing import List
+from sqlalchemy.sql.functions import user
 
 import werkzeug
 from app.utils.grew_utils import GrewService
@@ -12,6 +13,7 @@ from .interface import ProjectExtendedInterface, ProjectInterface
 from .model import Project, ProjectAccess
 from .schema import ProjectExtendedSchema, ProjectSchema, ProjectSchemaCamel
 from .service import (
+    LastAccessService,
     ProjectAccessService,
     ProjectFeatureService,
     ProjectMetaFeatureService,
@@ -96,6 +98,8 @@ class ProjectResource(Resource):
         GrewService.create_project(new_project_attrs["project_name"])
 
         new_project = ProjectService.create(new_project_attrs)
+        LastAccessService.update_last_access_per_user_and_project(creator_id, projectName, "write")
+
         ProjectAccessService.create(
             {
                 "user_id": creator_id,
@@ -103,6 +107,7 @@ class ProjectResource(Resource):
                 "access_level": 2,
             }
         )
+
         default_features = ["FORM", "UPOS", "LEMMA", "MISC.Gloss"]
         default_metafeatures = ["text_en"]
 
@@ -134,7 +139,6 @@ class ProjectIdResource(Resource):
     def put(self, projectName: str):
         """Modify a single project (by it's name)"""
         changes: ProjectInterface = request.parsed_obj
-        print("KK changes", changes)
         project = ProjectService.get_by_name(projectName)
 
         return ProjectService.update(project, changes)
@@ -277,6 +281,33 @@ class ProjectImageResource(Resource):
         content = args["files"].read()
         ProjectService.change_image(projectName, content)
         return ProjectService.get_by_name(projectName)
+
+
+@api.route("/last_access")
+class LastAccessController(Resource):
+    @responds()
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument(name="projectName", type=str)
+        parser.add_argument(name="username", type=str)
+        parser.add_argument(name="accessType", type=str)
+        args = parser.parse_args()
+
+        project_name = args.projectName
+        username = args.username
+        access_type = args.accessType or "any"
+        
+        if project_name == None and username == None:
+            abort(400) # TODO : FIXME please : more logging or info returned to the FE (frontend)
+        
+        if project_name and username:
+            return LastAccessService.get_last_access_time_per_user_and_project(username, project_name, access_type)
+
+        if project_name:
+            return LastAccessService.get_last_access_time_per_project(project_name, access_type)
+        if username:
+            return LastAccessService.get_last_access_time_per_user(username, access_type)
+
 
 
 # @api.route('/<string:projectName>/settings_info')
