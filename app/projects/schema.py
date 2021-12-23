@@ -43,6 +43,8 @@ class ProjectExtendedSchema(ProjectSchema):
     number_samples = fields.Integer()
     number_trees = fields.Integer()
     number_tokens = fields.Integer()
+    last_access = fields.Integer() # this contains the seconds since last access
+    last_write_access = fields.Integer() # this contains the seconds since last access
 
 
 # KK TODO : Ths should be unified with  `ProjectSchema`. However, at the moment,

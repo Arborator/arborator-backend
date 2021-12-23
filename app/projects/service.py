@@ -267,7 +267,8 @@ class LastAccessService:
         """
         if access_type not in ["any", "read", "write"]:
             raise f"ERROR by the coder in LastAccessService, access_type not in 'any' 'read' 'write'"
-        last_accesss: List[LastAccess] = LastAccess.join(Project).query.filter(Project.project_name == project_name).all()
+        q = LastAccess.query.join(Project)
+        last_accesss: List[LastAccess] = LastAccess.query.join(Project).filter(Project.project_name == project_name).all()
         
         last_read = 0
         last_write = 0

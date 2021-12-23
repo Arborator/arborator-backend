@@ -1,4 +1,4 @@
-import json, re
+import json, re, datetime
 from typing import List
 from sqlalchemy.sql.functions import user
 
@@ -32,8 +32,9 @@ class ProjectResource(Resource):
         """Get all projects"""
         projects_extended_list: List[ProjectExtendedInterface] = []
         projects: List[Project] = Project.query.all()
-
+        print(11111,projects)
         grew_projects = GrewService.get_projects()
+        print(22222, grew_projects)
         grewnames = set([project["name"] for project in grew_projects])
         dbnames = set([project.project_name for project in projects])
         common = grewnames & dbnames
@@ -43,7 +44,9 @@ class ProjectResource(Resource):
                 continue
             dumped_project["admins"] = ProjectAccessService.get_admins(project.id)
             dumped_project["guests"] = ProjectAccessService.get_guests(project.id)
-
+            dumped_project["last_access"] = LastAccessService.get_last_access_time_per_project(project.project_name)-datetime.datetime.now().timestamp()
+            dumped_project["last_write_access"] = LastAccessService.get_last_access_time_per_project(project.project_name, "write")-datetime.datetime.now().timestamp()
+            
             for p in grew_projects:
                 if p["name"] == project.project_name:
                     dumped_project["number_sentences"] = p["number_sentences"]
@@ -51,7 +54,7 @@ class ProjectResource(Resource):
                     dumped_project["number_tokens"] = p["number_tokens"]
                     dumped_project["number_trees"] = p["number_trees"]
             projects_extended_list.append(dumped_project)
-
+        print(333333,projects_extended_list)
         return projects_extended_list
 
     # @accepts(
