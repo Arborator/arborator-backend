@@ -82,8 +82,8 @@ class SampleTreesResource(Resource):
                         sampleName,
                         current_user,
                     )
-
-        LastAccessService.update_last_access_per_user_and_project(current_user.id, projectName, "read")
+        if current_user.is_authenticated:
+            LastAccessService.update_last_access_per_user_and_project(current_user.id, projectName, "read")
         data = {"sample_trees": sample_trees, "exercise_level": exercise_level}
         return data
 
