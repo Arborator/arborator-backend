@@ -81,7 +81,7 @@ def login(provider_name) -> Response:
     # If there is no LoginResult object, the login procedure is still pending.
     if result:
         if result.error:
-            print("Error: {}".format(result.error))
+            print("auth/views.py Error: {}".format(result.error))
             abort(500)
 
         if result.user:
@@ -128,7 +128,7 @@ def login(provider_name) -> Response:
             login_user(user, remember=True)
 
             session["logged_in"] = True  # TODO : can be removed ?????
-            print("============", user)
+            print("auth/views.py =======", user, type(user))
 
             # If there is no superadmin in DB, add admin privilege to this new user
             if not User.query.filter_by(super_admin=True).first():

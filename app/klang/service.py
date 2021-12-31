@@ -6,6 +6,7 @@ import json
 from app import klang_config
 
 from app.utils.conllmaker import newtranscription
+from app.user.service import UserService
 
 align_begin_and_end_regex = re.compile(
     r"^\d+\t(.+?)\t.*AlignBegin=(\d+).*AlignEnd=(\d+)"
@@ -44,7 +45,7 @@ class KlangService:
         else:
             project_config = {}
         return project_config
-    
+
     @staticmethod
     def update_project_config(project_name, project_config):
         path_project_config = KlangService.get_path_project_config(project_name)
@@ -57,6 +58,32 @@ class KlangService:
         admins = project_config["admins"]
         return admins
 
+    # new: for Klang project admin table
+    @staticmethod
+    def get_project_transcribers(project_name: str):
+        sample2transcribers = {}
+        transcriber2samples = {}
+        samples = KlangService.get_project_samples(project_name)
+        for sample in samples:
+            transcribers = [t['user'] for t in TranscriptionService.load_transcriptions(project_name, sample)]
+            for t in transcribers:
+                transcriber2samples[t] = transcriber2samples.get(t,[]) + [sample]
+            sample2transcribers[sample] = transcribers
+        users = {transcriber:UserService.get_by_username(transcriber) for transcriber in transcriber2samples}
+        transcribers = [
+            {
+            'name':transcriber, 
+            'id':users[transcriber].id, 
+            'auth provider':'Google' if int(users[transcriber].auth_provider)==3 else "GitHub", 
+            'first name':users[transcriber].first_name, 
+            'family name':users[transcriber].family_name, 
+            'last seen':str(users[transcriber].last_seen.date()), 
+            'Klang projects':', '.join(samples)
+            } 
+                for transcriber,samples in transcriber2samples.items()]
+        tableColumns = [{'name':k, 'label':k, 'field':k} for k in transcribers[0]]
+        return [sample2transcribers, transcribers, tableColumns]
+    
     @staticmethod
     def get_path_project_samples(project_name: str) -> str:
         path_project = KlangService.get_path_project(project_name)

@@ -34,6 +34,14 @@ class SamplesServiceResource(Resource):
         return KlangService.get_project_samples(project_name)
 
 
+@api.route("/projects/<string:project_name>/transcribers")
+class ProjectAdminsServiceResource(Resource):
+    "Klang admins (by project)"
+
+    def get(self, project_name):
+        "get all admins of a project"
+        return KlangService.get_project_transcribers(project_name)
+
 @api.route("/projects/<string:project_name>/admins")
 class ProjectAdminsServiceResource(Resource):
     "Klang admins (by project)"
