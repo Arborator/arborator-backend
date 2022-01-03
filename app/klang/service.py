@@ -81,7 +81,7 @@ class KlangService:
             'Klang projects':', '.join(samples)
             } 
                 for transcriber,samples in transcriber2samples.items()]
-        tableColumns = [{'name':k, 'label':k, 'field':k} for k in transcribers[0]]
+        tableColumns = [{'name':k, 'label':k, 'field':k} for k in (transcribers or [])]
         return [sample2transcribers, transcribers, tableColumns]
     
     @staticmethod
@@ -113,14 +113,22 @@ class KlangService:
     @staticmethod
     def get_projects():
         os.makedirs(KlangService.get_path_data(), mode=0o777, exist_ok=True)
-        return os.listdir(KlangService.get_path_data())
+        projects = [{
+            'name':name, 
+            'config':KlangService.get_project_config(name), 
+            'nrSamples':len(KlangService.get_project_samples(name))
+            } for name in os.listdir(KlangService.get_path_data()) ]
+        return projects
 
     @staticmethod
     def get_project_samples(project_name: str):
         """returns all klang project naturally sorted"""
         files = os.listdir(KlangService.get_path_project_samples(project_name))
         splitfiles = sorted([[ (int(c) if c.isdigit() else c) for c in re.split(r'(\d+)', f) ] for f in files])
-        return [''.join([str(c) for c in sf]) for sf in splitfiles]
+        orderedFiles = [''.join([str(c) for c in sf]) for sf in splitfiles]
+        if set(orderedFiles)!=set(files):
+            return files # my natural order failed (_008_ in the names)
+        return sorted(orderedFiles)
 
     @staticmethod
     def read_conll(path_conll):

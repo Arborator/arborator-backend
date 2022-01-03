@@ -31,11 +31,15 @@ class SamplesServiceResource(Resource):
 
     def get(self, project_name):
         "get all samples of a project"
+        project_config = KlangService.get_project_config(project_name)
+        if 'private' in project_config and project_config['private']==True:
+            if current_user.id not in KlangService.get_project_admins(project_name):
+                abort(403, "User doesn't have the right privileges")
         return KlangService.get_project_samples(project_name)
 
 
 @api.route("/projects/<string:project_name>/transcribers")
-class ProjectAdminsServiceResource(Resource):
+class ProjectTranscribersServiceResource(Resource):
     "Klang admins (by project)"
 
     def get(self, project_name):
@@ -62,6 +66,16 @@ class ProjectAdminsServiceResource(Resource):
         KlangService.update_project_config(project_name, project_config)
 
         return admins
+
+@api.route("/projects/<string:project_name>/accessible")
+class ProjectAccessibleServiceResource(Resource):
+    "access to private projects only for admins"
+    def get(self, project_name):
+        project_config = KlangService.get_project_config(project_name)
+        if 'private' in project_config and project_config['private']==True:
+            return current_user.id in KlangService.get_project_admins(project_name)
+        else:
+            return True
 
 
 @api.route("/projects/<string:project_name>/samples/<string:sample_name>/timed-tokens")
