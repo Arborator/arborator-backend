@@ -9,6 +9,8 @@ z_sandbox/
 app/*.sqlite
 app/klang/data_dev/
 app/klang/data_prod/
+app/klang/data_test/Paris*
+app/klang/data_test/o*
 
 app/public/tmp/*
 

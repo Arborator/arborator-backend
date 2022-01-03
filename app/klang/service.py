@@ -126,9 +126,10 @@ class KlangService:
         files = os.listdir(KlangService.get_path_project_samples(project_name))
         splitfiles = sorted([[ (int(c) if c.isdigit() else c) for c in re.split(r'(\d+)', f) ] for f in files])
         orderedFiles = [''.join([str(c) for c in sf]) for sf in splitfiles]
+        
         if set(orderedFiles)!=set(files):
-            return files # my natural order failed (_008_ in the names)
-        return sorted(orderedFiles)
+            return sorted(files) # my natural order failed (_008_ in the names) TODO: make the sort keep the original filename
+        return orderedFiles
 
     @staticmethod
     def read_conll(path_conll):
