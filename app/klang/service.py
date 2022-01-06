@@ -80,7 +80,7 @@ class KlangService:
             'last seen':str(users[transcriber].last_seen.date()), 
             'Klang projects':', '.join(samples)
             } 
-                for transcriber, samples in transcriber2samples.items() if transcriber in users]
+                for transcriber, samples in transcriber2samples.items() if ((transcriber in users) and  (users[transcriber] != None))]
         tableColumns = [{'name':k, 'label':k, 'field':k} for k in (transcribers or [])]
         return [sample2transcribers, transcribers, tableColumns]
     
