@@ -69,18 +69,18 @@ class KlangService:
             for t in transcribers:
                 transcriber2samples[t] = transcriber2samples.get(t,[]) + [sample]
             sample2transcribers[sample] = transcribers
-        users = {transcriber:UserService.get_by_username(transcriber) for transcriber in transcriber2samples}
+        users = {transcriber: UserService.get_by_username(transcriber) for transcriber in transcriber2samples}
         transcribers = [
             {
-            'name':transcriber, 
-            'id':users[transcriber].id, 
+            'name': transcriber, 
+            'id': users[transcriber].id, 
             'auth provider':'Google' if int(users[transcriber].auth_provider)==3 else "GitHub", 
             'first name':users[transcriber].first_name, 
             'family name':users[transcriber].family_name, 
             'last seen':str(users[transcriber].last_seen.date()), 
             'Klang projects':', '.join(samples)
             } 
-                for transcriber,samples in transcriber2samples.items()]
+                for transcriber, samples in transcriber2samples.items() if transcriber in users]
         tableColumns = [{'name':k, 'label':k, 'field':k} for k in (transcribers or [])]
         return [sample2transcribers, transcribers, tableColumns]
     
