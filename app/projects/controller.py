@@ -201,7 +201,7 @@ class ProjectConllSchemaResource(Resource):
         """Get a single project conll schema"""
         project = ProjectService.get_by_name(projectName)
         ProjectService.check_if_project_exist(project)
-        conll_schema = GrewService.get_project_config(projectName)
+        conll_schema = GrewService.get_conll_schema(projectName)
         return conll_schema
 
     def put(self, projectName: str):
@@ -229,7 +229,7 @@ class ProjectAccessResource(Resource):
 @api.route("/<string:projectName>/access/many")
 class ProjectAccessManyResource(Resource):
     def put(self, projectName: str):
-        """Get a single project users access"""
+        """Modify a single project users access"""
         parser = reqparse.RequestParser()
         parser.add_argument(name="user_ids", type=str, action="append")
         parser.add_argument(name="targetrole", type=str)

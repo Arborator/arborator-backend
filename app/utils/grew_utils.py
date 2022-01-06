@@ -82,7 +82,7 @@ class GrewService:
         return
 
     @staticmethod
-    def get_project_config(project_id: str):
+    def get_conll_schema(project_id: str):
         grew_reply = grew_request("getProjectConfig", data={"project_id": project_id})
         # TODO : redo this. It's ugly
         data = grew_reply.get("data")
@@ -105,8 +105,7 @@ class GrewService:
                 "config": dumped_project_config,
             },
         )
-        return
-
+        return {"success": True}
 
     @staticmethod
     def get_samples(project_id : str):

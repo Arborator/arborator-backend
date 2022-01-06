@@ -80,7 +80,6 @@ class SampleResource(Resource):
                 )
             # samples = {"samples": Sam.get_samples(project_name)}
             return {"status": "OK"}
-            return samples
 
 
 @api.route("/<string:project_name>/samples/<string:sample_name>/role")
