@@ -160,8 +160,7 @@ class GrewService:
         data = {
             "project_id": project_id,
             "pattern": pattern,
-            "user_ids": user_ids
+            "user_ids": json.dumps(user_ids)
         }
-        print("KK data", data)
         reply = grew_request("searchPatternInGraphs", data=data)
         return reply
