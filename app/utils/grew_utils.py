@@ -147,7 +147,7 @@ class GrewService:
         data = {
             "project_id": project_id,
             "pattern": pattern,
-            "user_ids": "[{}]".format(",".join(user_ids)),
+            "user_ids": "all",
         }
         reply = grew_request("searchPatternInGraphs", data=data)
         return reply
