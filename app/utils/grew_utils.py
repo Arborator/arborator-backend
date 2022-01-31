@@ -143,11 +143,25 @@ class GrewService:
         )
 
     @staticmethod
-    def search_pattern_in_graphs(project_id: str, pattern: str, user_ids = []):
+    def search_pattern_in_graphs(project_id: str, pattern: str, passed_user_ids = [], view_only_one = False):
+        passed_user_ids = ["kirianguiller", "kiriangui"]
+        if view_only_one == False:
+            if passed_user_ids == []:
+                user_ids = "all"
+            else:
+                user_ids = {"multi": passed_user_ids}
+        
+        else:
+            if passed_user_ids == []:
+                user_ids = {"one": "__last__"}
+            else:
+                user_ids = {"one": passed_user_ids}
+
         data = {
             "project_id": project_id,
             "pattern": pattern,
-            "user_ids": "all",
+            "user_ids": user_ids
         }
+        print("KK data", data)
         reply = grew_request("searchPatternInGraphs", data=data)
         return reply
