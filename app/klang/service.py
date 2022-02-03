@@ -152,7 +152,7 @@ class KlangService:
     @staticmethod
     def sentence_to_audio_tokens(sentence: str):
         audio_tokens = []
-        speaker_info = 0 
+        speaker_info = "L0" 
         for line in sentence.split("\n"):
             if line:
                 if line.startswith("#"):
