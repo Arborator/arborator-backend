@@ -30,46 +30,30 @@ class ProjectResource(Resource):
     @responds(schema=ProjectExtendedSchema(many=True), api=api)
     def get(self) -> List[ProjectExtendedInterface]:
         """Get all projects"""
-        
-        tstart = time.perf_counter()
 
         projects_extended_list: List[ProjectExtendedInterface] = []
         push_project = projects_extended_list.append
 
         projects: List[Project] = Project.query.all()
-        tlocaldb = time.perf_counter()
-        print(f"local db queried in {tlocaldb - tstart:0.4f} seconds")
-
-        tgrewdb = time.perf_counter()
+        
         grew_projects = GrewService.get_projects()
-        print(f"grew db queried in {time.perf_counter() - tgrewdb:0.4f} seconds")
 
-        tgrewnames = time.perf_counter()
         grewnames = set([project["name"] for project in grew_projects])
         dbnames = set([project.project_name for project in projects])
         common = grewnames & dbnames
-        print(f"grew parsed in {time.perf_counter() - tgrewnames:0.4f} seconds")
 
-
-        titerprojects = time.perf_counter()
-        print('!%s projects !' % (len(projects)))
         for project in projects:
             dumped_project: ProjectExtendedInterface = ProjectSchema().dump(project)
             if dumped_project["project_name"] not in common: continue
 
-            tpaccserv = time.perf_counter()
             dumped_project["admins"], dumped_project["guests"] = ProjectAccessService.get_all(project.id)
-            print(f"project access services in {time.perf_counter() - tpaccserv:0.4f} seconds")
 
-            tacclast = time.perf_counter()
             # better version: less complexity + database calls / 2
             last_access, last_write_access = LastAccessService.get_last_access_time_per_project(project.project_name, "any+write")
             now = datetime.datetime.now().timestamp()
             dumped_project["last_access"] = last_access - now
             dumped_project["last_write_access"] = last_write_access - now
-            print(f"projects access lasts in {time.perf_counter() - tacclast:0.4f} seconds")
 
-            tloopgrewprojects = time.perf_counter()
             for p in grew_projects:
                 if p["name"] == project.project_name:
                     dumped_project["number_sentences"] = p["number_sentences"]
@@ -77,11 +61,7 @@ class ProjectResource(Resource):
                     dumped_project["number_tokens"] = p["number_tokens"]
                     dumped_project["number_trees"] = p["number_trees"]
             push_project(dumped_project)
-            print(f"grew project loop in {time.perf_counter() - tloopgrewprojects:0.4f} seconds")
-
-        print(f"iter projects in {time.perf_counter() - titerprojects:0.4f} seconds")
-        print(f"GET function in {time.perf_counter() - tstart:0.4f} seconds")
-
+            
         return projects_extended_list
 
     # @accepts(
