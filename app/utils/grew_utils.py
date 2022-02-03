@@ -48,7 +48,7 @@ def grew_request(fct_name, data={}, files={}):
                     pass # just dump the message as raw. better than nothing...
         else:
             message = "unknown grew servor error"
-        abort(418, message) # GREW ERROR = 418
+        abort(406, message) # GREW ERROR = 418
     return response
 
 
