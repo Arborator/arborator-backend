@@ -175,6 +175,17 @@ class ProjectAccessService:
             return []
 
     @staticmethod
+    def get_all(project_id: str) -> List[str]:
+        '''optimized version dedicated to homepage. reduces the database calls but makes the code less pretty'''
+        project_access_list: List[ProjectAccess] = ProjectAccess.query.filter_by(project_id=project_id).all()
+        admins, guests = [], []
+        push_admin, push_guest = admins.append, guests.append
+        for project_access in project_access_list: 
+            if project_access.access_level==1: push_guest(project_access.user_id)
+            elif project_access.access_level==2: push_admin(project_access.user_id)
+        return admins, guests
+
+    @staticmethod
     def get_users_role(project_id: str) -> Dict[str, List[str]]:
         admins = ProjectAccessService.get_admins(project_id)
         guests = ProjectAccessService.get_guests(project_id)
@@ -263,26 +274,36 @@ class LastAccessService:
     def get_last_access_time_per_project(project_name, access_type="any"):
         """return the last access for a project
         project_id: string, id of the project
-        access_type: "write" , "read", "any"
+        access_type: "write" ,"read", "any", "any+write"
         """
-        if access_type not in ["any", "read", "write"]:
+        if access_type not in ["any", "read", "write", "any+write"]:
             raise f"ERROR by the coder in LastAccessService, access_type not in 'any' 'read' 'write'"
-        q = LastAccess.query.join(Project)
+        
         last_accesss: List[LastAccess] = LastAccess.query.join(Project).filter(Project.project_name == project_name).all()
         
-        last_read = 0
-        last_write = 0
-        for last_access in last_accesss:
-            if last_access.last_read or 0 > last_read:
-                last_read = last_access.last_read
-            if last_access.last_write or 0 > last_write:
-                last_write = last_access.last_write
-        
-        if access_type == "any":
+        # less "pretty" version but with decreased complexity
+        if access_type == "any+write":
+            last_read, last_write = 0, 0
+            for last_access in last_accesss:
+                if last_access.last_read or 0 > last_read:   last_read = last_access.last_read
+                if last_access.last_write or 0 > last_write: last_write = last_access.last_write
+            return max(last_read, last_write), last_write
+        elif access_type == "any":
+            last_read = 0
+            last_write = 0
+            for last_access in last_accesss:
+                if last_access.last_read or 0 > last_read:   last_read = last_access.last_read
+                if last_access.last_write or 0 > last_write: last_write = last_access.last_write
             return max(last_read, last_write)
         elif access_type == "write":
+            last_write = 0
+            for last_access in last_accesss:
+                if last_access.last_write or 0 > last_write: last_write = last_access.last_write
             return last_write
         elif access_type == "read":
+            last_read = 0
+            for last_access in last_accesss:
+                if last_access.last_read or 0 > last_read:   last_read = last_access.last_read
             return last_read
 
 

@@ -1,4 +1,4 @@
-import json, re, datetime
+import json, re, datetime, time
 from typing import List
 from sqlalchemy.sql.functions import user
 
@@ -30,28 +30,38 @@ class ProjectResource(Resource):
     @responds(schema=ProjectExtendedSchema(many=True), api=api)
     def get(self) -> List[ProjectExtendedInterface]:
         """Get all projects"""
+
         projects_extended_list: List[ProjectExtendedInterface] = []
+        push_project = projects_extended_list.append
+
         projects: List[Project] = Project.query.all()
+        
         grew_projects = GrewService.get_projects()
+
         grewnames = set([project["name"] for project in grew_projects])
         dbnames = set([project.project_name for project in projects])
         common = grewnames & dbnames
+
         for project in projects:
             dumped_project: ProjectExtendedInterface = ProjectSchema().dump(project)
-            if dumped_project["project_name"] not in common:
-                continue
-            dumped_project["admins"] = ProjectAccessService.get_admins(project.id)
-            dumped_project["guests"] = ProjectAccessService.get_guests(project.id)
-            dumped_project["last_access"] = LastAccessService.get_last_access_time_per_project(project.project_name)-datetime.datetime.now().timestamp()
-            dumped_project["last_write_access"] = LastAccessService.get_last_access_time_per_project(project.project_name, "write")-datetime.datetime.now().timestamp()
-            
+            if dumped_project["project_name"] not in common: continue
+
+            dumped_project["admins"], dumped_project["guests"] = ProjectAccessService.get_all(project.id)
+
+            # better version: less complexity + database calls / 2
+            last_access, last_write_access = LastAccessService.get_last_access_time_per_project(project.project_name, "any+write")
+            now = datetime.datetime.now().timestamp()
+            dumped_project["last_access"] = last_access - now
+            dumped_project["last_write_access"] = last_write_access - now
+
             for p in grew_projects:
                 if p["name"] == project.project_name:
                     dumped_project["number_sentences"] = p["number_sentences"]
                     dumped_project["number_samples"] = p["number_samples"]
                     dumped_project["number_tokens"] = p["number_tokens"]
                     dumped_project["number_trees"] = p["number_trees"]
-            projects_extended_list.append(dumped_project)
+            push_project(dumped_project)
+            
         return projects_extended_list
 
     # @accepts(
