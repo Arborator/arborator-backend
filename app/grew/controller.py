@@ -137,7 +137,7 @@ class SearchInSampleResource(Resource):
         return trees
 
 
-@api.route("/<string:project_name>/relation-table")
+@api.route("/<string:project_name>/old-relation-table")
 class RelationTableResource(Resource):
     def post(self, project_name):
         # TODO : if user is not currently authenticated, they should only have access to recent mode
@@ -212,6 +212,48 @@ class RelationTableResource(Resource):
                         pass
                     data[e][gov][dep] = trees
         return data
+
+
+@api.route("/<string:project_name>/relation-table")
+class RelationTableResource(Resource):
+    def post(self, project_name):
+        # TODO : if user is not currently authenticated, they should only have access to recent mode
+        # @login_required
+        parser = reqparse.RequestParser()
+        parser.add_argument(name="sample_id")
+        parser.add_argument(name="tableType")
+        args = parser.parse_args()
+        sample_id = args.get("sample_id")
+        if sample_id:
+            sample_ids = [sample_id]
+        else:
+            sample_ids = []
+        tableType = args.get("tableType")
+        if tableType=='user':
+            user_ids = { "one": [current_user.username] }
+        elif tableType=='user_recent':
+            user_ids = { "one": [current_user.username, "__last__"] }
+        elif tableType=='recent':
+            user_ids = { "one": ["__last__"] }
+        elif tableType=='all':
+            user_ids = "all"
+
+        if not sample_ids:
+            abort(400)
+        reply = grew_request(
+            "relationTables",
+            data={
+                "project_id": project_name,
+                "sample_ids": json.dumps(sample_ids),
+                "user_ids": json.dumps(user_ids),
+            },
+        )
+        if reply["status"] != "OK":
+            abort(400)
+        data = reply.get("data")    
+        return data
+
+
 
 
 from app.utils.conll3 import conll2tree
