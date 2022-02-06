@@ -91,7 +91,7 @@ class ProductionConfig(Config):
     PKEY = default_backend().load_pem_private_key(cert_bytes, None)
 
     ## WARNING : specify the DIST folder, not the quasar source code in prod
-    PROJECT_IMAGE_FOLDER = "../../../arborator-frontend/public/images/projectimages"
+    PROJECT_IMAGE_FOLDER = "/home/arborator/arborator-frontend/dist/spa/images/projectimages"#"../../../arborator-frontend/public/images/projectimages"
     UPLOAD_IMAGE_EXTENSIONS = ['.jpg', '.png', '.gif', '.jpeg']
 
 

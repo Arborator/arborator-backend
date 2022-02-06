@@ -17,6 +17,10 @@ manager = Manager(app)
 app.app_context().push()
 manager.add_command("blob2img", SeedCommand)
 
+#### to run as follows
+# ########################  python3 manage_imgblob2path.py blob_to_path ####################
+
+
 
 @manager.command
 def run():
@@ -30,7 +34,10 @@ def blob_to_path():
     import subprocess
 
     subprocess.run(['bash', 'migrate_img.sh', 'app/arborator_dev.sqlite', '../arborator-frontend/public/images/projectimages']) #, 'y'])
-    print('Retrieved all Blob based images from database to app/public/projectimages as png files named according to the project name')
+    # subprocess.run(['bash', 'migrate_img.sh', 'app/20220206.arborator_prod.sqlite', 'images_prod_temp'])#'../arborator-frontend/public/images/projectimages']) #, 'y'])
+    # prod
+    subprocess.run(['bash', 'migrate_img.sh', 'app/arborator_dev.sqlite', '/home/arborator/arborator-frontend/dist/spa/images/projectimages']) #, 'y'])
+    # print('Retrieved all Blob based images from database to app/public/projectimages as png files named according to the project name')
 
     from app.projects.service import ProjectService
     from app.projects.model import Project
