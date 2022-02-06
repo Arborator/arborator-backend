@@ -1,10 +1,11 @@
-import json, re, datetime, time
+import json, re, datetime, time, os
 from typing import List
 from sqlalchemy.sql.functions import user
 
 import werkzeug
+from werkzeug.utils import secure_filename
 from app.utils.grew_utils import GrewService
-from flask import abort, current_app, request
+from flask import abort, current_app, request, session
 from flask_accepts.decorators.decorators import accepts, responds
 from flask_login import current_user
 from flask_restx import Namespace, Resource, reqparse
@@ -21,7 +22,7 @@ from .service import (
 )
 
 api = Namespace("Project", description="Endpoints for dealing with projects")  # noqa
-
+# appconfig = current_app.config
 
 @api.route("/")
 class ProjectResource(Resource):
@@ -61,7 +62,7 @@ class ProjectResource(Resource):
                     dumped_project["number_tokens"] = p["number_tokens"]
                     dumped_project["number_trees"] = p["number_trees"]
             push_project(dumped_project)
-            
+
         return projects_extended_list
 
     # @accepts(
@@ -276,6 +277,23 @@ class ProjectAccessUserResource(Resource):
         return ProjectAccessService.get_users_role(project.id)
 
 
+# @api.route("/<string:projectName>/image")
+# class ProjectImageResource(Resource):
+#     @responds(schema=ProjectSchemaCamel)
+#     def post(self, projectName: str):
+#         parser = reqparse.RequestParser()
+#         parser.add_argument(
+#             "files", type=werkzeug.datastructures.FileStorage, location="files"
+#         )
+#         args = parser.parse_args()
+#         project = ProjectService.get_by_name(projectName)
+#         ProjectService.check_if_project_exist(project)
+
+#         content = args["files"].read()
+#         ProjectService.change_image(projectName, content)
+#         return ProjectService.get_by_name(projectName)
+
+
 @api.route("/<string:projectName>/image")
 class ProjectImageResource(Resource):
     @responds(schema=ProjectSchemaCamel)
@@ -287,9 +305,20 @@ class ProjectImageResource(Resource):
         args = parser.parse_args()
         project = ProjectService.get_by_name(projectName)
         ProjectService.check_if_project_exist(project)
-
+        
+        file_ext = os.path.splitext(args['files'].filename)[1]
+        if file_ext not in current_app.config['UPLOAD_IMAGE_EXTENSIONS']:
+            abort(400)
+        
+        filename = secure_filename(projectName+file_ext)
+        # uploaded_file.save(os.path.join(current_app.config['PROJECT_IMAGE_FOLDER'], filename))
         content = args["files"].read()
-        ProjectService.change_image(projectName, content)
+        with open(os.path.join(current_app.config['PROJECT_IMAGE_FOLDER'], filename), 'wb') as f:
+            f.write(content)
+        
+        filepath = 'images/projectimages/%s' % (filename)
+        ProjectService.change_image(projectName, filepath)
+
         return ProjectService.get_by_name(projectName)
 
 

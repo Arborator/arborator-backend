@@ -46,6 +46,9 @@ class DevelopmentConfig(Config):
     cert_bytes = open(fname, 'rb').read()
     PKEY = default_backend().load_pem_private_key(cert_bytes, None)
 
+    PROJECT_IMAGE_FOLDER = "/home/gael/Documents/arborator/arborator-frontend/public/images/projectimages" #"../../../arborator-frontend/public/images/projectimages"
+    UPLOAD_IMAGE_EXTENSIONS = ['.jpg', '.png', '.gif', '.jpeg']
+
 
 class TestingConfig(Config):
     CONFIG_NAME = "test"
@@ -60,6 +63,9 @@ class TestingConfig(Config):
     TESTING = True
     basedir = os.path.dirname(os.path.abspath(__file__))
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'arborator_test.sqlite')
+
+    PROJECT_IMAGE_FOLDER = "../../../arborator-frontend/public/images/projectimages"
+    UPLOAD_IMAGE_EXTENSIONS = ['.jpg', '.png', '.gif', '.jpeg']
 
 
 class ProductionConfig(Config):
@@ -83,6 +89,10 @@ class ProductionConfig(Config):
     # INSTALATION_ID = int(open('keys/arborator-grew-installationid.txt').read())
     cert_bytes = open(fname, 'rb').read()
     PKEY = default_backend().load_pem_private_key(cert_bytes, None)
+
+    ## WARNING : specify the DIST folder, not the quasar source code in prod
+    PROJECT_IMAGE_FOLDER = "../../../arborator-frontend/public/images/projectimages"
+    UPLOAD_IMAGE_EXTENSIONS = ['.jpg', '.png', '.gif', '.jpeg']
 
 
 EXPORT_CONFIGS: List[Type[Config]] = [

@@ -49,11 +49,12 @@ class ProjectService:
 
     @staticmethod
     def change_image(project_name, value):
-        """ set a project image (blob base64) and return the new project  """
+        """ set a project image (path) and return the new project  """
         project = Project.query.filter(
             Project.project_name == project_name).first()
         project.image = value
         db.session.commit()
+        print('change_image done')
         return project
 
     @staticmethod
