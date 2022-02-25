@@ -139,13 +139,13 @@ class TryPackageResource(Resource):
         reply = GrewService.try_package(project_name, package, samples_ids, passed_user_ids=[], view_only_one=False)
         if reply["status"] != "OK":
             abort(400)
-        # trees = {}
-        # for m in reply["data"]:
-        #     if m["user_id"] == "":
-        #         abort(409)
-        #     conll = m["conll"]
-        #     trees = formatTrees_new(m, trees, conll)
-        return reply["data"]
+        trees = {}
+        for m in reply["data"]:
+            if m["user_id"] == "":
+                abort(409)
+            conll = m["conll"]
+            trees = formatTrees_new(m, trees, conll, hasMatch=False)
+        return trees
 
 
 
@@ -290,17 +290,20 @@ def get_last_user(tree):
     return last
 
 
-def formatTrees_new(m, trees, conll):
+def formatTrees_new(m, trees, conll, hasMatch: bool = True):
     """
     m is the query result from grew
     list of trees
     returns something like {'WAZL_15_MC-Abi_MG': {'WAZL_15_MC-Abi_MG__8': {'sentence': '# kalapotedly < you see < # ehn ...', 'conlls': {'kimgerdes': ...
     """
-    nodes = m["nodes"]
-    edges = m["edges"]
+
     user_id = m["user_id"]
     sample_name = m["sample_id"]
     sent_id = m["sent_id"]
+
+    if hasMatch == True:
+        nodes = m["nodes"]
+        edges = m["edges"]
 
     if sample_name not in trees:
         trees[sample_name] = {}
@@ -311,14 +314,23 @@ def formatTrees_new(m, trees, conll):
         trees[sample_name][sent_id] = {
             "sentence": s,
             "conlls": {user_id: conll},
-            "matches": {user_id: [{"edges": edges, "nodes": nodes}]},
+           
         }
+        if hasMatch == True:
+            trees[sample_name][sent_id]["matches"] = {user_id: [{"edges": edges, "nodes": nodes}]}
+        else:
+            trees[sample_name][sent_id]["matches"] = None
+    
+    
     else:
         trees[sample_name][sent_id]["conlls"][user_id] = conll
         # /!\ there can be more than a single match for a same sample, sentence, user so it has to be a list
-        # example [{'edges': {}, 'nodes': {'GOV': '1', 'DEP': '2'}}, {'edges': {}, 'nodes': {'GOV': '5', 'DEP': '7'}}]
-        trees[sample_name][sent_id]["matches"][user_id] = trees[sample_name][sent_id][
+        if hasMatch == True:
+            trees[sample_name][sent_id]["matches"][user_id] = trees[sample_name][sent_id][
             "matches"
         ].get(user_id, []) + [{"edges": edges, "nodes": nodes}]
-    # print(trees[sample_name][sent_id]["matches"])
+        else:
+            trees[sample_name][sent_id]["matches"][user_id] = None
+
+        
     return trees
