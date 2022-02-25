@@ -163,3 +163,27 @@ class GrewService:
         }
         reply = grew_request("searchPatternInGraphs", data=data)
         return reply
+
+
+    @staticmethod
+    def try_package(project_id: str, package: str, sample_ids: List[str] ,passed_user_ids = [], view_only_one = False):
+        if view_only_one == False:
+            if passed_user_ids == []:
+                user_ids = "all"
+            else:
+                user_ids = {"multi": passed_user_ids}
+        
+        else:
+            if passed_user_ids == []:
+                user_ids = {"one": "__last__"}
+            else:
+                user_ids = {"one": passed_user_ids}
+
+        data = {
+            "project_id": project_id,
+            "package": package,
+            "user_ids": json.dumps(user_ids),
+            "sample_ids": json.dumps(sample_ids)
+        }
+        reply = grew_request("tryPackage", data=data)
+        return reply

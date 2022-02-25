@@ -16,19 +16,6 @@ api = Namespace(
 @api.route("/<string:project_name>/try-rule")
 class TryRuleResource(Resource):
     def post(self, project_name: str):
-        """
-        expects json with grew pattern such as
-        {
-        "pattern":"pattern { N [upos=\"NUM\"] }"
-        "rewriteCommands":"commands { N [upos=\"NUM\"] }"
-        }
-        important: simple and double quotes must be escaped!
-
-
-        returns:
-        {'sample_id': 'P_WAZP_07_Imonirhuas.Life.Story_PRO', 'sent_id': 'P_WAZP_07_Imonirhuas-Life-Story_PRO_97', 'nodes': {'N': 'Bernard_11'}, 'edges': {}}, {'sample_id':...
-        """
-
         project = ProjectService.get_by_name(project_name)
         ProjectService.check_if_project_exist(project)
 
@@ -89,7 +76,6 @@ class TryRuleResource(Resource):
 @api.route("/<string:project_name>/search")
 class SearchResource(Resource):
     "Search"
-
     def post(self, project_name: str):
         parser = reqparse.RequestParser()
         parser.add_argument(name="pattern", type=str)
@@ -135,6 +121,32 @@ class SearchInSampleResource(Resource):
             conll = m["conll"]
             trees = formatTrees_new(m, trees, conll)
         return trees
+
+@api.route("/<string:project_name>/try-package")
+class TryPackageResource(Resource):
+    "Search"
+    def post(self, project_name: str):
+        parser = reqparse.RequestParser()
+        parser.add_argument(name="package", type=str)
+        parser.add_argument(name="sampleId", type=str)
+        args = parser.parse_args()
+        
+        package = args.get("package")
+        sample_id = args.get("sampleId", None)
+        samples_ids = []
+        if (sample_id):
+            samples_ids = [sample_id]
+        reply = GrewService.try_package(project_name, package, samples_ids, passed_user_ids=[], view_only_one=False)
+        if reply["status"] != "OK":
+            abort(400)
+        # trees = {}
+        # for m in reply["data"]:
+        #     if m["user_id"] == "":
+        #         abort(409)
+        #     conll = m["conll"]
+        #     trees = formatTrees_new(m, trees, conll)
+        return reply["data"]
+
 
 
 @api.route("/<string:project_name>/old-relation-table")
