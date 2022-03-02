@@ -144,7 +144,7 @@ class TryPackageResource(Resource):
             if m["user_id"] == "":
                 abort(409)
             conll = m["conll"]
-            trees = formatTrees_new(m, trees, conll, hasMatch=False)
+            trees = formatTrees_new(m, trees, conll, isPackage=True)
         return trees
 
 
@@ -290,7 +290,7 @@ def get_last_user(tree):
     return last
 
 
-def formatTrees_new(m, trees, conll, hasMatch: bool = True):
+def formatTrees_new(m, trees, conll, isPackage: bool = False):
     """
     m is the query result from grew
     list of trees
@@ -301,9 +301,12 @@ def formatTrees_new(m, trees, conll, hasMatch: bool = True):
     sample_name = m["sample_id"]
     sent_id = m["sent_id"]
 
-    if hasMatch == True:
+    if isPackage == False:
         nodes = m["nodes"]
         edges = m["edges"]
+    else:
+        modified_nodes = m["modified_nodes"]
+        modified_edges = m["modified_edges"]
 
     if sample_name not in trees:
         trees[sample_name] = {}
@@ -316,21 +319,21 @@ def formatTrees_new(m, trees, conll, hasMatch: bool = True):
             "conlls": {user_id: conll},
            
         }
-        if hasMatch == True:
+        if isPackage == False:
             trees[sample_name][sent_id]["matches"] = {user_id: [{"edges": edges, "nodes": nodes}]}
         else:
-            trees[sample_name][sent_id]["matches"] = None
+            trees[sample_name][sent_id]["packages"] = {user_id: {"modified_edges": modified_edges, "modified_nodes": modified_nodes}}
     
     
     else:
         trees[sample_name][sent_id]["conlls"][user_id] = conll
         # /!\ there can be more than a single match for a same sample, sentence, user so it has to be a list
-        if hasMatch == True:
+        if isPackage == False:
             trees[sample_name][sent_id]["matches"][user_id] = trees[sample_name][sent_id][
-            "matches"
-        ].get(user_id, []) + [{"edges": edges, "nodes": nodes}]
+                "matches"
+            ].get(user_id, []) + [{"edges": edges, "nodes": nodes}]
         else:
-            trees[sample_name][sent_id]["matches"][user_id] = None
+            trees[sample_name][sent_id]["packages"][user_id] = {"modified_edges": modified_edges, "modified_nodes": modified_nodes}
 
         
     return trees
