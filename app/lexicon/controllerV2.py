@@ -17,7 +17,6 @@ api = Namespace(
 class LexiconResource(Resource):
     "Lexicon"
 
-    @responds(schema=LexiconItemSchema(many=True), api=api)
     def post(self, project_name: str):
         parser = reqparse.RequestParser()
         parser.add_argument(name="samplenames", type=str, action="append")
@@ -34,18 +33,4 @@ class LexiconResource(Resource):
             "getLexicon",
             data={"project_id": project_name, "sample_ids": json.dumps(sample_names), "user_ids": json.dumps(user_ids), "features": json.dumps(features),},
         )
-        lexiconItems: List[LexiconItemInterface] = []
-        for lexiconItemGrew in reply["data"]:
-            lexiconItem = LexiconItemInterface(
-                form=lexiconItemGrew["feats"]["form"],
-                lemma=lexiconItemGrew["feats"]["lemma"],
-                pos=lexiconItemGrew["feats"]["upos"],
-                gloss=lexiconItemGrew["feats"]["Gloss"],
-                features=TokenProcessor.conll_mapping_to_dict_mapping(
-                    lexiconItemGrew.get("features", "_")
-                ),  # for now, grew send features as a string (conll format)
-                frequency=lexiconItemGrew["freq"],
-            )
-            lexiconItems.append(lexiconItem)
-
-        return lexiconItems
+        return reply["data"]
