@@ -21,7 +21,7 @@ sudo apt-get install python3.<X>-dev
 with `<X>` equal to your python version
 
 ## Setting the python virtual environment
-
+WORKS WITH PYTHON 3.8   (DOESNT WORK FOR 3.10 !!!)
 Preferably, first create a virtualenv and activate it, perhaps with the following command:
 
 ```
