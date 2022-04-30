@@ -26,21 +26,25 @@ class LexiconResource(Resource):
 
         sample_names = args.get("samplenames")
         treeSelection = args.get("treeSelection")
+        
+        user_ids = "all"
+        features = ["form", "lemma", "upos", "Gloss"]
+        
         reply = grew_request(
             "getLexicon",
-            data={"project_id": project_name, "sample_ids": json.dumps(sample_names)},
+            data={"project_id": project_name, "sample_ids": json.dumps(sample_names), "user_ids": json.dumps(user_ids), "features": json.dumps(features),},
         )
         lexiconItems: List[LexiconItemInterface] = []
         for lexiconItemGrew in reply["data"]:
             lexiconItem = LexiconItemInterface(
-                form=lexiconItemGrew["form"],
-                lemma=lexiconItemGrew["lemma"],
-                pos=lexiconItemGrew["POS"],
-                gloss=lexiconItemGrew["gloss"],
+                form=lexiconItemGrew["feats"]["form"],
+                lemma=lexiconItemGrew["feats"]["lemma"],
+                pos=lexiconItemGrew["feats"]["upos"],
+                gloss=lexiconItemGrew["feats"]["Gloss"],
                 features=TokenProcessor.conll_mapping_to_dict_mapping(
                     lexiconItemGrew.get("features", "_")
                 ),  # for now, grew send features as a string (conll format)
-                frequency=lexiconItemGrew["frequency"],
+                frequency=lexiconItemGrew["freq"],
             )
             lexiconItems.append(lexiconItem)
 
