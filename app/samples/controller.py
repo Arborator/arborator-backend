@@ -1,11 +1,15 @@
+from importlib.resources import path
 import json
+import os
 import re
+import requests 
 
 from flask.helpers import send_file
 
 from app.projects.service import ProjectService
 from app.user.service import UserService
 from app.utils.grew_utils import GrewService, grew_request
+from app.config import Config
 from flask import Response, abort, current_app, request, send_from_directory
 from flask_restx import Namespace, Resource, reqparse
 # from openpyxl import Workbook
@@ -17,6 +21,7 @@ from .service import (
     SampleExportService,
     SampleRoleService,
     SampleUploadService,
+    add_or_keep_timestamps,
 )
 
 api = Namespace(
@@ -210,7 +215,6 @@ class ExportSampleResource(Resource):
         )
         return resp
 
-
 @api.route("/<string:project_name>/samples/<string:sample_name>")
 class DeleteSampleResource(Resource):
     def delete(self, project_name: str, sample_name: str):
@@ -222,3 +226,141 @@ class DeleteSampleResource(Resource):
         return {
             "status": "OK",
         }
+
+@api.route("/<string:project_name>/samples/parsing", methods = ['GET','POST'])
+class BootParsing(Resource):
+    def get(self, project_name: str):
+        #test connexion
+        reply = requests.get("https://arboratorgrew.lisn.upsaclay.fr/testBoot/")
+        # reply = requests.get("http://127.0.0.1:8001/testBoot/")
+        return reply.text
+
+    def __getSamples(self, sample_names, project_name):
+        samplecontentfiles = list()
+        
+        for sample_name in sample_names:
+            reply = grew_request(
+                "getConll",
+                data={"project_id": project_name, "sample_id": sample_name},
+            )
+            if reply.get("status") == "OK":
+                # {"sent_id_1":{"conlls":{"user_1":"conllstring"}}}
+                sample_tree = SampleExportService.servSampleTrees(reply.get("data", {}))
+                sample_tree_nots_noui = SampleExportService.servSampleTrees(reply.get("data", {}), timestamps=False, user_ids=False)
+                # print("sample_tree", sample_tree)
+                sample_content = SampleExportService.sampletree2contentfile(sample_tree_nots_noui)
+                for sent_id in sample_tree:
+                    last = SampleExportService.get_last_user(
+                        sample_tree[sent_id]["conlls"]
+                    )
+                    # print(sample_content.keys())
+                    sample_content["last"] = sample_content.get("last", []) + [
+                        sample_tree_nots_noui[sent_id]["conlls"][last]
+                    ]
+                    # print(sample_content["last"])
+
+                # gluing back the trees
+                sample_content["last"] = "\n".join(sample_content["last"])
+                samplecontentfiles.append(sample_content["last"])
+
+            else:
+                print("Error: {}".format(reply.get("message")))
+
+        return  [sample_names, samplecontentfiles]
+
+    def post(self,  project_name: str):
+        param = request.get_json(force=True)
+
+        #extract names of samples for training set and to parse  
+        train_samp_names = param["samples"]
+        grew_samples = GrewService.get_samples(project_name)
+        all_sample_names = [grew_sample["name"] for grew_sample in grew_samples]
+        default_to_parse = [ n for n in all_sample_names if n not in train_samp_names ] if param['to_parse'] == 'ALL' else param['to_parse']
+
+        #get samples 
+        train_name, train_set = self.__getSamples(train_samp_names, project_name)
+        #TODO assure parse_name not empty
+        parse_name, to_parse = self.__getSamples(default_to_parse, project_name) 
+
+        # return to_parse
+
+        data = {
+            'project_name': project_name,
+            'train_name': train_name, 
+            'train_set': train_set, 
+            'parse_name': parse_name,
+            'to_parse': to_parse, 
+            'dev': param['dev'],
+            'epochs': param['epoch'],
+            'parser': param['parser']
+            }
+
+        # reply = requests.post("http://127.0.0.1:8001/conllus/", json = data)
+        reply = requests.post("https://arboratorgrew.lisn.upsaclay.fr/conllus/", json = data)
+        print("########!!",reply.text)
+
+        # return reply.text
+        try:
+            reply = json.loads(reply.text)
+            
+        except:
+            return {"datasetStatus" : "Failed"}
+
+        return reply
+
+
+@api.route("/<string:project_name>/samples/parsing/results", methods = ['POST'])
+class BootParsedResults(Resource):
+    def post(self,  project_name: str):
+        param = request.get_json(force=True)
+        print(param)
+        
+        reply = requests.post("https://arboratorgrew.lisn.upsaclay.fr/getResults/", data = {'projectFdname': param['fdname'], 'parser': param['parser']})
+        # return reply.text
+        try:
+            reply = json.loads(reply.text)
+        except:
+            print(reply.text)
+            return {"status" : "Error"}
+
+        status = reply.get('status', None)
+        if 'error' in status.lower():
+            return {"status" : "Error"}
+
+        if status.lower() == 'fin':
+            filenames = reply.get('parsed_names', '')
+            files = reply.get('parsed_files', '')
+            print(len(filenames))
+
+            for fname, fcontent in zip(filenames, files):
+                path_file = os.path.join(Config.UPLOAD_FOLDER, fname)
+                print('upload parsed\n', path_file)
+                with open(path_file,'w') as f:
+                    f.write(fcontent)
+
+                add_or_keep_timestamps(path_file)
+
+                with open(path_file, "rb") as file_to_save:
+                    print('save files')
+                    GrewService.save_sample(project_name, fname, file_to_save)
+        return reply
+
+
+@api.route("/<string:project_name>/samples/parsing/removeFolder", methods = ['POST', 'PUT'])
+class BootParsedRemoveFolder(Resource):
+    def post(self,  project_name: str):
+        param = request.get_json(force=True)
+        print(param)
+        
+        reply = requests.post("https://arboratorgrew.lisn.upsaclay.fr/removeFolder/", data = {'projectFdname': param['fdname']})
+        # return reply.text
+        try:
+            reply = json.loads(reply.text)
+        except:
+            print(reply.text)
+            return {"status" : "Error"}
+        return reply
+
+
+
+
