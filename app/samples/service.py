@@ -36,6 +36,7 @@ class SampleUploadService:
         filename = secure_filename(fileobject.filename)
         sample_name = reextensions.sub("", filename)
         path_file = os.path.join(Config.UPLOAD_FOLDER, filename)
+        print('upload\n', path_file)
         fileobject.save(path_file)
 
         nrtoks = convert_users_ids(path_file, users_ids_convertor)
