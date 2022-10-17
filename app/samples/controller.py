@@ -193,7 +193,7 @@ class ExportSampleResource(Resource):
                     ]
 
                 # gluing back the trees
-                sample_content["last"] = "\n".join(sample_content["last"])
+                sample_content["last"] = "\n".join(sample_content.get("last", ""))
                 samplecontentfiles.append(sample_content)
 
             else:
