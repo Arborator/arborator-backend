@@ -8,7 +8,7 @@ from flask.helpers import send_file
 
 from app.projects.service import ProjectService
 from app.user.service import UserService
-from app.utils.grew_utils import GrewService, grew_request
+from app.utils.grew_utils import GrewService, SampleExportService, grew_request
 from app.config import Config
 from flask import Response, abort, current_app, request, send_from_directory
 from flask_restx import Namespace, Resource, reqparse
@@ -18,7 +18,6 @@ from .model import SampleRole
 from .service import (
     SampleEvaluationService,
     SampleExerciseLevelService,
-    SampleExportService,
     SampleRoleService,
     SampleUploadService,
     add_or_keep_timestamps,
@@ -169,38 +168,11 @@ class ExportSampleResource(Resource):
         data = request.get_json(force=True)
         sample_names = data["samples"]
         print("requested zip", sample_names, project_name)
-        sampletrees = list()
-        samplecontentfiles = list()
-
-        for sample_name in sample_names:
-            reply = grew_request(
-                "getConll",
-                data={"project_id": project_name, "sample_id": sample_name},
-            )
-            if reply.get("status") == "OK":
-
-                # {"sent_id_1":{"conlls":{"user_1":"conllstring"}}}
-                sample_tree = SampleExportService.servSampleTrees(reply.get("data", {}))
-                sample_tree_nots_noui = SampleExportService.servSampleTrees(reply.get("data", {}), timestamps=False, user_ids=False)
-                print("sample_tree", sample_tree)
-                sample_content = SampleExportService.sampletree2contentfile(sample_tree_nots_noui)
-                for sent_id in sample_tree:
-                    last = SampleExportService.get_last_user(
-                        sample_tree[sent_id]["conlls"]
-                    )
-                    sample_content["last"] = sample_content.get("last", []) + [
-                        sample_tree_nots_noui[sent_id]["conlls"][last]
-                    ]
-
-                # gluing back the trees
-                sample_content["last"] = "\n".join(sample_content.get("last", ""))
-                samplecontentfiles.append(sample_content)
-
-            else:
-                print("Error: {}".format(reply.get("message")))
+        
+        sample_names, samples_with_string_content = GrewService.get_samples_with_string_contents(project_name, sample_names)
 
         memory_file = SampleExportService.contentfiles2zip(
-            sample_names, samplecontentfiles
+            sample_names, samples_with_string_content
         )
 
         resp = Response(
@@ -235,39 +207,6 @@ class BootParsing(Resource):
         # reply = requests.get("http://127.0.0.1:8001/testBoot/")
         return reply.text
 
-    def __getSamples(self, sample_names, project_name):
-        samplecontentfiles = list()
-        
-        for sample_name in sample_names:
-            reply = grew_request(
-                "getConll",
-                data={"project_id": project_name, "sample_id": sample_name},
-            )
-            if reply.get("status") == "OK":
-                # {"sent_id_1":{"conlls":{"user_1":"conllstring"}}}
-                sample_tree = SampleExportService.servSampleTrees(reply.get("data", {}))
-                sample_tree_nots_noui = SampleExportService.servSampleTrees(reply.get("data", {}), timestamps=False, user_ids=False)
-                # print("sample_tree", sample_tree)
-                sample_content = SampleExportService.sampletree2contentfile(sample_tree_nots_noui)
-                for sent_id in sample_tree:
-                    last = SampleExportService.get_last_user(
-                        sample_tree[sent_id]["conlls"]
-                    )
-                    # print(sample_content.keys())
-                    sample_content["last"] = sample_content.get("last", []) + [
-                        sample_tree_nots_noui[sent_id]["conlls"][last]
-                    ]
-                    # print(sample_content["last"])
-
-                # gluing back the trees
-                sample_content["last"] = "\n".join(sample_content["last"])
-                samplecontentfiles.append(sample_content["last"])
-
-            else:
-                print("Error: {}".format(reply.get("message")))
-
-        return  [sample_names, samplecontentfiles]
-
     def post(self,  project_name: str):
         param = request.get_json(force=True)
 
@@ -278,12 +217,11 @@ class BootParsing(Resource):
         default_to_parse = [ n for n in all_sample_names if n not in train_samp_names ] if param['to_parse'] == 'ALL' else param['to_parse']
 
         #get samples 
-        train_name, train_set = self.__getSamples(train_samp_names, project_name)
+        train_name, train_set = GrewService.get_samples_with_string_contents(project_name, train_samp_names)
         #TODO assure parse_name not empty
-        parse_name, to_parse = self.__getSamples(default_to_parse, project_name) 
+        parse_name, to_parse = GrewService.get_samples_with_string_contents(project_name, default_to_parse) 
 
         # return to_parse
-
         data = {
             'project_name': project_name,
             'train_name': train_name, 
