@@ -218,8 +218,10 @@ class BootParsing(Resource):
 
         #get samples 
         train_name, train_set = GrewService.get_samples_with_string_contents(project_name, train_samp_names)
+        train_set = [sample.get("last", "") for sample in train_set]
         #TODO assure parse_name not empty
         parse_name, to_parse = GrewService.get_samples_with_string_contents(project_name, default_to_parse) 
+        train_set = [sample.get("last", "") for sample in to_parse]
 
         # return to_parse
         data = {
