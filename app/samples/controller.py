@@ -209,12 +209,12 @@ class BootParsing(Resource):
 
     def post(self,  project_name: str):
         param = request.get_json(force=True)
-
         #extract names of samples for training set and to parse  
         train_samp_names = param["samples"]
         grew_samples = GrewService.get_samples(project_name)
         all_sample_names = [grew_sample["name"] for grew_sample in grew_samples]
-        default_to_parse = [ n for n in all_sample_names if n not in train_samp_names ] if param['to_parse'] == 'ALL' else param['to_parse']
+
+        default_to_parse = all_sample_names if param['to_parse'] == 'ALL' else param['to_parse']
 
         #get samples 
         train_name, train_set = GrewService.get_samples_with_string_contents(project_name, train_samp_names)
