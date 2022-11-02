@@ -84,6 +84,7 @@ class ProjectResource(Resource):
             creator_id = current_user.id
         except:
             abort(401, "User not loged in")
+
         # KK : Make a unified schema for all http request related to project
         # ... and have the schema taking JS camelcase typing
         parser = reqparse.RequestParser()
@@ -149,13 +150,18 @@ class ProjectIdResource(Resource):
     @accepts(schema=ProjectSchemaCamel, api=api)
     def put(self, projectName: str):
         """Modify a single project (by it's name)"""
-        changes: ProjectInterface = request.parsed_obj
         project = ProjectService.get_by_name(projectName)
+        
+        ProjectAccessService.check_admin_access(project.id)
 
+        changes: ProjectInterface = request.parsed_obj
         return ProjectService.update(project, changes)
 
     def delete(self, projectName: str):
         """Delete a single project (by it's name)"""
+        project = ProjectService.get_by_name(projectName)
+        ProjectAccessService.check_admin_access(project.id)
+
         project_name = ProjectService.delete_by_name(projectName)
         if project_name:
             GrewService.delete_project(project_name)

@@ -6,7 +6,7 @@ import requests
 
 from flask.helpers import send_file
 
-from app.projects.service import ProjectService
+from app.projects.service import ProjectAccessService, ProjectService
 from app.user.service import UserService
 from app.utils.grew_utils import GrewService, SampleExportService, grew_request
 from app.config import Config
@@ -63,7 +63,8 @@ class SampleResource(Resource):
     def post(self, project_name: str):
         """Upload a sample to the server"""
         project = ProjectService.get_by_name(project_name)
-        
+        ProjectAccessService.check_admin_access(project.id)
+
         users_ids_convertor = {}
         for user_id_mapping in json.loads(request.form.get("userIdsConvertor", "{}")):
             users_ids_convertor[user_id_mapping["old"]] = user_id_mapping["new"]
@@ -96,12 +97,13 @@ class SampleRoleResource(Resource):
         args = parser.parse_args()
 
         project = ProjectService.get_by_name(project_name)
-        project_id = project.id
+        ProjectAccessService.check_admin_access(project.id)
+
         role = SampleRole.LABEL_TO_ROLES[args.targetrole]
         user_id = UserService.get_by_username(args.username).id
         if args.action == "add":
             new_attrs = {
-                "project_id": project_id,
+                "project_id": project.id,
                 "sample_name": sample_name,
                 "user_id": user_id,
                 "role": role,
@@ -125,14 +127,14 @@ class SampleExerciseLevelResource(Resource):
         args = parser.parse_args()
 
         project = ProjectService.get_by_name(project_name)
-        project_id = project.id
+        ProjectAccessService.check_admin_access(project.id)
 
         sample_exercise_level = SampleExerciseLevelService.get_by_sample_name(
             project_id, sample_name
         )
 
         new_attrs = {
-            "project_id": project_id,
+            "project_id": project.id,
             "sample_name": sample_name,
             "exercise_level": args.exerciseLevel,
         }
@@ -191,6 +193,7 @@ class ExportSampleResource(Resource):
 class DeleteSampleResource(Resource):
     def delete(self, project_name: str, sample_name: str):
         project = ProjectService.get_by_name(project_name)
+        ProjectAccessService.check_admin_access(project.id)
         ProjectService.check_if_project_exist(project)
         GrewService.delete_sample(project_name, sample_name)
         SampleRoleService.delete_by_sample_name(project.id, sample_name)

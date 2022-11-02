@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Dict, List, NewType, Union
 import json
 import base64
+from xmlrpc.client import boolean
 
 from sqlalchemy.sql.sqltypes import Date, DateTime
 
@@ -212,6 +213,34 @@ class ProjectAccessService:
         else:
             abort(403)
 
+    @staticmethod
+    def check_admin_access(project_id) -> None:
+        """
+        Will check, for a project, if user is admin (or super_admin). If not, the service will interupt the controller (abort) and return a 
+        401 error with the corresponding error message :
+        - User not loged in
+        - User doesn't belong to this project
+        - User doesn't have admin rights on this projects
+        """
+
+
+        if not current_user.is_authenticated:
+            abort(401, "User not logged in")
+        
+        # super_admin have access to all projects
+        if current_user.super_admin:
+            return
+
+        user_id = current_user.id
+        project_user_access = ProjectAccessService.get_by_user_id(user_id, project_id)
+        if not project_user_access:
+            abort(401, "User doesn't belong to this project")
+
+        if project_user_access.access_level != "admin":
+            abort(401, "User doesn't have admin rights on this projects")
+
+        return
+        
 
 class ProjectFeatureService:
     @staticmethod
