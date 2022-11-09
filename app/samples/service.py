@@ -1,20 +1,15 @@
 from typing import List
 from app.utils.conllup import ConllProcessor
-import io
-import json
 import os
 import re
-import time
-import zipfile
+
 from datetime import datetime
 
 from app import db
 from app.config import MAX_TOKENS, Config
 from app.user.model import User
-from app.utils.conll3 import conllFile2trees, trees2conllFile
-from app.utils.grew_utils import GrewService, grew_request
-from flask import abort, current_app
-from sqlalchemy.sql.operators import startswith_op
+from app.utils.grew_utils import GrewService
+from flask import abort
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
 from .model import SampleExerciseLevel, SampleRole
@@ -36,6 +31,7 @@ class SampleUploadService:
         filename = secure_filename(fileobject.filename)
         sample_name = reextensions.sub("", filename)
         path_file = os.path.join(Config.UPLOAD_FOLDER, filename)
+        print('upload\n', path_file)
         fileobject.save(path_file)
 
         nrtoks = convert_users_ids(path_file, users_ids_convertor)
@@ -49,71 +45,6 @@ class SampleUploadService:
             GrewService.save_sample(project_name, sample_name, file_to_save)
 
 
-# TODO : refactor this
-class SampleExportService:
-    @staticmethod
-    def servSampleTrees(samples, timestamps=True, user_ids=True):
-        """ get samples in form of json trees """
-        trees = {}
-        for sentId, users in samples.items():
-            for user_id, conll in users.items():
-                # tree = conll3.ConllProcessor.sentence_conll_to_sentence_json(conll)
-                if sentId not in trees:
-                    trees[sentId] = {"conlls": {}}
-                
-                # Adapt user_id or timestamps lines depending on options
-                if not user_ids: conll = re.sub("# user_id = .+\n", '', conll)
-                if not timestamps: conll = re.sub("# timestamp = .+\n", '', conll)
-
-                trees[sentId]["conlls"][user_id] = conll
-        return trees
-
-    @staticmethod
-    def sampletree2contentfile(tree):
-        if isinstance(tree, str):
-            tree = json.loads(tree)
-        usertrees = dict()
-        for sentId in tree.keys():
-            for user, conll in tree[sentId]["conlls"].items():
-                if user not in usertrees:
-                    usertrees[user] = list()
-                usertrees[user].append(conll)
-        for user, content in usertrees.items():
-            usertrees[user] = "\n".join(usertrees[user])
-        return usertrees
-
-    @staticmethod
-    def get_last_user(tree):
-        timestamps = [(user, get_timestamp(conll)) for (user, conll) in tree.items()]
-        if len(timestamps) == 1:
-            last = timestamps[0][0]
-        else:
-            # print(timestamps)
-            last = sorted(timestamps, key=lambda x: x[1])[-1][0]
-            # print(last)
-        return last
-
-    @staticmethod
-    def contentfiles2zip(sample_names, sampletrees):
-        memory_file = io.BytesIO()
-        with zipfile.ZipFile(memory_file, "w") as zf:
-            for sample_name, sample in zip(sample_names, sampletrees):
-                for fuser, filecontent in sample.items():
-                    data = zipfile.ZipInfo("{}.{}.conllu".format(sample_name, fuser))
-                    data.date_time = time.localtime(time.time())[:6]
-                    data.compress_type = zipfile.ZIP_DEFLATED
-                    zf.writestr(data, filecontent)
-        memory_file.seek(0)
-        return memory_file
-
-
-# TODO : refactor this
-def get_timestamp(conll):
-    t = re.search("# timestamp = (\d+(?:\.\d+)?)\n", conll).groups()
-    if t:
-        return t[0]
-    else:
-        return False
 
 
 class SampleRoleService:

@@ -4,7 +4,7 @@ import os
 
 from app.projects.service import ProjectService
 from app.user.service import UserService
-from app.utils.grew_utils import GrewService, grew_request
+from app.utils.grew_utils import GrewService, SampleExportService, grew_request
 from flask import Response, abort, current_app, request
 from flask_login import current_user
 from flask_restx import Namespace, Resource, reqparse
@@ -13,7 +13,6 @@ from app.config import Config
 from app.samples.service import (
     SampleEvaluationService,
     SampleExerciseLevelService,
-    SampleExportService,
     SampleRoleService,
     SampleUploadService,
 )
@@ -39,7 +38,6 @@ class LexiconResource(Resource):
             "getLexicon",
             data={"project_id": project_name, "sample_ids": json.dumps(sample_names)},
         )
-        print("KK reply", reply)
         for i in reply["data"]:
             x = {"key": i["form"] + i["lemma"] + i["POS"] + i["features"] + i["gloss"]}
             i.update(x)
