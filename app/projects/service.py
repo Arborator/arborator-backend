@@ -236,7 +236,7 @@ class ProjectAccessService:
         if not project_user_access:
             abort(401, "User doesn't belong to this project")
 
-        if project_user_access.access_level != "admin":
+        if project_user_access.access_level.value != "admin":
             abort(401, "User doesn't have admin rights on this projects")
 
         return
