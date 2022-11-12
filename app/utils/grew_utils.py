@@ -4,9 +4,11 @@ from typing import Dict, List
 
 import requests
 from flask import abort, current_app
-from werkzeug.utils import secure_filename
 from app import grew_config
-
+import re
+import io
+import time
+import zipfile
 
 def grew_request(fct_name, data={}, files={}):
     try:
@@ -187,3 +189,101 @@ class GrewService:
         }
         reply = grew_request("tryPackage", data=data)
         return reply
+
+    @staticmethod
+    def get_samples_with_string_contents(project_name: str, sample_names: List[str]):
+        samplecontentfiles = list()
+        for sample_name in sample_names:
+            reply = grew_request(
+                "getConll",
+                data={"project_id": project_name, "sample_id": sample_name},
+            )
+            if reply.get("status") == "OK":
+
+                # {"sent_id_1":{"conlls":{"user_1":"conllstring"}}}
+                sample_tree = SampleExportService.servSampleTrees(reply.get("data", {}))
+                sample_tree_nots_noui = SampleExportService.servSampleTrees(reply.get("data", {}), timestamps=False, user_ids=False)
+                sample_content = SampleExportService.sampletree2contentfile(sample_tree_nots_noui)
+                for sent_id in sample_tree:
+                    last = SampleExportService.get_last_user(
+                        sample_tree[sent_id]["conlls"]
+                    )
+                    sample_content["last"] = sample_content.get("last", []) + [
+                        sample_tree_nots_noui[sent_id]["conlls"][last]
+                    ]
+
+                # gluing back the trees
+                sample_content["last"] = "\n".join(sample_content.get("last", ""))
+                samplecontentfiles.append(sample_content)
+
+            else:
+                print("Error: {}".format(reply.get("message")))
+        return sample_names, samplecontentfiles
+
+
+
+# TODO : refactor this
+def get_timestamp(conll):
+    t = re.search("# timestamp = (\d+(?:\.\d+)?)\n", conll).groups()
+    if t:
+        return t[0]
+    else:
+        return False
+
+# TODO : refactor this
+
+class SampleExportService:
+    @staticmethod
+    def servSampleTrees(samples, timestamps=True, user_ids=True):
+        """ get samples in form of json trees """
+        trees = {}
+        for sentId, users in samples.items():
+            for user_id, conll in users.items():
+                # tree = conll3.ConllProcessor.sentence_conll_to_sentence_json(conll)
+                if sentId not in trees:
+                    trees[sentId] = {"conlls": {}}
+                
+                # Adapt user_id or timestamps lines depending on options
+                if not user_ids: conll = re.sub("# user_id = .+\n", '', conll)
+                if not timestamps: conll = re.sub("# timestamp = .+\n", '', conll)
+
+                trees[sentId]["conlls"][user_id] = conll
+        return trees
+
+    @staticmethod
+    def sampletree2contentfile(tree):
+        if isinstance(tree, str):
+            tree = json.loads(tree)
+        usertrees = dict()
+        for sentId in tree.keys():
+            for user, conll in tree[sentId]["conlls"].items():
+                if user not in usertrees:
+                    usertrees[user] = list()
+                usertrees[user].append(conll)
+        for user, content in usertrees.items():
+            usertrees[user] = "\n".join(usertrees[user])
+        return usertrees
+
+    @staticmethod
+    def get_last_user(tree):
+        timestamps = [(user, get_timestamp(conll)) for (user, conll) in tree.items()]
+        if len(timestamps) == 1:
+            last = timestamps[0][0]
+        else:
+            # print(timestamps)
+            last = sorted(timestamps, key=lambda x: x[1])[-1][0]
+            # print(last)
+        return last
+
+    @staticmethod
+    def contentfiles2zip(sample_names, sampletrees):
+        memory_file = io.BytesIO()
+        with zipfile.ZipFile(memory_file, "w") as zf:
+            for sample_name, sample in zip(sample_names, sampletrees):
+                for fuser, filecontent in sample.items():
+                    data = zipfile.ZipInfo("{}.{}.conllu".format(sample_name, fuser))
+                    data.date_time = time.localtime(time.time())[:6]
+                    data.compress_type = zipfile.ZIP_DEFLATED
+                    zf.writestr(data, filecontent)
+        memory_file.seek(0)
+        return memory_file

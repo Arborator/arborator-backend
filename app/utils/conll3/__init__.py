@@ -27,6 +27,11 @@
 
 import collections, re, glob
 import copy
+from platform import python_version_tuple
+
+# handles new collections from python 3.10
+if int(python_version_tuple()[1]) >= 10: from collections.abc import Mapping
+else: from collections import Mapping
 
 
 class Tree(dict):
@@ -150,7 +155,8 @@ class Tree(dict):
 
 def update(d, u):
 	for k, v in u.items():
-		if isinstance(v, collections.Mapping):
+		
+		if isinstance(v, Mapping):
 			r = update(d.get(k, {}), v)
 			d[k] = r
 		else:

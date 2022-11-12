@@ -107,7 +107,14 @@ pytest
 ```
 
 
-### Deploy the app in production
+### Production
+
+#### Pulling last changes on prod
+1) ssh to server
+2) go to backend folder
+3) pull latests changes : `git pull origin main`
+4) restart service : `sudo systemctl restart arborator-backend.service`
+#### Deploy the app in production for the first time
 
 ##### Set the environment
 
