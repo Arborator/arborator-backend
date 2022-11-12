@@ -236,12 +236,25 @@ class ProjectAccessService:
         if not project_user_access:
             abort(401, "User doesn't belong to this project")
 
-        if project_user_access.access_level != "admin":
+        if project_user_access.access_level.value != "admin":
             abort(401, "User doesn't have admin rights on this projects")
 
         return
-        
-
+    @staticmethod
+    def check_project_access(visibility,project_id):
+        """
+        If the project is private (visibility==0) , it's readable only by its users and by the superadmins
+        else the public and the open projects are readable by all the users even those who are not logged in
+        """
+        if visibility==0:
+            if not current_user.is_authenticated:
+               return False
+            if current_user.super_admin:
+                return True
+            return ProjectAccessService.get_by_user_id(current_user.id, project_id)   
+        else:
+            return True
+            
 class ProjectFeatureService:
     @staticmethod
     def create(new_attrs) -> ProjectFeature:

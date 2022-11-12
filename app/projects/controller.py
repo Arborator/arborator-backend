@@ -1,25 +1,25 @@
-import json, re, datetime, time, os
+import datetime
+import json
+import os
+import re
+import time
 from typing import List
-from sqlalchemy.sql.functions import user
 
 import werkzeug
-from werkzeug.utils import secure_filename
 from app.utils.grew_utils import GrewService
 from flask import abort, current_app, request, session
 from flask_accepts.decorators.decorators import accepts, responds
 from flask_login import current_user
 from flask_restx import Namespace, Resource, reqparse
+from sqlalchemy.sql.functions import user
+from werkzeug.utils import secure_filename
 
 from .interface import ProjectExtendedInterface, ProjectInterface
 from .model import Project, ProjectAccess
 from .schema import ProjectExtendedSchema, ProjectSchema, ProjectSchemaCamel
-from .service import (
-    LastAccessService,
-    ProjectAccessService,
-    ProjectFeatureService,
-    ProjectMetaFeatureService,
-    ProjectService,
-)
+from .service import (LastAccessService, ProjectAccessService,
+                      ProjectFeatureService, ProjectMetaFeatureService,
+                      ProjectService)
 
 api = Namespace("Project", description="Endpoints for dealing with projects")  # noqa
 # appconfig = current_app.config
@@ -44,24 +44,25 @@ class ProjectResource(Resource):
         common = grewnames & dbnames
 
         for project in projects:
-            dumped_project: ProjectExtendedInterface = ProjectSchema().dump(project)
-            if dumped_project["project_name"] not in common: continue
+            if(ProjectAccessService.check_project_access(project.visibility,project.id)):
+                dumped_project: ProjectExtendedInterface = ProjectSchema().dump(project)
+                if dumped_project["project_name"] not in common: continue
 
-            dumped_project["admins"], dumped_project["guests"] = ProjectAccessService.get_all(project.id)
+                dumped_project["admins"], dumped_project["guests"] = ProjectAccessService.get_all(project.id)
 
-            # better version: less complexity + database calls / 2
-            last_access, last_write_access = LastAccessService.get_last_access_time_per_project(project.project_name, "any+write")
-            now = datetime.datetime.now().timestamp()
-            dumped_project["last_access"] = last_access - now
-            dumped_project["last_write_access"] = last_write_access - now
+                # better version: less complexity + database calls / 2
+                last_access, last_write_access = LastAccessService.get_last_access_time_per_project(project.project_name, "any+write")
+                now = datetime.datetime.now().timestamp()
+                dumped_project["last_access"] = last_access - now
+                dumped_project["last_write_access"] = last_write_access - now
 
-            for p in grew_projects:
-                if p["name"] == project.project_name:
-                    dumped_project["number_sentences"] = p["number_sentences"]
-                    dumped_project["number_samples"] = p["number_samples"]
-                    dumped_project["number_tokens"] = p["number_tokens"]
-                    dumped_project["number_trees"] = p["number_trees"]
-            push_project(dumped_project)
+                for p in grew_projects:
+                    if p["name"] == project.project_name:
+                        dumped_project["number_sentences"] = p["number_sentences"]
+                        dumped_project["number_samples"] = p["number_samples"]
+                        dumped_project["number_tokens"] = p["number_tokens"]
+                        dumped_project["number_trees"] = p["number_trees"]
+                push_project(dumped_project)
 
         return projects_extended_list
 
@@ -197,6 +198,7 @@ class ProjectFeaturesResource(Resource):
         parser.add_argument(name="shownmeta", type=str, action="append")
         args = parser.parse_args()
         project = ProjectService.get_by_name(projectName)
+        ProjectAccessService.check_admin_access(project.id)
         if args.get("shownfeatures"):
             ProjectFeatureService.delete_by_project_id(project.id)
             for feature in args.shownfeatures:
@@ -225,6 +227,7 @@ class ProjectConllSchemaResource(Resource):
         """Modify a single project conll schema"""
         project = ProjectService.get_by_name(projectName)
         ProjectService.check_if_project_exist(project)
+        ProjectAccessService.check_admin_access(project.id)
         parser = reqparse.RequestParser()
         parser.add_argument(name="config", type=dict, action="append")
         args = parser.parse_args()
