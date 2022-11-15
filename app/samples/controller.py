@@ -130,7 +130,7 @@ class SampleExerciseLevelResource(Resource):
         ProjectAccessService.check_admin_access(project.id)
 
         sample_exercise_level = SampleExerciseLevelService.get_by_sample_name(
-            project_id, sample_name
+            project.id, sample_name
         )
 
         new_attrs = {
