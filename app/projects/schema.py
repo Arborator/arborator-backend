@@ -24,13 +24,12 @@ class ProjectSchema(Schema):
     """User schema"""
 
     id = fields.Integer(attribute="id")
-    project_name = fields.String(attribute="project_name")
+    projectName = fields.String(attribute="project_name")
     description = fields.String(attribute="description")
-    # TODO : Find how to serialize glob images
     image = BlobImageField(attribute="image")
     visibility = fields.Integer(attribute="visibility")
-    show_all_trees = fields.Boolean(attribute="show_all_trees")
-    exercise_mode = fields.Boolean(attribute="exercise_mode")
+    showAllTrees = fields.Boolean(attribute="show_all_trees")
+    exerciseMode = fields.Boolean(attribute="exercise_mode")
     # default_user_trees = fields.String(attribute="default_user_trees")
 
 
@@ -39,12 +38,12 @@ class ProjectExtendedSchema(ProjectSchema):
 
     admins = fields.List(fields.String())
     guests = fields.List(fields.String())
-    number_sentences = fields.Integer()
-    number_samples = fields.Integer()
-    number_trees = fields.Integer()
-    number_tokens = fields.Integer()
-    last_access = fields.Integer() # this contains the seconds since last access
-    last_write_access = fields.Integer() # this contains the seconds since last access
+    numberSentences = fields.Integer(attribute='number_sentences')
+    numberSamples = fields.Integer(attribute='number_samples')
+    numberTrees = fields.Integer(attribute='number_trees')
+    numberTokens = fields.Integer(attribute='number_tokens')
+    lastAccess = fields.Integer(attribute='last_access') # this contains the seconds since last access
+    lastWriteAccess = fields.Integer(attribute='last_write_access') # this contains the seconds since last access
 
 
 # KK TODO : Ths should be unified with  `ProjectSchema`. However, at the moment,

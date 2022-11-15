@@ -33,7 +33,6 @@ class ProjectResource(Resource):
         """Get all projects"""
 
         projects_extended_list: List[ProjectExtendedInterface] = []
-        push_project = projects_extended_list.append
 
         projects: List[Project] = Project.query.all()
         
@@ -44,25 +43,24 @@ class ProjectResource(Resource):
         common = grewnames & dbnames
 
         for project in projects:
-            if(ProjectAccessService.check_project_access(project.visibility,project.id)):
-                dumped_project: ProjectExtendedInterface = ProjectSchema().dump(project)
-                if dumped_project["project_name"] not in common: continue
+            if ProjectAccessService.check_project_access(project.visibility,project.id):
+                if project.project_name not in common: continue
 
-                dumped_project["admins"], dumped_project["guests"] = ProjectAccessService.get_all(project.id)
+                project.admins, project.guests = ProjectAccessService.get_all(project.id)
 
                 # better version: less complexity + database calls / 2
                 last_access, last_write_access = LastAccessService.get_last_access_time_per_project(project.project_name, "any+write")
                 now = datetime.datetime.now().timestamp()
-                dumped_project["last_access"] = last_access - now
-                dumped_project["last_write_access"] = last_write_access - now
+                project.last_access = last_access - now
+                project.last_write_access = last_write_access - now
 
-                for p in grew_projects:
-                    if p["name"] == project.project_name:
-                        dumped_project["number_sentences"] = p["number_sentences"]
-                        dumped_project["number_samples"] = p["number_samples"]
-                        dumped_project["number_tokens"] = p["number_tokens"]
-                        dumped_project["number_trees"] = p["number_trees"]
-                push_project(dumped_project)
+                for grew_project in grew_projects:
+                    if grew_project["name"] == project.project_name:
+                        project.number_sentences = grew_project["number_sentences"]
+                        project.number_samples = grew_project["number_samples"]
+                        project.number_tokens = grew_project["number_tokens"]
+                        project.number_trees = grew_project["number_trees"]
+                projects_extended_list.append(project)
 
         return projects_extended_list
 

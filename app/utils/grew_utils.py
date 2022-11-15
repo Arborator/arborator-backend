@@ -1,6 +1,6 @@
 # Some utility functions for grew process
 import json
-from typing import Dict, List
+from typing import Dict, List, TypedDict
 
 import requests
 from flask import abort, current_app
@@ -54,6 +54,14 @@ def grew_request(fct_name, data={}, files={}):
     return response
 
 
+class GrewProjectInterface(TypedDict):
+    name: str
+    number_samples: int
+    number_sentences: int
+    number_tokens: int
+    number_trees: int
+
+
 class GrewService:
     @staticmethod
     def get_sample_trees(projectName, sampleName) -> Dict[str, Dict[str, str]]:
@@ -67,7 +75,7 @@ class GrewService:
     @staticmethod
     def get_projects():
         reply = grew_request("getProjects")
-        grew_projects = reply.get("data", [])
+        grew_projects: List[GrewProjectInterface] = reply.get("data", [])
         return grew_projects
 
     @staticmethod

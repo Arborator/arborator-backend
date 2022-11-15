@@ -111,7 +111,7 @@ class SampleRoleResource(Resource):
             SampleRoleService.create(new_attrs)
 
         if args.action == "remove":
-            SampleRoleService.delete_one(project_id, sample_name, user_id, role)
+            SampleRoleService.delete_one(project.id, sample_name, user_id, role)
 
         data = {
             "roles": SampleRoleService.get_by_sample_name(project.id, sample_name),

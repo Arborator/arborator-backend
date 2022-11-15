@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, List, NewType, Union
+from typing import Dict, List, NewType, Union, Tuple
 import json
 import base64
 from xmlrpc.client import boolean
@@ -177,7 +177,7 @@ class ProjectAccessService:
             return []
 
     @staticmethod
-    def get_all(project_id: str) -> List[str]:
+    def get_all(project_id: int) -> Tuple[List[str], List[str]]:
         '''optimized version dedicated to homepage. reduces the database calls but makes the code less pretty'''
         project_access_list: List[ProjectAccess] = ProjectAccess.query.filter_by(project_id=project_id).all()
         admins, guests = [], []
