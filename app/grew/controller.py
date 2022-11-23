@@ -249,9 +249,6 @@ class RelationTableResource(Resource):
             user_ids = { "one": ["__last__"] }
         elif tableType=='all':
             user_ids = "all"
-
-        if not sample_ids:
-            abort(400)
         reply = grew_request(
             "relationTables",
             data={
