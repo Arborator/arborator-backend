@@ -67,17 +67,14 @@ class LexiconExportTsv(Resource):
         parser.add_argument(name="data", type=dict, action="append")
         args = parser.parse_args()
         lexicon = args.get("data")
-        features = ["form", "lemma", "POS", "features", "gloss", "frequency"]
-        line = ""
+        features=['form','lemma','upos','Gloss']
+        line_tsv = ""
         for i in lexicon:
             for f in features:
-                try:
-                    line += i[f] + "\t"
-                except TypeError:
-                    line += str(i[f])
-            line += "\n"
-
-        resp = Response(line, status=200)
+                line_tsv += str(i['feats'][f]) + " \t"
+            line_tsv += str(i['freq'])+ " \t"
+            line_tsv += "\n"
+        resp = Response(line_tsv, status=200)
         return resp
 
 
