@@ -20,17 +20,17 @@ class LexiconResource(Resource):
     def post(self, project_name: str):
         parser = reqparse.RequestParser()
         parser.add_argument(name="samplenames", type=str, action="append")
-        parser.add_argument(name="treeSelection", type=str)
+        parser.add_argument(name="features", type=str,action="append")
         args = parser.parse_args()
 
         sample_names = args.get("samplenames")
-        treeSelection = args.get("treeSelection")
-        
+        features = args.get("features")
         user_ids = "all"
-        features = ["form", "lemma", "upos", "Gloss"]
-        
+        default_features = ["form", "lemma", "upos", "Gloss"]
+        if features:
+            default_features+=features
         reply = grew_request(
             "getLexicon",
-            data={"project_id": project_name, "sample_ids": json.dumps(sample_names), "user_ids": json.dumps(user_ids), "features": json.dumps(features),},
+            data={"project_id": project_name, "sample_ids": json.dumps(sample_names), "user_ids": json.dumps(user_ids), "features": json.dumps(default_features),},
         )
         return reply["data"]
