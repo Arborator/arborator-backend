@@ -76,14 +76,14 @@ def newtranscription(inconll, transcription, samplename, soundfile):
 	if len(conlls) != len(transcription): 
 		raise Exception
 	
-	intervals = []
+	intervals = [] # will contain a tuple (begin align, end align taken from the inconll)
 	for co, tr in zip(conlls,transcription):
-		sent = []
+		sent = [] # will contain a triple per token: token, begin align, end align
 		for li in co.strip().split('\n'):
-			if li and li[0] != '#':
+			if li and li[0] != '#': # skip comment lines
 				m = treg.search(li)
-				w = m.group(1)
-				sent += [(w, int(m.group(2)), int(m.group(3)))]
+				w = m.group(1) # group 1 is the token from inconll
+				sent += [(w, int(m.group(2)), int(m.group(3)))] # group 2 and 3 are the AlignBegin and AlignEnd
 				
 		intervals += [(sent[0][1], sent[-1][2], tr)]
 	return intervals2conll(intervals, samplename, soundfile)
