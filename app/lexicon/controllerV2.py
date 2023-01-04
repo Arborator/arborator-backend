@@ -5,6 +5,7 @@ from app.lexicon.interfaceV2 import LexiconItemInterface
 from app.lexicon.schemaV2 import LexiconItemSchema
 from app.utils.conllup import TokenProcessor
 from app.utils.grew_utils import grew_request
+from flask_login import current_user
 from flask_accepts.decorators.decorators import responds
 from flask_restx import Namespace, Resource, reqparse
 
@@ -21,11 +22,22 @@ class LexiconResource(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument(name="samplenames", type=str, action="append")
         parser.add_argument(name="features", type=str,action="append")
+        parser.add_argument(name="lexiconType", type=str)
         args = parser.parse_args()
 
         sample_names = args.get("samplenames")
         features = args.get("features")
-        user_ids = "all"
+        lexicon_type=args.get("lexiconType")
+        
+        if lexicon_type=='user':
+            user_ids = { "one": [current_user.username] }
+        elif lexicon_type=='user_recent':
+            user_ids = { "one": [current_user.username, "__last__"] }
+        elif lexicon_type=='recent':
+            user_ids = { "one": ["__last__"] }
+        elif lexicon_type=='all':
+            user_ids = "all"
+        
         default_features = ["form", "lemma", "upos", "Gloss"]
         if features:
             default_features+=features
