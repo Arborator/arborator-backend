@@ -23,12 +23,14 @@ class LexiconResource(Resource):
         parser.add_argument(name="samplenames", type=str, action="append")
         parser.add_argument(name="features", type=str,action="append")
         parser.add_argument(name="lexiconType", type=str)
+        parser.add_argument(name="prune", type=int)
         args = parser.parse_args()
 
         sample_names = args.get("samplenames")
         features = args.get("features")
         lexicon_type=args.get("lexiconType")
-        
+        prune=args.get("prune")
+       
         if lexicon_type=='user':
             user_ids = { "one": [current_user.username] }
         elif lexicon_type=='user_recent':
@@ -37,12 +39,15 @@ class LexiconResource(Resource):
             user_ids = { "one": ["__last__"] }
         elif lexicon_type=='all':
             user_ids = "all"
+
+        print(user_ids)
         
         default_features = ["form", "lemma", "upos", "Gloss"]
         if features:
             default_features+=features
+            
         reply = grew_request(
             "getLexicon",
-            data={"project_id": project_name, "sample_ids": json.dumps(sample_names), "user_ids": json.dumps(user_ids), "features": json.dumps(default_features),},
+            data={"project_id": project_name, "sample_ids": json.dumps(sample_names), "user_ids": json.dumps(user_ids), "features": json.dumps(default_features),"prune":prune},
         )
         return reply["data"]
