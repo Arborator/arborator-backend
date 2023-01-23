@@ -202,11 +202,13 @@ class DeleteSampleResource(Resource):
             "status": "OK",
         }
 
+DJANGO_BOOT_SERVER_URL = "http://calcul-kimgerdes.lisn.upsaclay.fr:8001"
+
 @api.route("/<string:project_name>/samples/parsing", methods = ['GET','POST'])
 class BootParsing(Resource):
     def get(self, project_name: str):
         #test connexion
-        reply = requests.get("https://arboratorgrew.lisn.upsaclay.fr/testBoot/")
+        reply = requests.get(f"{DJANGO_BOOT_SERVER_URL}/testBoot/")
         # reply = requests.get("http://127.0.0.1:8001/testBoot/")
         return reply.text
 
@@ -239,7 +241,7 @@ class BootParsing(Resource):
             }
 
         # reply = requests.post("http://127.0.0.1:8001/conllus/", json = data)
-        reply = requests.post("https://arboratorgrew.lisn.upsaclay.fr/conllus/", json = data)
+        reply = requests.post(f"{DJANGO_BOOT_SERVER_URL}/conllus/", json = data)
         print("########!!",reply.text)
 
         # return reply.text
@@ -258,7 +260,7 @@ class BootParsedResults(Resource):
         param = request.get_json(force=True)
         print(param)
         
-        reply = requests.post("https://arboratorgrew.lisn.upsaclay.fr/getResults/", data = {'projectFdname': param['fdname'], 'parser': param['parser']})
+        reply = requests.post(f"{DJANGO_BOOT_SERVER_URL}/getResults/", data = {'projectFdname': param['fdname'], 'parser': param['parser']})
         # return reply.text
         try:
             reply = json.loads(reply.text)
@@ -295,7 +297,7 @@ class BootParsedRemoveFolder(Resource):
         param = request.get_json(force=True)
         print(param)
         
-        reply = requests.post("https://arboratorgrew.lisn.upsaclay.fr/removeFolder/", data = {'projectFdname': param['fdname']})
+        reply = requests.post(f"{DJANGO_BOOT_SERVER_URL}/removeFolder/", data = {'projectFdname': param['fdname']})
         # return reply.text
         try:
             reply = json.loads(reply.text)
