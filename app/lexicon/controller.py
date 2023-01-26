@@ -283,14 +283,15 @@ class TryRulesResource(Resource):
 @api.route("/<string:project_name>/saveConll")
 class SaveConll(Resource):
     def post(self, project_name: str):
+
         parser = reqparse.RequestParser()
         parser.add_argument(name="data", type=dict, action="append")
         args = parser.parse_args()
         data = args.get("data")
-        sample_names = [ sampleId for sampleId in data[0] ]
-        conll = str()
 
+        sample_names = [ sampleId for sampleId in data[0] ]
         for sample_name in sample_names:
+            conll = str()
             reply = grew_request(
                 "getConll",
                 data={"project_id": project_name, "sample_id": sample_name},
@@ -298,7 +299,6 @@ class SaveConll(Resource):
             if reply.get("status") == "OK":
 
                 sample_tree = SampleExportService.servSampleTrees(reply.get("data", {}))
-                trees = list()
                 for sent in sample_tree:
                     tree = dict()
                     if sent in data[0][sample_name]:
