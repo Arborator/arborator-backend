@@ -1,5 +1,5 @@
 from typing import List
-from app.utils.conllup import ConllProcessor
+from conllup.conllup import sentenceConllToJson
 import os
 import re
 
@@ -177,21 +177,21 @@ class SampleEvaluationService:
     def evaluate_sample(sample_conlls):
         corrects = {}
         submitted = {}
-        total = {"upos": 0, "deprel": 0, "head": 0}
+        total = {"UPOS": 0, "DEPREL": 0, "HEAD": 0}
         for sentence_id, sentence_conlls in sample_conlls.items():
             teacher_conll = sentence_conlls.get("teacher")
             if teacher_conll:
-                teacher_sentence_json = ConllProcessor.sentence_conll_to_sentence_json(
+                teacher_sentence_json = sentenceConllToJson(
                     teacher_conll
                 )
-                teacher_tree = teacher_sentence_json["tree"]
+                teacher_tree = teacher_sentence_json["treeJson"]['nodesJson']
 
                 basetree_conll = sentence_conlls.get(BASE_TREE)
                 if basetree_conll:
                     basetree_sentence_json = (
-                        ConllProcessor.sentence_conll_to_sentence_json(basetree_conll)
+                        sentenceConllToJson(basetree_conll)
                     )
-                    basetree_tree = basetree_sentence_json["tree"]
+                    basetree_tree = basetree_sentence_json["treeJson"]['nodesJson']
                 else:
                     basetree_tree = {}
 
@@ -200,7 +200,7 @@ class SampleEvaluationService:
                     if teacher_token == None:
                         continue
                     basetree_token = basetree_tree.get(token_id, {})
-                    for label in ["upos", "head", "deprel"]:
+                    for label in ["UPOS", "HEAD", "DEPREL"]:
                         if (
                             teacher_token[label] != "_"
                             and basetree_token.get(label) != teacher_token[label]
@@ -213,14 +213,14 @@ class SampleEvaluationService:
 
                 if user_id != "teacher":
                     if not corrects.get(user_id):
-                        corrects[user_id] = {"upos": 0, "deprel": 0, "head": 0}
+                        corrects[user_id] = {"UPOS": 0, "DEPREL": 0, "HEAD": 0}
                     if not submitted.get(user_id):
-                        submitted[user_id] = {"upos": 0, "deprel": 0, "head": 0}
+                        submitted[user_id] = {"UPOS": 0, "DEPREL": 0, "HEAD": 0}
 
-                    user_sentence_json = ConllProcessor.sentence_conll_to_sentence_json(
+                    user_sentence_json = sentenceConllToJson(
                         user_conll
                     )
-                    user_tree = user_sentence_json["tree"]
+                    user_tree = user_sentence_json["treeJson"]["nodesJson"]
 
                     for token_id in user_tree.keys():
                         teacher_token = teacher_tree.get(token_id)
@@ -230,7 +230,7 @@ class SampleEvaluationService:
                         user_token = user_tree.get(token_id)
                         basetree_token = basetree_tree.get(token_id, {})
 
-                        for label in ["upos", "head", "deprel"]:
+                        for label in ["UPOS", "HEAD", "DEPREL"]:
                             if (
                                 teacher_token[label] != "_"
                                 and basetree_token.get(label) != teacher_token[label]
@@ -244,7 +244,7 @@ class SampleEvaluationService:
         evaluations = {}
         for user_id in corrects.keys():
             evaluations[user_id] = {}
-            for label in ["upos", "deprel", "head"]:
+            for label in ["UPOS", "HEAD", "DEPREL"]:
                 if total[label] == 0:
                     score = 0
                 else:
@@ -261,6 +261,10 @@ class SampleEvaluationService:
 
     @staticmethod
     def evaluations_json_to_tsv(evaluations):
+        if evaluations == {}:
+            # noone works on these trees
+            return ""
+
         list_usernames = list(evaluations.keys())
         first_username = list(evaluations.keys())[0]
         columns = list(evaluations[first_username].keys())

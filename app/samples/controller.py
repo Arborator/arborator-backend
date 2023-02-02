@@ -152,16 +152,10 @@ class SampleEvaluationResource(Resource):
     def get(self, project_name, sample_name):
         sample_conlls = GrewService.get_sample_trees(project_name, sample_name)
         evaluations = SampleEvaluationService.evaluate_sample(sample_conlls)
-        
-        if evaluations:
-            evaluations_tsv = SampleEvaluationService.evaluations_json_to_tsv(evaluations)
-
-            uploadable_evaluations_tsv = SharedService.get_sendable_data(evaluations_tsv)
-            
-            file_name = f"{sample_name}_evaluations.tsv"
-            return send_file(uploadable_evaluations_tsv, attachment_filename = file_name, as_attachment=True)
-        else:
-            abort(404, "No user worked on this sample")
+        evaluations_tsv = SampleEvaluationService.evaluations_json_to_tsv(evaluations)
+        uploadable_evaluations_tsv = SharedService.get_sendable_data(evaluations_tsv)
+        file_name = f"{sample_name}_evaluations.tsv"
+        return send_file(uploadable_evaluations_tsv, attachment_filename = file_name, as_attachment=True)
 
 
 @api.route("/<string:project_name>/samples/export")

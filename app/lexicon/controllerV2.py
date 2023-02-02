@@ -3,7 +3,6 @@ from typing import List
 
 from app.lexicon.interfaceV2 import LexiconItemInterface
 from app.lexicon.schemaV2 import LexiconItemSchema
-from app.utils.conllup import TokenProcessor
 from app.utils.grew_utils import grew_request
 from flask_login import current_user
 from flask_accepts.decorators.decorators import responds
