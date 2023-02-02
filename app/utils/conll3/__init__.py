@@ -28,6 +28,7 @@
 import collections, re, glob
 import copy
 from platform import python_version_tuple
+from conllup.conllup import sentenceJson_T
 
 # handles new collections from python 3.10
 if int(python_version_tuple()[1]) >= 10: from collections.abc import Mapping
@@ -490,6 +491,12 @@ def unpunctATree_2(tree):
 		best_tree.append(new_tree[k])
 	t = Tree(dict([(elt["id"],elt) for elt in best_tree]))
 	return t
+
+
+def getSentenceTextFromSentenceJson(sentenceJson: sentenceJson_T):
+	# temporary method, to slowly switch from conll3 to conllup pip package
+	sentence_text = " ".join([node["FORM"] for node in sentenceJson["treeJson"]["nodesJson"].values()])
+	return sentence_text
 
 
 if __name__ == "__main__":

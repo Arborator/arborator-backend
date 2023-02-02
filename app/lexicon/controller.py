@@ -1,5 +1,4 @@
 import json
-import re
 import os
 
 from app.projects.service import ProjectService
@@ -8,14 +7,10 @@ from app.utils.grew_utils import GrewService, SampleExportService, grew_request
 from flask import Response, abort, current_app, request
 from flask_login import current_user
 from flask_restx import Namespace, Resource, reqparse
-from app.utils.conll3 import conll2tree, trees2conllFile
+from conllup.conllup import sentenceConllToJson
+from app.utils.conll3 import getSentenceTextFromSentenceJson
+
 from app.config import Config
-from app.samples.service import (
-    SampleEvaluationService,
-    SampleExerciseLevelService,
-    SampleRoleService,
-    SampleUploadService,
-)
 
 api = Namespace(
     "Lexicon", description="Endpoints for dealing with samples of project"
@@ -271,10 +266,12 @@ class TryRulesResource(Resource):
                     m["sent_id"], {"conlls": {}, "nodes": {}, "edges": {}}
                 )
                 trees[m["sample_id"]][m["sent_id"]]["conlls"][m["user_id"]] = m["conll"]
+
                 if "sentence" not in trees[m["sample_id"]][m["sent_id"]]:
-                    trees[m["sample_id"]][m["sent_id"]]["sentence"] = conll2tree(
-                        m["conll"]
-                    ).sentence()
+                    sentenceJson = sentenceConllToJson(m["conll"])
+                    sentence_text = getSentenceTextFromSentenceJson(sentenceJson)
+                    trees[m["sample_id"]][m["sent_id"]]["sentence"] = sentence_text
+
         resp = {"status_code": 200, "trees": trees, "rules": list_rules}
         return resp
 

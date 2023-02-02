@@ -7,6 +7,9 @@ from app.utils.grew_utils import GrewService, grew_request
 from flask import Response, abort, current_app, request
 from flask_login import current_user
 from flask_restx import Namespace, Resource, reqparse
+from conllup.conllup import sentenceConllToJson
+from app.utils.conll3 import getSentenceTextFromSentenceJson
+
 
 api = Namespace(
     "Grew", description="Endpoints for dealing with samples of project"
@@ -263,11 +266,6 @@ class RelationTableResource(Resource):
         return data
 
 
-
-
-from app.utils.conll3 import conll2tree
-
-
 def get_timestamp(conll):
     t = re.search("# timestamp = (\d+(?:\.\d+)?)\n", conll).groups()
     if t:
@@ -309,10 +307,10 @@ def formatTrees_new(m, trees, conll, isPackage: bool = False):
         trees[sample_name] = {}
 
     if sent_id not in trees[sample_name]:
-        t = conll2tree(conll)
-        s = t.sentence()
+        sentenceJson = sentenceConllToJson(conll)
+        sentence_text = getSentenceTextFromSentenceJson(sentenceJson)
         trees[sample_name][sent_id] = {
-            "sentence": s,
+            "sentence": sentence_text,
             "conlls": {user_id: conll},
            
         }

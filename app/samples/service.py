@@ -169,8 +169,6 @@ class SampleExerciseLevelService:
         return
 
 
-from app.utils.conll3 import conll2tree
-
 
 class SampleEvaluationService:
     @staticmethod
