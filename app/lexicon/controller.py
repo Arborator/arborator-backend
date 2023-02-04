@@ -8,7 +8,7 @@ from flask import Response, abort, current_app, request
 from flask_login import current_user
 from flask_restx import Namespace, Resource, reqparse
 from conllup.conllup import sentenceConllToJson
-from app.utils.conll3 import getSentenceTextFromSentenceJson
+from conllup.processing import constructTextFromTreeJson
 
 from app.config import Config
 
@@ -269,7 +269,7 @@ class TryRulesResource(Resource):
 
                 if "sentence" not in trees[m["sample_id"]][m["sent_id"]]:
                     sentenceJson = sentenceConllToJson(m["conll"])
-                    sentence_text = getSentenceTextFromSentenceJson(sentenceJson)
+                    sentence_text = constructTextFromTreeJson(sentenceJson)
                     trees[m["sample_id"]][m["sent_id"]]["sentence"] = sentence_text
 
         resp = {"status_code": 200, "trees": trees, "rules": list_rules}

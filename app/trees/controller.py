@@ -1,4 +1,3 @@
-from app.utils.conll3 import changeMetaField, emptyConllu
 from app.projects.service import LastAccessService, ProjectAccessService, ProjectService
 from app.samples.service import SampleExerciseLevelService
 from app.utils.grew_utils import grew_request, GrewService
@@ -6,7 +5,7 @@ from flask import abort, current_app, jsonify
 from flask_login import current_user
 from flask_restx import Namespace, Resource, reqparse
 from conllup.conllup import sentenceConllToJson
-from app.utils.conll3 import getSentenceTextFromSentenceJson
+from conllup.processing import constructTextFromTreeJson, emptySentenceConllu, changeMetaFieldInSentenceConllu
 
 
 BASE_TREE = "base_tree"
@@ -113,7 +112,7 @@ class SampleTreesResource(Resource):
         #             abort(403)
 
         if project.exercise_mode == 1 and user_id == TEACHER:
-            conll = changeMetaField(conll, "user_id", TEACHER)
+            conll = changeMetaFieldInSentenceConllu(conll, "user_id", TEACHER)
         data = {
             "project_id": project_name,
             "sample_id": sample_name,
@@ -141,7 +140,7 @@ def samples2trees(samples, sample_name):
     for sentId, users in samples.items():
         for user_id, conll in users.items():
             sentenceJson = sentenceConllToJson(conll)
-            sentence_text = getSentenceTextFromSentenceJson(sentenceJson)
+            sentence_text = constructTextFromTreeJson(sentenceJson["treeJson"])
             if sentId not in trees:
                 trees[sentId] = {
                     "sample_name": sample_name,
@@ -159,7 +158,7 @@ def extract_trees_from_sample(sample, sample_name):
     for sentId, users in sample.items():
         for user_id, conll in users.items():
             sentenceJson = sentenceConllToJson(conll)
-            sentence_text = getSentenceTextFromSentenceJson(sentenceJson)
+            sentence_text = constructTextFromTreeJson(sentenceJson["treeJson"])
             if sentId not in trees:
                 trees[sentId] = {
                     "sample_name": sample_name,
@@ -178,7 +177,7 @@ def add_base_tree(trees):
         if BASE_TREE not in list_users:
             model_user = TEACHER if TEACHER in list_users else list_users[0]
             model_tree = sent_conlls[model_user]
-            empty_conllu = emptyConllu(model_tree)
+            empty_conllu = emptySentenceConllu(model_tree)
             sent_conlls[BASE_TREE] = empty_conllu
     return trees
 
@@ -220,7 +219,7 @@ def samples2trees_with_restrictions(samples, sample_name, current_user):
         }
         for user_id, conll in filtered_users.items():
             sentenceJson = sentenceConllToJson(conll)
-            sentence_text = getSentenceTextFromSentenceJson(sentenceJson)
+            sentence_text = constructTextFromTreeJson(sentenceJson["treeJson"])
             if sentId not in trees:
                 trees[sentId] = {
                     "sample_name": sample_name,
@@ -252,17 +251,17 @@ def samples2trees_exercise_mode(trees_on_grew, sample_name, current_user, projec
                 # if tree:
                 if trees_processed[tree_id]["sentence"] == "":
                     sentenceJson = sentenceConllToJson(conll)
-                    sentence_text = getSentenceTextFromSentenceJson(sentenceJson)
+                    sentence_text = constructTextFromTreeJson(sentenceJson["treeJson"])
                     trees_processed[tree_id]["sentence"] = sentence_text
 
                     ### add the base tree (emptied conllu) ###
-                    empty_conllu = emptyConllu(conll)
-                    base_conllu = changeMetaField(empty_conllu, "user_id", BASE_TREE)
+                    empty_conllu = emptySentenceConllu(conll)
+                    base_conllu = changeMetaFieldInSentenceConllu(empty_conllu, "user_id", BASE_TREE)
                     trees_processed[tree_id]["conlls"][BASE_TREE] = base_conllu
 
         if current_user.username not in trees_processed[tree_id]["conlls"]:
-            empty_conllu = emptyConllu(conll)
-            user_empty_conllu = changeMetaField(
+            empty_conllu = emptySentenceConllu(conll)
+            user_empty_conllu = changeMetaFieldInSentenceConllu(
                 empty_conllu, "user_id", current_user.username
             )
             trees_processed[tree_id]["conlls"][

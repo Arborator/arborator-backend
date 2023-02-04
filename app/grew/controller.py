@@ -8,7 +8,7 @@ from flask import Response, abort, current_app, request
 from flask_login import current_user
 from flask_restx import Namespace, Resource, reqparse
 from conllup.conllup import sentenceConllToJson
-from app.utils.conll3 import getSentenceTextFromSentenceJson
+from conllup.processing import constructTextFromTreeJson
 
 
 api = Namespace(
@@ -69,9 +69,7 @@ class TryRuleResource(Resource):
             trees["sample_id"]["sent_id"]["conlls"][m["user_id"]] = m["conll"]
             # trees['sample_id']['sent_id']['matches'][m['user_id']]=[{"edges":{},"nodes":{}}] # TODO: get the nodes and edges from the grew server!
             if "sentence" not in trees["sample_id"]["sent_id"]:
-                trees["sample_id"]["sent_id"]["sentence"] = conll2tree(
-                    m["conll"]
-                ).sentence()
+                trees["sample_id"]["sent_id"]["sentence"] = constructTextFromTreeJson(sentenceConllToJson(m["conll"]))
             # print('mmmm',trees['sample_id']['sent_id'])
         return trees
 
@@ -308,7 +306,7 @@ def formatTrees_new(m, trees, conll, isPackage: bool = False):
 
     if sent_id not in trees[sample_name]:
         sentenceJson = sentenceConllToJson(conll)
-        sentence_text = getSentenceTextFromSentenceJson(sentenceJson)
+        sentence_text = constructTextFromTreeJson(sentenceJson["treeJson"])
         trees[sample_name][sent_id] = {
             "sentence": sentence_text,
             "conlls": {user_id: conll},
