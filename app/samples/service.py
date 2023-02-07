@@ -284,9 +284,13 @@ class SampleEvaluationService:
 #
 #
 def read_conll_from_disk(path_file: str) -> str:
-    with open(path_file, "r") as infile:
-        conll_string = infile.read()
-    return conll_string
+    try: 
+        with open(path_file, "r") as infile:
+            conll_string = infile.read()
+    except:
+        abort(415)
+    return conll_string  
+   
 
 
 def split_conll_string_to_conlls_list(conll_string) -> List[str]:
