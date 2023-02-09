@@ -138,6 +138,7 @@ class GrewService:
     
     @staticmethod
     def save_sample(project_id: str, sample_id: str, conll_file) -> None:
+        print("test")
         grew_request(
             "saveConll",
             data={"project_id": project_id, "sample_id": sample_id},
@@ -247,7 +248,7 @@ class SampleExportService:
         trees = {}
         for sentId, users in samples.items():
             for user_id, conll in users.items():
-                # tree = conll3.ConllProcessor.sentence_conll_to_sentence_json(conll)
+                conll+="\n"
                 if sentId not in trees:
                     trees[sentId] = {"conlls": {}}
                 

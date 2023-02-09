@@ -316,13 +316,15 @@ def convert_users_ids(path_file, users_ids_convertor):
             continue
         conll_lines_modified = []
         user_id = "default"
+
         for line in conll_string.rstrip().split("\n"):
-            if "# user_id = " in line:
-                user_id = line.split("# user_id = ")[-1]
-            else:
-                conll_lines_modified.append(line)
-                if line[0]!='#':
-                    nrtoks+=1
+            if line:
+                if "# user_id = " in line:
+                    user_id = line.split("# user_id = ")[-1]
+                else:
+                    conll_lines_modified.append(line)
+                    if line[0]!='#':
+                        nrtoks+=1
 
         user_id_converted = users_ids_convertor[user_id]
         conll_lines_modified = ["# user_id = {}".format(user_id_converted)] + conll_lines_modified
