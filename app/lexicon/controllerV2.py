@@ -39,14 +39,9 @@ class LexiconResource(Resource):
         elif lexicon_type=='all':
             user_ids = "all"
 
-        print(user_ids)
-        
-        default_features = ["form", "lemma", "upos", "Gloss"]
-        if features:
-            default_features+=features
-            
+        prune = (None, prune) [prune != 0]
         reply = grew_request(
             "getLexicon",
-            data={"project_id": project_name, "sample_ids": json.dumps(sample_names), "user_ids": json.dumps(user_ids), "features": json.dumps(default_features),"prune":prune},
+            data={"project_id": project_name, "sample_ids": json.dumps(sample_names), "user_ids": json.dumps(user_ids), "features": json.dumps(features),"prune":prune},
         )
         return reply["data"]
