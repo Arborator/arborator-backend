@@ -210,6 +210,7 @@ class BootParsing(Resource):
         param = request.get_json(force=True)
         #extract names of samples for training set and to parse  
         train_samp_names = param["samples"]
+        training_user = param["training_user"]
         grew_samples = GrewService.get_samples(project_name)
         all_sample_names = [grew_sample["name"] for grew_sample in grew_samples]
 
@@ -217,10 +218,10 @@ class BootParsing(Resource):
 
         #get samples 
         train_name, train_set = GrewService.get_samples_with_string_contents(project_name, train_samp_names)
-        train_set = [sample.get("last", "") for sample in train_set]
+        train_set = [sample.get(training_user, "") for sample in train_set]
         #TODO assure parse_name not empty
         parse_name, to_parse = GrewService.get_samples_with_string_contents(project_name, default_to_parse) 
-        to_parse = [sample.get("last", "") for sample in to_parse]
+        to_parse = [sample.get(training_user, "") for sample in to_parse]
 
         # return to_parse
         data = {
@@ -229,6 +230,7 @@ class BootParsing(Resource):
             'train_set': train_set, 
             'parse_name': parse_name,
             'to_parse': to_parse, 
+            'training_user': training_user,
             'dev': param['dev'],
             'epochs': param['epoch'],
             'parser': param['parser']
