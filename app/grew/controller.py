@@ -1,7 +1,7 @@
 import json
 import re
 
-from app.projects.service import ProjectService
+from app.projects.service import LastAccessService
 from app.user.service import UserService
 from app.utils.grew_utils import GrewService, grew_request
 from flask import Response, abort, current_app, request
@@ -16,62 +16,29 @@ api = Namespace(
 )  # noqa
 
 
-@api.route("/<string:project_name>/try-rule")
-class TryRuleResource(Resource):
+@api.route("/<string:project_name>/apply-rule")
+class ApplyRuleResource(Resource):
     def post(self, project_name: str):
-        project = ProjectService.get_by_name(project_name)
-        ProjectService.check_if_project_exist(project)
-
-        # TODO : to change
-        if not request.json:
-            abort(400)
 
         parser = reqparse.RequestParser()
-        parser.add_argument(name="pattern", type=str)
-        parser.add_argument(name="rewriteCommands", type=str)
+        parser.add_argument(name="data", type=dict, action="append")
         args = parser.parse_args()
-        pattern = args.get("pattern")
-        rewriteCommands = args.get("rewriteCommands")
-        # tryRule(<string> project_id, [<string> sample_id], [<string> user_id], <string> pattern, <string> commands)
-        reply = grew_request(
-            "tryRule",
-            data={
-                "project_id": project_name,
-                "pattern": pattern,
-                "commands": rewriteCommands,
-            },
-        )
+        data = args.get("data")
+        print('test')
+        for index in range(len(data)):
+            for sample_name, search_results in data[index].items():
+                for sent_id, sentence in search_results.items(): 
+                    grew_request("saveGraph",
+                    data={
+                        "project_id": project_name,
+                        "sample_id": sample_name,
+                        "user_id": list(sentence['conlls'].keys())[0],
+                        "sent_id": sent_id,
+                        "conll_graph": list(sentence['conlls'].values())[0],
+                    })
 
-        if reply["status"] != "OK":
-            if "message" in reply:
-                resp = {
-                    "status_code": 444,
-                    "status": reply["status"],
-                    "message": reply["message"],
-                }
-                status_code = 444
-                return resp
-            abort(400)
-        trees = {}
-        # matches={}
-        # reendswithnumbers = re.compile(r"_(\d+)$")
-        # {'WAZL_15_MC-Abi_MG': {'WAZL_15_MC-Abi_MG__8': {'sentence': '# kalapotedly < you see < # ehn ...', 'conlls': {'kimgerdes': ..
-        for m in reply["data"]:
-            if m["user_id"] == "":
-                abort(409)
-            print("___")
-            # for x in m:
-            # 	print('mmmm',x)
-            trees["sample_id"] = trees.get("sample_id", {})
-            trees["sample_id"]["sent_id"] = trees["sample_id"].get(
-                "sent_id", {"conlls": {}, "nodes": {}, "edges": {}}
-            )
-            trees["sample_id"]["sent_id"]["conlls"][m["user_id"]] = m["conll"]
-            # trees['sample_id']['sent_id']['matches'][m['user_id']]=[{"edges":{},"nodes":{}}] # TODO: get the nodes and edges from the grew server!
-            if "sentence" not in trees["sample_id"]["sent_id"]:
-                trees["sample_id"]["sent_id"]["sentence"] = constructTextFromTreeJson(sentenceConllToJson(m["conll"]))
-            # print('mmmm',trees['sample_id']['sent_id'])
-        return trees
+        LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
+        return {"status": "success"}
 
 
 @api.route("/<string:project_name>/search")
@@ -80,10 +47,14 @@ class SearchResource(Resource):
     def post(self, project_name: str):
         parser = reqparse.RequestParser()
         parser.add_argument(name="pattern", type=str)
+        parser.add_argument(name="userType", type=str)
         args = parser.parse_args()
 
         pattern = args.get("pattern")
-        reply = GrewService.search_pattern_in_graphs(project_name, pattern)
+        user_type = args.get("userType") 
+        print(user_type)
+
+        reply = GrewService.search_pattern_in_graphs(project_name, pattern, user_type)
         if reply["status"] != "OK":
             abort(400)
         trees = {}
@@ -109,10 +80,12 @@ class SearchInSampleResource(Resource):
 
         parser = reqparse.RequestParser()
         parser.add_argument(name="pattern", type=str)
+        parser.add_argument(name="userType", type=str)
         args = parser.parse_args()
 
         pattern = args.get("pattern")
-        reply = GrewService.search_pattern_in_graphs(project_name, pattern)
+        user_type = args.get("userType")
+        reply = GrewService.search_pattern_in_graphs(project_name, pattern, user_type)
         trees = {}
         for m in reply["data"]:
             if m["sample_id"] != sample_name:
@@ -130,14 +103,16 @@ class TryPackageResource(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument(name="package", type=str)
         parser.add_argument(name="sampleId", type=str)
+        parser.add_argument(name="userType", type=str)
         args = parser.parse_args()
         
         package = args.get("package")
+        user_type = args.get("userType")
         sample_id = args.get("sampleId", None)
         samples_ids = []
         if (sample_id):
             samples_ids = [sample_id]
-        reply = GrewService.try_package(project_name, package, samples_ids, passed_user_ids=[], view_only_one=False)
+        reply = GrewService.try_package(project_name, package, samples_ids, user_type)
         if reply["status"] != "OK":
             abort(400)
         trees = {}

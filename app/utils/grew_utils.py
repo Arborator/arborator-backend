@@ -4,6 +4,7 @@ from typing import Dict, List, TypedDict
 
 import requests
 from flask import abort, current_app
+from flask_login import current_user
 from app import grew_config
 import re
 import io
@@ -138,7 +139,6 @@ class GrewService:
     
     @staticmethod
     def save_sample(project_id: str, sample_id: str, conll_file) -> None:
-        print("test")
         grew_request(
             "saveConll",
             data={"project_id": project_id, "sample_id": sample_id},
@@ -154,18 +154,16 @@ class GrewService:
         )
 
     @staticmethod
-    def search_pattern_in_graphs(project_id: str, pattern: str, passed_user_ids = [], view_only_one = False):
-        if view_only_one == False:
-            if passed_user_ids == []:
-                user_ids = "all"
-            else:
-                user_ids = {"multi": passed_user_ids}
+    def search_pattern_in_graphs(project_id: str, pattern: str, user_type: str):
         
-        else:
-            if passed_user_ids == []:
-                user_ids = {"one": "__last__"}
-            else:
-                user_ids = {"one": passed_user_ids}
+        if user_type == 'user':
+            user_ids = { "one": [current_user.username] }
+        elif user_type == 'user_recent':
+            user_ids = { "one": [current_user.username, "__last__"] }
+        elif user_type == 'recent':
+            user_ids = { "one": ["__last__"] }
+        elif user_type == 'all':
+            user_ids = "all"
 
         data = {
             "project_id": project_id,
@@ -177,19 +175,16 @@ class GrewService:
 
 
     @staticmethod
-    def try_package(project_id: str, package: str, sample_ids: List[str] ,passed_user_ids = [], view_only_one = False):
-        if view_only_one == False:
-            if passed_user_ids == []:
-                user_ids = "all"
-            else:
-                user_ids = {"multi": passed_user_ids}
+    def try_package(project_id: str, package: str, sample_ids: List[str] , user_type):
         
-        else:
-            if passed_user_ids == []:
-                user_ids = {"one": "__last__"}
-            else:
-                user_ids = {"one": passed_user_ids}
-
+        if user_type == 'user':
+            user_ids = { "one": [current_user.username] }
+        elif user_type == 'user_recent':
+            user_ids = { "one": [current_user.username, "__last__"] }
+        elif user_type == 'recent':
+            user_ids = { "one": ["__last__"] }
+        elif user_type == 'all':
+            user_ids = "all"
         data = {
             "project_id": project_id,
             "package": package,
