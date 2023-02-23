@@ -1,0 +1,13 @@
+[Unit]
+Description=uWSGI instance to serve myproject
+After=network.target
+
+[Service]
+User=arborator
+Group=arborator
+WorkingDirectory=/home/arborator/arborator-backend
+Environment="PATH=/home/arborator/arborator-backend/venv/bin"
+ExecStart=/home/arborator/arborator-backend/venv/bin/uwsgi --ini arborator-backend.ini
+
+[Install]
+WantedBy=multi-user.target
