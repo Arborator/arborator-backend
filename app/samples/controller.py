@@ -233,7 +233,7 @@ class BootParsing(Resource):
             'dev': param['dev'],
             'epochs': param['epoch'],
             'parser': param['parser'],
-            'keep_pos': param['keep_pos'],
+            'keep_upos': param['keep_upos'],
             }
 
         # reply = requests.post("http://127.0.0.1:8001/conllus/", json = data)
