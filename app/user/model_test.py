@@ -15,6 +15,7 @@ def user() -> User:
     username = "JohnDoe",
     first_name = "John",
     family_name = "Doe",
+    email = "JohnDoe@gmail.com",
     picture_url = "www.google.com",
     super_admin = True,
     created_date = datetime.utcnow(),

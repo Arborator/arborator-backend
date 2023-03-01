@@ -24,6 +24,7 @@ def test_UserSchema_works(schema: UserSchema):
             "username": "JohnDoe",
             "first_name": "John",
             "family_name": "Doe",
+            "email": "JohnDoe@gmail.com",
             "picture_url": "www.google.com",
             "super_admin": True,
             "created_date": str(datetime.now()),
@@ -37,5 +38,6 @@ def test_UserSchema_works(schema: UserSchema):
     assert user.username == "JohnDoe"
     assert user.first_name == "John"
     assert user.family_name == "Doe"
+    assert user.email == "JohnDoe@gmail.com"
     assert user.picture_url == "www.google.com"
     assert user.super_admin == True

@@ -107,6 +107,7 @@ def login(provider_name) -> Response:
                     "username": unique_username,
                     "first_name": results_parsed.get("first_name"),
                     "family_name": results_parsed.get("family_name"),
+                    "email": results_parsed.get("email"),
                     "picture_url": results_parsed.get("picture_url"),
                     "super_admin": False,
                     "created_date": datetime.utcnow(),
@@ -117,18 +118,18 @@ def login(provider_name) -> Response:
 
             # Else if existing user, uptade the profile picture
             else:
-                changes: UserInterface = {
-                    "picture_url": results_parsed.get("picture_url")
-                }
+                if not user.email:
+                    changes: UserInterface = {
+                        "email": results_parsed.get("email"),
+                        "picture_url": results_parsed.get("picture_url")
+                    }
+                else: 
+                    changes: UserInterface = {
+                        "picture_url": results_parsed.get("picture_url")
+                    }
                 user = UserService.update(user, changes)
-            # User.setPictureUrl(
-            #     db.session, user.username, results_parsed.get("picture_url")
-            # )  # always get the lastest picture on login
 
             login_user(user, remember=True)
-
-            session["logged_in"] = True  # TODO : can be removed ?????
-            print("auth/views.py =======", user, type(user))
 
             # If there is no superadmin in DB, add admin privilege to this new user
             if not User.query.filter_by(super_admin=True).first():

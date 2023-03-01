@@ -11,6 +11,10 @@ class UserService:
     @staticmethod
     def get_all() -> List[User]:
         return User.query.all()
+    
+    @staticmethod
+    def get_all_emails() -> List[str]:
+        return [user.email for user in User.query.all()]
 
     @staticmethod
     def get_by_id(id: str) -> User:

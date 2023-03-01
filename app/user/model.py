@@ -17,11 +17,9 @@ class User(UserMixin, db.Model, BaseM):
     username = Column(String(60), index=True, unique=True)
     first_name = Column(String(60), index=True)
     family_name = Column(String(60), index=True)
+    email = Column(String(60), index=True)
     picture_url = Column(String(128), index=True)
     super_admin = Column(Boolean, default=False)
-    # role = Column(Integer)
-    # project_id = Column(Integer, db.ForeignKey('projects.id'))
-    # todos = db.relationship('Todo', backref='txt_todos')
     created_date = Column(DateTime)
     last_seen = Column(DateTime)
 

@@ -24,7 +24,7 @@ class ApplyRuleResource(Resource):
         parser.add_argument(name="data", type=dict, action="append")
         args = parser.parse_args()
         data = args.get("data")
-        print('test')
+
         for index in range(len(data)):
             for sample_name, search_results in data[index].items():
                 for sent_id, sentence in search_results.items(): 
@@ -52,7 +52,7 @@ class SearchResource(Resource):
 
         pattern = args.get("pattern")
         user_type = args.get("userType") 
-        print(user_type)
+        
 
         reply = GrewService.search_pattern_in_graphs(project_name, pattern, user_type)
         if reply["status"] != "OK":

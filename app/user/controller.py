@@ -1,8 +1,9 @@
 from datetime import datetime
 from typing import List
 
-from flask import session
-from flask_accepts.decorators.decorators import responds
+from flask import session, request
+from flask_login import current_user
+from flask_accepts.decorators.decorators import responds, accepts
 from flask_restx import Namespace, Resource
 
 from .interface import UserInterface
@@ -28,11 +29,14 @@ class UserResource(Resource):
 
     @responds(schema=UserSchema, api=api)
     def get(self) -> User:
-        user_id = session.get("user_id")
-        if not user_id:
-            user_id = session.get("_user_id")
-
-        user = UserService.get_by_id(user_id)
+        user = UserService.get_by_id(current_user.id)
         changes: UserInterface = {"last_seen": datetime.utcnow()}
         user = UserService.update(user, changes)
         return user
+    
+    @responds(schema=UserSchema, api=api)
+    @accepts(schema=UserSchema, api=api)
+    def put(self): 
+        user = UserService.get_by_id(current_user.id)
+        changes: UserInterface = request.parsed_obj
+        return UserService.update(user,changes)

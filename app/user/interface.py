@@ -8,6 +8,7 @@ class UserInterface(TypedDict, total=False):
     username: str
     first_name: str
     family_name: str
+    email: str
     picture_url: str
     super_admin: bool
     created_date: datetime
