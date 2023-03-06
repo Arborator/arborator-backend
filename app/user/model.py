@@ -18,6 +18,8 @@ class User(UserMixin, db.Model, BaseM):
     first_name = Column(String(60), index=True)
     family_name = Column(String(60), index=True)
     email = Column(String(60), index=True)
+    not_share_email=Column(Boolean, default=False)
+    receive_newsletter=Column(Boolean, default=False)
     picture_url = Column(String(128), index=True)
     super_admin = Column(Boolean, default=False)
     created_date = Column(DateTime)

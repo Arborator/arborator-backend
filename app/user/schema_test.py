@@ -25,6 +25,8 @@ def test_UserSchema_works(schema: UserSchema):
             "first_name": "John",
             "family_name": "Doe",
             "email": "JohnDoe@gmail.com",
+            "share_email": True, 
+            "receive_newsletter": True,
             "picture_url": "www.google.com",
             "super_admin": True,
             "created_date": str(datetime.now()),

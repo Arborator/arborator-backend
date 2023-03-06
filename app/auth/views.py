@@ -108,6 +108,8 @@ def login(provider_name) -> Response:
                     "first_name": results_parsed.get("first_name"),
                     "family_name": results_parsed.get("family_name"),
                     "email": results_parsed.get("email"),
+                    "not_share_email": False,
+                    "receive_newsletter": False,
                     "picture_url": results_parsed.get("picture_url"),
                     "super_admin": False,
                     "created_date": datetime.utcnow(),
@@ -118,17 +120,17 @@ def login(provider_name) -> Response:
 
             # Else if existing user, uptade the profile picture
             else:
-                if not user.email:
+                if not user.email and not user.not_share_email:
                     changes: UserInterface = {
                         "email": results_parsed.get("email"),
-                        "picture_url": results_parsed.get("picture_url")
+                        "not_share_email": False,
+                        "picture_url": results_parsed.get("picture_url"),
                     }
                 else: 
                     changes: UserInterface = {
                         "picture_url": results_parsed.get("picture_url")
                     }
                 user = UserService.update(user, changes)
-
             login_user(user, remember=True)
 
             # If there is no superadmin in DB, add admin privilege to this new user

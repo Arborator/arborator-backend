@@ -14,6 +14,8 @@ def interface() -> UserInterface:
         first_name="John",
         family_name="Doe",
         email="JohnDoe@gmail.com",
+        not_share_email=False,
+        receive_newsletter=True,
         picture_url="www.google.com",
         super_admin=True,
         created_date=datetime.utcnow(),

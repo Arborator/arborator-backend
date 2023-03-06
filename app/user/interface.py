@@ -9,6 +9,8 @@ class UserInterface(TypedDict, total=False):
     first_name: str
     family_name: str
     email: str
+    not_share_email: bool
+    receive_newsletter: bool
     picture_url: str
     super_admin: bool
     created_date: datetime
