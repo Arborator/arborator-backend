@@ -14,6 +14,7 @@ class User(UserMixin, db.Model, BaseM):
 
     id = Column(String(256), primary_key=True)
     auth_provider = Column(String(256))
+    github_access_token = Column(String(256))
     username = Column(String(60), index=True, unique=True)
     first_name = Column(String(60), index=True)
     family_name = Column(String(60), index=True)

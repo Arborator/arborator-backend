@@ -6,6 +6,7 @@ class UserSchema(Schema):
 
     id = fields.String(attribute="id")
     auth_provider = fields.String(attribute="auth_provider")
+    github_access_token = fields.String(attribute="github_access_token")
     username = fields.String(attribute="username")
     first_name = fields.String(attribute="first_name")
     family_name = fields.String(attribute="family_name")
