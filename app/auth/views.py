@@ -111,7 +111,7 @@ def login(provider_name) -> Response:
                 user = UserService.create(new_attrs)
 
             else:
-                if not user.github_access_token and user.auth_provider == "4":
+                if  user.auth_provider == "4":
                     changes: UserInterface = {
                         "github_access_token": results_parsed.get("access_token"),
                         "picture_url": results_parsed.get("picture_url"),
