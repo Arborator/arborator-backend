@@ -35,23 +35,33 @@ class GithubService:
     def base_header(access_token):
         return {"Authorization": "bearer " + access_token}
 
+
     @staticmethod
     def get_user_information(access_token):
         response = requests.get("https://api.github.com/user", headers = GithubService.base_header(access_token))
         data = response.json()
         return data
     
+
     @staticmethod
     def get_user_email(access_token) -> str:
         response = requests.get("https://api.github.com/user/emails", headers = GithubService.base_header(access_token))
         data = response.json()
         return data[0].get("email")
     
+    
     @staticmethod
-    def get_repositories(access_token) -> List[str]:
+    def get_repositories(access_token):
+        repositories = []
         response = requests.get("https://api.github.com/user/repos", headers = GithubService.base_header(access_token))
         data = response.json()
-        return [repo.get("full_name") for repo in data]
+        for repo in data:
+            repository = {}
+            repository["name"] = repo.get("full_name")
+            repository["owner_name"] = repo.get("owner").get("login")
+            repository["owner_avatar"] = repo.get("owner").get("avatar_url")
+            repositories.append(repository)
+        return repositories        
     
     
 
