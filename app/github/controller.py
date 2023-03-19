@@ -8,26 +8,31 @@ api = Namespace("Github", description="Endpoints for dealing with github reposit
 
 
 
-@api.route("/<string:projectName>/me/github")
+@api.route("/<string:project_name>/me/github")
 class GithubRepository(Resource):
-    def get(self, projectName):
+    def get(self, project_name):
         return GithubService.get_repositories(UserService.get_by_id(current_user.id).github_access_token)
 
-@api.route("/<string:projectName>/github-repository")
+@api.route("/<string:project_name>/<string:username>/github-repository")
 class SynchronizedGithubRepositoryController(Resource):
-    def get(self, project_name: str, user_id: str):
+    def get(self, project_name: str, username: str):
         project = ProjectService.get_by_name(project_name)
         ProjectService.check_if_project_exist(project)
-        return GithubRepositoryService.get_github_repository_per_user(user_id, project.id)
+        user_id = UserService.get_by_username(username).id
+        repository = GithubRepositoryService.get_github_repository_per_user(user_id, project.id)
+        return repository
     
-    def post(self, project_name: str, user_id: str):
+    def post(self, project_name: str):
         parser = reqparse.RequestParser()
         parser.add_argument(name="repositoryName")
+        parser.add_argument(name="username")
         args = parser.parse_args()
         repository_name = args.get("repositoryName")
+        username = args.get("username")
 
         project = ProjectService.get_by_name(project_name)
         ProjectService.check_if_project_exist(project)
+        user_id = UserService.get_by_username(username).id
         GithubRepositoryService.synchronize_github_repository(user_id, project.id, repository_name)
 
         return {"status": "success"}
