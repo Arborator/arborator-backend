@@ -22,14 +22,13 @@ class SynchronizedGithubRepositoryController(Resource):
         repository = GithubRepositoryService.get_github_repository_per_user(user_id, project.id)
         return repository
     
-    def post(self, project_name: str):
+    def post(self, project_name: str, username:str):
         parser = reqparse.RequestParser()
         parser.add_argument(name="repositoryName")
-        parser.add_argument(name="username")
+       
         args = parser.parse_args()
         repository_name = args.get("repositoryName")
-        username = args.get("username")
-
+    
         project = ProjectService.get_by_name(project_name)
         ProjectService.check_if_project_exist(project)
         user_id = UserService.get_by_username(username).id

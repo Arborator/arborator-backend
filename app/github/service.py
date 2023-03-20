@@ -12,7 +12,10 @@ class GithubRepositoryService:
     @staticmethod
     def get_github_repository_per_user(user_id, project_id):
         github_repository: GithubRepository = GithubRepository.query.filter(GithubRepository.user_id == user_id).filter(GithubRepository.project_id == project_id).first()
-        return github_repository.repository_name
+        if github_repository: 
+            return github_repository.repository_name
+        else: 
+            return ''
     
 
     @staticmethod
