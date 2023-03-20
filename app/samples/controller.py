@@ -202,10 +202,14 @@ DJANGO_BOOT_SERVER_URL = "http://calcul-kimgerdes.lisn.upsaclay.fr:8001"
 class BootParsing(Resource):
     def get(self, project_name: str):
         #test connexion
-        reply = requests.get(f"{DJANGO_BOOT_SERVER_URL}/testBoot/")
+        
         # reply = requests.get("http://127.0.0.1:8001/testBoot/")
-        try: return reply.text
-        except: return ""
+        try: 
+            reply = requests.get(f"{DJANGO_BOOT_SERVER_URL}/testBoot/")
+            return reply.text
+        except: 
+            print('controller.py parsing' reply)
+            return ""
 
     def post(self,  project_name: str):
         param = request.get_json(force=True)
@@ -238,12 +242,13 @@ class BootParsing(Resource):
             }
 
         # reply = requests.post("http://127.0.0.1:8001/conllus/", json = data)
-        reply = requests.post(f"{DJANGO_BOOT_SERVER_URL}/conllus/", json = data)
+        
         
 
         # return reply.text
         try:
-            print("########!!",reply.text)
+            reply = requests.post(f"{DJANGO_BOOT_SERVER_URL}/conllus/", json = data)
+            print("controller.py parsing ########!!",reply.text)
             reply = json.loads(reply.text)
             
         except:
@@ -258,12 +263,12 @@ class BootParsedResults(Resource):
         param = request.get_json(force=True)
         print(param)
         
-        reply = requests.post(f"{DJANGO_BOOT_SERVER_URL}/getResults/", data = {'projectFdname': param['fdname'], 'parser': param['parser']})
         # return reply.text
         try:
+            reply = requests.post(f"{DJANGO_BOOT_SERVER_URL}/getResults/", data = {'projectFdname': param['fdname'], 'parser': param['parser']})
             reply = json.loads(reply.text)
         except:
-            print(reply.text)
+            print('controller.py results' reply)
             return {"status" : "Error"}
 
         status = reply.get('status', None)
@@ -295,12 +300,12 @@ class BootParsedRemoveFolder(Resource):
         param = request.get_json(force=True)
         print(param)
         
-        reply = requests.post(f"{DJANGO_BOOT_SERVER_URL}/removeFolder/", data = {'projectFdname': param['fdname']})
         # return reply.text
         try:
+            reply = requests.post(f"{DJANGO_BOOT_SERVER_URL}/removeFolder/", data = {'projectFdname': param['fdname']})
             reply = json.loads(reply.text)
         except:
-            print(reply.text)
+            print('controller.py removeFolder' reply)
             return {"status" : "Error"}
         return reply
 
