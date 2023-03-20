@@ -204,7 +204,8 @@ class BootParsing(Resource):
         #test connexion
         reply = requests.get(f"{DJANGO_BOOT_SERVER_URL}/testBoot/")
         # reply = requests.get("http://127.0.0.1:8001/testBoot/")
-        return reply.text
+        try: return reply.text
+        except: return ""
 
     def post(self,  project_name: str):
         param = request.get_json(force=True)
@@ -238,10 +239,11 @@ class BootParsing(Resource):
 
         # reply = requests.post("http://127.0.0.1:8001/conllus/", json = data)
         reply = requests.post(f"{DJANGO_BOOT_SERVER_URL}/conllus/", json = data)
-        print("########!!",reply.text)
+        
 
         # return reply.text
         try:
+            print("########!!",reply.text)
             reply = json.loads(reply.text)
             
         except:
