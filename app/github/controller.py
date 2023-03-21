@@ -25,14 +25,17 @@ class SynchronizedGithubRepositoryController(Resource):
     def post(self, project_name: str, username:str):
         parser = reqparse.RequestParser()
         parser.add_argument(name="repositoryName")
-       
         args = parser.parse_args()
         repository_name = args.get("repositoryName")
-    
+
+        user_ids = {}
+        user_ids["default"] = username
         project = ProjectService.get_by_name(project_name)
         ProjectService.check_if_project_exist(project)
         user_id = UserService.get_by_username(username).id
+        github_access_token = UserService.get_by_id(current_user.id).github_access_token
         GithubRepositoryService.synchronize_github_repository(user_id, project.id, repository_name)
+        GithubService.import_files_from_github(github_access_token, repository_name, project_name,user_ids)
 
         return {"status": "success"}
 
