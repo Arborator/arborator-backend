@@ -223,6 +223,36 @@ class GrewService:
             else:
                 print("Error: {}".format(reply.get("message")))
         return sample_names, samplecontentfiles
+    
+    @staticmethod
+    def get_samples_with_string_contents_as_dict(project_name: str, sample_names: List[str], user: str) -> Dict[str, str]:
+        samples_dict_for_user: Dict[str, str] = {}
+        for sample_name in sample_names:
+            reply = grew_request(
+                "getConll",
+                data={"project_id": project_name, "sample_id": sample_name},
+            )
+            if reply.get("status") == "OK":
+
+                # {"sent_id_1":{"conlls":{"user_1":"conllstring"}}}
+                sample_tree = SampleExportService.servSampleTrees(reply.get("data", {}))
+                sample_tree_nots_noui = SampleExportService.servSampleTrees(reply.get("data", {}), timestamps=False, user_ids=False)
+                sample_content = SampleExportService.sampletree2contentfile(sample_tree_nots_noui)
+                for sent_id in sample_tree:
+                    last = SampleExportService.get_last_user(
+                        sample_tree[sent_id]["conlls"]
+                    )
+                    sample_content["last"] = sample_content.get("last", []) + [
+                        sample_tree_nots_noui[sent_id]["conlls"][last]
+                    ]
+
+                # gluing back the trees
+                sample_content["last"] = "\n".join(sample_content.get("last", ""))
+                samples_dict_for_user[sample_name] =sample_content.get(user, "")
+
+            else:
+                print("Error: {}".format(reply.get("message")))
+        return samples_dict_for_user
 
 
 
@@ -255,18 +285,20 @@ class SampleExportService:
         return trees
 
     @staticmethod
-    def sampletree2contentfile(tree):
+    def sampletree2contentfile(tree) -> Dict[str, str]:
         if isinstance(tree, str):
             tree = json.loads(tree)
-        usertrees = dict()
+        usertrees: Dict[str, List[str]] = {}
         for sentId in tree.keys():
             for user, conll in tree[sentId]["conlls"].items():
                 if user not in usertrees:
                     usertrees[user] = list()
                 usertrees[user].append(conll)
+        
+        to_return_obj = {}
         for user, content in usertrees.items():
-            usertrees[user] = "\n".join(usertrees[user])
-        return usertrees
+            to_return_obj[user] = "\n".join(content)
+        return to_return_obj
 
     @staticmethod
     def get_last_user(tree):

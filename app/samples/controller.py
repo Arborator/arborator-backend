@@ -196,6 +196,35 @@ class DeleteSampleResource(Resource):
             "status": "OK",
         }
 
+
+
+ARBORATOR_PARSER_URL = "http://calcul-kimgerdes.lisn.upsaclay.fr:8002"
+
+@api.route("/<string:project_name>/samples/parser/train")
+class BootParsing(Resource):
+    def post(self, project_name):
+        if project_name == "undefined":
+            return {"status" : "NOT VALID PROJECT NAME"}
+        
+        params = request.get_json(force=True)
+        train_samples_names = params["train_samples_names"]
+        train_user = params["train_user"]
+        max_epoch = params["max_epoch"]
+
+        train_samples = GrewService.get_samples_with_string_contents_as_dict(project_name, train_samples_names, train_user)
+
+        to_send_params = {
+            "project_name": project_name, 
+            "train_samples": train_samples, 
+            "max_epoch": max_epoch, 
+        }
+        print("KK to_send_params", to_send_params)
+        reply = requests.post(f"{ARBORATOR_PARSER_URL}/parser/models/train", json=to_send_params)
+        print("KK reply", reply)
+        # print("KK REPKY", json.loads(reply.text))
+        return {}
+
+
 DJANGO_BOOT_SERVER_URL = "http://calcul-kimgerdes.lisn.upsaclay.fr:8001"
 
 @api.route("/<string:project_name>/samples/parsing", methods = ['GET','POST'])
