@@ -201,12 +201,21 @@ DJANGO_BOOT_SERVER_URL = "http://calcul-kimgerdes.lisn.upsaclay.fr:8001"
 @api.route("/<string:project_name>/samples/parsing", methods = ['GET','POST'])
 class BootParsing(Resource):
     def get(self, project_name: str):
+        # return {"status" : "UNVALID NOW"}
+
         #test connexion
-        reply = requests.get(f"{DJANGO_BOOT_SERVER_URL}/testBoot/")
+        try: 
+            reply = requests.get(f"{DJANGO_BOOT_SERVER_URL}/testBoot/")
+            return reply.text
+        except: 
+            print('controller.py parsing', reply)
+            return "ERROR BootParsing #1"
         # reply = requests.get("http://127.0.0.1:8001/testBoot/")
-        return reply.text
 
     def post(self,  project_name: str):
+        if project_name == "undefined":
+            return {"status" : "NOT VALID PROJECT NAME"}
+
         param = request.get_json(force=True)
         #extract names of samples for training set and to parse  
         train_samp_names = param["samples"]
@@ -255,13 +264,13 @@ class BootParsedResults(Resource):
     def post(self,  project_name: str):
         param = request.get_json(force=True)
         print(param)
-        
-        reply = requests.post(f"{DJANGO_BOOT_SERVER_URL}/getResults/", data = {'projectFdname': param['fdname'], 'parser': param['parser']})
-        # return reply.text
+        if project_name == "undefined":
+            return {"status" : "NOT VALID PROJECT NAME"}
         try:
+            reply = requests.post(f"{DJANGO_BOOT_SERVER_URL}/getResults/", data = {'projectFdname': param['fdname'], 'parser': param['parser']})
             reply = json.loads(reply.text)
         except:
-            print(reply.text)
+            print("ERROR BOOTPARSER #2")
             return {"status" : "Error"}
 
         status = reply.get('status', None)
@@ -292,13 +301,14 @@ class BootParsedRemoveFolder(Resource):
     def post(self,  project_name: str):
         param = request.get_json(force=True)
         print(param)
+        if project_name == "undefined":
+            return {"status" : "NOT VALID PROJECT NAME"}
         
-        reply = requests.post(f"{DJANGO_BOOT_SERVER_URL}/removeFolder/", data = {'projectFdname': param['fdname']})
-        # return reply.text
         try:
+            reply = requests.post(f"{DJANGO_BOOT_SERVER_URL}/removeFolder/", data = {'projectFdname': param['fdname']})
             reply = json.loads(reply.text)
         except:
-            print(reply.text)
+            print("ERROR BOOTPARSER #3")
             return {"status" : "Error"}
         return reply
 
