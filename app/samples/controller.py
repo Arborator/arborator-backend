@@ -2,6 +2,7 @@ from importlib.resources import path
 import json
 import os
 import re
+from typing import Dict
 import requests 
 
 from flask.helpers import send_file
@@ -201,7 +202,7 @@ class DeleteSampleResource(Resource):
 ARBORATOR_PARSER_URL = "http://calcul-kimgerdes.lisn.upsaclay.fr:8002"
 
 @api.route("/<string:project_name>/samples/parser/train")
-class BootParsing(Resource):
+class BootParsingTrain(Resource):
     def post(self, project_name):
         if project_name == "undefined":
             return {"status" : "NOT VALID PROJECT NAME"}
@@ -218,11 +219,47 @@ class BootParsing(Resource):
             "train_samples": train_samples, 
             "max_epoch": max_epoch, 
         }
-        print("KK to_send_params", to_send_params)
+
         reply = requests.post(f"{ARBORATOR_PARSER_URL}/parser/models/train", json=to_send_params)
-        print("KK reply", reply)
-        # print("KK REPKY", json.loads(reply.text))
-        return {}
+        return reply.json()
+    
+
+@api.route("/<string:project_name>/samples/parser/parse")
+class BootParsingParse(Resource):
+    def post(self, project_name):
+        if project_name == "undefined":
+            return {"status" : "NOT VALID PROJECT NAME"}
+        
+        params = request.get_json(force=True)
+        to_parse_samples_names = params["to_parse_samples_names"]
+        model_id = params["model_id"]
+
+        to_parse_samples = GrewService.get_samples_with_string_contents_as_dict(project_name, to_parse_samples_names, "last")
+
+        to_send_params = {
+            "project_name": project_name, 
+            "model_id": model_id, 
+            "to_parse_samples": to_parse_samples, 
+        }
+
+        reply = requests.post(f"{ARBORATOR_PARSER_URL}/parser/models/parse", json=to_send_params)
+        data = reply.json()
+        parsed_conlls: Dict[str, str] = data["parsed_conlls"]
+
+        for conll_name, conll_content in parsed_conlls.items():
+            path_file = os.path.join(Config.UPLOAD_FOLDER, conll_name)
+            print('upload parsed\n', path_file)
+            with open(path_file,'w') as f:
+                f.write(conll_content)
+
+            add_or_keep_timestamps(path_file)
+
+            with open(path_file, "rb") as file_to_save:
+                print('save files')
+                GrewService.save_sample(project_name, conll_name, file_to_save)
+
+        return {"success": True, "model_info": data["model_info"]}
+
 
 
 DJANGO_BOOT_SERVER_URL = "http://calcul-kimgerdes.lisn.upsaclay.fr:8001"
