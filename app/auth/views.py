@@ -29,7 +29,7 @@ from ..user.service import UserService
 from ..user.interface import UserInterface
 from ..user.schema import UserSchema
 from ..user.model import User
-from ..github.service import GithubService , GithubRepositoryService
+from ..github.service import GithubService 
 
 
 authomatic = Authomatic(CONFIG, Config.SECRET_KEY, report_errors=True)

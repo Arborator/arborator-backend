@@ -1,20 +1,22 @@
 from flask_restx import Namespace, Resource, reqparse
 from ..projects.service import ProjectService
 from ..user.service import UserService
-from .service import GithubRepositoryService, GithubService
+from .service import GithubSynchronizationService, GithubService, GithubWorkflowService, GithubCommitStatusService
 from flask_login import current_user
 
 api = Namespace("Github", description="Endpoints for dealing with github repositories") 
 
 
 @api.route("/<string:project_name>/<string:username>/github-repository")
-class SynchronizedGithubRepositoryController(Resource):
+class GithubSynchronization(Resource):
+
     def get(self, project_name: str, username: str):
         project = ProjectService.get_by_name(project_name)
         ProjectService.check_if_project_exist(project)
         user_id = UserService.get_by_username(username).id
-        repository = GithubRepositoryService.get_github_repository_per_user(user_id, project.id)
+        repository = GithubSynchronizationService.get_github_synchronized_repository(user_id, project.id)
         return repository
+    
     
     def post(self, project_name: str, username:str):
         parser = reqparse.RequestParser()
@@ -22,22 +24,22 @@ class SynchronizedGithubRepositoryController(Resource):
         args = parser.parse_args()
         repository_name = args.get("repositoryName")
 
-        user_ids = {}
-        user_ids["default"] = username
+        
         project = ProjectService.get_by_name(project_name)
         ProjectService.check_if_project_exist(project)
         user_id = UserService.get_by_username(username).id
         github_access_token = UserService.get_by_id(current_user.id).github_access_token
-        GithubRepositoryService.synchronize_github_repository(user_id, project.id, repository_name)
-        GithubService.import_files_from_github(github_access_token, repository_name, project_name,user_ids)
+        GithubSynchronizationService.synchronize_github_repository(user_id, project.id, repository_name)
+        GithubWorkflowService.import_files_from_github(github_access_token, repository_name, project_name, username)
 
         return {"status": "success"}
     
+
     def delete(self, project_name: str, username: str):
         project = ProjectService.get_by_name(project_name)
         ProjectService.check_if_project_exist(project)
         user_id = UserService.get_by_username(username).id
-        GithubRepositoryService.delete_synchronization(user_id, project.id)
+        GithubSynchronizationService.delete_synchronization(user_id, project.id)
         
         return {"status": "success"}
 
@@ -79,4 +81,6 @@ class GithubCommit(Resource):
         github_message = args.get("message")
         repository_name = args.get("repositoryName")
         github_access_token = UserService.get_by_id(current_user.id).github_access_token
-        GithubService.commit_changes_repository(github_access_token, repository_name, project_name, github_message)
+        modified_samples = GithubCommitStatusService.get_modified_samples(ProjectService.get_by_name(project_name).id)
+        GithubWorkflowService.commit_changes(github_access_token, repository_name, modified_samples,project_name, username, github_message)
+        GithubCommitStatusService.reset_samples(ProjectService.get_by_name(project_name).id, modified_samples)
