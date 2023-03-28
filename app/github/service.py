@@ -46,7 +46,7 @@ class GithubWorkflowService:
     @staticmethod
     def import_files_from_github(access_token, full_name, project_name, username):
         repository_files = GithubService.get_repository_files(access_token, full_name)
-
+        GithubService.create_new_branch_arborator(access_token, full_name)
         for file in repository_files:
             sample_name, path_file = GithubWorkflowService.create_file_from_github_file_content(file.get('name'), file.get('download_url'))
             user_ids = GithubWorkflowService.preprocess_file(path_file,username)
@@ -90,11 +90,10 @@ class GithubWorkflowService:
     
     @staticmethod
     def commit_changes(access_token, full_name, updated_samples, project_name, username, message):
-        branch = GithubService.get_default_branch(access_token, full_name)
-        parent = GithubService.get_sha_base_tree(access_token, full_name, branch)
+        parent = GithubService.get_sha_base_tree(access_token, full_name, "arboratorgrew")
         tree = GithubService.create_tree(access_token,full_name, updated_samples, project_name, username, parent)
         sha = GithubService.create_commit(access_token, tree, parent, message, full_name)
-        response =GithubService.update_sha(access_token, full_name, branch, sha)
+        response =GithubService.update_sha(access_token, full_name, "arboratorgrew", sha)
         return response.json()
 
 
@@ -218,6 +217,17 @@ class GithubService:
         response = requests.post("https://api.github.com/user/repos", headers = GithubService.base_header(access_token), data = json.dumps(data) )
         return response
     
+
+    @staticmethod
+    def create_new_branch_arborator(access_token, full_name):
+        default_branch = GithubService.get_default_branch(access_token, full_name) 
+        sha = GithubService.get_sha_base_tree(access_token, full_name, default_branch)
+        data = {
+            "ref": "refs/heads/arboratorgrew",
+            "sha": sha
+        }
+        response = requests.post("https://api.github.com/repos/{}/git/refs".format(full_name), headers = GithubService.base_header(access_token), data = json.dumps(data))
+        return response.json()
 
 class GithubCommitStatusService:
     @staticmethod
