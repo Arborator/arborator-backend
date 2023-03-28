@@ -1,19 +1,17 @@
-from importlib.resources import path
 import json
 import os
 import re
-from typing import Dict
-import requests 
+import requests
 
 from flask.helpers import send_file
 
+from app import parser_config
 from app.projects.service import ProjectAccessService, ProjectService
 from app.user.service import UserService
 from app.utils.grew_utils import GrewService, SampleExportService, grew_request
 from app.config import Config
 from flask import Response, abort, current_app, request, send_from_directory
 from flask_restx import Namespace, Resource, reqparse
-# from openpyxl import Workbook
 
 from .model import SampleRole
 from .service import (
@@ -21,8 +19,9 @@ from .service import (
     SampleExerciseLevelService,
     SampleRoleService,
     SampleUploadService,
-    add_or_keep_timestamps,
+    add_or_keep_timestamps, add_or_replace_userid,
 )
+from ..utils.arborator_parser_utils import ArboratorParserAPI
 
 api = Namespace(
     "Samples", description="Endpoints for dealing with samples of project"
@@ -199,184 +198,97 @@ class DeleteSampleResource(Resource):
 
 
 
-ARBORATOR_PARSER_URL = "http://calcul-kimgerdes.lisn.upsaclay.fr:8002"
-
-@api.route("/<string:project_name>/samples/parser/train")
-class BootParsingTrain(Resource):
+@api.route("/<string:project_name>/samples/parser/train/start")
+class ParserTrainStartResource(Resource):
     def post(self, project_name):
         if project_name == "undefined":
             return {"status" : "NOT VALID PROJECT NAME"}
-        
+
         params = request.get_json(force=True)
+        print("<PARSER> train/start request :", params)
         train_samples_names = params["train_samples_names"]
         train_user = params["train_user"]
         max_epoch = params["max_epoch"]
 
         train_samples = GrewService.get_samples_with_string_contents_as_dict(project_name, train_samples_names, train_user)
 
-        to_send_params = {
-            "project_name": project_name, 
-            "train_samples": train_samples, 
-            "max_epoch": max_epoch, 
-        }
+        return ArboratorParserAPI.train_start(project_name, train_samples, max_epoch)
 
-        reply = requests.post(f"{ARBORATOR_PARSER_URL}/parser/models/train", json=to_send_params)
-        return reply.json()
-    
 
-@api.route("/<string:project_name>/samples/parser/parse")
-class BootParsingParse(Resource):
+
+@api.route("/<string:project_name>/samples/parser/train/status")
+class ParserTrainStatusResource(Resource):
+    def post(self, project_name):
+        if project_name == "undefined":
+            return {"status": "NOT VALID PROJECT NAME"}
+
+        params = request.get_json(force=True)
+        print("<PARSER> parser/info request :", params)
+
+        model_info = params["model_info"]
+        model_id = model_info["model_id"]
+
+        return ArboratorParserAPI.train_status(project_name, model_id)
+
+
+
+@api.route("/<string:project_name>/samples/parser/parse/start")
+class ParserParseStartResource(Resource):
     def post(self, project_name):
         if project_name == "undefined":
             return {"status" : "NOT VALID PROJECT NAME"}
-        
         params = request.get_json(force=True)
+        print("<PARSER> parse/start request :", params)
+
         to_parse_samples_names = params["to_parse_samples_names"]
         model_id = params["model_id"]
 
         to_parse_samples = GrewService.get_samples_with_string_contents_as_dict(project_name, to_parse_samples_names, "last")
 
-        to_send_params = {
-            "project_name": project_name, 
-            "model_id": model_id, 
-            "to_parse_samples": to_parse_samples, 
-        }
-
-        reply = requests.post(f"{ARBORATOR_PARSER_URL}/parser/models/parse", json=to_send_params)
-        data = reply.json()
-        parsed_conlls: Dict[str, str] = data["parsed_conlls"]
-
-        for conll_name, conll_content in parsed_conlls.items():
-            path_file = os.path.join(Config.UPLOAD_FOLDER, conll_name)
-            print('upload parsed\n', path_file)
-            with open(path_file,'w') as f:
-                f.write(conll_content)
-
-            add_or_keep_timestamps(path_file)
-
-            with open(path_file, "rb") as file_to_save:
-                print('save files')
-                GrewService.save_sample(project_name, conll_name, file_to_save)
-
-        return {"success": True, "model_info": data["model_info"]}
+        return ArboratorParserAPI.parse_start(project_name, model_id, to_parse_samples)
 
 
-
-DJANGO_BOOT_SERVER_URL = "http://calcul-kimgerdes.lisn.upsaclay.fr:8001"
-
-@api.route("/<string:project_name>/samples/parsing", methods = ['GET','POST'])
-class BootParsing(Resource):
-    def get(self, project_name: str):
-        # return {"status" : "UNVALID NOW"}
-
-        #test connexion
-        try: 
-            reply = requests.get(f"{DJANGO_BOOT_SERVER_URL}/testBoot/")
-            return reply.text
-        except: 
-            print('controller.py parsing', reply)
-            return "ERROR BootParsing #1"
-        # reply = requests.get("http://127.0.0.1:8001/testBoot/")
-
-    def post(self,  project_name: str):
+@api.route("/<string:project_name>/samples/parser/parse/status")
+class ParserParseStatus(Resource):
+    def post(self, project_name):
         if project_name == "undefined":
-            return {"status" : "NOT VALID PROJECT NAME"}
+            return {"status": "NOT VALID PROJECT NAME"}
+        params = request.get_json(force=True)
+        print("<PARSER> parse/status request :", params)
+        model_id = params["model_id"]
+        parse_task_id = params["parse_task_id"]
+        parser_suffix = params["parser_suffix"]
 
-        param = request.get_json(force=True)
-        #extract names of samples for training set and to parse  
-        train_samp_names = param["samples"]
-        training_user = param["training_user"]
-        grew_samples = GrewService.get_samples(project_name)
-        all_sample_names = [grew_sample["name"] for grew_sample in grew_samples]
+        parse_status_reply = ArboratorParserAPI.parse_status(parse_task_id)
+        if parse_status_reply["status"] == "failure":
+            return parse_status_reply
 
-        default_to_parse = all_sample_names if param['to_parse'] == 'ALL' else param['to_parse']
+        else:
+            data = parse_status_reply["data"]
+            if data["ready"]:
+                task_model_info = data["result"]["model_info"]
+                task_parsed_samples = data["result"]["parsed_samples"]
 
-        #get samples 
-        train_name, train_set = GrewService.get_samples_with_string_contents(project_name, train_samp_names)
-        train_set = [sample.get(training_user, "") for sample in train_set]
-        #TODO assure parse_name not empty
-        parse_name, to_parse = GrewService.get_samples_with_string_contents(project_name, default_to_parse) 
-        to_parse = [sample.get("last", "") for sample in to_parse]
-        # return to_parse
-        data = {
-            'project_name': project_name,
-            'train_name': train_name, 
-            'train_set': train_set, 
-            'parse_name': parse_name,
-            'to_parse': to_parse, 
-            'training_user': training_user,
-            'dev': param['dev'],
-            'epochs': param['epoch'],
-            'parser': param['parser'],
-            'keep_pos': param['keep_pos'],
-            }
+                if task_model_info["model_id"] == model_id and task_model_info["project_name"] == project_name:
 
-        # reply = requests.post("http://127.0.0.1:8001/conllus/", json = data)
-        reply = requests.post(f"{DJANGO_BOOT_SERVER_URL}/conllus/", json = data)
-        print("########!!",reply.text)
+                    for sample_name, sample_content in task_parsed_samples.items():
+                        path_file = os.path.join(Config.UPLOAD_FOLDER, sample_name)
+                        print('upload parsed\n', path_file)
+                        with open(path_file,'w') as f:
+                            f.write(sample_content)
 
-        # return reply.text
-        try:
-            reply = json.loads(reply.text)
-            
-        except:
-            return {"datasetStatus" : "Failed"}
+                        add_or_keep_timestamps(path_file, when="long_ago")
+                        add_or_replace_userid(path_file, "parser" + parser_suffix)
+                        print("KK GREW SAVING", "parser" + parser_suffix)
+                        with open(path_file, "rb") as file_to_save:
+                            print('save files')
+                            GrewService.save_sample(project_name, sample_name, file_to_save)
 
-        return reply
+                    return {"status": "success", "data": {"ready": True, "model_info": task_model_info}}
+            else:
+                return {"status": "success", "data": {"ready": False}}
 
-
-@api.route("/<string:project_name>/samples/parsing/results", methods = ['POST'])
-class BootParsedResults(Resource):
-    def post(self,  project_name: str):
-        param = request.get_json(force=True)
-        print(param)
-        if project_name == "undefined":
-            return {"status" : "NOT VALID PROJECT NAME"}
-        try:
-            reply = requests.post(f"{DJANGO_BOOT_SERVER_URL}/getResults/", data = {'projectFdname': param['fdname'], 'parser': param['parser']})
-            reply = json.loads(reply.text)
-        except:
-            print("ERROR BOOTPARSER #2")
-            return {"status" : "Error"}
-
-        status = reply.get('status', None)
-        if 'error' in status.lower():
-            return {"status" : "Error"}
-
-        if status.lower() == 'fin':
-            filenames = reply.get('parsed_names', '')
-            files = reply.get('parsed_files', '')
-            print(len(filenames))
-
-            for fname, fcontent in zip(filenames, files):
-                path_file = os.path.join(Config.UPLOAD_FOLDER, fname)
-                print('upload parsed\n', path_file)
-                with open(path_file,'w') as f:
-                    f.write(fcontent)
-
-                add_or_keep_timestamps(path_file)
-
-                with open(path_file, "rb") as file_to_save:
-                    print('save files')
-                    GrewService.save_sample(project_name, fname, file_to_save)
-        return reply
-
-
-@api.route("/<string:project_name>/samples/parsing/removeFolder", methods = ['POST', 'PUT'])
-class BootParsedRemoveFolder(Resource):
-    def post(self,  project_name: str):
-        param = request.get_json(force=True)
-        print(param)
-        if project_name == "undefined":
-            return {"status" : "NOT VALID PROJECT NAME"}
-        
-        try:
-            reply = requests.post(f"{DJANGO_BOOT_SERVER_URL}/removeFolder/", data = {'projectFdname': param['fdname']})
-            reply = json.loads(reply.text)
-        except:
-            print("ERROR BOOTPARSER #3")
-            return {"status" : "Error"}
-        return reply
+            return {"status": "failure", "error": "unknown error in ParserParseStatus"}
 
 
 

@@ -7,6 +7,7 @@ from flask_migrate import Migrate
 
 from app.klang.config import KlangConfig
 from app.utils.grew_config import GrewConfig
+from app.utils.arborator_parser_config import ParserConfig
 
 db = SQLAlchemy()
 login_manager = LoginManager()
@@ -14,15 +15,17 @@ migrate = Migrate()
 
 klang_config = KlangConfig()
 grew_config = GrewConfig()
+parser_config = ParserConfig()
 
 def create_app(env=None):
     from app.config import config_by_name
     from app.routes import register_routes
     app_env = env or "test"
     app = Flask(__name__, instance_relative_config=False)
-    app.config.from_object(config_by_name[env or "test"])
-    klang_config.set_path(env or "test")
-    grew_config.set_url(env or "test")
+    app.config.from_object(config_by_name[app_env])
+    klang_config.set_path(app_env)
+    grew_config.set_url(app_env)
+    parser_config.set_url(app_env)
 
     api = Api(
         app,

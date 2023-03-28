@@ -28,9 +28,9 @@ def grew_request(fct_name, data={}, files={}):
         abort(500, {"message": error_message})
     response = json.loads(response.text)
     if response.get("status") != "OK":
-        if "data" in response:
+        if response.get("data", None):
             message = str(response["data"])
-        elif "message" in response:
+        elif response.get("message", None):
             message = str(response["message"]) # should already be a string
             if 'Conllx_error' in message:
                 try:
@@ -49,9 +49,13 @@ def grew_request(fct_name, data={}, files={}):
                     message = '<br>'.join(messages)
                 except:
                     pass # just dump the message as raw. better than nothing...
+
+        elif response.get("messages", None):
+            message = "; ".join(response["messages"])
         else:
             message = "unknown grew servor error"
-        abort(406, message) # GREW ERROR = 418
+        abort(406, "GREW-ERROR : " + message) # GREW ERROR = 418
+        print("GREW-ERROR : " + message)
     return response
 
 

@@ -1,5 +1,5 @@
-from typing import List
-from conllup.conllup import sentenceConllToJson
+from typing import List, Literal
+from conllup.conllup import sentenceConllToJson, readConlluFile, writeConlluFile
 import os
 import re
 
@@ -335,26 +335,22 @@ def convert_users_ids(path_file, users_ids_convertor):
     return nrtoks
 
 
-def add_or_keep_timestamps(path_file: str):
+def add_or_keep_timestamps(path_file: str, when: Literal["now", "long_ago"] = "now"):
     """ adds a timestamp on the tree if there is not one """
-    conll_string = read_conll_from_disk(path_file)
-    conlls_strings = split_conll_string_to_conlls_list(conll_string)
-    conlls_string_modified = []
-    for conll_string in conlls_strings:
-        if conll_string == "":
-            continue
-        conll_lines_modified = []
-        now = datetime.now()
-        # int  millisecondes
-        timestamp = datetime.timestamp(now) * 1000
-        for line in conll_string.rstrip().split("\n"):
-            if "# timestamp = " in line:
-                timestamp = line.split("# timestamp = ")[-1]
-            else:
-                conll_lines_modified.append(line)
-        conll_lines_modified = ["# timestamp = {}".format(timestamp)] + conll_lines_modified
-        conlls_string_modified.append("\n".join(conll_lines_modified))
+    sentences_json = readConlluFile(path_file, keepEmptyTrees=True)
+    timestamp_str = str(datetime.timestamp(datetime.now()) * 1000)
+    if when == "long_ago":
+        timestamp_str = 0
+    for sentence_json in sentences_json:
+        sentence_json["metaJson"]["timestamp"] = sentence_json["metaJson"].get("timestamp", timestamp_str)
+    writeConlluFile(path_file, sentences_json, overwrite=True)
 
-    new_file_string = "\n\n".join(conlls_string_modified)
-    write_conll_on_disk(path_file, new_file_string)
-    return 
+
+def add_or_replace_userid(path_file: str, new_user_id: str):
+    """ adds a userid on the tree or replace it if already has one """
+    sentences_json = readConlluFile(path_file, keepEmptyTrees=True)
+    for sentence_json in sentences_json:
+        sentence_json["metaJson"]["user_id"] = new_user_id
+    writeConlluFile(path_file, sentences_json, overwrite=True)
+
+
