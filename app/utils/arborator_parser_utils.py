@@ -1,4 +1,4 @@
-from typing import Dict, TypedDict
+from typing import Dict, TypedDict, Union
 import requests
 
 from app import parser_config
@@ -47,11 +47,12 @@ class ArboratorParserAPI:
         return ArboratorParserAPI.send_get_request("/list")
 
     @staticmethod
-    def train_start(project_name: str, train_samples: Dict[str, str], max_epoch: int):
+    def train_start(project_name: str, train_samples: Dict[str, str], max_epoch: int, base_model: Union[ModelInfo_t, None]):
         data = {
             "project_name": project_name,
             "train_samples": train_samples,
             "max_epoch": max_epoch,
+            "base_model": base_model,
         }
         return ArboratorParserAPI.send_post_request("/train/start", data)
 

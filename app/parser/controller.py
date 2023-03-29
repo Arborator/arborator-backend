@@ -1,5 +1,5 @@
 import os
-from typing import TypedDict, List
+from typing import TypedDict, List, Union
 
 from app.utils.grew_utils import GrewService
 from app.config import Config
@@ -7,15 +7,10 @@ from flask import request
 from flask_restx import Namespace, Resource
 
 from ..samples.service import add_or_keep_timestamps, add_or_replace_userid
-from ..utils.arborator_parser_utils import ArboratorParserAPI
-
+from ..utils.arborator_parser_utils import ArboratorParserAPI, ModelInfo_t
 
 api = Namespace("Parser", description="Endpoints for dealing with the parser")  # noqa
 
-
-class ModelInfoFull_t(TypedDict):
-    model_id: str
-    project_name: str
 
 @api.route("/list")
 class ParserTrainStartResource(Resource):
@@ -24,22 +19,30 @@ class ParserTrainStartResource(Resource):
         return ArboratorParserAPI.list()
 
 
+class ParserTrainStart_ED(TypedDict):
+    project_name: str
+    train_samples_names: List[str]
+    train_user: str
+    max_epoch: int
+    base_model: Union[None, ModelInfo_t]
+
 @api.route("/train/start")
 class ParserTrainStartResource(Resource):
     def post(self):
-        params = request.get_json(force=True)
+        params: ParserTrainStart_ED = request.get_json(force=True)
         print("<PARSER> train/start request :", params)
         project_name = params["project_name"]
         train_samples_names = params["train_samples_names"]
         train_user = params["train_user"]
         max_epoch = params["max_epoch"]
+        base_model = params["base_model"]
 
         if project_name == "undefined":
             return {"status": "failure", "error": "NOT VALID PROJECT NAME"}
 
         train_samples = GrewService.get_samples_with_string_contents_as_dict(project_name, train_samples_names, train_user)
 
-        return ArboratorParserAPI.train_start(project_name, train_samples, max_epoch)
+        return ArboratorParserAPI.train_start(project_name, train_samples, max_epoch, base_model)
 
 
 
