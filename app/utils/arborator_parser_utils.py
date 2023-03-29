@@ -10,10 +10,11 @@ class ArboratorParserAPI:
         url = f"{parser_config.server}/parser/models{url_suffix}"
         try:
             reply = requests.post(url, json=data, timeout=10)
-            return {"status": "success", data: reply.json()}
+            return reply.json()
         except requests.exceptions.ReadTimeout:
             return {"status": "failure", "error": f"<ArboratorParserAPI> connection timout with `url={url}`"}
         except Exception as e:
+            print(f"<ArboratorParserAPI> unknown error when connecting `url={url}` : {str(e)}", e)
             return {"status": "failure", "error": f"<ArboratorParserAPI> unknown error when connecting `url={url}` : {str(e)}"}
 
     @staticmethod

@@ -105,9 +105,9 @@ class ParserParseStatus(Resource):
                             print('save files')
                             GrewService.save_sample(project_name, sample_name, file_to_save)
 
-                    return {"status": "success", "data": {"ready": True, "model_info": task_model_info}}
+                    return {"status": "success", "data": {"task_status": "READY", "model_info": task_model_info}}
             else:
-                return {"status": "success", "data": {"ready": False}}
+                return {"status": "success", "data": {"task_status": "PARSING"}}
 
             return {"status": "failure", "error": "unknown error in ParserParseStatus"}
 
