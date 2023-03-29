@@ -1,4 +1,5 @@
 import os
+from typing import TypedDict, List
 
 from app.utils.grew_utils import GrewService
 from app.config import Config
@@ -10,6 +11,17 @@ from ..utils.arborator_parser_utils import ArboratorParserAPI
 
 
 api = Namespace("Parser", description="Endpoints for dealing with the parser")  # noqa
+
+
+class ModelInfoFull_t(TypedDict):
+    model_id: str
+    project_name: str
+
+@api.route("/list")
+class ParserTrainStartResource(Resource):
+    def get(self):
+        print("<PARSER> list/start request")
+        return ArboratorParserAPI.list()
 
 
 @api.route("/train/start")

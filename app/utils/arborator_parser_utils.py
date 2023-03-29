@@ -6,16 +6,41 @@ from app import parser_config
 
 class ArboratorParserAPI:
     @staticmethod
-    def send_post_request(url_suffix: str, data: Dict):
+    def send_get_request(url_suffix: str):
         url = f"{parser_config.server}/parser/models{url_suffix}"
         try:
-            reply = requests.post(url, json=data, timeout=10)
+            reply = requests.get(url, timeout=10)
             return reply.json()
         except requests.exceptions.ReadTimeout:
             return {"status": "failure", "error": f"<ArboratorParserAPI> connection timout with `url={url}`"}
         except Exception as e:
             print(f"<ArboratorParserAPI> unknown error when connecting `url={url}` : {str(e)}", e)
             return {"status": "failure", "error": f"<ArboratorParserAPI> unknown error when connecting `url={url}` : {str(e)}"}
+
+
+    @staticmethod
+    def send_post_request(url_suffix: str, data: Dict):
+        url = f"{parser_config.server}/parser/models{url_suffix}"
+        try:
+            reply = requests.post(url, json=data, timeout=10)
+            data = reply.json()
+            if data.get("schema_errors"):
+                return {
+                    "status": "failure",
+                    "error": f"<ArboratorParserSchemaValidation> You have a problem with at least one of the sentence "
+                             f"you sent",
+                    "schema_errors": data.get("schema_errors"),
+                        }
+            return data
+        except requests.exceptions.ReadTimeout:
+            return {"status": "failure", "error": f"<ArboratorParserAPI> connection timout with `url={url}`"}
+        except Exception as e:
+            print(f"<ArboratorParserAPI> unknown error when connecting `url={url}` : {str(e)}", e)
+            return {"status": "failure", "error": f"<ArboratorParserAPI> unknown error when connecting `url={url}` : {str(e)}"}
+
+    @staticmethod
+    def list():
+        return ArboratorParserAPI.send_get_request("/list")
 
     @staticmethod
     def train_start(project_name: str, train_samples: Dict[str, str], max_epoch: int):
