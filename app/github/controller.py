@@ -1,4 +1,5 @@
 from flask_restx import Namespace, Resource, reqparse
+from flask import request
 from ..projects.service import ProjectService
 from ..user.service import UserService
 from .service import GithubSynchronizationService, GithubService, GithubWorkflowService, GithubCommitStatusService
@@ -7,7 +8,7 @@ from flask_login import current_user
 api = Namespace("Github", description="Endpoints for dealing with github repositories") 
 
 
-@api.route("/<string:project_name>/<string:username>/github-repository")
+@api.route("/<string:project_name>/<string:username>/synchronize-github")
 class GithubSynchronization(Resource):
 
     def get(self, project_name: str, username: str):
@@ -21,16 +22,18 @@ class GithubSynchronization(Resource):
     def post(self, project_name: str, username:str):
         parser = reqparse.RequestParser()
         parser.add_argument(name="repositoryName")
+        parser.add_argument(name="branch")
         args = parser.parse_args()
-        repository_name = args.get("repositoryName")
 
+        repository_name = args.get("repositoryName")
+        branch = args.get("branch")
         
         project = ProjectService.get_by_name(project_name)
         ProjectService.check_if_project_exist(project)
         user_id = UserService.get_by_username(username).id
         github_access_token = UserService.get_by_id(current_user.id).github_access_token
         GithubSynchronizationService.synchronize_github_repository(user_id, project.id, repository_name)
-        GithubWorkflowService.import_files_from_github(github_access_token, repository_name, project_name, username)
+        GithubWorkflowService.import_files_from_github(github_access_token, repository_name, project_name, username, branch)
 
         return {"status": "success"}
     
@@ -44,12 +47,12 @@ class GithubSynchronization(Resource):
         return {"status": "success"}
 
     
-@api.route("/<string:project_name>/me/github")
+@api.route("/<string:project_name>/<string:username>/github")
 class GithubRepository(Resource):
-    def get(self, project_name):
-        return GithubService.get_repositories(UserService.get_by_id(current_user.id).github_access_token)
+    def get(self, project_name, username):
+        return GithubService.get_repositories(UserService.get_by_username(username).github_access_token)
     
-    def post(self, project_name):
+    def post(self, project_name, username):
 
         parser = reqparse.RequestParser()
         parser.add_argument(name="repositoryName")
@@ -65,12 +68,26 @@ class GithubRepository(Resource):
             "name" : name,
             "description": description,
             "private": private
-        }
-        github_access_token = UserService.get_by_id(current_user.id).github_access_token
+        } 
+        github_access_token = UserService.get_by_username(username).github_access_token
         GithubService.create_github_repository(github_access_token, data)
+
+
+@api.route("/<string:project_name>/<string:username>/github/branch")
+class GithubRepositoryBranch(Resource):
+    def get(self, project_name, username):
+
+        parser = reqparse.RequestParser()
+        parser.add_argument(name="full_name")
+        args = parser.parse_args()
+        full_name = args.get("full_name")
+
+        github_access_token = UserService.get_by_username(username).github_access_token
+        return GithubService.list_branches_repository(github_access_token, full_name)
+
         
 
-@api.route("/<string:project_name>/<string:username>/commit")
+@api.route("/<string:project_name>/<string:username>/synchronize-github/commit")
 class GithubCommit(Resource):
     def post(self, project_name:str, username: str):
 

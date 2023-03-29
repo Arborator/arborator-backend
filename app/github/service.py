@@ -2,6 +2,8 @@ import os
 import requests
 import base64
 import json
+import re 
+from datetime import datetime
 from flask import abort
 from app import db
 from typing import List
@@ -43,15 +45,19 @@ class GithubSynchronizationService:
 
 
 class GithubWorkflowService:
+
+    
     @staticmethod
-    def import_files_from_github(access_token, full_name, project_name, username):
-        repository_files = GithubService.get_repository_files(access_token, full_name)
-        GithubService.create_new_branch_arborator(access_token, full_name)
+    def import_files_from_github(access_token, full_name, project_name, username, branch):
+        extension = re.compile(r"\.(conll(u|\d+)?|txt|tsv|csv)$")
+        repository_files = GithubService.get_repository_files_from_specific_branch(access_token, full_name, branch)
+        GithubService.create_new_branch_arborator(access_token, full_name, branch)
         for file in repository_files:
             sample_name, path_file = GithubWorkflowService.create_file_from_github_file_content(file.get('name'), file.get('download_url'))
-            user_ids = GithubWorkflowService.preprocess_file(path_file,username)
-            GithubWorkflowService.create_sample(sample_name, path_file, project_name, user_ids)
-            GithubCommitStatusService.create(ProjectService.get_by_name(project_name).id, sample_name)
+            if extension.search(path_file):
+                user_ids = GithubWorkflowService.preprocess_file(path_file,username)
+                GithubWorkflowService.create_sample(sample_name, path_file, project_name, user_ids)
+                GithubCommitStatusService.create(ProjectService.get_by_name(project_name).id, sample_name)
 
     
     @staticmethod 
@@ -138,10 +144,17 @@ class GithubService:
             repositories.append(repository)
         return repositories  
     
-          
+
+    @staticmethod
+    def list_branches_repository(access_token, full_name) -> List[str]:
+        response = requests.get("https://api.github.com/repos/{}/branches".format(full_name), headers = GithubService.base_header(access_token)) 
+        data = response.json()
+        return [branch.get("name") for branch in data if "dependabot" not in branch.get("name")]
+
+
     @staticmethod    
-    def get_repository_files(access_token, full_name):
-        response = requests.get("https://api.github.com/repos/{}/contents".format(full_name), headers = GithubService.base_header(access_token))
+    def get_repository_files_from_specific_branch(access_token, full_name, branch):
+        response = requests.get("https://api.github.com/repos/{}/contents/?ref={}".format(full_name, branch), headers = GithubService.base_header(access_token))
         data = response.json()
         return data
     
@@ -219,8 +232,7 @@ class GithubService:
     
 
     @staticmethod
-    def create_new_branch_arborator(access_token, full_name):
-        default_branch = GithubService.get_default_branch(access_token, full_name) 
+    def create_new_branch_arborator(access_token, full_name, default_branch):
         sha = GithubService.get_sha_base_tree(access_token, full_name, default_branch)
         data = {
             "ref": "refs/heads/arboratorgrew",
@@ -237,7 +249,6 @@ class GithubCommitStatusService:
             "project_id": project_id,
             "changes_number": 0,
         }
-        print(commit_status)
         github_commit_status = GithubCommitStatus(**commit_status)
         db.session.add(github_commit_status)
         db.session.commit()
