@@ -1,8 +1,12 @@
-from typing import Dict
+from typing import Dict, TypedDict
 import requests
 
 from app import parser_config
 
+
+class ModelInfo_t(TypedDict):
+    project_name: str
+    model_id: str
 
 class ArboratorParserAPI:
     @staticmethod
@@ -52,18 +56,16 @@ class ArboratorParserAPI:
         return ArboratorParserAPI.send_post_request("/train/start", data)
 
     @staticmethod
-    def train_status(project_name: str, model_id: str):
+    def train_status(model_info: ModelInfo_t):
         data = {
-            "project_name": project_name,
-            "model_id": model_id,
+            "model_info": model_info,
         }
         return ArboratorParserAPI.send_post_request("/train/status", data)
 
     @staticmethod
-    def parse_start(project_name: str, model_id: str, to_parse_samples: Dict[str, str]):
+    def parse_start(model_info: ModelInfo_t, to_parse_samples: Dict[str, str]):
         data = {
-            "project_name": project_name,
-            "model_id": model_id,
+            "model_info": model_info,
             "to_parse_samples": to_parse_samples,
         }
         return ArboratorParserAPI.send_post_request("/parse/start", data)

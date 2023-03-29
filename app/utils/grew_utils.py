@@ -54,8 +54,8 @@ def grew_request(fct_name, data={}, files={}):
             message = "; ".join(response["messages"])
         else:
             message = "unknown grew servor error"
-        abort(406, "GREW-ERROR : " + message) # GREW ERROR = 418
         print("GREW-ERROR : " + message)
+        abort(406, "GREW-ERROR : " + message) # GREW ERROR = 418
     return response
 
 
