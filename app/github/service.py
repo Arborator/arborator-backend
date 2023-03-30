@@ -177,7 +177,12 @@ class GithubService:
     def get_sha_base_tree(access_token, full_name, branch):
         response = requests.get("https://api.github.com/repos/{}/git/refs/heads/{}".format(full_name, branch), headers = GithubService.base_header(access_token))
         data = response.json()
-        return data.get("object").get("sha")
+        try:
+            return data.get("object").get("sha")
+        except:
+            abort(400, "The Github repository doesn't exist anymore") 
+           
+        
     
     
     @staticmethod
@@ -207,6 +212,7 @@ class GithubService:
         data = {"tree": tree, "base_tree": base_tree}
         response = requests.post("https://api.github.com/repos/{}/git/trees".format(full_name), headers = GithubService.base_header(access_token), data = json.dumps(data) )
         data = response.json()
+        print(data)
         return data.get("sha")
         
     
