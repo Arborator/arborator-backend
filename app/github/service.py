@@ -49,15 +49,18 @@ class GithubWorkflowService:
     
     @staticmethod
     def import_files_from_github(access_token, full_name, project_name, username, branch):
-        extension = re.compile(r"\.(conll(u|\d+)?|txt|tsv|csv)$")
+        extension = re.compile("^.*\.(conllu)$")
         repository_files = GithubService.get_repository_files_from_specific_branch(access_token, full_name, branch)
-        GithubService.create_new_branch_arborator(access_token, full_name, branch)
-        for file in repository_files:
+        conll_files = [file for file in repository_files if (extension.search(file.get('name')))]
+        if not conll_files:
+            abort(400, "No conll Files in this repository")
+        for file in conll_files:
             sample_name, path_file = GithubWorkflowService.create_file_from_github_file_content(file.get('name'), file.get('download_url'))
             if extension.search(path_file):
                 user_ids = GithubWorkflowService.preprocess_file(path_file,username)
                 GithubWorkflowService.create_sample(sample_name, path_file, project_name, user_ids)
                 GithubCommitStatusService.create(ProjectService.get_by_name(project_name).id, sample_name)
+        GithubService.create_new_branch_arborator(access_token, full_name, branch)
 
     
     @staticmethod 
