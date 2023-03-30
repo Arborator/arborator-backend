@@ -1,8 +1,9 @@
 import json
 import re
 
-from app.projects.service import LastAccessService
+from app.projects.service import LastAccessService, ProjectService
 from app.user.service import UserService
+from app.github.service import GithubCommitStatusService
 from app.utils.grew_utils import GrewService, grew_request
 from flask import Response, abort, current_app, request
 from flask_login import current_user
@@ -36,6 +37,8 @@ class ApplyRuleResource(Resource):
                         "sent_id": sent_id,
                         "conll_graph": list(sentence['conlls'].values())[0],
                     })
+                    project = ProjectService.get_by_name(project_name)
+                    GithubCommitStatusService.update(project.id, sample_name)
 
         LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
         return {"status": "success"}
