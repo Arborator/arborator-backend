@@ -254,6 +254,7 @@ class GithubCommitStatusService:
         db.session.commit()
         return github_commit_status
 
+
     @staticmethod
     def update(project_id, sample_name):
         github_commit_status: GithubCommitStatus = GithubCommitStatus.query.filter(GithubCommitStatus.project_id == project_id).filter(GithubCommitStatus.sample_name == sample_name).first()
@@ -261,11 +262,20 @@ class GithubCommitStatusService:
             github_commit_status.changes_number = github_commit_status.changes_number + 1
             db.session.commit()
     
+
+    @staticmethod
     def get_modified_samples(project_id) -> List[str]:
         modified_samples = GithubCommitStatus.query.filter(GithubCommitStatus.project_id == project_id).filter(GithubCommitStatus.changes_number > 0)
         return [modified_sample.sample_name for modified_sample in modified_samples]
     
 
+    @staticmethod
+    def get_changes_number(project_id):
+        modified_samples = GithubCommitStatus.query.filter(GithubCommitStatus.project_id == project_id).filter(GithubCommitStatus.changes_number > 0)
+        return sum(modified_sample.changes_number for modified_sample in modified_samples)
+        
+        
+    @staticmethod
     def reset_samples(project_id, modified_samples):
         for sample_name in modified_samples:
             github_commit_status: GithubCommitStatus = GithubCommitStatus.query.filter(GithubCommitStatus.project_id == project_id).filter(GithubCommitStatus.sample_name == sample_name).first()

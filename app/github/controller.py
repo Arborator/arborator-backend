@@ -49,10 +49,10 @@ class GithubSynchronization(Resource):
     
 @api.route("/<string:project_name>/<string:username>/github")
 class GithubRepository(Resource):
-    def get(self, project_name, username):
+    def get(self, project_name: str, username: str):
         return GithubService.get_repositories(UserService.get_by_username(username).github_access_token)
     
-    def post(self, project_name, username):
+    def post(self, project_name: str, username: str):
 
         parser = reqparse.RequestParser()
         parser.add_argument(name="repositoryName")
@@ -75,7 +75,7 @@ class GithubRepository(Resource):
 
 @api.route("/<string:project_name>/<string:username>/github/branch")
 class GithubRepositoryBranch(Resource):
-    def get(self, project_name, username):
+    def get(self, project_name: str, username: str):
 
         parser = reqparse.RequestParser()
         parser.add_argument(name="full_name")
@@ -89,15 +89,21 @@ class GithubRepositoryBranch(Resource):
 
 @api.route("/<string:project_name>/<string:username>/synchronize-github/commit")
 class GithubCommit(Resource):
+    def get(self, project_name: str, username: str):
+        project = ProjectService.get_by_name(project_name)
+        return GithubCommitStatusService.get_changes_number(project.id)
+
     def post(self, project_name:str, username: str):
 
         parser = reqparse.RequestParser()
         parser.add_argument(name="message")
         parser.add_argument(name="repositoryName")
+        parser.add_argument(name="userType")
         args = parser.parse_args()
         github_message = args.get("message")
         repository_name = args.get("repositoryName")
+        user_type = args.get("userType")
         github_access_token = UserService.get_by_id(current_user.id).github_access_token
         modified_samples = GithubCommitStatusService.get_modified_samples(ProjectService.get_by_name(project_name).id)
-        GithubWorkflowService.commit_changes(github_access_token, repository_name, modified_samples,project_name, username, github_message)
+        GithubWorkflowService.commit_changes(github_access_token, repository_name, modified_samples,project_name, user_type, github_message)
         GithubCommitStatusService.reset_samples(ProjectService.get_by_name(project_name).id, modified_samples)
