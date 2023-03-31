@@ -7,6 +7,6 @@ class ParserConfig:
 
     def set_url(self, env: Literal["prod", "dev", "test"]):
         if env == "prod":
-            self.server = "http://calcul-kimgerdes.lisn.upsaclay.fr:8002"
+            self.server = "http://calcul-kimgerdes.lisn.upsaclay.fr:8001"
         else:  # if env is dev or test
             self.server = "https://arboratorgrew.elizia.net"

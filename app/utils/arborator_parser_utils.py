@@ -57,9 +57,10 @@ class ArboratorParserAPI:
         return ArboratorParserAPI.send_post_request("/train/start", data)
 
     @staticmethod
-    def train_status(model_info: ModelInfo_t):
+    def train_status(model_info: ModelInfo_t, train_task_id: str):
         data = {
             "model_info": model_info,
+            "train_task_id": train_task_id,
         }
         return ArboratorParserAPI.send_post_request("/train/status", data)
 

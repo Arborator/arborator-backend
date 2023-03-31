@@ -53,13 +53,14 @@ class ParserTrainStatusResource(Resource):
 
         print("<PARSER> parser/info request :", params)
 
+        train_task_id = params["train_task_id"]
         model_info = params["model_info"]
         project_name = model_info["project_name"]
 
         if project_name == "undefined":
             return {"status": "failure", "error": "NOT VALID PROJECT NAME"}
 
-        return ArboratorParserAPI.train_status(model_info)
+        return ArboratorParserAPI.train_status(model_info, train_task_id)
 
 
 
@@ -99,31 +100,26 @@ class ParserParseStatus(Resource):
         if parse_status_reply["status"] == "failure":
             return parse_status_reply
 
-        else:
-            data = parse_status_reply["data"]
-            if data["ready"]:
-                task_model_info = data["result"]["model_info"]
-                task_parsed_samples = data["result"]["parsed_samples"]
+        data = parse_status_reply["data"]
+        if data:
+            task_model_info = data["model_info"]
+            task_parsed_samples = data["parsed_samples"]
 
-                if task_model_info["model_id"] == model_info["model_id"] and task_model_info["project_name"] == model_info["project_name"]:
+            if task_model_info["model_id"] == model_info["model_id"] and task_model_info["project_name"] == model_info["project_name"]:
 
-                    for sample_name, sample_content in task_parsed_samples.items():
-                        path_file = os.path.join(Config.UPLOAD_FOLDER, sample_name)
-                        print('upload parsed\n', path_file)
-                        with open(path_file,'w') as f:
-                            f.write(sample_content)
+                for sample_name, sample_content in task_parsed_samples.items():
+                    path_file = os.path.join(Config.UPLOAD_FOLDER, sample_name)
+                    print('upload parsed\n', path_file)
+                    with open(path_file,'w') as f:
+                        f.write(sample_content)
 
-                        add_or_keep_timestamps(path_file, when="long_ago")
-                        add_or_replace_userid(path_file, "parser" + parser_suffix)
-                        with open(path_file, "rb") as file_to_save:
-                            print('save files')
-                            GrewService.save_sample(project_name, sample_name, file_to_save)
+                    add_or_keep_timestamps(path_file, when="long_ago")
+                    add_or_replace_userid(path_file, "parser" + parser_suffix)
+                    with open(path_file, "rb") as file_to_save:
+                        print('save files')
+                        GrewService.save_sample(project_name, sample_name, file_to_save)
 
-                    return {"status": "success", "data": {"task_status": "READY", "model_info": task_model_info}}
-            else:
-                return {"status": "success", "data": {"task_status": "PARSING"}}
-
-            return {"status": "failure", "error": "unknown error in ParserParseStatus"}
+        return {"status": "success", "data": data}
 
 
 
