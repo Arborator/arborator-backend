@@ -4,15 +4,17 @@ import base64
 import json
 import re 
 from datetime import datetime
+
 from flask import abort
+
 from app import db
 from typing import List
 from app.config import MAX_TOKENS, Config
 from .model import GithubRepository, GithubCommitStatus
 from app.projects.service import ProjectService
-from app.samples.service import convert_users_ids, add_or_keep_timestamps, read_conll_from_disk, split_conll_string_to_conlls_list
+import app.samples.service as SampleService
 from app.utils.grew_utils import GrewService, grew_request
-from app.user.service import UserService
+
 
 
 
@@ -84,7 +86,7 @@ class GithubWorkflowService:
     def preprocess_file(path_file, username):
         user_ids = {}
         user_ids["default"] = username
-        file = read_conll_from_disk(path_file)
+        file = SampleService.read_conll_from_disk(path_file)
         for line in file.rstrip().split("\n"):
             if "# user_id = " in line:
                 user_id = line.split("# user_id = ")[-1]
@@ -94,8 +96,8 @@ class GithubWorkflowService:
 
     @staticmethod
     def create_sample(sample_name, path_file, project_name, users_ids):
-        tokens_number = convert_users_ids(path_file, users_ids)
-        add_or_keep_timestamps(path_file)
+        tokens_number = SampleService.convert_users_ids(path_file, users_ids)
+        SampleService.add_or_keep_timestamps(path_file)
         if tokens_number > MAX_TOKENS:
             abort(406, "Too big: Sample files on ArboratorGrew should have less than {max} tokens.".format(max=MAX_TOKENS))
         GrewService.create_sample(project_name, sample_name)
@@ -108,7 +110,7 @@ class GithubWorkflowService:
         sample_name, path_file = GithubWorkflowService.create_file_from_github_file_content(file, download_url)
         user_ids = GithubWorkflowService.preprocess_file(path_file,username)
         GithubWorkflowService.create_sample(sample_name, path_file, project_name, user_ids)
-        GithubCommitStatusService.create(ProjectService.get_by_name(project_name).id, sample_name)
+        GithubCommitStatusService.create(project_name, sample_name)
 
 
     @staticmethod
@@ -116,7 +118,6 @@ class GithubWorkflowService:
         parent = GithubService.get_sha_base_tree(access_token, full_name, "arboratorgrew")
         tree = GithubService.create_tree(access_token,full_name, updated_samples, project_name, username, parent)
         sha = GithubService.create_commit(access_token, tree, parent, message, full_name)
-        print(sha)
         response =GithubService.update_sha(access_token, full_name, "arboratorgrew", sha)
         data = response.json()
         return data.get("object").get("sha")
@@ -134,9 +135,7 @@ class GithubWorkflowService:
     def check_pull(access_token, project_name):
         project = ProjectService.get_by_name(project_name)
         full_name, sha = GithubSynchronizationService.get_github_synchronized_repository(project.id)
-        print(sha)
         base_tree = GithubService.get_sha_base_tree(access_token, full_name, "arboratorgrew")
-        print(base_tree)
         return sha != base_tree
 
 
@@ -159,7 +158,7 @@ class GithubWorkflowService:
     @staticmethod
     def pull_change_existing_sample(project_name, sample_name, username, download_url):
         content = requests.get(download_url).text
-        conlls_strings = split_conll_string_to_conlls_list(content)
+        conlls_strings = SampleService.split_conll_string_to_conlls_list(content)
         for conll in conlls_strings:
             for line in conll.rstrip().split("\n"):
                 if "# sent_id = " in line:
@@ -317,10 +316,11 @@ class GithubService:
 
 class GithubCommitStatusService:
     @staticmethod
-    def create(project_id, sample_name):
+    def create(project_name, sample_name):
+        project = ProjectService.get_by_name(project_name)
         commit_status = {
             "sample_name": sample_name,
-            "project_id": project_id,
+            "project_id": project.id,
             "changes_number": 0,
         }
         github_commit_status = GithubCommitStatus(**commit_status)
@@ -330,8 +330,9 @@ class GithubCommitStatusService:
 
 
     @staticmethod
-    def update(project_id, sample_name):
-        github_commit_status: GithubCommitStatus = GithubCommitStatus.query.filter(GithubCommitStatus.project_id == project_id).filter(GithubCommitStatus.sample_name == sample_name).first()
+    def update(project_name, sample_name):
+        project = ProjectService.get_by_name(project_name)
+        github_commit_status: GithubCommitStatus = GithubCommitStatus.query.filter(GithubCommitStatus.project_id == project.id).filter(GithubCommitStatus.sample_name == sample_name).first()
         if github_commit_status: 
             github_commit_status.changes_number = github_commit_status.changes_number + 1
             db.session.commit()

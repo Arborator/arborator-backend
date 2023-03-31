@@ -9,6 +9,7 @@ from app import db
 from app.config import MAX_TOKENS, Config
 from app.user.model import User
 from app.utils.grew_utils import GrewService
+from app.github.service import GithubCommitStatusService
 from flask import abort
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
@@ -43,6 +44,8 @@ class SampleUploadService:
 
         with open(path_file, "rb") as file_to_save:
             GrewService.save_sample(project_name, sample_name, file_to_save)
+            GithubCommitStatusService.create(project_name, sample_name)
+            GithubCommitStatusService.update(project_name, sample_name)
 
 
 

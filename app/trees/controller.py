@@ -124,7 +124,7 @@ class SampleTreesResource(Resource):
 
         grew_request("saveGraph", data=data)
         LastAccessService.update_last_access_per_user_and_project(current_user.id, projectName, "write")
-        GithubCommitStatusService.update(project.id, sample_name)
+        GithubCommitStatusService.update(project_name, sample_name)
         return {"status": "success"}
 
 

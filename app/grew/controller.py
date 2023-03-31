@@ -37,8 +37,7 @@ class ApplyRuleResource(Resource):
                         "sent_id": sent_id,
                         "conll_graph": list(sentence['conlls'].values())[0],
                     })
-                    project = ProjectService.get_by_name(project_name)
-                    GithubCommitStatusService.update(project.id, sample_name)
+                    GithubCommitStatusService.update(project_name, sample_name)
 
         LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
         return {"status": "success"}
