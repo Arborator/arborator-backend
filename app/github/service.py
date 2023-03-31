@@ -10,32 +10,44 @@ from typing import List
 from app.config import MAX_TOKENS, Config
 from .model import GithubRepository, GithubCommitStatus
 from app.projects.service import ProjectService
-from app.samples.service import convert_users_ids, add_or_keep_timestamps, read_conll_from_disk
-from app.utils.grew_utils import GrewService
+from app.samples.service import convert_users_ids, add_or_keep_timestamps, read_conll_from_disk, split_conll_string_to_conlls_list
+from app.utils.grew_utils import GrewService, grew_request
+from app.user.service import UserService
 
+
+
+extension = re.compile("^.*\.(conllu)$")
 
 class GithubSynchronizationService:
     @staticmethod
-    def get_github_synchronized_repository(user_id, project_id):
-        github_repository: GithubRepository = GithubRepository.query.filter(GithubRepository.user_id == user_id).filter(GithubRepository.project_id == project_id).first()
+    def get_github_synchronized_repository(project_id):
+        github_repository: GithubRepository = GithubRepository.query.filter(GithubRepository.project_id == project_id).first()
         if github_repository: 
-            return github_repository.repository_name
+            return github_repository.repository_name , github_repository.base_sha
         else: 
-            return ''
+            return '', ''
     
 
     @staticmethod
-    def synchronize_github_repository(user_id, project_id, repository_name):
+    def synchronize_github_repository(user_id, project_id, repository_name, sha):
 
         github_repository ={
             "project_id": project_id,
             "user_id": user_id, 
             "repository_name": repository_name,
+            "base_sha": sha,
         }
         synchronized_github_repository = GithubRepository(**github_repository)
         db.session.add(synchronized_github_repository)
         db.session.commit()
     
+
+    @staticmethod
+    def update_base_sha(project_id, repository_name, sha):
+        github_synchronized_repo: GithubRepository = GithubRepository.query.filter(GithubRepository.repository_name == repository_name).filter(GithubRepository.project_id == project_id).first()
+        if github_synchronized_repo:
+            github_synchronized_repo.base_sha = sha
+        
 
     @staticmethod
     def delete_synchronization(user_id, project_id):
@@ -46,20 +58,14 @@ class GithubSynchronizationService:
 
 class GithubWorkflowService:
 
-    
     @staticmethod
     def import_files_from_github(access_token, full_name, project_name, username, branch):
-        extension = re.compile("^.*\.(conllu)$")
         repository_files = GithubService.get_repository_files_from_specific_branch(access_token, full_name, branch)
-        conll_files = [file for file in repository_files if (extension.search(file.get('name')))]
+        conll_files = [file for file in repository_files if extension.search(file.get('name'))]
         if not conll_files:
             abort(400, "No conll Files in this repository")
         for file in conll_files:
-            sample_name, path_file = GithubWorkflowService.create_file_from_github_file_content(file.get('name'), file.get('download_url'))
-            if extension.search(path_file):
-                user_ids = GithubWorkflowService.preprocess_file(path_file,username)
-                GithubWorkflowService.create_sample(sample_name, path_file, project_name, user_ids)
-                GithubCommitStatusService.create(ProjectService.get_by_name(project_name).id, sample_name)
+            GithubWorkflowService.create_sample_from_github_file(file.get("name"), file.get("download_url"), username, project_name)
         GithubService.create_new_branch_arborator(access_token, full_name, branch)
 
     
@@ -98,12 +104,22 @@ class GithubWorkflowService:
 
     
     @staticmethod
+    def create_sample_from_github_file(file, download_url, username, project_name):
+        sample_name, path_file = GithubWorkflowService.create_file_from_github_file_content(file, download_url)
+        user_ids = GithubWorkflowService.preprocess_file(path_file,username)
+        GithubWorkflowService.create_sample(sample_name, path_file, project_name, user_ids)
+        GithubCommitStatusService.create(ProjectService.get_by_name(project_name).id, sample_name)
+
+
+    @staticmethod
     def commit_changes(access_token, full_name, updated_samples, project_name, username, message):
         parent = GithubService.get_sha_base_tree(access_token, full_name, "arboratorgrew")
         tree = GithubService.create_tree(access_token,full_name, updated_samples, project_name, username, parent)
         sha = GithubService.create_commit(access_token, tree, parent, message, full_name)
+        print(sha)
         response =GithubService.update_sha(access_token, full_name, "arboratorgrew", sha)
-        return response.json()
+        data = response.json()
+        return data.get("object").get("sha")
 
 
     @staticmethod 
@@ -114,6 +130,50 @@ class GithubWorkflowService:
         return response
     
 
+    @staticmethod
+    def check_pull(access_token, project_name):
+        project = ProjectService.get_by_name(project_name)
+        full_name, sha = GithubSynchronizationService.get_github_synchronized_repository(project.id)
+        print(sha)
+        base_tree = GithubService.get_sha_base_tree(access_token, full_name, "arboratorgrew")
+        print(base_tree)
+        return sha != base_tree
+
+
+    @staticmethod 
+    def pull_changes(access_token, project_name, username, full_name, base_tree):
+
+        tree = GithubService.get_tree(access_token, full_name, base_tree)
+        files = [file.get('path') for file in tree if extension.search(file.get('path'))]
+        grew_samples = GrewService.get_samples(project_name)
+        sample_names = [sa["name"] for sa in grew_samples]
+        for path in files:
+            file_content= GithubService.get_file_content_by_commit_sha(access_token,full_name, path, base_tree)
+            sample_name = file_content.get("name").split(".")[0]
+            if sample_name not in sample_names:
+                GithubWorkflowService.create_sample_from_github_file(file_content.get("name"), file_content.get("download_url"), username, project_name)
+            else: 
+                GithubWorkflowService.pull_change_existing_sample(project_name, sample_name,username, file_content.get("download_url"))
+    
+
+    @staticmethod
+    def pull_change_existing_sample(project_name, sample_name, username, download_url):
+        content = requests.get(download_url).text
+        conlls_strings = split_conll_string_to_conlls_list(content)
+        for conll in conlls_strings:
+            for line in conll.rstrip().split("\n"):
+                if "# sent_id = " in line:
+                    sent_id = line.split("# sent_id = ")[-1] 
+                    grew_request("saveGraph",
+                        data={
+                            "project_id": project_name,
+                            "sample_id": sample_name,
+                            "user_id": username,
+                            "sent_id": sent_id,
+                            "conll_graph": conll,
+                        })
+
+           
 class GithubService: 
     @staticmethod    
     def base_header(access_token):
@@ -186,15 +246,6 @@ class GithubService:
             abort(400, "The Github repository doesn't exist anymore") 
            
         
-    
-    
-    @staticmethod
-    def get_sha_last_commit(access_token, full_name, branch):
-        response = requests.get("https://api.github.com/repos/{}/commits/{}".format(full_name, branch), headers = GithubService.base_header(access_token))
-        data = response.json()
-        return data.get("sha")
-    
-
     @staticmethod
     def create_blob_for_updated_file(access_token, full_name, content):
         data = {"content": content, "encoding": "utf-8"}
@@ -215,7 +266,6 @@ class GithubService:
         data = {"tree": tree, "base_tree": base_tree}
         response = requests.post("https://api.github.com/repos/{}/git/trees".format(full_name), headers = GithubService.base_header(access_token), data = json.dumps(data) )
         data = response.json()
-        print(data)
         return data.get("sha")
         
     
@@ -249,6 +299,21 @@ class GithubService:
         }
         response = requests.post("https://api.github.com/repos/{}/git/refs".format(full_name), headers = GithubService.base_header(access_token), data = json.dumps(data))
         return response.json()
+    
+
+    @staticmethod
+    def get_tree(access_token, full_name, base_tree):
+        response = requests.get("https://api.github.com/repos/{}/git/trees/{}".format(full_name, base_tree), headers = GithubService.base_header(access_token))
+        data = response.json()
+        return data.get("tree")
+    
+
+    @staticmethod
+    def get_file_content_by_commit_sha(access_token, full_name, file_path, sha):
+        response = requests.get("https://api.github.com/repos/{}/contents/{}?ref={}".format(full_name, file_path, sha), headers = GithubService.base_header(access_token))
+        data = response.json()
+        return data
+    
 
 class GithubCommitStatusService:
     @staticmethod
@@ -290,9 +355,4 @@ class GithubCommitStatusService:
             github_commit_status: GithubCommitStatus = GithubCommitStatus.query.filter(GithubCommitStatus.project_id == project_id).filter(GithubCommitStatus.sample_name == sample_name).first()
             github_commit_status.changes_number = 0
             db.session.commit()
-
-
-          
-
-
-
+    

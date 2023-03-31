@@ -14,8 +14,7 @@ class GithubSynchronization(Resource):
     def get(self, project_name: str, username: str):
         project = ProjectService.get_by_name(project_name)
         ProjectService.check_if_project_exist(project)
-        user_id = UserService.get_by_username(username).id
-        repository = GithubSynchronizationService.get_github_synchronized_repository(user_id, project.id)
+        repository, sha = GithubSynchronizationService.get_github_synchronized_repository(project.id)
         return repository
     
     
@@ -33,7 +32,8 @@ class GithubSynchronization(Resource):
         user_id = UserService.get_by_username(username).id
         github_access_token = UserService.get_by_id(current_user.id).github_access_token
         GithubWorkflowService.import_files_from_github(github_access_token, repository_name, project_name, username, branch)
-        GithubSynchronizationService.synchronize_github_repository(user_id, project.id, repository_name)
+        sha = GithubService.get_sha_base_tree(github_access_token, repository_name, "arboratorgrew" )
+        GithubSynchronizationService.synchronize_github_repository(user_id, project.id, repository_name, sha)
         
         return {"status": "success"}
     
@@ -86,7 +86,6 @@ class GithubRepositoryBranch(Resource):
         return GithubService.list_branches_repository(github_access_token, full_name)
 
         
-
 @api.route("/<string:project_name>/<string:username>/synchronize-github/commit")
 class GithubCommit(Resource):
     def get(self, project_name: str, username: str):
@@ -99,11 +98,35 @@ class GithubCommit(Resource):
         parser.add_argument(name="message")
         parser.add_argument(name="repositoryName")
         parser.add_argument(name="userType")
+
         args = parser.parse_args()
         github_message = args.get("message")
         repository_name = args.get("repositoryName")
         user_type = args.get("userType")
+        project = ProjectService.get_by_name(project_name)
         github_access_token = UserService.get_by_id(current_user.id).github_access_token
         modified_samples = GithubCommitStatusService.get_modified_samples(ProjectService.get_by_name(project_name).id)
-        GithubWorkflowService.commit_changes(github_access_token, repository_name, modified_samples,project_name, user_type, github_message)
+        sha = GithubWorkflowService.commit_changes(github_access_token, repository_name, modified_samples,project_name, user_type, github_message)
+        GithubSynchronizationService.update_base_sha(project.id, repository_name, sha)
         GithubCommitStatusService.reset_samples(ProjectService.get_by_name(project_name).id, modified_samples)
+    
+
+@api.route("/<string:project_name>/<string:username>/synchronize-github/pull")
+class GithubPull(Resource):
+
+    def get(self, project_name: str, username: str):
+        user = UserService.get_by_username(username)
+        return GithubWorkflowService.check_pull(user.github_access_token, project_name)
+    
+    def post(self, project_name: str, username: str):
+
+        parser = reqparse.RequestParser()
+        parser.add_argument(name="repositoryName")
+        args = parser.parse_args()
+        full_name = args.get("repositoryName")
+        
+        user = UserService.get_by_username(username)
+        if GithubWorkflowService.check_pull(user.github_access_token, project_name):
+            base_tree = GithubService.get_sha_base_tree(user.github_access_token, full_name, "arboratorgrew")
+            GithubWorkflowService.pull_changes(user.github_access_token,project_name,username, full_name,base_tree)
+
