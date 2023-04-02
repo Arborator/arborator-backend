@@ -124,9 +124,11 @@ class GithubPull(Resource):
         parser.add_argument(name="repositoryName")
         args = parser.parse_args()
         full_name = args.get("repositoryName")
+        project = ProjectService.get_by_name(project_name)
         
         user = UserService.get_by_username(username)
         if GithubWorkflowService.check_pull(user.github_access_token, project_name):
             base_tree = GithubService.get_sha_base_tree(user.github_access_token, full_name, "arboratorgrew")
             GithubWorkflowService.pull_changes(user.github_access_token,project_name,username, full_name,base_tree)
+            GithubSynchronizationService.update_base_sha(project.id, full_name, base_tree)
 

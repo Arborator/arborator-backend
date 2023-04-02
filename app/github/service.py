@@ -13,7 +13,7 @@ from app.config import MAX_TOKENS, Config
 from .model import GithubRepository, GithubCommitStatus
 from app.projects.service import ProjectService
 import app.samples.service as SampleService
-from app.utils.grew_utils import GrewService, grew_request
+from app.utils.grew_utils import GrewService, grew_request , SampleExportService
 
 
 
@@ -49,6 +49,7 @@ class GithubSynchronizationService:
         github_synchronized_repo: GithubRepository = GithubRepository.query.filter(GithubRepository.repository_name == repository_name).filter(GithubRepository.project_id == project_id).first()
         if github_synchronized_repo:
             github_synchronized_repo.base_sha = sha
+            db.session.commit()
         
 
     @staticmethod
@@ -73,7 +74,7 @@ class GithubWorkflowService:
     
     @staticmethod 
     def create_file_from_github_file_content(file_name, download_url):
-        sample_name = file_name.split(".")[0]
+        sample_name = file_name.split(".conllu")[0]
         raw_content = requests.get(download_url)
         path_file = os.path.join(Config.UPLOAD_FOLDER, file_name)
         file = open(path_file, "w")
@@ -148,7 +149,7 @@ class GithubWorkflowService:
         sample_names = [sa["name"] for sa in grew_samples]
         for path in files:
             file_content= GithubService.get_file_content_by_commit_sha(access_token,full_name, path, base_tree)
-            sample_name = file_content.get("name").split(".")[0]
+            sample_name = file_content.get("name").split(".conllu")[0]
             if sample_name not in sample_names:
                 GithubWorkflowService.create_sample_from_github_file(file_content.get("name"), file_content.get("download_url"), username, project_name)
             else: 
@@ -159,18 +160,35 @@ class GithubWorkflowService:
     def pull_change_existing_sample(project_name, sample_name, username, download_url):
         content = requests.get(download_url).text
         conlls_strings = SampleService.split_conll_string_to_conlls_list(content)
+        reply = grew_request(
+                "getConll",
+                data={"project_id": project_name, "sample_id": sample_name},
+            )
+        sample_trees =SampleExportService.servSampleTrees(reply.get("data", {}))
+        
+        modified_sentences = []
         for conll in conlls_strings:
             for line in conll.rstrip().split("\n"):
                 if "# sent_id = " in line:
                     sent_id = line.split("# sent_id = ")[-1] 
+                    modified_sentences.append((sent_id, conll))
                     grew_request("saveGraph",
-                        data={
-                            "project_id": project_name,
-                            "sample_id": sample_name,
-                            "user_id": username,
-                            "sent_id": sent_id,
-                            "conll_graph": conll,
-                        })
+                    data={
+                        "project_id": project_name,
+                        "sample_id": sample_name,
+                        "user_id": username,
+                        "sent_id": sent_id,
+                        "conll_graph": conll,
+                    })
+        for sentence in list(sample_trees.keys()):
+            if not any (sentence in sent_id for modified_sentence in modified_sentences):
+                grew_request("eraseGraph",
+                    data={
+                        "project_id": project_name,
+                        "sample_id": sample_name,
+                        "sent_id": sentence,
+                        "user_id": username,
+                    })        
 
            
 class GithubService: 
