@@ -119,7 +119,9 @@ class ParserParseStatus(Resource):
                         print('save files')
                         GrewService.save_sample(project_name, sample_name, file_to_save)
 
-        return {"status": "success", "data": data}
+            return {"status": "success", "data": {"model_info": data["model_info"]}}
+        else:
+            return {"status": "success", "data": None}
 
 
 
