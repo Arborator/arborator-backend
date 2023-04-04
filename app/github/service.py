@@ -192,9 +192,9 @@ class GithubWorkflowService:
 
 
     @staticmethod
-    def delete_file_from_github(access_token, full_name, project_name, sample_name):
+    def delete_file_from_github(access_token, project_name, full_name, sample_name):
         file_path = sample_name+".conllu"
-        GithubService.delete_file(access_token, full_name, file_path)
+        GithubService.delete_file(access_token, full_name, file_path, "arboratorgrew")
         GithubCommitStatusService.delete(project_name, sample_name)
 
 
@@ -247,8 +247,8 @@ class GithubService:
     
 
     @staticmethod   
-    def get_file_sha(access_token, full_name, file_path):
-        response = requests.get("https://api.github.com/repos/{}/contents/{}".format(full_name, file_path), headers = GithubService.base_header(access_token))
+    def get_file_sha(access_token, full_name, file_path, branch):
+        response = requests.get("https://api.github.com/repos/{}/contents/{}?ref={}".format(full_name, file_path, branch), headers = GithubService.base_header(access_token))
         data = response.json()
         return data.get("sha")
     
@@ -340,11 +340,10 @@ class GithubService:
     
 
     @staticmethod
-    def delete_file(access_token, full_name, file_path):
-        sha = GithubService.get_file_sha(access_token, full_name, file_path)
-        data = {"sha": sha, "message": "file deleted from github", "branch": "arborator-grew"}
-        response = requests.get("https://api.github.com/repos/{}/contents/{}".format(full_name, file_path), headers = GithubService.base_header(access_token), data=json.dumps(data))
-
+    def delete_file(access_token, full_name, file_path, branch):
+        sha = GithubService.get_file_sha(access_token, full_name, file_path, branch)
+        data = {"sha": sha, "message": "file deleted from github", "branch": "arboratorgrew"}
+        response = requests.delete("https://api.github.com/repos/{}/contents/{}".format(full_name, file_path), headers = GithubService.base_header(access_token), data=json.dumps(data))
 
 class GithubCommitStatusService:
     @staticmethod

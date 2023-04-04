@@ -9,7 +9,7 @@ api = Namespace("Github", description="Endpoints for dealing with github reposit
 
 
 @api.route("/<string:project_name>/<string:username>/synchronize-github")
-class GithubSynchronization(Resource):
+class GithubSynchronizationResource(Resource):
 
     def get(self, project_name: str, username: str):
         project = ProjectService.get_by_name(project_name)
@@ -48,7 +48,7 @@ class GithubSynchronization(Resource):
 
     
 @api.route("/<string:project_name>/<string:username>/github")
-class GithubRepository(Resource):
+class GithubRepositoryResource(Resource):
     def get(self, project_name: str, username: str):
         return GithubService.get_repositories(UserService.get_by_username(username).github_access_token)
     
@@ -74,7 +74,7 @@ class GithubRepository(Resource):
 
 
 @api.route("/<string:project_name>/<string:username>/github/branch")
-class GithubRepositoryBranch(Resource):
+class GithubRepositoryBranchResource(Resource):
     def get(self, project_name: str, username: str):
 
         parser = reqparse.RequestParser()
@@ -87,7 +87,7 @@ class GithubRepositoryBranch(Resource):
 
         
 @api.route("/<string:project_name>/<string:username>/synchronize-github/commit")
-class GithubCommit(Resource):
+class GithubCommitResource(Resource):
     def get(self, project_name: str, username: str):
         project = ProjectService.get_by_name(project_name)
         return GithubCommitStatusService.get_changes_number(project.id)
@@ -112,7 +112,7 @@ class GithubCommit(Resource):
     
 
 @api.route("/<string:project_name>/<string:username>/synchronize-github/pull")
-class GithubPull(Resource):
+class GithubPullResource(Resource):
 
     def get(self, project_name: str, username: str):
         user = UserService.get_by_username(username)
@@ -131,4 +131,14 @@ class GithubPull(Resource):
             base_tree = GithubService.get_sha_base_tree(user.github_access_token, full_name, "arboratorgrew")
             GithubWorkflowService.pull_changes(user.github_access_token,project_name,username, full_name,base_tree)
             GithubSynchronizationService.update_base_sha(project.id, full_name, base_tree)
+
+
+@api.route("/<string:project_name>/<string:username>/synchronize-github/<string:file_name>")
+class GithubRepositoryFileResource(Resource):
+
+    def delete(self, project_name: str, username: str, file_name):
+        user = UserService.get_by_username(username)
+        project = ProjectService.get_by_name(project_name)
+        full_name = GithubSynchronizationService.get_github_synchronized_repository(project.id)[0]
+        GithubWorkflowService.delete_file_from_github(user.github_access_token, project_name, full_name,file_name )
 
