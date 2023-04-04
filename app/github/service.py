@@ -196,7 +196,8 @@ class GithubWorkflowService:
         file_path = sample_name+".conllu"
         GithubService.delete_file(access_token, full_name, file_path, "arboratorgrew")
         GithubCommitStatusService.delete(project_name, sample_name)
-
+        new_base_tree_sha = GithubService.get_sha_base_tree(access_token, full_name, "arboratorgrew")
+        GithubSynchronizationService.update_base_sha(ProjectService.get_by_name(project_name).id, full_name, new_base_tree_sha)
 
 class GithubService: 
     @staticmethod    
