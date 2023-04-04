@@ -181,16 +181,23 @@ class GithubWorkflowService:
                         "conll_graph": conll,
                     })
         for sentence in list(sample_trees.keys()):
-            if not any (sentence in sent_id for modified_sentence in modified_sentences):
+            if not any (sentence in  modified_sentence for modified_sentence in modified_sentences):
                 grew_request("eraseGraph",
                     data={
                         "project_id": project_name,
                         "sample_id": sample_name,
                         "sent_id": sentence,
                         "user_id": username,
-                    })        
+                    })  
 
-           
+
+    @staticmethod
+    def delete_file_from_github(access_token, full_name, project_name, sample_name):
+        file_path = sample_name+".conllu"
+        GithubService.delete_file(access_token, full_name, file_path)
+        GithubCommitStatusService.delete(project_name, sample_name)
+
+
 class GithubService: 
     @staticmethod    
     def base_header(access_token):
@@ -332,6 +339,13 @@ class GithubService:
         return data
     
 
+    @staticmethod
+    def delete_file(access_token, full_name, file_path):
+        sha = GithubService.get_file_sha(access_token, full_name, file_path)
+        data = {"sha": sha, "message": "file deleted from github", "branch": "arborator-grew"}
+        response = requests.get("https://api.github.com/repos/{}/contents/{}".format(full_name, file_path), headers = GithubService.base_header(access_token), data=json.dumps(data))
+
+
 class GithubCommitStatusService:
     @staticmethod
     def create(project_name, sample_name):
@@ -375,3 +389,12 @@ class GithubCommitStatusService:
             github_commit_status.changes_number = 0
             db.session.commit()
     
+
+    @staticmethod
+    def delete(project_name, sample_name):
+        project = ProjectService.get_by_name(project_name)
+        github_commit_status: GithubCommitStatus = GithubCommitStatus.query.filter(GithubCommitStatus.project_id == project.id).filter(GithubCommitStatus.sample_name == sample_name).first()
+        if github_commit_status:
+            db.session.delete(github_commit_status)
+            db.session.commit()
+
