@@ -1,6 +1,6 @@
 from flask_restx import Namespace, Resource, reqparse
 from flask import request
-from ..projects.service import ProjectService
+from ..projects.service import ProjectService, LastAccessService
 from ..user.service import UserService
 from .service import GithubSynchronizationService, GithubService, GithubWorkflowService, GithubCommitStatusService
 from flask_login import current_user
@@ -131,6 +131,7 @@ class GithubPullResource(Resource):
             base_tree = GithubService.get_sha_base_tree(user.github_access_token, full_name, "arboratorgrew")
             GithubWorkflowService.pull_changes(user.github_access_token,project_name,username, full_name,base_tree)
             GithubSynchronizationService.update_base_sha(project.id, full_name, base_tree)
+            LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
 
 
 @api.route("/<string:project_name>/<string:username>/synchronize-github/<string:file_name>")
