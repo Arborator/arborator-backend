@@ -134,6 +134,23 @@ class GithubPullResource(Resource):
             LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
 
 
+@api.route("/<string:project_name>/<string:username>/synchronize-github/pull-request")
+class GithubPullRequestResource(Resource):
+
+    def post(self, project_name: str, username: str):
+
+        parser =   parser = reqparse.RequestParser()
+        parser.add_argument(name="repositoryName")
+        parser.add_argument(name="branch")
+        parser.add_argument(name="title")
+        args = parser.parse_args()
+        full_name = args.get("repositoryName")
+        branch = args.get("branch")
+        title = args.get("title")
+        access_token = UserService.get_by_username(username).github_access_token
+        GithubService.create_pull_request(access_token, full_name, username, "arboratorgrew", branch, title)
+
+
 @api.route("/<string:project_name>/<string:username>/synchronize-github/<string:file_name>")
 class GithubRepositoryFileResource(Resource):
 

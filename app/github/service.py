@@ -363,6 +363,15 @@ class GithubService:
         data = {"sha": sha, "message": "file deleted from github", "branch": "arboratorgrew"}
         response = requests.delete("https://api.github.com/repos/{}/contents/{}".format(full_name, file_path), headers = GithubService.base_header(access_token), data=json.dumps(data))
 
+
+    @staticmethod
+    def create_pull_request(access_token, full_name, username, arborator_branch, branch, title):
+        head = username + ":" + arborator_branch
+        data = {"title": title, "head": head, "base": branch}
+        response = requests.post("https://api.github.com/repos/{}/pulls".format(full_name), headers = GithubService.base_header(access_token), data=json.dumps(data))
+        print(response.json())
+
+        
 class GithubCommitStatusService:
     @staticmethod
     def create(project_name, sample_name):
