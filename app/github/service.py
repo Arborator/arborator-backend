@@ -144,17 +144,22 @@ class GithubWorkflowService:
     def pull_changes(access_token, project_name, username, full_name, base_tree):
 
         tree = GithubService.get_tree(access_token, full_name, base_tree)
-        files = [file.get('path') for file in tree if extension.search(file.get('path'))]
-        grew_samples = GrewService.get_samples(project_name)
-        sample_names = [sa["name"] for sa in grew_samples]
-        for path in files:
-            file_content= GithubService.get_file_content_by_commit_sha(access_token,full_name, path, base_tree)
-            sample_name = file_content.get("name").split(".conllu")[0]
-            if sample_name not in sample_names:
-                GithubWorkflowService.create_sample_from_github_file(file_content.get("name"), file_content.get("download_url"), username, project_name)
-            else: 
-                GithubWorkflowService.pull_change_existing_sample(project_name, sample_name,username, file_content.get("download_url"))
-    
+        project_samples = GrewService.get_samples(project_name)
+        sample_names = [sample["name"] for sample in project_samples]
+        if tree: 
+            files = [file.get('path') for file in tree if extension.search(file.get('path'))]
+            for path in files:
+                file_content= GithubService.get_file_content_by_commit_sha(access_token,full_name, path, base_tree)
+                sample_name = file_content.get("name").split(".conllu")[0]
+                if sample_name not in sample_names:
+                    GithubWorkflowService.create_sample_from_github_file(file_content.get("name"), file_content.get("download_url"), username, project_name)
+                else: 
+                    GithubWorkflowService.pull_change_existing_sample(project_name, sample_name,username, file_content.get("download_url"))
+            deleted_samples = list(set(sample_names) - set([file_name.split(".conllu")[0] for file_name in files]))
+            if deleted_samples : 
+                for deleted_sample in deleted_samples:
+                    GithubWorkflowService.delete_sample_from_project(project_name, deleted_sample)
+
 
     @staticmethod
     def pull_change_existing_sample(project_name, sample_name, username, download_url):
@@ -180,7 +185,7 @@ class GithubWorkflowService:
                         "sent_id": sent_id,
                         "conll_graph": conll,
                     })
-        for sentence in list(sample_trees.keys()):
+        for sentence in list(sample_trees.keys()): #sentence deleted earase only the tree of the user when we pull
             if not any (sentence in  modified_sentence for modified_sentence in modified_sentences):
                 grew_request("eraseGraph",
                     data={
@@ -198,6 +203,15 @@ class GithubWorkflowService:
         GithubCommitStatusService.delete(project_name, sample_name)
         new_base_tree_sha = GithubService.get_sha_base_tree(access_token, full_name, "arboratorgrew")
         GithubSynchronizationService.update_base_sha(ProjectService.get_by_name(project_name).id, full_name, new_base_tree_sha)
+
+
+    @staticmethod
+    def delete_sample_from_project(project_name, sample_name):
+        project = ProjectService.get_by_name(project_name)
+        GrewService.delete_sample(project_name, sample_name)
+        SampleService.SampleRoleService.delete_by_sample_name(project.id, sample_name)
+        SampleService.SampleExerciseLevelService.delete_by_sample_name(project.id, sample_name)
+
 
 class GithubService: 
     @staticmethod    
@@ -329,8 +343,11 @@ class GithubService:
     @staticmethod
     def get_tree(access_token, full_name, base_tree):
         response = requests.get("https://api.github.com/repos/{}/git/trees/{}".format(full_name, base_tree), headers = GithubService.base_header(access_token))
-        data = response.json()
-        return data.get("tree")
+        try: 
+            data = response.json()
+            return data.get("tree")
+        except:
+            return []
     
 
     @staticmethod
