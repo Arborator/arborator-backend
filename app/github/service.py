@@ -23,11 +23,8 @@ extension = re.compile("^.*\.(conllu)$")
 class GithubSynchronizationService:
     @staticmethod
     def get_github_synchronized_repository(project_id):
-        github_repository: GithubRepository = GithubRepository.query.filter(GithubRepository.project_id == project_id).first()
-        if github_repository: 
-            return github_repository.repository_name , github_repository.branch, github_repository.base_sha ,
+        return GithubRepository.query.filter(GithubRepository.project_id == project_id).first()
     
-
     @staticmethod
     def synchronize_github_repository(user_id, project_id, repository_name, branch, sha):
 
@@ -117,7 +114,7 @@ class GithubWorkflowService:
     @staticmethod
     def commit_changes(access_token, full_name, updated_samples, project_name, username, message):
         
-        branch = GithubSynchronizationService.get_github_synchronized_repository(ProjectService.get_by_name(project_name).id)[1]
+        branch = GithubSynchronizationService.get_github_synchronized_repository(ProjectService.get_by_name(project_name).id).branch
         parent = GithubService.get_sha_base_tree(access_token, full_name, branch)
         tree = GithubService.create_tree(access_token,full_name, updated_samples, project_name, username, parent)
         sha = GithubService.create_commit(access_token, tree, parent, message, full_name)
@@ -137,7 +134,9 @@ class GithubWorkflowService:
     @staticmethod
     def check_pull(access_token, project_name):
         project = ProjectService.get_by_name(project_name)
-        full_name, branch, sha = GithubSynchronizationService.get_github_synchronized_repository(project.id)
+        full_name = GithubSynchronizationService.get_github_synchronized_repository(project.id).repository_name
+        branch = GithubSynchronizationService.get_github_synchronized_repository(project.id).branch
+        sha = GithubSynchronizationService.get_github_synchronized_repository(project.id).base_sha
         base_tree = GithubService.get_sha_base_tree(access_token, full_name, branch)
         return sha != base_tree
 
@@ -202,7 +201,7 @@ class GithubWorkflowService:
     def delete_file_from_github(access_token, project_name, full_name, sample_name):
         file_path = sample_name+".conllu"
         project_id = ProjectService.get_by_name(project_name).id
-        branch = GithubSynchronizationService.get_github_synchronized_repository(project_id)[1]
+        branch = GithubSynchronizationService.get_github_synchronized_repository(project_id).branch
         GithubService.delete_file(access_token, full_name, file_path, branch)
         GithubCommitStatusService.delete(project_name, sample_name)
         new_base_tree_sha = GithubService.get_sha_base_tree(access_token, full_name, branch)
@@ -373,6 +372,9 @@ class GithubService:
         head = username + ":" + arborator_branch
         data = {"title": title, "head": head, "base": branch}
         response = requests.post("https://api.github.com/repos/{}/pulls".format(full_name), headers = GithubService.base_header(access_token), data=json.dumps(data))
+        if not response:
+            error = response.json()['errors'][0].get("message") 
+            abort(422, error)
 
         
 class GithubCommitStatusService:

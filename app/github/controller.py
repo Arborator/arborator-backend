@@ -1,5 +1,5 @@
 from flask_restx import Namespace, Resource, reqparse
-from flask import request
+from flask import request, abort
 from ..projects.service import ProjectService, LastAccessService
 from ..user.service import UserService
 from .service import GithubSynchronizationService, GithubService, GithubWorkflowService, GithubCommitStatusService
@@ -14,8 +14,11 @@ class GithubSynchronizationResource(Resource):
     def get(self, project_name: str, username: str):
         project = ProjectService.get_by_name(project_name)
         ProjectService.check_if_project_exist(project)
-        repository = GithubSynchronizationService.get_github_synchronized_repository(project.id)[0]
-        return repository
+        try:
+            repository = GithubSynchronizationService.get_github_synchronized_repository(project.id).repository_name
+            return repository
+        except: 
+            return ''
     
     
     def post(self, project_name: str, username:str):
@@ -131,7 +134,7 @@ class GithubPullResource(Resource):
         project = ProjectService.get_by_name(project_name)
         
         user = UserService.get_by_username(username)
-        branch = GithubSynchronizationService.get_github_synchronized_repository(project.id)[1]
+        branch = GithubSynchronizationService.get_github_synchronized_repository(project.id).branch
         if GithubWorkflowService.check_pull(user.github_access_token, project_name):
             base_tree = GithubService.get_sha_base_tree(user.github_access_token, full_name, branch)
             GithubWorkflowService.pull_changes(user.github_access_token,project_name,username, full_name,base_tree)
@@ -154,9 +157,12 @@ class GithubPullRequestResource(Resource):
         branch = args.get("branch")
         title = args.get("title")
         project_id = ProjectService.get_by_name(project_name).id
-        branch_base = GithubSynchronizationService.get_github_synchronized_repository(project_id)[1]
+        branch_base = GithubSynchronizationService.get_github_synchronized_repository(project_id).branch
         access_token = UserService.get_by_username(username).github_access_token
-        GithubService.create_pull_request(access_token, full_name, username, branch_base , branch, title)
+        if branch == branch_base:
+            abort(422, "No pulls between {} and {}. You’ll need to use two different branches".format(branch, branch_base))
+        else:
+            GithubService.create_pull_request(access_token, full_name, username, branch_base , branch, title)
 
 
 @api.route("/<string:project_name>/<string:username>/synchronize-github/<string:file_name>")
@@ -165,6 +171,6 @@ class GithubRepositoryFileResource(Resource):
     def delete(self, project_name: str, username: str, file_name):
         user = UserService.get_by_username(username)
         project = ProjectService.get_by_name(project_name)
-        full_name = GithubSynchronizationService.get_github_synchronized_repository(project.id)[0]
+        full_name = GithubSynchronizationService.get_github_synchronized_repository(project.id).repository_name
         GithubWorkflowService.delete_file_from_github(user.github_access_token, project_name, full_name,file_name )
 
