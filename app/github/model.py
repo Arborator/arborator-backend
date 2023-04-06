@@ -8,6 +8,7 @@ class GithubRepository(db.Model):
     project_id = Column(Integer, db.ForeignKey("projects.id"))
     user_id = Column(String(256), db.ForeignKey("users.id")) 
     repository_name = Column(String(256))
+    branch = Column(String(256))
     base_sha = Column(String(256))
 
     def update(self, changes):

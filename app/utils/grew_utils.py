@@ -229,8 +229,8 @@ class GrewService:
 # TODO : refactor this
 def get_timestamp(conll):
     t = re.search("# timestamp = (\d+(?:\.\d+)?)\n", conll)
-    if t.groups():
-        return t[0]
+    if t: 
+        t.groups()[0]
     else:
         return False
 

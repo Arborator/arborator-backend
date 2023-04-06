@@ -25,18 +25,17 @@ class GithubSynchronizationService:
     def get_github_synchronized_repository(project_id):
         github_repository: GithubRepository = GithubRepository.query.filter(GithubRepository.project_id == project_id).first()
         if github_repository: 
-            return github_repository.repository_name , github_repository.base_sha
-        else: 
-            return '', ''
+            return github_repository.repository_name , github_repository.branch, github_repository.base_sha ,
     
 
     @staticmethod
-    def synchronize_github_repository(user_id, project_id, repository_name, sha):
+    def synchronize_github_repository(user_id, project_id, repository_name, branch, sha):
 
         github_repository ={
             "project_id": project_id,
             "user_id": user_id, 
             "repository_name": repository_name,
+            "branch": branch,
             "base_sha": sha,
         }
         synchronized_github_repository = GithubRepository(**github_repository)
@@ -62,14 +61,15 @@ class GithubSynchronizationService:
 class GithubWorkflowService:
 
     @staticmethod
-    def import_files_from_github(access_token, full_name, project_name, username, branch):
+    def import_files_from_github(access_token, full_name, project_name, username, branch, branch_syn):
         repository_files = GithubService.get_repository_files_from_specific_branch(access_token, full_name, branch)
         conll_files = [file for file in repository_files if extension.search(file.get('name'))]
         if not conll_files:
             abort(400, "No conll Files in this repository")
         for file in conll_files:
             GithubWorkflowService.create_sample_from_github_file(file.get("name"), file.get("download_url"), username, project_name)
-        GithubService.create_new_branch_arborator(access_token, full_name, branch)
+        if branch_syn == "arboratorgrew":
+            GithubService.create_new_branch_arborator(access_token, full_name, branch)
 
     
     @staticmethod 
@@ -116,10 +116,12 @@ class GithubWorkflowService:
 
     @staticmethod
     def commit_changes(access_token, full_name, updated_samples, project_name, username, message):
-        parent = GithubService.get_sha_base_tree(access_token, full_name, "arboratorgrew")
+        
+        branch = GithubSynchronizationService.get_github_synchronized_repository(ProjectService.get_by_name(project_name).id)[1]
+        parent = GithubService.get_sha_base_tree(access_token, full_name, branch)
         tree = GithubService.create_tree(access_token,full_name, updated_samples, project_name, username, parent)
         sha = GithubService.create_commit(access_token, tree, parent, message, full_name)
-        response =GithubService.update_sha(access_token, full_name, "arboratorgrew", sha)
+        response =GithubService.update_sha(access_token, full_name, branch, sha)
         data = response.json()
         return data.get("object").get("sha")
 
@@ -135,8 +137,8 @@ class GithubWorkflowService:
     @staticmethod
     def check_pull(access_token, project_name):
         project = ProjectService.get_by_name(project_name)
-        full_name, sha = GithubSynchronizationService.get_github_synchronized_repository(project.id)
-        base_tree = GithubService.get_sha_base_tree(access_token, full_name, "arboratorgrew")
+        full_name, branch, sha = GithubSynchronizationService.get_github_synchronized_repository(project.id)
+        base_tree = GithubService.get_sha_base_tree(access_token, full_name, branch)
         return sha != base_tree
 
 
@@ -199,9 +201,11 @@ class GithubWorkflowService:
     @staticmethod
     def delete_file_from_github(access_token, project_name, full_name, sample_name):
         file_path = sample_name+".conllu"
-        GithubService.delete_file(access_token, full_name, file_path, "arboratorgrew")
+        project_id = ProjectService.get_by_name(project_name).id
+        branch = GithubSynchronizationService.get_github_synchronized_repository(project_id)[1]
+        GithubService.delete_file(access_token, full_name, file_path, branch)
         GithubCommitStatusService.delete(project_name, sample_name)
-        new_base_tree_sha = GithubService.get_sha_base_tree(access_token, full_name, "arboratorgrew")
+        new_base_tree_sha = GithubService.get_sha_base_tree(access_token, full_name, branch)
         GithubSynchronizationService.update_base_sha(ProjectService.get_by_name(project_name).id, full_name, new_base_tree_sha)
 
 
@@ -360,7 +364,7 @@ class GithubService:
     @staticmethod
     def delete_file(access_token, full_name, file_path, branch):
         sha = GithubService.get_file_sha(access_token, full_name, file_path, branch)
-        data = {"sha": sha, "message": "file deleted from github", "branch": "arboratorgrew"}
+        data = {"sha": sha, "message": "file deleted from github", "branch": branch}
         response = requests.delete("https://api.github.com/repos/{}/contents/{}".format(full_name, file_path), headers = GithubService.base_header(access_token), data=json.dumps(data))
 
 
@@ -369,7 +373,6 @@ class GithubService:
         head = username + ":" + arborator_branch
         data = {"title": title, "head": head, "base": branch}
         response = requests.post("https://api.github.com/repos/{}/pulls".format(full_name), headers = GithubService.base_header(access_token), data=json.dumps(data))
-        print(response.json())
 
         
 class GithubCommitStatusService:
