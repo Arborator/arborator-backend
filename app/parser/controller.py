@@ -73,13 +73,13 @@ class ParserParseStartResource(Resource):
         to_parse_samples_names = params["to_parse_samples_names"]
         project_name = params["project_name"]
         model_info = params["model_info"]
-
+        parsing_settings = params["parsing_settings"]
         if project_name == "undefined":
             return {"status": "failure", "error": "NOT VALID PROJECT NAME"}
 
         to_parse_samples = GrewService.get_samples_with_string_contents_as_dict(project_name, to_parse_samples_names, "last")
 
-        return ArboratorParserAPI.parse_start(model_info, to_parse_samples)
+        return ArboratorParserAPI.parse_start(model_info, to_parse_samples, parsing_settings)
 
 
 @api.route("/parse/status")
