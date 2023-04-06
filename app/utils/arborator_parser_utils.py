@@ -65,11 +65,11 @@ class ArboratorParserAPI:
         return ArboratorParserAPI.send_post_request("/train/status", data)
 
     @staticmethod
-    def parse_start(model_info: ModelInfo_t, to_parse_samples: Dict[str, str], parse_settings: Dict[str, str]):
+    def parse_start(model_info: ModelInfo_t, to_parse_samples: Dict[str, str], parsing_settings: Dict[str, str]):
         data = {
             "model_info": model_info,
             "to_parse_samples": to_parse_samples,
-            "parse_settings": parse_settings,
+            "parsing_settings": parsing_settings,
         }
         return ArboratorParserAPI.send_post_request("/parse/start", data)
 
