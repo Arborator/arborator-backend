@@ -24,20 +24,19 @@ class GithubSynchronizationResource(Resource):
     def post(self, project_name: str, username:str):
         parser = reqparse.RequestParser()
         parser.add_argument(name="repositoryName")
-        parser.add_argument(name="branch")
+        parser.add_argument(name="branchImport")
         parser.add_argument(name="branchSyn")
         args = parser.parse_args()
 
         repository_name = args.get("repositoryName")
-        branch = args.get("branch")
+        branch_import = args.get("branchImport")
         branch_syn = args.get("branchSyn")
 
         project = ProjectService.get_by_name(project_name)
         ProjectService.check_if_project_exist(project)
         user_id = UserService.get_by_username(username).id
         github_access_token = UserService.get_by_id(current_user.id).github_access_token
-        GithubWorkflowService.import_files_from_github(github_access_token, repository_name, project_name, username, branch, branch_syn)
-        print(branch_syn)
+        GithubWorkflowService.import_files_from_github(github_access_token, repository_name, project_name, username, branch_import, branch_syn)
         sha = GithubService.get_sha_base_tree(github_access_token, repository_name, branch_syn)
         GithubSynchronizationService.synchronize_github_repository(user_id, project.id, repository_name, branch_syn, sha)
         

@@ -66,6 +66,8 @@ class GithubWorkflowService:
         for file in conll_files:
             GithubWorkflowService.create_sample_from_github_file(file.get("name"), file.get("download_url"), username, project_name)
         if branch_syn == "arboratorgrew":
+            if (branch != branch_syn and  branch_syn in GithubService.list_branches_repository(access_token, full_name)): 
+                GithubService.delete_branch(access_token, full_name, branch_syn)    
             GithubService.create_new_branch_arborator(access_token, full_name, branch)
 
     
@@ -376,7 +378,20 @@ class GithubService:
             error = response.json()['errors'][0].get("message") 
             abort(422, error)
 
-        
+    
+    @staticmethod 
+    def merge_branch(access_token, full_name, base, head):
+        data = {"base": base, "head": head}
+        response = requests.post("https://api.github.com/repos/{}/merges".format(full_name), headers=GithubService.base_header(access_token), data=json.dumps(data))
+        print(response)
+
+
+    @staticmethod
+    def delete_branch(access_token, full_name, base):
+        response = requests.delete("https://api.github.com/repos/{}/git/refs/heads/{}".format(full_name, base), headers=GithubService.base_header(access_token))
+        return response
+
+
 class GithubCommitStatusService:
     @staticmethod
     def create(project_name, sample_name):
