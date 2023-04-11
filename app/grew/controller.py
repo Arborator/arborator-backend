@@ -21,6 +21,8 @@ api = Namespace(
 class ApplyRuleResource(Resource):
     def post(self, project_name: str):
 
+        project =ProjectService.get_by_name(project_name)
+        ProjectService.check_if_freezed(project)
         parser = reqparse.RequestParser()
         parser.add_argument(name="data", type=dict, action="append")
         args = parser.parse_args()

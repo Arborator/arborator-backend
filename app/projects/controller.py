@@ -64,18 +64,6 @@ class ProjectResource(Resource):
 
         return projects_extended_list
 
-    # @accepts(
-    #     dict(name="project_name", type=str),
-    #     # dict(name="user", type=str),
-    #     # dict(name="description", type=str),
-    #     # dict(name="name", type=str),
-    #     # dict(name="showAllTrees", type=bool),
-    #     # dict(name="user", type=str),
-    #     # dict(name="visibility", type=int),
-    #     # dict(name="exerciseMode", type=bool),
-    #     # schema=ProjectSchema,
-    #     api=api,
-    # )
     @responds(schema=ProjectSchema)
     def post(self) -> Project:
         "Create a single Project"
@@ -103,6 +91,7 @@ class ProjectResource(Resource):
             "show_all_trees": args.showAllTrees,
             "exercise_mode": args.exerciseMode,
             "visibility": args.visibility,
+            "freezed": False,
         }
 
         # KK : TODO : put all grew request in a seperated file and add error catching
@@ -150,9 +139,7 @@ class ProjectIdResource(Resource):
     def put(self, projectName: str):
         """Modify a single project (by it's name)"""
         project = ProjectService.get_by_name(projectName)
-        
         ProjectAccessService.check_admin_access(project.id)
-
         changes: ProjectInterface = request.parsed_obj
         return ProjectService.update(project, changes)
 

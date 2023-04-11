@@ -25,6 +25,7 @@ class SampleTreesResource(Resource):
         """Entrypoint for getting all trees of a given sample"""
         project = ProjectService.get_by_name(projectName)
         ProjectService.check_if_project_exist(project)
+        ProjectService.check_if_freezed(project)
 
         grew_sample_trees = GrewService.get_sample_trees(projectName, sampleName)
 
@@ -98,6 +99,7 @@ class SampleTreesResource(Resource):
         args = parser.parse_args()
 
         project = ProjectService.get_by_name(projectName)
+        ProjectService.check_if_freezed(project)
         project_name = projectName
         sample_name = sampleName
         user_id = args.user_id

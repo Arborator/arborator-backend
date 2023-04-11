@@ -13,7 +13,7 @@ class ProjectInterface(TypedDict, total=False):
     visibility: int
     show_all_trees: bool
     exercise_mode: bool
-    # default_user_trees: str # TODO : What's the type ?
+    freezed: bool
 
 
 class ProjectExtendedInterface(ProjectInterface, total=False):

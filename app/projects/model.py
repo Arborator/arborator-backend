@@ -23,6 +23,7 @@ class Project(db.Model, BaseM):
     exercise_mode = Column(Boolean, default=False)
     diff_mode = Column(Boolean, default=False)
     diff_user_id = Column(String(256), nullable=True)
+    freezed = Column(Boolean, default=False)
 
     feature = db.relationship("ProjectFeature", cascade="all,delete", backref="projects")
     meta_feature = db.relationship("ProjectMetaFeature", cascade="all,delete", backref="projects")
