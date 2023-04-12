@@ -32,20 +32,23 @@ class SampleUploadService:
         filename = secure_filename(fileobject.filename)
         sample_name = reextensions.sub("", filename)
         path_file = os.path.join(Config.UPLOAD_FOLDER, filename)
-        print('upload\n', path_file)
-        fileobject.save(path_file)
+        if sample_name in existing_samples: 
+            abort(409, 'There is sample already exists with the same name')
+        else:
+            print('upload\n', path_file)
+            fileobject.save(path_file)
 
-        nrtoks = convert_users_ids(path_file, users_ids_convertor)
-        add_or_keep_timestamps(path_file)
-        if nrtoks>Config.MAX_TOKENS:
-            abort(406, "Too big: Sample files on ArboratorGrew should have less than {max} tokens<br>Your file {fn} has {nrtoks} tokens. Split your file into smaller samples.".format(max=Config.MAX_TOKENS, fn=fileobject.filename, nrtoks=nrtoks))
-        if sample_name not in existing_samples:
+            nrtoks = convert_users_ids(path_file, users_ids_convertor)
+            add_or_keep_timestamps(path_file)
+            if nrtoks>Config.MAX_TOKENS:
+                abort(406, "Too big: Sample files on ArboratorGrew should have less than {max} tokens<br>Your file {fn} has {nrtoks} tokens. Split your file into smaller samples.".format(max=Config.MAX_TOKENS, fn=fileobject.filename, nrtoks=nrtoks))
+            
             GrewService.create_sample(project_name, sample_name)
 
-        with open(path_file, "rb") as file_to_save:
-            GrewService.save_sample(project_name, sample_name, file_to_save)
-            GithubCommitStatusService.create(project_name, sample_name)
-            GithubCommitStatusService.update(project_name, sample_name)
+            with open(path_file, "rb") as file_to_save:
+                GrewService.save_sample(project_name, sample_name, file_to_save)
+                GithubCommitStatusService.create(project_name, sample_name)
+                GithubCommitStatusService.update(project_name, sample_name)
 
 
 
