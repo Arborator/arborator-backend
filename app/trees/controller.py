@@ -1,6 +1,6 @@
 from app.projects.service import LastAccessService, ProjectAccessService, ProjectService
 from app.samples.service import SampleExerciseLevelService
-from app.github.service import GithubCommitStatusService
+from app.github.service import GithubCommitStatusService, GithubSynchronizationService
 from app.utils.grew_utils import grew_request, GrewService
 from flask import abort, current_app, jsonify
 from flask_login import current_user
@@ -17,17 +17,17 @@ api = Namespace(
 )  # noqa
 
 
-@api.route("/<string:projectName>/samples/<string:sampleName>/trees")
+@api.route("/<string:project_name>/samples/<string:sample_name>/trees")
 class SampleTreesResource(Resource):
     "Trees"
 
-    def get(self, projectName: str, sampleName: str):
+    def get(self, project_name: str, sample_name: str):
         """Entrypoint for getting all trees of a given sample"""
-        project = ProjectService.get_by_name(projectName)
+        project = ProjectService.get_by_name(project_name)
         ProjectService.check_if_project_exist(project)
         ProjectService.check_if_freezed(project)
 
-        grew_sample_trees = GrewService.get_sample_trees(projectName, sampleName)
+        grew_sample_trees = GrewService.get_sample_trees(project_name, sample_name)
 
         # ProjectAccessService.require_access_level(project.id, 2)
         ##### exercise mode block #####
@@ -50,12 +50,12 @@ class SampleTreesResource(Resource):
 
         if exercise_mode:
             exercise_level_obj = SampleExerciseLevelService.get_by_sample_name(
-                project.id, sampleName
+                project.id, sample_name
             )
             if exercise_level_obj:
                 exercise_level = exercise_level_obj.exercise_level.code
 
-            sample_trees = extract_trees_from_sample(grew_sample_trees, sampleName)
+            sample_trees = extract_trees_from_sample(grew_sample_trees, sample_name)
             sample_trees = add_base_tree(sample_trees)
 
             username = "anonymous"
@@ -70,38 +70,36 @@ class SampleTreesResource(Resource):
 
         else:
             if project.show_all_trees or project.visibility == 2:
-                sample_trees = samples2trees(grew_sample_trees, sampleName)
+                sample_trees = samples2trees(grew_sample_trees, sample_name)
             else:
                 validator = 1
                 # validator = project_service.is_validator(
-                #     project.id, sampleName, current_user.id)
+                #     project.id, sample_name, current_user.id)
                 if validator:
                     sample_trees = samples2trees(
                         grew_sample_trees,
-                        sampleName,
+                        sample_name,
                     )
                 else:
                     sample_trees = samples2trees_with_restrictions(
                         grew_sample_trees,
-                        sampleName,
+                        sample_name,
                         current_user,
                     )
         if current_user.is_authenticated:
-            LastAccessService.update_last_access_per_user_and_project(current_user.id, projectName, "read")
+            LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "read")
         data = {"sample_trees": sample_trees, "exercise_level": exercise_level}
         return data
 
-    def post(self, projectName: str, sampleName: str):
+    def post(self, project_name: str, sample_name: str):
         parser = reqparse.RequestParser()
         parser.add_argument(name="sent_id", type=str)
         parser.add_argument(name="user_id", type=str)
         parser.add_argument(name="conll", type=str)
         args = parser.parse_args()
 
-        project = ProjectService.get_by_name(projectName)
+        project = ProjectService.get_by_name(project_name)
         ProjectService.check_if_freezed(project)
-        project_name = projectName
-        sample_name = sampleName
         user_id = args.user_id
         conll = args.conll
         sent_id = args.sent_id
@@ -125,8 +123,10 @@ class SampleTreesResource(Resource):
         }
 
         grew_request("saveGraph", data=data)
-        LastAccessService.update_last_access_per_user_and_project(current_user.id, projectName, "write")
-        GithubCommitStatusService.update(project_name, sample_name)
+        LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
+        if GithubSynchronizationService.get_github_synchronized_repository(project.id):
+            GithubCommitStatusService.update(project_name, sample_name)
+
         return {"status": "success"}
 
 

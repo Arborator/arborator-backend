@@ -3,7 +3,7 @@ import re
 
 from app.projects.service import LastAccessService, ProjectService
 from app.user.service import UserService
-from app.github.service import GithubCommitStatusService
+from app.github.service import GithubCommitStatusService, GithubSynchronizationService
 from app.utils.grew_utils import GrewService, grew_request
 from flask import Response, abort, current_app, request
 from flask_login import current_user
@@ -39,7 +39,8 @@ class ApplyRuleResource(Resource):
                         "sent_id": sent_id,
                         "conll_graph": list(sentence['conlls'].values())[0],
                     })
-                    GithubCommitStatusService.update(project_name, sample_name)
+                    if GithubSynchronizationService.get_github_synchronized_repository(project.id):
+                        GithubCommitStatusService.update(project_name, sample_name)
 
         LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
         return {"status": "success"}

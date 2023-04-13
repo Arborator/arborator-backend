@@ -10,6 +10,7 @@ from collections import Counter
 from app import db
 from app.config import MAX_TOKENS, Config
 from app.user.model import User
+from app.projects.service import ProjectService
 from app.utils.grew_utils import GrewService
 from app.github.service import GithubCommitStatusService, GithubSynchronizationService
 from flask import abort
@@ -28,7 +29,8 @@ class SampleUploadService:
         reextensions=None,
         existing_samples=[],
         users_ids_convertor={},
-    ):		
+    ):	
+        project = ProjectService.get_by_name(project_name)	
         if reextensions == None:
             reextensions = re.compile(r"\.(conll(u|\d+)?|txt|tsv|csv)$")
         filename = secure_filename(fileobject.filename)
@@ -54,8 +56,9 @@ class SampleUploadService:
                 except Exception as e:
                     GrewService.delete_sample(project_name, sample_name)
                     abort(e.code, str(e.description))
-                GithubCommitStatusService.create(project_name, sample_name)
-                GithubCommitStatusService.update(project_name, sample_name)
+                if GithubSynchronizationService.get_github_synchronized_repository(project.id):
+                    GithubCommitStatusService.create(project_name, sample_name)
+                    GithubCommitStatusService.update(project_name, sample_name)
 
 
 
