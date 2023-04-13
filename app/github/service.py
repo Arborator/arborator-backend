@@ -98,6 +98,7 @@ class GithubWorkflowService:
     def create_sample(sample_name, path_file, project_name, users_ids):
         tokens_number = SampleService.convert_users_ids(path_file, users_ids)
         SampleService.add_or_keep_timestamps(path_file)
+        SampleService.check_duplicated_sent_id(path_file)
         if tokens_number > MAX_TOKENS:
             abort(406, "Too big: Sample files on ArboratorGrew should have less than {max} tokens.".format(max=MAX_TOKENS))
         GrewService.create_sample(project_name, sample_name)

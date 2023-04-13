@@ -4,6 +4,8 @@ import os
 import re
 
 from datetime import datetime
+from collections import Counter
+
 
 from app import db
 from app.config import MAX_TOKENS, Config
@@ -39,6 +41,7 @@ class SampleUploadService:
             fileobject.save(path_file)
 
             nrtoks = convert_users_ids(path_file, users_ids_convertor)
+            check_duplicated_sent_id(path_file)
             add_or_keep_timestamps(path_file)
             if nrtoks>Config.MAX_TOKENS:
                 abort(406, "Too big: Sample files on ArboratorGrew should have less than {max} tokens<br>Your file {fn} has {nrtoks} tokens. Split your file into smaller samples.".format(max=Config.MAX_TOKENS, fn=fileobject.filename, nrtoks=nrtoks))
@@ -344,6 +347,23 @@ def convert_users_ids(path_file, users_ids_convertor):
     write_conll_on_disk(path_file, new_file_string)
     return nrtoks
 
+
+def check_duplicated_sent_id(path_file: str):
+    conll_string = read_conll_from_disk(path_file)
+    conlls_strings = split_conll_string_to_conlls_list(conll_string)
+    sent_ids =[]
+    for conll_string in conlls_strings:
+        if conll_string == "": 
+            continue
+        for line in conll_string.rstrip().split("\n"):
+            if "# sent_id = " in line:
+                sent_ids.append(line.split("# sent_id = ")[-1])
+    sent_ids_count = Counter(sent_ids)
+    for sent_id, count in sent_ids_count.items():
+        if count > 1: 
+            abort(406, "sent_id `{}` is duplicated in your file".format(sent_id))
+    return
+    
 
 def add_or_keep_timestamps(path_file: str):
     """ adds a timestamp on the tree if there is not one """
