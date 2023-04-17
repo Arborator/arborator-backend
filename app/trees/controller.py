@@ -128,6 +128,16 @@ class SampleTreesResource(Resource):
             GithubCommitStatusService.update(project_name, sample_name)
 
         return {"status": "success"}
+    
+
+@api.route("/<string:project_name>/samples/<string:sample_name>/trees/<string:username>")
+class UserTreesResource(Resource):
+    
+    def delete(self, project_name: str, sample_name: str, username: str):
+        user_sent_ids = get_user_trees(project_name, sample_name, username)
+        for sent_id in user_sent_ids:
+            data = {"project_id": project_name,  "sample_id": sample_name, "sent_id": sent_id,"user_id": username, }
+            grew_request("eraseGraph", data)  
 
 
 ################################################################################
@@ -271,3 +281,16 @@ def samples2trees_exercise_mode(trees_on_grew, sample_name, current_user, projec
                 current_user.username
             ] = user_empty_conllu
     return trees_processed
+
+
+def get_user_trees(project_name, sample_name, username):
+    
+    user_trees_sent_ids = []
+    grew_sample_trees = GrewService.get_sample_trees(project_name, sample_name)
+    sample_trees = extract_trees_from_sample(grew_sample_trees, sample_name)
+    for sent_id, trees in sample_trees.items():
+       if username in trees['conlls']: 
+           user_trees_sent_ids.append(sent_id)
+    
+    return user_trees_sent_ids
+
