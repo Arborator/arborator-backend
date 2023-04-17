@@ -1,4 +1,4 @@
-from typing import List, Literal
+from typing import List, Literal, Dict
 from conllup.conllup import sentenceConllToJson, readConlluFile, writeConlluFile
 import os
 import re
@@ -33,7 +33,6 @@ class SampleUploadService:
         path_file = os.path.join(Config.UPLOAD_FOLDER, filename)
         print('upload\n', path_file)
         fileobject.save(path_file)
-
         nrtoks = convert_users_ids(path_file, users_ids_convertor)
         add_or_keep_timestamps(path_file)
         if nrtoks>Config.MAX_TOKENS:
@@ -335,22 +334,40 @@ def convert_users_ids(path_file, users_ids_convertor):
     return nrtoks
 
 
+def readConlluFileWrapper(path_file: str, keepEmptyTrees: bool = False):
+    """ read a conllu file and return a list of sentences """
+    try:
+        sentences_json = readConlluFile(path_file, keepEmptyTrees=keepEmptyTrees)
+        return sentences_json
+    except Exception as e:
+        abort(406, str(e))
+
+def writeConlluFileWrapper(path_file: str, sentences_json: List[Dict]):
+    """ write a conllu file from a list of sentences """
+    try:
+        writeConlluFile(path_file, sentences_json, overwrite=True)
+    except Exception as e:
+        abort(406, str(e))
+
+
 def add_or_keep_timestamps(path_file: str, when: Literal["now", "long_ago"] = "now"):
     """ adds a timestamp on the tree if there is not one """
-    sentences_json = readConlluFile(path_file, keepEmptyTrees=True)
+    sentences_json = readConlluFileWrapper(path_file, keepEmptyTrees=True)
     timestamp_str = str(datetime.timestamp(datetime.now()) * 1000)
     if when == "long_ago":
         timestamp_str = 0
     for sentence_json in sentences_json:
         sentence_json["metaJson"]["timestamp"] = sentence_json["metaJson"].get("timestamp", timestamp_str)
-    writeConlluFile(path_file, sentences_json, overwrite=True)
+
+    writeConlluFileWrapper(path_file, sentences_json, overwrite=True)
 
 
 def add_or_replace_userid(path_file: str, new_user_id: str):
     """ adds a userid on the tree or replace it if already has one """
-    sentences_json = readConlluFile(path_file, keepEmptyTrees=True)
+    sentences_json = readConlluFileWrapper(path_file, keepEmptyTrees=True)
     for sentence_json in sentences_json:
         sentence_json["metaJson"]["user_id"] = new_user_id
-    writeConlluFile(path_file, sentences_json, overwrite=True)
+
+    writeConlluFileWrapper(path_file, sentences_json, overwrite=True)
 
 
