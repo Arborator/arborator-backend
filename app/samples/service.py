@@ -359,7 +359,7 @@ def add_or_keep_timestamps(path_file: str, when: Literal["now", "long_ago"] = "n
     for sentence_json in sentences_json:
         sentence_json["metaJson"]["timestamp"] = sentence_json["metaJson"].get("timestamp", timestamp_str)
 
-    writeConlluFileWrapper(path_file, sentences_json, overwrite=True)
+    writeConlluFileWrapper(path_file, sentences_json)
 
 
 def add_or_replace_userid(path_file: str, new_user_id: str):
@@ -368,6 +368,6 @@ def add_or_replace_userid(path_file: str, new_user_id: str):
     for sentence_json in sentences_json:
         sentence_json["metaJson"]["user_id"] = new_user_id
 
-    writeConlluFileWrapper(path_file, sentences_json, overwrite=True)
+    writeConlluFileWrapper(path_file, sentences_json)
 
 
