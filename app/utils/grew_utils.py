@@ -221,7 +221,7 @@ class GrewService:
                     ]
 
                 # gluing back the trees
-                sample_content["last"] = "\n".join(sample_content.get("last", ""))
+                sample_content["last"] = "".join(sample_content.get("last", ""))
                 samplecontentfiles.append(sample_content)
 
             else:
@@ -251,7 +251,7 @@ class GrewService:
                     ]
 
                 # gluing back the trees
-                sample_content["last"] = "\n".join(sample_content.get("last", ""))
+                sample_content["last"] = "".join(sample_content.get("last", ""))
                 samples_dict_for_user[sample_name] =sample_content.get(user, "")
 
             else:
@@ -301,7 +301,7 @@ class SampleExportService:
         
         to_return_obj = {}
         for user, content in usertrees.items():
-            to_return_obj[user] = "\n".join(content)
+            to_return_obj[user] = "".join(content)
         return to_return_obj
 
     @staticmethod
