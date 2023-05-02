@@ -242,16 +242,25 @@ class GithubService:
     @staticmethod    
     def get_repositories(access_token):
         repositories = []
-        response = requests.get("https://api.github.com/user/repos", headers = GithubService.base_header(access_token))
-        data = response.json()
+        data = []
+        url = "https://api.github.com/user/repos?per_page=100"
+        headers = GithubService.base_header(access_token)
+        first_page = requests.get(url, headers=headers)
+        data = first_page.json()
+        next_page = first_page
+        while next_page.links.get('next', None) is not None:
+            next_url = next_page.links['next']['url']
+            next_page = requests.get(next_url, headers=headers)
+            data.extend(next_page.json())
+    
         for repo in data:
             repository = {}
             repository["name"] = repo.get("full_name")
             repository["owner_name"] = repo.get("owner").get("login")
             repository["owner_avatar"] = repo.get("owner").get("avatar_url")
-            repositories.append(repository)
-        return repositories  
-    
+            repositories.append(repository) 
+        return repositories
+      
 
     @staticmethod
     def list_branches_repository(access_token, full_name) -> List[str]:
