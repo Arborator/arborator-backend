@@ -208,7 +208,7 @@ class BootParsing(Resource):
             reply = requests.get(f"{DJANGO_BOOT_SERVER_URL}/testBoot/")
             return reply.text
         except: 
-            print('controller.py parsing' reply)
+            print('controller.py parsing', reply)
             return ""
 
     def post(self,  project_name: str):
@@ -268,7 +268,7 @@ class BootParsedResults(Resource):
             reply = requests.post(f"{DJANGO_BOOT_SERVER_URL}/getResults/", data = {'projectFdname': param['fdname'], 'parser': param['parser']})
             reply = json.loads(reply.text)
         except:
-            print('controller.py results' reply)
+            print('controller.py results', reply)
             return {"status" : "Error"}
 
         status = reply.get('status', None)
@@ -305,7 +305,7 @@ class BootParsedRemoveFolder(Resource):
             reply = requests.post(f"{DJANGO_BOOT_SERVER_URL}/removeFolder/", data = {'projectFdname': param['fdname']})
             reply = json.loads(reply.text)
         except:
-            print('controller.py removeFolder' reply)
+            print('controller.py removeFolder', reply)
             return {"status" : "Error"}
         return reply
 
