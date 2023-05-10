@@ -44,6 +44,7 @@ class SampleResource(Resource):
                 "number_trees": grew_sample["number_trees"],
                 "tokens": grew_sample["number_tokens"],
                 "treesFrom": grew_sample["users"],
+                "treeByUser": grew_sample["tree_by_user"],
                 "roles": {},
             }
             sample["roles"] = SampleRoleService.get_by_sample_name(
