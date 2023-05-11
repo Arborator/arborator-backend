@@ -162,14 +162,18 @@ class SampleEvaluationResource(Resource):
 @api.route("/<string:project_name>/samples/export")
 class ExportSampleResource(Resource):
     def post(self, project_name: str):
-        data = request.get_json(force=True)
-        sample_names = data["samples"]
-        print("requested zip", sample_names, project_name)
-        
+
+
+        parser = reqparse.RequestParser()
+        parser.add_argument("sampleNames", type=str, action="append")
+        parser.add_argument("users", type=str, action="append")
+        args = parser.parse_args()
+        sample_names = args.get("sampleNames")
+        users = args.get("users")
         sample_names, samples_with_string_content = GrewService.get_samples_with_string_contents(project_name, sample_names)
 
         memory_file = SampleExportService.contentfiles2zip(
-            sample_names, samples_with_string_content
+            sample_names, samples_with_string_content, users
         )
 
         resp = Response(

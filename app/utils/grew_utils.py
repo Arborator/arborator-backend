@@ -316,14 +316,16 @@ class SampleExportService:
         return last
 
     @staticmethod
-    def contentfiles2zip(sample_names, sampletrees):
+    def contentfiles2zip(sample_names, sampletrees, users):
         memory_file = io.BytesIO()
         with zipfile.ZipFile(memory_file, "w") as zf:
-            for sample_name, sample in zip(sample_names, sampletrees):
-                for fuser, filecontent in sample.items():
-                    data = zipfile.ZipInfo("{}.{}.conllu".format(sample_name, fuser))
-                    data.date_time = time.localtime(time.time())[:6]
-                    data.compress_type = zipfile.ZIP_DEFLATED
-                    zf.writestr(data, filecontent)
+            for user in users:
+                for sample_name, sample in zip(sample_names, sampletrees):
+                    if user in sample.keys():
+                        data = zipfile.ZipInfo()
+                        data.filename = "{}/{}.conllu".format(user, sample_name) 
+                        data.date_time = time.localtime(time.time())[:6]
+                        data.compress_type = zipfile.ZIP_DEFLATED
+                        zf.writestr(data, sample.get(user))
         memory_file.seek(0)
         return memory_file
