@@ -239,6 +239,33 @@ class RelationTableResource(Resource):
         return data
 
 
+@api.route("/<string:project_name>/show-diff")
+class ShowDiffRessource(Resource):
+    def post(self, project_name: str):
+        parser = reqparse.RequestParser()
+        parser.add_argument(name="username", type=str)
+        parser.add_argument(name="otherUsers", type=str, action="append")
+        parser.add_argument(name="features", type=str, action="append")
+        args = parser.parse_args()
+
+        username= args.get("username")
+        other_users = args.get("otherUsers")
+        features = args.get("features")
+        pattern = "pattern { }"
+        user_type = "all"
+
+        reply = GrewService.search_pattern_in_graphs(project_name, pattern, user_type)
+        if reply["status"] != "OK":
+            abort(400)
+        trees = {}
+        for m in reply["data"]:
+            if m["user_id"] == "":
+                abort(409)
+            conll = m["conll"]
+            trees = formatTrees_new(m, trees, conll)
+        return post_process_diffs(trees, username, other_users, features)
+        
+
 def get_timestamp(conll):
     t = re.search("# timestamp = (\d+(?:\.\d+)?)\n", conll).groups()
     if t:
@@ -305,3 +332,81 @@ def formatTrees_new(m, trees, conll, isPackage: bool = False):
 
         
     return trees
+
+
+def check_all_diffs(left_sentence_json, right_sentence_json):
+
+    left_nodes_json = left_sentence_json["treeJson"]["nodesJson"]
+    right_nodes_json = right_sentence_json["treeJson"]["nodesJson"]
+    if len(left_nodes_json.values()) == len(right_nodes_json.values()):
+            return True
+    else: 
+        for token_id in left_nodes_json:
+            left_token = left_nodes_json[token_id]
+            right_token = right_nodes_json[token_id]
+            if json.dumps(left_token) != json.dumps(right_token):
+                return True
+
+
+def check_diffs_based_on_feats(left_sentence_json, right_sentence_json, features):
+    left_nodes_json = left_sentence_json["treeJson"]["nodesJson"]
+    right_nodes_json = right_sentence_json["treeJson"]["nodesJson"]
+    diff_token_ids =  set()
+    if len(left_nodes_json.values()) == len(right_nodes_json.values()):
+        for token_id in left_nodes_json:
+            left_token = left_nodes_json[token_id]
+            right_token = right_nodes_json[token_id]
+            if left_token['FORM'] == right_token['FORM']:
+                for feat in features:
+                    if '.' in feat: 
+                        base_feat = feat.split('.')[0]
+                        second_feat = feat.split('.')[1]
+                        if  second_feat in left_token[base_feat].keys() and second_feat in  right_token[base_feat].keys():
+                            if  left_token[base_feat][second_feat]!= right_token[base_feat][second_feat]:
+                                diff_token_ids.add(token_id)
+                    else:
+                        if left_token[feat] != right_token[feat]:
+                            diff_token_ids.add(token_id)
+
+        return diff_token_ids
+
+
+def post_process_diffs(grew_search_results, user_id, other_users, features):
+
+    post_processed_results = {}
+    for sample_name in grew_search_results:
+        post_processed_results[sample_name] = {}
+        for sent_id in  grew_search_results[sample_name]:
+            if grew_search_results[sample_name][sent_id]["conlls"][user_id]:
+                user_sentence_json = sentenceConllToJson(grew_search_results[sample_name][sent_id]["conlls"][user_id])
+                conlls = {}
+                matches = {}
+                for other_user_id in other_users:
+                    if (other_user_id in grew_search_results[sample_name][sent_id]["conlls"].keys()):
+                        other_sentence_json = sentenceConllToJson(grew_search_results[sample_name][sent_id]["conlls"][other_user_id])
+                        if not features:
+                            if check_all_diffs(user_sentence_json, other_sentence_json):
+                                conlls[other_user_id] = grew_search_results[sample_name][sent_id]["conlls"][other_user_id]
+                        else:
+                            token_ids = check_diffs_based_on_feats(user_sentence_json, other_sentence_json, features)
+                            if token_ids:
+                                list_matches = []
+                                for token_id in token_ids:
+                                    list_matches.append({"edges":'' , "nodes": {"N": token_id} }) 
+                            
+                                matches[other_user_id] = list_matches
+                                conlls[other_user_id] = grew_search_results[sample_name][sent_id]["conlls"][other_user_id]           
+                if len(conlls) > 0 : 
+                    print('test')
+                    post_processed_results[sample_name][sent_id] = {
+                        "sentence": grew_search_results[sample_name][sent_id]["sentence"],
+                        "sample_name": sample_name,
+                        "conlls": conlls,
+                        "matches": matches,
+                        "packages": {},
+                    }
+
+                    post_processed_results[sample_name][sent_id]["conlls"][user_id] = grew_search_results[sample_name][sent_id]["conlls"][user_id]                                    
+    return post_processed_results
+
+                
