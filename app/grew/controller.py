@@ -377,7 +377,7 @@ def post_process_diffs(grew_search_results, user_id, other_users, features):
     for sample_name in grew_search_results:
         post_processed_results[sample_name] = {}
         for sent_id in  grew_search_results[sample_name]:
-            if grew_search_results[sample_name][sent_id]["conlls"][user_id]:
+            if user_id in grew_search_results[sample_name][sent_id]["conlls"].keys():
                 user_sentence_json = sentenceConllToJson(grew_search_results[sample_name][sent_id]["conlls"][user_id])
                 conlls = {}
                 matches = {}
