@@ -217,7 +217,7 @@ class GrewService:
                     ]
 
                 # gluing back the trees
-                sample_content["last"] = "\n".join(sample_content.get("last", ""))
+                sample_content["last"] = "".join(sample_content.get("last", ""))
                 samplecontentfiles.append(sample_content)
 
             else:
@@ -265,7 +265,7 @@ class SampleExportService:
                     usertrees[user] = list()
                 usertrees[user].append(conll)
         for user, content in usertrees.items():
-            usertrees[user] = "\n".join(usertrees[user])
+            usertrees[user] = "".join(usertrees[user])
         return usertrees
 
     @staticmethod

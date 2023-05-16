@@ -59,10 +59,20 @@ class GithubWorkflowService:
 
     @staticmethod
     def import_files_from_github(access_token, full_name, project_name, username, branch, branch_syn):
+
         repository_files = GithubService.get_repository_files_from_specific_branch(access_token, full_name, branch)
         conll_files = [file for file in repository_files if extension.search(file.get('name'))]
-        if not conll_files:
-            abort(400, "No conll Files in this repository")
+        conll_files_names = [file.get("name").split(".conllu")[0] for file in repository_files]
+        print(conll_files_names)
+        project_samples = GrewService.get_samples(project_name)
+        samples_names = [sample["name"] for sample in project_samples]
+        print(samples_names)
+        not_intersected_samples = [sample_name for sample_name in samples_names if sample_name not in conll_files_names]
+        print(not_intersected_samples)
+        for sample_name in not_intersected_samples:
+            GithubCommitStatusService.create(project_name, sample_name)
+            GithubCommitStatusService.update(project_name, sample_name)
+    
         for file in conll_files:
             GithubWorkflowService.create_sample_from_github_file(file.get("name"), file.get("download_url"), username, project_name)
         if branch_syn == "arboratorgrew":
@@ -101,7 +111,10 @@ class GithubWorkflowService:
         SampleService.check_duplicated_sent_id(path_file)
         if tokens_number > MAX_TOKENS:
             abort(406, "Too big: Sample files on ArboratorGrew should have less than {max} tokens.".format(max=MAX_TOKENS))
-        GrewService.create_sample(project_name, sample_name)
+        grew_samples = GrewService.get_samples(project_name)
+        samples_names = [sa["name"] for sa in grew_samples]
+        if sample_name not in samples_names:
+            GrewService.create_sample(project_name, sample_name)
         with open(path_file, "rb") as file_to_save:
             GrewService.save_sample(project_name, sample_name, file_to_save)
 

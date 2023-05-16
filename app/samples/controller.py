@@ -34,7 +34,6 @@ class SampleResource(Resource):
 
     def get(self, project_name: str):
         project = ProjectService.get_by_name(project_name)
-        ProjectAccessService.check_admin_access(project.id)
         ProjectService.check_if_freezed(project)
         grew_samples = GrewService.get_samples(project_name)
 

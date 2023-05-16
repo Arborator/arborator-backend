@@ -67,7 +67,7 @@ class ProjectService:
     @staticmethod 
     def check_if_freezed(project: Project) -> None:
         if project.freezed and ProjectAccessService.get_admins(project.id)[0] != current_user.id: 
-            abort(403, "You can't access the project when it's freezd")
+            abort(403, "You can't access the project when it's freezed")
 
    
 class ProjectAccessService:
