@@ -63,12 +63,9 @@ class GithubWorkflowService:
         repository_files = GithubService.get_repository_files_from_specific_branch(access_token, full_name, branch)
         conll_files = [file for file in repository_files if extension.search(file.get('name'))]
         conll_files_names = [file.get("name").split(".conllu")[0] for file in repository_files]
-        print(conll_files_names)
         project_samples = GrewService.get_samples(project_name)
         samples_names = [sample["name"] for sample in project_samples]
-        print(samples_names)
         not_intersected_samples = [sample_name for sample_name in samples_names if sample_name not in conll_files_names]
-        print(not_intersected_samples)
         for sample_name in not_intersected_samples:
             GithubCommitStatusService.create(project_name, sample_name)
             GithubCommitStatusService.update(project_name, sample_name)
@@ -158,24 +155,17 @@ class GithubWorkflowService:
 
 
     @staticmethod 
-    def pull_changes(access_token, project_name, username, full_name, base_tree):
-
-        tree = GithubService.get_tree(access_token, full_name, base_tree)
-        project_samples = GrewService.get_samples(project_name)
-        sample_names = [sample["name"] for sample in project_samples]
-        if tree: 
-            files = [file.get('path') for file in tree if extension.search(file.get('path'))]
-            for path in files:
-                file_content= GithubService.get_file_content_by_commit_sha(access_token,full_name, path, base_tree)
-                sample_name = file_content.get("name").split(".conllu")[0]
-                if sample_name not in sample_names:
-                    GithubWorkflowService.create_sample_from_github_file(file_content.get("name"), file_content.get("download_url"), username, project_name)
-                else: 
-                    GithubWorkflowService.pull_change_existing_sample(project_name, sample_name,username, file_content.get("download_url"))
-            deleted_samples = list(set(sample_names) - set([file_name.split(".conllu")[0] for file_name in files]))
-            if deleted_samples : 
-                for deleted_sample in deleted_samples:
-                    GithubWorkflowService.delete_sample_from_project(project_name, deleted_sample)
+    def pull_changes(access_token, project_name, username, full_name, base_tree, modified_files):
+        for file in modified_files:
+            sample_name = file.get("filename").split(".conllu")[0]
+            file_content= GithubService.get_file_content_by_commit_sha(access_token,full_name, file.get("filename"), base_tree)
+            download_url = file_content.get("download_url")
+            if file.get("status") == "added":
+                GithubWorkflowService.create_sample_from_github_file(sample_name, download_url, username, project_name)
+            if file.get("status") == "modified":
+                GithubWorkflowService.pull_change_existing_sample(project_name, sample_name,username, download_url)
+            if file.get("status") == "removed":
+                GithubWorkflowService.delete_sample_from_project(project_name, sample_name)
 
 
     @staticmethod
@@ -187,32 +177,22 @@ class GithubWorkflowService:
                 data={"project_id": project_name, "sample_id": sample_name},
             )
         sample_trees =SampleExportService.servSampleTrees(reply.get("data", {}))
-        
         modified_sentences = []
+        deleted_sentences = []
         for conll in conlls_strings:
             for line in conll.rstrip().split("\n"):
                 if "# sent_id = " in line:
                     sent_id = line.split("# sent_id = ")[-1] 
-                    modified_sentences.append((sent_id, conll))
-                    grew_request("saveGraph",
-                    data={
-                        "project_id": project_name,
-                        "sample_id": sample_name,
-                        "user_id": username,
-                        "sent_id": sent_id,
-                        "conll_graph": conll,
-                    })
+                    modified_sentences.append(sent_id)
+        data = {"project_id": project_name, "sample_id": sample_name, "user_id": username, "conll_graphs": content,}
+        grew_request("saveGraphs", data)
         for sentence in list(sample_trees.keys()): #sentence deleted earase only the tree of the user when we pull
-            if not any (sentence in  modified_sentence for modified_sentence in modified_sentences):
-                grew_request("eraseGraph",
-                    data={
-                        "project_id": project_name,
-                        "sample_id": sample_name,
-                        "sent_id": sentence,
-                        "user_id": username,
-                    })  
-
-
+            if not sentence in  modified_sentences:
+                deleted_sentences.append(sentence)
+        data = {"project_id": project_name, "sample_id": sample_name, "sent_ids": json.dumps(deleted_sentences), "user_id": username}
+        grew_request("eraseGraphs", data)
+        
+                
     @staticmethod
     def delete_file_from_github(access_token, project_name, full_name, sample_name):
         file_path = sample_name+".conllu"
@@ -406,13 +386,21 @@ class GithubService:
     def merge_branch(access_token, full_name, base, head):
         data = {"base": base, "head": head}
         response = requests.post("https://api.github.com/repos/{}/merges".format(full_name), headers=GithubService.base_header(access_token), data=json.dumps(data))
-        print(response)
 
 
     @staticmethod
     def delete_branch(access_token, full_name, base):
         response = requests.delete("https://api.github.com/repos/{}/git/refs/heads/{}".format(full_name, base), headers=GithubService.base_header(access_token))
         return response
+    
+    @staticmethod
+    def compare_two_commits(access_token, full_name, previous_commit, new_commit):
+        url = 'https://api.github.com/repos/{}/compare/{}...{}'.format(full_name, previous_commit, new_commit)
+        headers = GithubService.base_header(access_token)
+        response = requests.get(url, headers=headers)
+        data = response.json()
+        modified_files = [{"filename": file.get("filename"), "status": file.get("status")} for file in data.get('files')]
+        return modified_files
 
 
 class GithubCommitStatusService:

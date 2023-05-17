@@ -133,10 +133,13 @@ class GithubPullResource(Resource):
         project = ProjectService.get_by_name(project_name)
         
         user = UserService.get_by_username(username)
+        access_token = user.github_access_token
         branch = GithubSynchronizationService.get_github_synchronized_repository(project.id).branch
-        if GithubWorkflowService.check_pull(user.github_access_token, project_name):
-            base_tree = GithubService.get_sha_base_tree(user.github_access_token, full_name, branch)
-            GithubWorkflowService.pull_changes(user.github_access_token,project_name,username, full_name,base_tree)
+        sha = GithubSynchronizationService.get_github_synchronized_repository(project.id).base_sha
+        base_tree = GithubService.get_sha_base_tree(access_token, full_name, branch)
+        if GithubWorkflowService.check_pull(access_token, project_name):
+            modified_files = GithubService.compare_two_commits(access_token, full_name, sha, base_tree)
+            GithubWorkflowService.pull_changes(access_token, project_name, username, full_name, base_tree, modified_files)
             GithubSynchronizationService.update_base_sha(project.id, full_name, base_tree)
             LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
 
