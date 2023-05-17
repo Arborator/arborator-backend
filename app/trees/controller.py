@@ -134,10 +134,8 @@ class SampleTreesResource(Resource):
 class UserTreesResource(Resource):
     
     def delete(self, project_name: str, sample_name: str, username: str):
-        user_sent_ids = get_user_trees(project_name, sample_name, username)
-        for sent_id in user_sent_ids:
-            data = {"project_id": project_name,  "sample_id": sample_name, "sent_id": sent_id,"user_id": username, }
-            grew_request("eraseGraph", data)  
+        data = {"project_id": project_name,  "sample_id": sample_name, "sent_ids": "[]","user_id": username, }
+        grew_request("eraseGraphs", data)  
 
 
 ################################################################################
