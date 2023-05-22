@@ -3,7 +3,8 @@ import requests
 import base64
 import json
 import re 
-from datetime import datetime
+import aiohttp
+import asyncio
 
 from flask import abort
 
@@ -54,7 +55,6 @@ class GithubSynchronizationService:
         db.session.delete(github_repository)
         db.session.commit()
 
-
 class GithubWorkflowService:
 
     @staticmethod
@@ -68,26 +68,36 @@ class GithubWorkflowService:
         not_intersected_samples = [sample_name for sample_name in samples_names if sample_name not in conll_files_names]
         for sample_name in not_intersected_samples:
             GithubCommitStatusService.create(project_name, sample_name)
-            GithubCommitStatusService.update(project_name, sample_name)
-    
-        for file in conll_files:
-            GithubWorkflowService.create_sample_from_github_file(file.get("name"), file.get("download_url"), username, project_name)
+            GithubCommitStatusService.update(project_name, sample_name)   
+        asyncio.run(GithubWorkflowService.clone_github_repository(conll_files, project_name, username))
         if branch_syn == "arboratorgrew":
             if (branch != branch_syn and  branch_syn in GithubService.list_branches_repository(access_token, full_name)): 
                 GithubService.delete_branch(access_token, full_name, branch_syn)    
             GithubService.create_new_branch_arborator(access_token, full_name, branch)
 
-    
+        
     @staticmethod 
-    def create_file_from_github_file_content(file_name, download_url):
-        sample_name = file_name.split(".conllu")[0]
-        raw_content = requests.get(download_url)
-        path_file = os.path.join(Config.UPLOAD_FOLDER, file_name)
-        file = open(path_file, "w")
-        file.write(raw_content.text)
+    async def clone_github_repository(files, project_name, username):
+        async with aiohttp.ClientSession() as session: 
+            tasks = []   
+            for file in files:
+                download_url = file.get("download_url")
+                file_name = file.get("name")
+                tasks.append(GithubWorkflowService.create_sample_from_github_file(file_name, download_url, username, project_name, session))
+            group = await asyncio.gather(*tasks, return_exceptions=True)
+            return group
 
-        return sample_name, path_file
-    
+
+    @staticmethod 
+    async def get_github_file_content(file_name, download_url, session):
+        async with session.get(download_url) as response:
+            raw_content = await response.text()
+            sample_name = file_name.split(".conllu")[0]
+            path_file = os.path.join(Config.UPLOAD_FOLDER, file_name)
+            file = open(path_file, "w")
+            file.write(raw_content)
+            return sample_name, path_file
+
 
     @staticmethod
     def preprocess_file(path_file, username):
@@ -117,8 +127,8 @@ class GithubWorkflowService:
 
     
     @staticmethod
-    def create_sample_from_github_file(file, download_url, username, project_name):
-        sample_name, path_file = GithubWorkflowService.create_file_from_github_file_content(file, download_url)
+    async def create_sample_from_github_file(file, download_url, username, project_name, session):
+        sample_name, path_file =  await GithubWorkflowService.get_github_file_content(file, download_url, session)
         user_ids = GithubWorkflowService.preprocess_file(path_file,username)
         GithubWorkflowService.create_sample(sample_name, path_file, project_name, user_ids)
         GithubCommitStatusService.create(project_name, sample_name)
