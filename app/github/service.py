@@ -107,7 +107,7 @@ class GithubWorkflowService:
         for line in file.rstrip().split("\n"):
             if "# user_id = " in line:
                 user_id = line.split("# user_id = ")[-1]
-                user_ids[user_id] =user_id
+                user_ids[user_id] = user_id
         return user_ids
         
 
@@ -180,25 +180,28 @@ class GithubWorkflowService:
 
     @staticmethod
     def pull_change_existing_sample(project_name, sample_name, username, download_url):
-        content = requests.get(download_url).text
+        
+        content = requests.get(download_url).text 
+        file_name = sample_name + "_modified.conllu"
+        path_file = os.path.join(Config.UPLOAD_FOLDER, file_name)
+        with open(path_file, "w") as file:
+            file.write(content)
+        user_ids = GithubWorkflowService.preprocess_file(path_file, username)
+        SampleService.convert_users_ids(path_file, user_ids)
+        SampleService.add_or_keep_timestamps(path_file)
+        with open(path_file, "rb") as file_to_save:
+            GrewService.save_sample(project_name, sample_name, file_to_save)
+        
         conlls_strings = SampleService.split_conll_string_to_conlls_list(content)
-        reply = grew_request(
-                "getConll",
-                data={"project_id": project_name, "sample_id": sample_name},
-            )
+        reply = grew_request("getConll", data={"project_id": project_name, "sample_id": sample_name},)
         sample_trees =SampleExportService.servSampleTrees(reply.get("data", {}))
         modified_sentences = []
-        deleted_sentences = []
         for conll in conlls_strings:
             for line in conll.rstrip().split("\n"):
                 if "# sent_id = " in line:
                     sent_id = line.split("# sent_id = ")[-1] 
                     modified_sentences.append(sent_id)
-        data = {"project_id": project_name, "sample_id": sample_name, "user_id": username, "conll_graphs": content,}
-        grew_request("saveGraphs", data)
-        for sentence in list(sample_trees.keys()): #sentence deleted earase only the tree of the user when we pull
-            if not sentence in  modified_sentences:
-                deleted_sentences.append(sentence)
+        deleted_sentences = [sent_id for sent_id in sample_trees.keys() if not sent_id in modified_sentences]
         data = {"project_id": project_name, "sample_id": sample_name, "sent_ids": json.dumps(deleted_sentences), "user_id": username}
         grew_request("eraseGraphs", data)
         
