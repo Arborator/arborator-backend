@@ -118,7 +118,6 @@ class SampleTreesResource(Resource):
             "project_id": project_name,
             "sample_id": sample_name,
             "user_id": user_id,
-            "sent_id": sent_id,
             "conll_graph": conll,
         }
 

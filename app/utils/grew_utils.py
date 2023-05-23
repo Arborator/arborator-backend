@@ -28,9 +28,9 @@ def grew_request(fct_name, data={}, files={}):
         abort(500, {"message": error_message})
     response = json.loads(response.text)
     if response.get("status") != "OK":
-        if "data" in response:
+        if response.get("data", None):
             message = str(response["data"])
-        elif "message" in response:
+        elif response.get("message", None):
             message = str(response["message"]) # should already be a string
             if 'Conllx_error' in message:
                 try:
@@ -49,9 +49,13 @@ def grew_request(fct_name, data={}, files={}):
                     message = '<br>'.join(messages)
                 except:
                     pass # just dump the message as raw. better than nothing...
+
+        elif response.get("messages", None):
+            message = "; ".join(response["messages"])
         else:
             message = "unknown grew servor error"
-        abort(406, message) # GREW ERROR = 418
+        print("GREW-ERROR : " + message)
+        abort(406, "GREW-ERROR : " + message) # GREW ERROR = 418
     return response
 
 
@@ -223,6 +227,36 @@ class GrewService:
             else:
                 print("Error: {}".format(reply.get("message")))
         return sample_names, samplecontentfiles
+    
+    @staticmethod
+    def get_samples_with_string_contents_as_dict(project_name: str, sample_names: List[str], user: str) -> Dict[str, str]:
+        samples_dict_for_user: Dict[str, str] = {}
+        for sample_name in sample_names:
+            reply = grew_request(
+                "getConll",
+                data={"project_id": project_name, "sample_id": sample_name},
+            )
+            if reply.get("status") == "OK":
+
+                # {"sent_id_1":{"conlls":{"user_1":"conllstring"}}}
+                sample_tree = SampleExportService.servSampleTrees(reply.get("data", {}))
+                sample_tree_nots_noui = SampleExportService.servSampleTrees(reply.get("data", {}), timestamps=False, user_ids=False)
+                sample_content = SampleExportService.sampletree2contentfile(sample_tree_nots_noui)
+                for sent_id in sample_tree:
+                    last = SampleExportService.get_last_user(
+                        sample_tree[sent_id]["conlls"]
+                    )
+                    sample_content["last"] = sample_content.get("last", []) + [
+                        sample_tree_nots_noui[sent_id]["conlls"][last]
+                    ]
+
+                # gluing back the trees
+                sample_content["last"] = "".join(sample_content.get("last", ""))
+                samples_dict_for_user[sample_name] =sample_content.get(user, "")
+
+            else:
+                print("Error: {}".format(reply.get("message")))
+        return samples_dict_for_user
 
 
 
@@ -255,18 +289,20 @@ class SampleExportService:
         return trees
 
     @staticmethod
-    def sampletree2contentfile(tree):
+    def sampletree2contentfile(tree) -> Dict[str, str]:
         if isinstance(tree, str):
             tree = json.loads(tree)
-        usertrees = dict()
+        usertrees: Dict[str, List[str]] = {}
         for sentId in tree.keys():
             for user, conll in tree[sentId]["conlls"].items():
                 if user not in usertrees:
                     usertrees[user] = list()
                 usertrees[user].append(conll)
+        
+        to_return_obj = {}
         for user, content in usertrees.items():
-            usertrees[user] = "".join(usertrees[user])
-        return usertrees
+            to_return_obj[user] = "".join(content)
+        return to_return_obj
 
     @staticmethod
     def get_last_user(tree):
@@ -280,14 +316,16 @@ class SampleExportService:
         return last
 
     @staticmethod
-    def contentfiles2zip(sample_names, sampletrees):
+    def contentfiles2zip(sample_names, sampletrees, users):
         memory_file = io.BytesIO()
         with zipfile.ZipFile(memory_file, "w") as zf:
-            for sample_name, sample in zip(sample_names, sampletrees):
-                for fuser, filecontent in sample.items():
-                    data = zipfile.ZipInfo("{}.{}.conllu".format(sample_name, fuser))
-                    data.date_time = time.localtime(time.time())[:6]
-                    data.compress_type = zipfile.ZIP_DEFLATED
-                    zf.writestr(data, filecontent)
+            for user in users:
+                for sample_name, sample in zip(sample_names, sampletrees):
+                    if user in sample.keys():
+                        data = zipfile.ZipInfo()
+                        data.filename = "{}/{}.conllu".format(user, sample_name) 
+                        data.date_time = time.localtime(time.time())[:6]
+                        data.compress_type = zipfile.ZIP_DEFLATED
+                        zf.writestr(data, sample.get(user))
         memory_file.seek(0)
         return memory_file

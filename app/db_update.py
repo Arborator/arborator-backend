@@ -2,7 +2,7 @@ import os
 from sqlalchemy import create_engine
 
 
-mode = 'dev'
+mode = 'prod'
 basedir = os.path.dirname(os.path.abspath(__file__))
 db_path = 'sqlite:///' + os.path.join(basedir, 'arborator_{}.sqlite'.format(mode))
 
