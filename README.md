@@ -151,6 +151,19 @@ If needed to, allow the folder access to the server user that will have control 
 sudo chown -Rf <admin>:<group> /var/www/flask_api_example/
 ```
 
+##### Debugging and logging
+To see the arborator logs : 
+```
+tail -f /var/log/arborator-backend/arborator-backend.log
+```
+To see tge nginx logs :
+```
+sudo tail -f /var/log/nginx/access.log
+```
+To see all last commands run on the server :
+```
+history
+```
 
 
 source : https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-uswgi-and-nginx-on-ubuntu-18-04

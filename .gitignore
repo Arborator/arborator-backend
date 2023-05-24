@@ -142,3 +142,7 @@ app/app-test.db
 
 migrations/*
 migrations/
+
+
+app/public/corpussamples
+app/data_dev

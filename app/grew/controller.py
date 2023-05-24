@@ -1,8 +1,9 @@
 import json
 import re
 
-from app.projects.service import LastAccessService
+from app.projects.service import LastAccessService, ProjectService
 from app.user.service import UserService
+from app.github.service import GithubCommitStatusService, GithubSynchronizationService
 from app.utils.grew_utils import GrewService, grew_request
 from flask import Response, abort, current_app, request
 from flask_login import current_user
@@ -20,11 +21,13 @@ api = Namespace(
 class ApplyRuleResource(Resource):
     def post(self, project_name: str):
 
+        project =ProjectService.get_by_name(project_name)
+        ProjectService.check_if_freezed(project)
         parser = reqparse.RequestParser()
         parser.add_argument(name="data", type=dict, action="append")
         args = parser.parse_args()
         data = args.get("data")
-        print('test')
+
         for index in range(len(data)):
             for sample_name, search_results in data[index].items():
                 for sent_id, sentence in search_results.items(): 
@@ -33,9 +36,10 @@ class ApplyRuleResource(Resource):
                         "project_id": project_name,
                         "sample_id": sample_name,
                         "user_id": list(sentence['conlls'].keys())[0],
-                        "sent_id": sent_id,
                         "conll_graph": list(sentence['conlls'].values())[0],
                     })
+                    if GithubSynchronizationService.get_github_synchronized_repository(project.id):
+                        GithubCommitStatusService.update(project_name, sample_name)
 
         LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
         return {"status": "success"}
@@ -52,7 +56,7 @@ class SearchResource(Resource):
 
         pattern = args.get("pattern")
         user_type = args.get("userType") 
-        print(user_type)
+        
 
         reply = GrewService.search_pattern_in_graphs(project_name, pattern, user_type)
         if reply["status"] != "OK":

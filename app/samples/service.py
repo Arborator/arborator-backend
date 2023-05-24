@@ -4,12 +4,16 @@ import os
 import re
 
 from datetime import datetime
+from collections import Counter
+
 
 from app import db
 from app.config import MAX_TOKENS, Config
 from app.user.model import User
+from app.projects.service import ProjectService
 from app.utils.grew_utils import GrewService
-from flask import abort
+from app.github.service import GithubCommitStatusService, GithubSynchronizationService
+from flask import abort, Response
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
 from .model import SampleExerciseLevel, SampleRole
@@ -25,25 +29,29 @@ class SampleUploadService:
         reextensions=None,
         existing_samples=[],
         users_ids_convertor={},
-    ):		
+    ):	
+        project = ProjectService.get_by_name(project_name)	
         if reextensions == None:
             reextensions = re.compile(r"\.(conll(u|\d+)?|txt|tsv|csv)$")
         filename = secure_filename(fileobject.filename)
         sample_name = reextensions.sub("", filename)
         path_file = os.path.join(Config.UPLOAD_FOLDER, filename)
+
         print('upload\n', path_file)
         fileobject.save(path_file)
         nrtoks = convert_users_ids(path_file, users_ids_convertor)
+        #check_duplicated_sent_id(path_file)
         add_or_keep_timestamps(path_file)
         if nrtoks>Config.MAX_TOKENS:
             abort(406, "Too big: Sample files on ArboratorGrew should have less than {max} tokens<br>Your file {fn} has {nrtoks} tokens. Split your file into smaller samples.".format(max=Config.MAX_TOKENS, fn=fileobject.filename, nrtoks=nrtoks))
-        if sample_name not in existing_samples:
+        if sample_name not in existing_samples: 
             GrewService.create_sample(project_name, sample_name)
 
         with open(path_file, "rb") as file_to_save:
             GrewService.save_sample(project_name, sample_name, file_to_save)
-
-
+            if GithubSynchronizationService.get_github_synchronized_repository(project.id):
+                GithubCommitStatusService.create(project_name, sample_name)
+                GithubCommitStatusService.update(project_name, sample_name)
 
 
 class SampleRoleService:
@@ -328,12 +336,27 @@ def convert_users_ids(path_file, users_ids_convertor):
         user_id_converted = users_ids_convertor[user_id]
         conll_lines_modified = ["# user_id = {}".format(user_id_converted)] + conll_lines_modified
         conlls_string_modified.append("\n".join(conll_lines_modified))
-
     new_file_string = "\n\n".join(conlls_string_modified)
     write_conll_on_disk(path_file, new_file_string)
     return nrtoks
 
 
+def check_duplicated_sent_id(path_file: str):
+    conll_string = read_conll_from_disk(path_file)
+    conlls_strings = split_conll_string_to_conlls_list(conll_string)
+    sent_ids =[]
+    for conll_string in conlls_strings:
+        if conll_string == "": 
+            continue
+        for line in conll_string.rstrip().split("\n"):
+            if "# sent_id = " in line:
+                sent_ids.append(line.split("# sent_id = ")[-1])
+    sent_ids_count = Counter(sent_ids)
+    for sent_id, count in sent_ids_count.items():
+        if count > 1:
+            abort(406, "sent_id `{}` is duplicated in your file".format(sent_id))
+    return
+    
 def readConlluFileWrapper(path_file: str, keepEmptyTrees: bool = False):
     """ read a conllu file and return a list of sentences """
     try:

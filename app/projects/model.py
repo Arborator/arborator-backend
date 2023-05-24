@@ -7,6 +7,7 @@ from sqlalchemy_utils import ChoiceType
 from app import db  # noqa
 
 from app.shared.model import BaseM
+from app.github.model import GithubCommitStatus, GithubRepository
 
 from .interface import ProjectInterface
 
@@ -16,18 +17,20 @@ class Project(db.Model, BaseM):
     id = Column(Integer, primary_key=True)
     project_name = Column(String(256), nullable=False, unique=True)
     description = Column(String(256))
-    # image = Column(BLOB)
     image = Column(String(256), nullable=True)
-    # users = db.relationship('User', backref='project_user',lazy='dynamic')
-    # texts = db.relationship('Text', backref='project_text',lazy='dynamic')
-    # is_private = Column(Boolean, default=False)
     visibility = Column(Integer)
     show_all_trees = Column(Boolean, default=True)
     exercise_mode = Column(Boolean, default=False)
     diff_mode = Column(Boolean, default=False)
     diff_user_id = Column(String(256), nullable=True)
+    freezed = Column(Boolean, default=False)
 
-    # default_user_trees = db.relationship('DefaultUserTrees')
+    feature = db.relationship("ProjectFeature", cascade="all,delete", backref="projects")
+    meta_feature = db.relationship("ProjectMetaFeature", cascade="all,delete", backref="projects")
+    project_access = db.relationship("ProjectAccess", cascade="all,delete", backref="projects")
+    project_last_access = db.relationship("LastAccess", cascade="all,delete", backref="projects")
+    github_repository = db.relationship(GithubRepository, cascade="all,delete", backref="projects")
+    github_commit_status = db.relationship(GithubCommitStatus, cascade="all,delete", backref="projects")
 
     def update(self, changes: ProjectInterface):
         for key, val in changes.items():

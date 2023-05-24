@@ -14,14 +14,15 @@ class User(UserMixin, db.Model, BaseM):
 
     id = Column(String(256), primary_key=True)
     auth_provider = Column(String(256))
+    github_access_token = Column(String(256))
     username = Column(String(60), index=True, unique=True)
     first_name = Column(String(60), index=True)
     family_name = Column(String(60), index=True)
+    email = Column(String(60), index=True)
+    not_share_email=Column(Boolean, default=False)
+    receive_newsletter=Column(Boolean, default=False)
     picture_url = Column(String(128), index=True)
     super_admin = Column(Boolean, default=False)
-    # role = Column(Integer)
-    # project_id = Column(Integer, db.ForeignKey('projects.id'))
-    # todos = db.relationship('Todo', backref='txt_todos')
     created_date = Column(DateTime)
     last_seen = Column(DateTime)
 

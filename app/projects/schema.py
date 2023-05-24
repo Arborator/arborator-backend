@@ -30,6 +30,7 @@ class ProjectSchema(Schema):
     visibility = fields.Integer(attribute="visibility")
     showAllTrees = fields.Boolean(attribute="show_all_trees")
     exerciseMode = fields.Boolean(attribute="exercise_mode")
+    freezed = fields.Boolean(attribute="freezed")
     # default_user_trees = fields.String(attribute="default_user_trees")
 
 
@@ -58,5 +59,6 @@ class ProjectSchemaCamel(Schema):
     visibility = fields.Integer(attribute="visibility")
     showAllTrees = fields.Boolean(attribute="show_all_trees")
     exerciseMode = fields.Boolean(attribute="exercise_mode")
+    freezed = fields.Boolean(attribute="freezed")
     diffMode = fields.Boolean(attribute="diff_mode")
     diffUserId = fields.String(attribute="diff_user_id")

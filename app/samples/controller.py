@@ -34,6 +34,7 @@ class SampleResource(Resource):
 
     def get(self, project_name: str):
         project = ProjectService.get_by_name(project_name)
+        ProjectService.check_if_freezed(project)
         grew_samples = GrewService.get_samples(project_name)
 
         processed_samples = []
@@ -65,7 +66,7 @@ class SampleResource(Resource):
         """Upload a sample to the server"""
         project = ProjectService.get_by_name(project_name)
         ProjectAccessService.check_admin_access(project.id)
-
+        ProjectService.check_if_freezed(project)
         users_ids_convertor = {}
         for user_id_mapping in json.loads(request.form.get("userIdsConvertor", "{}")):
             users_ids_convertor[user_id_mapping["old"]] = user_id_mapping["new"]
@@ -99,6 +100,7 @@ class SampleRoleResource(Resource):
 
         project = ProjectService.get_by_name(project_name)
         ProjectAccessService.check_admin_access(project.id)
+        ProjectService.check_if_freezed(project)
 
         role = SampleRole.LABEL_TO_ROLES[args.targetrole]
         user_id = UserService.get_by_username(args.username).id
@@ -193,6 +195,7 @@ class DeleteSampleResource(Resource):
     def delete(self, project_name: str, sample_name: str):
         project = ProjectService.get_by_name(project_name)
         ProjectAccessService.check_admin_access(project.id)
+        ProjectService.check_if_freezed(project)
         ProjectService.check_if_project_exist(project)
         GrewService.delete_sample(project_name, sample_name)
         SampleRoleService.delete_by_sample_name(project.id, sample_name)

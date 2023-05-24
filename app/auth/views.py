@@ -29,6 +29,7 @@ from ..user.service import UserService
 from ..user.interface import UserInterface
 from ..user.schema import UserSchema
 from ..user.model import User
+from ..github.service import GithubService 
 
 
 authomatic = Authomatic(CONFIG, Config.SECRET_KEY, report_errors=True)
@@ -38,8 +39,8 @@ def parse_user(provider_name, user):
     results_parsed = {}
 
     if provider_name == "github":
-        access_token = user.data.get("access_token")
-        data = get_username(access_token, "github")
+        results_parsed["access_token"] = user.data.get("access_token")
+        data = GithubService.get_user_information(results_parsed["access_token"])
         results_parsed["id"] = data.get("id")
         results_parsed["username"] = data.get("login")
         results_parsed["picture_url"] = data.get("avatar_url")
@@ -54,16 +55,6 @@ def parse_user(provider_name, user):
         results_parsed["picture_url"] = user.picture
 
     return results_parsed
-
-
-def get_username(access_token, provider_name):
-    if provider_name == "github":
-        headers = {"Authorization": "bearer " + access_token}
-        response = requests.get("https://api.github.com/user", headers=headers)
-        data = response.json()
-        return data
-    else:
-        abort(404)
 
 
 # @auth.route('/login/<provider_name>/', methods=['GET', 'POST'])
@@ -104,9 +95,13 @@ def login(provider_name) -> Response:
                 new_attrs: UserInterface = {
                     "id": results_parsed["id"],
                     "auth_provider": result.user.provider.id,
+                    "github_access_token": results_parsed.get("access_token"),
                     "username": unique_username,
                     "first_name": results_parsed.get("first_name"),
                     "family_name": results_parsed.get("family_name"),
+                    "email": results_parsed.get("email"),
+                    "not_share_email": False,
+                    "receive_newsletter": False,
                     "picture_url": results_parsed.get("picture_url"),
                     "super_admin": False,
                     "created_date": datetime.utcnow(),
@@ -115,21 +110,18 @@ def login(provider_name) -> Response:
 
                 user = UserService.create(new_attrs)
 
-            # Else if existing user, uptade the profile picture
             else:
-                changes: UserInterface = {
-                    "picture_url": results_parsed.get("picture_url")
-                }
+                if  user.auth_provider == "4":
+                    changes: UserInterface = {
+                        "github_access_token": results_parsed.get("access_token"),
+                        "picture_url": results_parsed.get("picture_url"),
+                    }
+                else: 
+                    changes: UserInterface = {
+                        "picture_url": results_parsed.get("picture_url")
+                    }
                 user = UserService.update(user, changes)
-            # User.setPictureUrl(
-            #     db.session, user.username, results_parsed.get("picture_url")
-            # )  # always get the lastest picture on login
-
             login_user(user, remember=True)
-
-            session["logged_in"] = True  # TODO : can be removed ?????
-            print("auth/views.py =======", user, type(user))
-
             # If there is no superadmin in DB, add admin privilege to this new user
             if not User.query.filter_by(super_admin=True).first():
                 print("firstsuper")
