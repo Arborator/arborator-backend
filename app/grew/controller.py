@@ -247,12 +247,10 @@ class RelationTableResource(Resource):
 class ShowDiffRessource(Resource):
     def post(self, project_name: str):
         parser = reqparse.RequestParser()
-        parser.add_argument(name="username", type=str)
         parser.add_argument(name="otherUsers", type=str, action="append")
         parser.add_argument(name="features", type=str, action="append")
         args = parser.parse_args()
 
-        username= args.get("username")
         other_users = args.get("otherUsers")
         features = args.get("features")
         pattern = "pattern { }"
@@ -267,7 +265,7 @@ class ShowDiffRessource(Resource):
                 abort(409)
             conll = m["conll"]
             trees = formatTrees_new(m, trees, conll)
-        return post_process_diffs(trees, username, other_users, features)
+        return post_process_diffs(trees, other_users, features)
         
 
 def get_timestamp(conll):
@@ -375,8 +373,9 @@ def check_diffs_based_on_feats(left_sentence_json, right_sentence_json, features
         return diff_token_ids
 
 
-def post_process_diffs(grew_search_results, user_id, other_users, features):
+def post_process_diffs(grew_search_results, other_users, features):
 
+    user_id = other_users[0]
     post_processed_results = {}
     for sample_name in grew_search_results:
         post_processed_results[sample_name] = {}
@@ -385,7 +384,7 @@ def post_process_diffs(grew_search_results, user_id, other_users, features):
                 user_sentence_json = sentenceConllToJson(grew_search_results[sample_name][sent_id]["conlls"][user_id])
                 conlls = {}
                 matches = {}
-                for other_user_id in other_users:
+                for other_user_id in other_users[1:]:
                     if (other_user_id in grew_search_results[sample_name][sent_id]["conlls"].keys()):
                         other_sentence_json = sentenceConllToJson(grew_search_results[sample_name][sent_id]["conlls"][other_user_id])
                         if not features:
