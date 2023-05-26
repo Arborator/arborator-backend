@@ -14,6 +14,7 @@ from ..user.model import User
 from .interface import ProjectExtendedInterface, ProjectInterface
 from .model import Project, ProjectAccess, ProjectFeature, ProjectMetaFeature, DefaultUserTrees, LastAccess
 from ..samples.model import SampleRole
+from ..user.service import UserService
 
 
 class ProjectService:
@@ -66,7 +67,7 @@ class ProjectService:
     
     @staticmethod 
     def check_if_freezed(project: Project) -> None:
-        if project.freezed and ProjectAccessService.get_admins(project.id)[0] != current_user.id: 
+        if project.freezed and ProjectAccessService.get_admins(project.id)[0] != current_user.username: 
             abort(403, "You can't access the project when it's freezed")
 
    
@@ -110,7 +111,7 @@ class ProjectAccessService:
             project_id=project_id, access_level=2
         )
         if project_access_list:
-            return [project_access.user_id for project_access in project_access_list]
+            return [UserService.get_by_id(project_access.user_id).username for project_access in project_access_list]
         else:
             return []
 
@@ -120,7 +121,7 @@ class ProjectAccessService:
             project_id=project_id, access_level=1
         )
         if project_access_list:
-            return [project_access.user_id for project_access in project_access_list]
+            return [UserService.get_by_id(project_access.user_id).username for project_access in project_access_list]
         else:
             return []
 
@@ -131,8 +132,9 @@ class ProjectAccessService:
         admins, guests = [], []
         push_admin, push_guest = admins.append, guests.append
         for project_access in project_access_list: 
-            if project_access.access_level==1: push_guest(project_access.user_id)
-            elif project_access.access_level==2: push_admin(project_access.user_id)
+            username = UserService.get_by_id(project_access.user_id).username
+            if project_access.access_level==1: push_guest(username)
+            elif project_access.access_level==2: push_admin(username)
         return admins, guests
 
     @staticmethod
