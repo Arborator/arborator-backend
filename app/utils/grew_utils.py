@@ -260,15 +260,14 @@ class GrewService:
 
 
 
-# TODO : refactor this
 def get_timestamp(conll):
-    t = re.search("# timestamp = (\d+(?:\.\d+)?)\n", conll)
-    if t: 
-        t.groups()[0]
+    t = re.search(r"# timestamp = (\d+(?:\.\d+)?)\n", conll)
+    print(t)
+    if t and t.groups(): 
+        return t.groups()[0]
     else:
         return False
 
-# TODO : refactor this
 
 class SampleExportService:
     @staticmethod
@@ -306,13 +305,14 @@ class SampleExportService:
 
     @staticmethod
     def get_last_user(tree):
+        print("KK tree", tree)
         timestamps = [(user, get_timestamp(conll)) for (user, conll) in tree.items()]
         if len(timestamps) == 1:
             last = timestamps[0][0]
         else:
-            # print(timestamps)
+            print(timestamps)
             last = sorted(timestamps, key=lambda x: x[1])[-1][0]
-            # print(last)
+            print(last)
         return last
 
     @staticmethod
