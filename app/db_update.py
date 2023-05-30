@@ -16,6 +16,7 @@ if args.version != 'add_github' and args.version != 'add_constructicon' and args
     print('version must be add_github, add_constructicon or all')
     exit()
 
+mode = args.mode
 basedir = os.path.dirname(os.path.abspath(__file__))
 db_path = 'sqlite:///' + os.path.join(basedir, 'arborator_{}.sqlite'.format(mode))
 
