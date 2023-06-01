@@ -3,8 +3,8 @@ import requests
 import base64
 import json
 import re 
-import aiohttp
-import asyncio
+import shutil
+import zipfile
 
 from flask import abort
 
@@ -61,15 +61,19 @@ class GithubWorkflowService:
     def import_files_from_github(access_token, full_name, project_name, username, branch, branch_syn):
 
         repository_files = GithubService.get_repository_files_from_specific_branch(access_token, full_name, branch)
-        conll_files = [file for file in repository_files if extension.search(file.get('name'))]
-        conll_files_names = [file.get("name").split(".conllu")[0] for file in repository_files]
+        conll_files = [file.get("name") for file in repository_files if extension.search(file.get('name'))]
+        
+        samples_names = [file.split(".conllu")[0] for file in conll_files]
         project_samples = GrewService.get_samples(project_name)
-        samples_names = [sample["name"] for sample in project_samples]
-        not_intersected_samples = [sample_name for sample_name in samples_names if sample_name not in conll_files_names]
+        existed_samples_names = [sample["name"] for sample in project_samples]
+        not_intersected_samples = [sample_name for sample_name in existed_samples_names if sample_name not in samples_names]
         for sample_name in not_intersected_samples:
             GithubCommitStatusService.create(project_name, sample_name)
             GithubCommitStatusService.update(project_name, sample_name)   
-        asyncio.run(GithubWorkflowService.clone_github_repository(conll_files, project_name, username))
+
+        tmp_zip_file = GithubService.download_github_repository(access_token, full_name, branch)
+        GithubService.extract_repository(tmp_zip_file)
+        GithubWorkflowService.clone_github_repository(conll_files, project_name, username)
         if branch_syn == "arboratorgrew":
             if (branch != branch_syn and  branch_syn in GithubService.list_branches_repository(access_token, full_name)): 
                 GithubService.delete_branch(access_token, full_name, branch_syn)    
@@ -77,26 +81,12 @@ class GithubWorkflowService:
 
         
     @staticmethod 
-    async def clone_github_repository(files, project_name, username):
-        async with aiohttp.ClientSession() as session: 
-            tasks = []   
-            for file in files:
-                download_url = file.get("download_url")
-                file_name = file.get("name")
-                tasks.append(GithubWorkflowService.create_sample_from_github_file(file_name, download_url, username, project_name, session))
-            group = await asyncio.gather(*tasks, return_exceptions=True)
-            return group
-
-
-    @staticmethod 
-    async def get_github_file_content(file_name, download_url, session):
-        async with session.get(download_url) as response:
-            raw_content = await response.text()
-            sample_name = file_name.split(".conllu")[0]
-            path_file = os.path.join(Config.UPLOAD_FOLDER, file_name)
-            file = open(path_file, "w")
-            file.write(raw_content)
-            return sample_name, path_file
+    def clone_github_repository(files, project_name, username):
+        for file in files:
+            path_file = os.path.join(Config.UPLOAD_FOLDER, file)
+            user_ids = GithubWorkflowService.preprocess_file(path_file, username)
+            sample_name = file.split('.conllu')[0]
+            GithubWorkflowService.create_sample(sample_name, path_file, project_name, user_ids)
 
 
     @staticmethod
@@ -124,14 +114,6 @@ class GithubWorkflowService:
             GrewService.create_sample(project_name, sample_name)
         with open(path_file, "rb") as file_to_save:
             GrewService.save_sample(project_name, sample_name, file_to_save)
-
-    
-    @staticmethod
-    async def create_sample_from_github_file(file, download_url, username, project_name, session):
-        sample_name, path_file =  await GithubWorkflowService.get_github_file_content(file, download_url, session)
-        user_ids = GithubWorkflowService.preprocess_file(path_file,username)
-        GithubWorkflowService.create_sample(sample_name, path_file, project_name, user_ids)
-        GithubCommitStatusService.create(project_name, sample_name)
 
 
     @staticmethod
@@ -406,6 +388,7 @@ class GithubService:
         response = requests.delete("https://api.github.com/repos/{}/git/refs/heads/{}".format(full_name, base), headers=GithubService.base_header(access_token))
         return response
     
+
     @staticmethod
     def compare_two_commits(access_token, full_name, previous_commit, new_commit):
         url = 'https://api.github.com/repos/{}/compare/{}...{}'.format(full_name, previous_commit, new_commit)
@@ -414,6 +397,32 @@ class GithubService:
         data = response.json()
         modified_files = [{"filename": file.get("filename"), "status": file.get("status")} for file in data.get('files')]
         return modified_files
+    
+    
+    @staticmethod
+    def download_github_repository(access_token, full_name, branch):
+        url = 'https://api.github.com/repos/{}/zipball/{}'.format(full_name, branch)
+        response = requests.get(url, headers=GithubService.base_header(access_token), stream=True)
+        file_name = 'tmp.zip'
+        path_file = os.path.join(Config.UPLOAD_FOLDER, file_name)
+        if response.status_code == 200:
+            with open(path_file, "wb") as file:
+                 file.write(response.content)
+        return path_file
+        
+
+    @staticmethod
+    def extract_repository(file_path):
+        with zipfile.ZipFile(file_path, 'r') as zip_file:
+            for file in zip_file.namelist():
+                filename = os.path.basename(file)
+                if not filename:
+                    continue
+                if extension.search(filename):
+                    source = zip_file.open(file)
+                    distination = open(os.path.join(Config.UPLOAD_FOLDER, filename), "wb")
+                    with source, distination:
+                        shutil.copyfileobj(source, distination)
 
 
 class GithubCommitStatusService:
