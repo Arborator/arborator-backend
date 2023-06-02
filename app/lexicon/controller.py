@@ -1,10 +1,11 @@
 import json
 from typing import List
 
-from app.lexicon.interfaceV2 import LexiconItemInterface
-from app.lexicon.schemaV2 import LexiconItemSchema
+from app.lexicon.interface import LexiconItemInterface
+from app.lexicon.schema import LexiconItemSchema
 from app.utils.grew_utils import grew_request
 from flask_login import current_user
+from flask import Response
 from flask_accepts.decorators.decorators import responds
 from flask_restx import Namespace, Resource, reqparse
 
@@ -45,3 +46,36 @@ class LexiconResource(Resource):
             data={"project_id": project_name, "sample_ids": json.dumps(sample_names), "user_ids": json.dumps(user_ids), "features": json.dumps(features),"prune":prune},
         )
         return reply["data"]
+
+
+@api.route("/<string:project_name>/lexicon/export-json")	
+class LexiconExportJson(Resource):	
+    def post(self, project_name: str):	
+        parser = reqparse.RequestParser()	
+        parser.add_argument(name="data", type=dict, action="append")	
+        args = parser.parse_args()	
+
+        lexicon = args.get("data")	
+        for element in lexicon:	
+            del element["key"]	
+        line = json.dumps(lexicon, separators=(",", ":"), indent=4)	
+        resp = Response(line, status=200)	
+        return resp
+    
+
+@api.route("/<string:project_name>/lexicon/export-tsv")	
+class LexiconExportTsv(Resource):	
+    def post(self, project_name: str):	
+        parser = reqparse.RequestParser()	
+        parser.add_argument(name="data", type=dict, action="append")	
+        args = parser.parse_args()	
+        lexicon = args.get("data")	
+
+        features=list(lexicon[0]["feats"].keys())	
+        header = "\t".join(features)+"\tfrequence"	
+        line_tsv=header+'\n'	
+
+        for item in lexicon:	
+            line_tsv += "\t".join(str(value) for key, value in item["feats"].items())	
+            line_tsv += "\t"+str(item["freq"])	
+            line_tsv += "\n"	

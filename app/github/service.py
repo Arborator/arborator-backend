@@ -10,7 +10,7 @@ from flask import abort
 
 from app import db
 from typing import List
-from app.config import MAX_TOKENS, Config
+from app.config import Config
 from .model import GithubRepository, GithubCommitStatus
 from app.projects.service import ProjectService
 import app.samples.service as SampleService
@@ -22,10 +22,12 @@ from app.utils.grew_utils import GrewService, grew_request , SampleExportService
 extension = re.compile("^.*\.(conllu)$")
 
 class GithubSynchronizationService:
+
     @staticmethod
     def get_github_synchronized_repository(project_id):
         return GithubRepository.query.filter(GithubRepository.project_id == project_id).first()
     
+
     @staticmethod
     def synchronize_github_repository(user_id, project_id, repository_name, branch, sha):
 
@@ -54,6 +56,7 @@ class GithubSynchronizationService:
         github_repository: GithubRepository = GithubRepository.query.filter(GithubRepository.user_id == user_id).filter(GithubRepository.project_id == project_id).first()
         db.session.delete(github_repository)
         db.session.commit()
+
 
 class GithubWorkflowService:
 
@@ -106,8 +109,6 @@ class GithubWorkflowService:
         tokens_number = SampleService.convert_users_ids(path_file, users_ids)
         SampleService.add_or_keep_timestamps(path_file)
         SampleService.check_duplicated_sent_id(path_file)
-        if tokens_number > MAX_TOKENS:
-            abort(406, "Too big: Sample files on ArboratorGrew should have less than {max} tokens.".format(max=MAX_TOKENS))
         grew_samples = GrewService.get_samples(project_name)
         samples_names = [sa["name"] for sa in grew_samples]
         if sample_name not in samples_names:
