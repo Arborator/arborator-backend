@@ -249,8 +249,10 @@ class ShowDiffRessource(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument(name="otherUsers", type=str, action="append")
         parser.add_argument(name="features", type=str, action="append")
+        parser.add_argument(name="sampleName", type=str)
         args = parser.parse_args()
 
+        sample_name = args.get("sampleName")
         other_users = args.get("otherUsers")
         features = args.get("features")
         pattern = "pattern { }"
@@ -261,10 +263,18 @@ class ShowDiffRessource(Resource):
             abort(400)
         trees = {}
         for m in reply["data"]:
-            if m["user_id"] == "":
-                abort(409)
-            conll = m["conll"]
-            trees = formatTrees_new(m, trees, conll)
+            if sample_name:
+                if m["sample_id"] != sample_name:
+                    continue
+                if m["user_id"] == "":
+                    abort(409)
+                conll = m["conll"]
+                trees = formatTrees_new(m, trees, conll)
+            else: 
+                if m["user_id"] == "":
+                    abort(409)
+                conll = m["conll"]
+                trees = formatTrees_new(m, trees, conll)
         return post_process_diffs(trees, other_users, features)
         
 
@@ -340,7 +350,7 @@ def check_all_diffs(left_sentence_json, right_sentence_json):
 
     left_nodes_json = left_sentence_json["treeJson"]["nodesJson"]
     right_nodes_json = right_sentence_json["treeJson"]["nodesJson"]
-    if len(left_nodes_json.values()) == len(right_nodes_json.values()):
+    if len(left_nodes_json.values()) != len(right_nodes_json.values()):
             return True
     else: 
         for token_id in left_nodes_json:
