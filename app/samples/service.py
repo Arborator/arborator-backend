@@ -42,8 +42,6 @@ class SampleUploadService:
         nrtoks = convert_users_ids(path_file, users_ids_convertor)
         #check_duplicated_sent_id(path_file)
         add_or_keep_timestamps(path_file)
-        if nrtoks>Config.MAX_TOKENS:
-            abort(406, "Too big: Sample files on ArboratorGrew should have less than {max} tokens<br>Your file {fn} has {nrtoks} tokens. Split your file into smaller samples.".format(max=Config.MAX_TOKENS, fn=fileobject.filename, nrtoks=nrtoks))
         if sample_name not in existing_samples: 
             GrewService.create_sample(project_name, sample_name)
 

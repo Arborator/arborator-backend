@@ -1,10 +1,12 @@
 import json
 import re
+import os 
 
+from app.config import Config
 from app.projects.service import LastAccessService, ProjectService
 from app.user.service import UserService
 from app.github.service import GithubCommitStatusService, GithubSynchronizationService
-from app.utils.grew_utils import GrewService, grew_request
+from app.utils.grew_utils import SampleExportService, GrewService, grew_request
 from flask import Response, abort, current_app, request
 from flask_login import current_user
 from flask_restx import Namespace, Resource, reqparse
@@ -26,23 +28,30 @@ class ApplyRuleResource(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument(name="data", type=dict, action="append")
         args = parser.parse_args()
-        data = args.get("data")
-
-        for index in range(len(data)):
-            for sample_name, search_results in data[index].items():
-                for sent_id, sentence in search_results.items(): 
-                    grew_request("saveGraph",
-                    data={
-                        "project_id": project_name,
-                        "sample_id": sample_name,
-                        "user_id": list(sentence['conlls'].keys())[0],
-                        "conll_graph": list(sentence['conlls'].values())[0],
-                    })
-                    if GithubSynchronizationService.get_github_synchronized_repository(project.id):
-                        GithubCommitStatusService.update(project_name, sample_name)
-
+        data = args.get("data")[0]
+        for sample_name in data:
+            new_conll = str()
+            sample_conll = grew_request(
+                "getConll",
+                data = {"project_id": project_name, "sample_id": sample_name}
+            )
+            sample_trees = SampleExportService.servSampleTrees(sample_conll.get("data"))
+            for sent_id in sample_trees:
+                if sent_id in data[sample_name].keys():
+                    sample_trees[sent_id] = data[sample_name][sent_id]
+                for user in sample_trees[sent_id]["conlls"]:
+                    new_conll += sample_trees[sent_id]["conlls"][user] + "\n\n"
+            
+            file_name = sample_name + "_modified.conllu"
+            path_file = os.path.join(Config.UPLOAD_FOLDER, file_name)
+            with open(path_file, "w") as file:
+                file.write(new_conll)
+            with open(path_file, "rb") as file_to_save:
+                GrewService.save_sample(project_name, sample_name, file_to_save)
+            if GithubSynchronizationService.get_github_synchronized_repository(project.id):
+                GithubCommitStatusService.update(project_name, sample_name)
+ 
         LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
-        return {"status": "success"}
 
 
 @api.route("/<string:project_name>/search")
