@@ -19,6 +19,7 @@ from .service import (
     SampleExerciseLevelService,
     SampleRoleService,
     SampleUploadService,
+    SampleTokenizeService,
     add_or_keep_timestamps, add_or_replace_userid,
 )
 from ..utils.arborator_parser_utils import ArboratorParserAPI
@@ -87,6 +88,24 @@ class SampleResource(Resource):
                 )
             # samples = {"samples": Sam.get_samples(project_name)}
             return {"status": "OK"}
+        
+@api.route("/<string:project_name>/samples/tokenize")
+class SampleTokenizeResource(Resource):
+    def post(self, project_name):
+        parser = reqparse.RequestParser()
+        parser.add_argument(name="username", type=str)
+        parser.add_argument(name="sampleName", type=str)
+        parser.add_argument(name="option", type=str)
+        parser.add_argument(name="lang", type=str)
+        parser.add_argument(name="text", type=str)
+
+        args = parser.parse_args()
+        username = args.get("username")
+        sample_name = args.get("sampleName")
+        option = args.get("option")
+        lang = args.get("lang")
+        text = args.get("text")
+        SampleTokenizeService.tokenize_text(text, option, lang, project_name, sample_name, username)
 
 
 @api.route("/<string:project_name>/samples/<string:sample_name>/role")

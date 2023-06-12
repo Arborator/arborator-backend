@@ -12,7 +12,7 @@ from app.config import MAX_TOKENS, Config
 from app.user.model import User
 from app.projects.service import ProjectService
 from app.utils.grew_utils import GrewService
-from app.github.service import GithubCommitStatusService, GithubSynchronizationService
+from app.github.service import GithubCommitStatusService, GithubSynchronizationService, GithubWorkflowService
 from flask import abort, Response
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
@@ -51,7 +51,40 @@ class SampleUploadService:
                 GithubCommitStatusService.create(project_name, sample_name)
                 GithubCommitStatusService.update(project_name, sample_name)
 
+class SampleTokenizeService:
 
+    @staticmethod
+    def tokenize_text(text, option, lang, project_name, sample_name, username):
+        conll= str()
+        if lang:
+            list_tokens = tokenize(text=text, lang=lang)
+            conll = conllize(sent2toks=list_tokens,sample_name=sample_name)
+        else: 
+            sentences = split_sentences(text, option)
+            for i in range(len(sentences)):
+                if (sentences[i]):
+                    conll += conllize_sentence(sentences[i], sample_name, i, option)
+
+        file_name = sample_name + ".conllu"
+        path_file = os.path.join(Config.UPLOAD_FOLDER, file_name)
+        with open(path_file, "w") as file:
+            file.write(conll)
+        user_ids = GithubWorkflowService.preprocess_file(path_file, username)
+        convert_users_ids(path_file, user_ids)
+        add_or_keep_timestamps(path_file)
+
+        existing_samples = GrewService.get_samples(project_name)
+        samples_names = [sample["name"] for sample in existing_samples]
+        project = ProjectService.get_by_name(project_name)
+        if sample_name not in samples_names:
+            GrewService.create_sample(project_name, sample_name)
+        with open(path_file, "rb") as file_to_save:
+            GrewService.save_sample(project_name, sample_name, file_to_save)
+            if GithubSynchronizationService.get_github_synchronized_repository(project.id):
+                GithubCommitStatusService.create(project_name, sample_name)
+                GithubCommitStatusService.update(project_name, sample_name)
+             
+   
 class SampleRoleService:
     @staticmethod
     def create(new_attrs):
@@ -132,8 +165,6 @@ class SampleRoleService:
 
         return
 
-    # def get_annotators_by_sample_id(project_id: int, sample_id: int) -> List[str]:
-    #     return
 
 
 class SampleExerciseLevelService:
@@ -553,3 +584,32 @@ def conllize(sent2toks, sample_name, start=1):
         conlls+=['\n'.join(conllines)]
         start+=1
     return '\n\n'.join(conlls)+'\n'
+
+def split_sentences(text, option):
+    if option == 'horizontal':
+        return text.split("\n")
+    else:
+        sentences = []
+        for sentence in text.split('\n\n'):
+            if ' ' in sentence:
+                sentence = re.sub("\s.*\n", "\n", sentence)
+                sentences.append(sentence)
+            else:
+                sentences.append(sentence)
+        return sentences
+
+def conllize_sentence(sentence_tokens, sample_name, index, option):
+    sent_id = '# sent_id = {}__{}\n'.format(sample_name, index+1)
+    text = '# text = '
+    sentence = str()
+    conll = str()
+    i = 1
+    delimiter = " " if option == 'horizontal' else "\n" 
+    for token in sentence_tokens.rstrip().split(delimiter):
+        text += "{} ".format(token)
+        sentence += '{}\t{}\t_\t_\t_\t_\t_\t_\t_\t_\t\n'.format(i,token)
+        i += 1
+    conll += sent_id
+    conll += text +"\n"
+    conll += sentence + "\n"
+    return conll
