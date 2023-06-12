@@ -361,6 +361,7 @@ def readConlluFileWrapper(path_file: str, keepEmptyTrees: bool = False):
         sentences_json = readConlluFile(path_file, keepEmptyTrees=keepEmptyTrees)
         return sentences_json
     except Exception as e:
+        print('debug_read_conll: {}'.format(str(e)))
         abort(406, str(e))
 
 def writeConlluFileWrapper(path_file: str, sentences_json: List[Dict]):
@@ -368,6 +369,7 @@ def writeConlluFileWrapper(path_file: str, sentences_json: List[Dict]):
     try:
         writeConlluFile(path_file, sentences_json, overwrite=True)
     except Exception as e:
+        print('debug_write_conll: {}'.format(str(e)))
         abort(406, str(e))
 
 
