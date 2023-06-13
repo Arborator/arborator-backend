@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List
 
-from flask import session, request
+from flask import request
 from flask_login import current_user
 from flask_accepts.decorators.decorators import responds, accepts
 from flask_restx import Namespace, Resource

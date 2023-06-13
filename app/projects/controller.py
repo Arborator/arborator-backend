@@ -2,18 +2,16 @@ import datetime
 import json
 import os
 import re
-import time
 from typing import List
 
-import werkzeug
-from app.utils.grew_utils import GrewService
 from flask import abort, current_app, request, session
 from flask_accepts.decorators.decorators import accepts, responds
 from flask_login import current_user
 from flask_restx import Namespace, Resource, reqparse
-from sqlalchemy.sql.functions import user
 from werkzeug.utils import secure_filename
+import werkzeug
 
+from app.utils.grew_utils import GrewService
 from .interface import ProjectExtendedInterface, ProjectInterface
 from .model import Project, ProjectAccess
 from .schema import ProjectExtendedSchema, ProjectSchema, ProjectSchemaCamel
@@ -22,7 +20,6 @@ from .service import (LastAccessService, ProjectAccessService,
                       ProjectService)
 
 api = Namespace("Project", description="Endpoints for dealing with projects")  # noqa
-# appconfig = current_app.config
 
 @api.route("/")
 class ProjectResource(Resource):
@@ -122,7 +119,6 @@ class ProjectResource(Resource):
             )
 
         return new_project
-        # return ProjectService.create(request.parsed_obj)
 
 
 @api.route("/<string:projectName>")
@@ -170,29 +166,27 @@ class ProjectFeaturesResource(Resource):
 
 
         features = {
-            # TODO : On frontend and backend, It's absolutely necessary to uniformize naming conventions and orthography
-            # ... we should have "shownMeta" /"shownFeatues" or "shownMeta"/"shownFeature"
-            "shownmeta": ProjectMetaFeatureService.get_by_project_id(project.id),
-            "shownfeatures": ProjectFeatureService.get_by_project_id(project.id),
+            "shownMeta": ProjectMetaFeatureService.get_by_project_id(project.id),
+            "shownFeatures": ProjectFeatureService.get_by_project_id(project.id),
         }
         return features
 
     def put(self, projectName: str):
         parser = reqparse.RequestParser()
-        parser.add_argument(name="shownfeatures", type=str, action="append")
-        parser.add_argument(name="shownmeta", type=str, action="append")
+        parser.add_argument(name="shownFeatures", type=str, action="append")
+        parser.add_argument(name="shownMeta", type=str, action="append")
         args = parser.parse_args()
         project = ProjectService.get_by_name(projectName)
         ProjectAccessService.check_admin_access(project.id)
-        if args.get("shownfeatures"):
+        if args.get("shownFeatures"):
             ProjectFeatureService.delete_by_project_id(project.id)
-            for feature in args.shownfeatures:
+            for feature in args.shownFeatures:
                 new_attrs = {"project_id": project.id, "value": feature}
                 ProjectFeatureService.create(new_attrs)
 
-        if args.get("shownmeta"):
+        if args.get("shownMeta"):
             ProjectMetaFeatureService.delete_by_project_id(project.id)
-            for feature in args.shownmeta:
+            for feature in args.shownMeta:
                 new_attrs = {"project_id": project.id, "value": feature}
                 ProjectMetaFeatureService.create(new_attrs)
 
@@ -271,23 +265,6 @@ class ProjectAccessUserResource(Resource):
         return ProjectAccessService.get_users_role(project.id)
 
 
-# @api.route("/<string:projectName>/image")
-# class ProjectImageResource(Resource):
-#     @responds(schema=ProjectSchemaCamel)
-#     def post(self, projectName: str):
-#         parser = reqparse.RequestParser()
-#         parser.add_argument(
-#             "files", type=werkzeug.datastructures.FileStorage, location="files"
-#         )
-#         args = parser.parse_args()
-#         project = ProjectService.get_by_name(projectName)
-#         ProjectService.check_if_project_exist(project)
-
-#         content = args["files"].read()
-#         ProjectService.change_image(projectName, content)
-#         return ProjectService.get_by_name(projectName)
-
-
 @api.route("/<string:projectName>/image")
 class ProjectImageResource(Resource):
     @responds(schema=ProjectSchemaCamel)
@@ -305,7 +282,6 @@ class ProjectImageResource(Resource):
             abort(400)
         
         filename = secure_filename(projectName+file_ext)
-        # uploaded_file.save(os.path.join(current_app.config['PROJECT_IMAGE_FOLDER'], filename))
         content = args["files"].read()
         with open(os.path.join(current_app.config['PROJECT_IMAGE_FOLDER'], filename), 'wb') as f:
             f.write(content)
@@ -331,7 +307,7 @@ class LastAccessController(Resource):
         access_type = args.accessType or "any"
         
         if project_name == None and username == None:
-            abort(400) # TODO : FIXME please : more logging or info returned to the FE (frontend)
+            abort(400) 
         
         if project_name and username:
             return LastAccessService.get_last_access_time_per_user_and_project(username, project_name, access_type)
@@ -341,11 +317,3 @@ class LastAccessController(Resource):
         if username:
             return LastAccessService.get_last_access_time_per_user(username, access_type)
 
-
-
-# @api.route('/<string:projectName>/settings_info')
-# class ProjectSettingsInfoResource(Resource):
-#     def get(self, projectName: str):
-#         return ProjectService.get_settings_infos(
-#             projectName, current_user
-#         )

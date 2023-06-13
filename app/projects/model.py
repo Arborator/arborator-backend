@@ -1,6 +1,4 @@
-from sqlalchemy import BLOB, Boolean, Column, Integer, String, Boolean, DateTime, Float
-from sqlalchemy.sql import func
-from sqlalchemy.ext.declarative import DeclarativeMeta
+from sqlalchemy import Boolean, Column, Integer, String, Boolean, Float
 from sqlalchemy.sql.schema import UniqueConstraint
 from sqlalchemy_utils import ChoiceType
 
@@ -90,12 +88,7 @@ class LastAccess(db.Model):
     last_read = Column(Float, nullable=True )
     last_write = Column(Float, nullable=True)
 
-    __table_args__ = (UniqueConstraint('user_id', 'project_id', name='user_project_unique_constraint'),
-                     )
-
-    # # Those two columns should be used to detect unused projects : time_created will become the starting point from the migration date
-    # time_created = Column(DateTime(timezone=True), server_default=func.now()) # what is this created concept ?
-    # time_updated = Column(DateTime(timezone=True), onupdate=func.now())
+    __table_args__ = (UniqueConstraint('user_id', 'project_id', name='user_project_unique_constraint'),)
 
 
 class DefaultUserTrees(db.Model, BaseM):
@@ -106,14 +99,6 @@ class DefaultUserTrees(db.Model, BaseM):
     user_id = Column(String(256), db.ForeignKey("users.id"))
     username = Column(String(256), nullable=False)
     robot = Column(Boolean, default=False)
-
-
-# class DefaultUserDiffTree(db.Model, BaseM):
-#     __tablename__ = "defaultuserdifftree"
-#     id = Column(Integer, primary_key=True)
-#     project_id = Column(Integer, db.ForeignKey("projects.id"))
-#     project = db.relationship("Project")
-#     user_id = Column(String(256), db.ForeignKey("users.id"))
 
 
 class Robot(db.Model, BaseM):

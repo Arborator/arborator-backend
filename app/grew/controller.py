@@ -2,16 +2,16 @@ import json
 import re
 import os 
 
-from app.config import Config
-from app.projects.service import LastAccessService, ProjectService
-from app.user.service import UserService
-from app.github.service import GithubCommitStatusService, GithubSynchronizationService
-from app.utils.grew_utils import SampleExportService, GrewService, grew_request
 from flask import Response, abort, current_app, request
 from flask_login import current_user
 from flask_restx import Namespace, Resource, reqparse
 from conllup.conllup import sentenceConllToJson
 from conllup.processing import constructTextFromTreeJson
+
+from app.config import Config
+from app.projects.service import LastAccessService, ProjectService
+from app.github.service import GithubCommitStatusService, GithubSynchronizationService
+from app.utils.grew_utils import SampleExportService, GrewService, grew_request
 
 
 api = Namespace(
@@ -29,6 +29,7 @@ class ApplyRuleResource(Resource):
         parser.add_argument(name="data", type=dict, action="append")
         args = parser.parse_args()
         data = args.get("data")[0]
+
         for sample_name in data:
             new_conll = str()
             sample_conll = grew_request(
@@ -83,7 +84,7 @@ class SearchResource(Resource):
 class SearchInSampleResource(Resource):
     def post(self, project_name: str, sample_name: str):
         """
-        Aplly a grew search inside a project and sample
+        Apply a grew search inside a project and sample
         """
         reply = grew_request("getSamples", data={"project_id": project_name})
         data = reply.get("data")
@@ -137,89 +138,10 @@ class TryPackageResource(Resource):
         return trees
 
 
-
-@api.route("/<string:project_name>/old-relation-table")
-class RelationTableResource(Resource):
-    def post(self, project_name):
-        # TODO : if user is not currently authenticated, they should only have access to recent mode
-        # @login_required
-        parser = reqparse.RequestParser()
-        parser.add_argument(name="table_type", type=str)
-        args = parser.parse_args()
-        table_type = args.get("table_type")
-        if not table_type:
-            abort(400)
-        reply = grew_request(
-            "searchPatternInGraphs",
-            data={
-                "project_id": project_name,
-                "pattern": "pattern { e: GOV -> DEP}",
-                "clusters": ["e.label; GOV.upos; DEP.upos"],
-                "user_ids": "[]",
-            },
-        )
-        if reply["status"] != "OK":
-            abort(400)
-        data = reply.get("data")
-        for e, v in data.items():
-            for gov, vv in v.items():
-                for dep, vvv in vv.items():
-                    trees = dict()
-                    for elt in vvv:
-                        if table_type == "user":
-                            if elt["user_id"] != current_user.username:
-                                continue
-                            else:
-                                conll = elt.get("conll")
-                                trees = formatTrees_new(elt, trees, conll)
-                        else:
-                            conll = elt.get("conll")
-                            trees = formatTrees_new(elt, trees, conll)
-
-                    # filtering out
-                    if table_type == "recent":
-                        for samp in trees:
-                            for sent in trees[samp]:
-                                last = get_last_user(trees[samp][sent]["conlls"])
-                                trees[samp][sent]["conlls"] = {
-                                    last: trees[samp][sent]["conlls"][last]
-                                }
-                                trees[samp][sent]["matches"] = {
-                                    last: trees[samp][sent]["matches"][last]
-                                }
-                    elif table_type == "user_recent":
-                        for samp in trees:
-                            for sent in trees[samp]:
-                                if current_user.username in trees[samp][sent]["conlls"]:
-                                    trees[samp][sent]["conlls"] = {
-                                        current_user.username: trees[samp][sent][
-                                            "conlls"
-                                        ][current_user.username]
-                                    }
-                                    trees[samp][sent]["matches"] = {
-                                        current_user.username: trees[samp][sent][
-                                            "matches"
-                                        ][current_user.username]
-                                    }
-                                else:
-                                    last = get_last_user(trees[samp][sent]["conlls"])
-                                    trees[samp][sent]["conlls"] = {
-                                        last: trees[samp][sent]["conlls"][last]
-                                    }
-                                    trees[samp][sent]["matches"] = {
-                                        last: trees[samp][sent]["matches"][last]
-                                    }
-                    elif table_type == "all":
-                        pass
-                    data[e][gov][dep] = trees
-        return data
-
-
 @api.route("/<string:project_name>/relation-table")
 class RelationTableResource(Resource):
     def post(self, project_name):
-        # TODO : if user is not currently authenticated, they should only have access to recent mode
-        # @login_required
+
         parser = reqparse.RequestParser()
         parser.add_argument(name="sample_id")
         parser.add_argument(name="tableType")
@@ -272,88 +194,14 @@ class ShowDiffRessource(Resource):
             abort(400)
         trees = {}
         for m in reply["data"]:
-            if sample_name:
-                if m["sample_id"] != sample_name:
-                    continue
-                if m["user_id"] == "":
-                    abort(409)
-                conll = m["conll"]
-                trees = formatTrees_new(m, trees, conll)
-            else: 
-                if m["user_id"] == "":
-                    abort(409)
-                conll = m["conll"]
-                trees = formatTrees_new(m, trees, conll)
+            if m["user_id"] == "":
+                abort(409)
+            if sample_name and m["sample_id"] != sample_name:
+                continue  
+            conll = m["conll"]
+            trees = formatTrees_new(m, trees, conll)
         return post_process_diffs(trees, other_users, features)
-        
-
-def get_timestamp(conll):
-    t = re.search("# timestamp = (\d+(?:\.\d+)?)\n", conll).groups()
-    if t:
-        return t[0]
-    else:
-        return False
-
-
-def get_last_user(tree):
-    timestamps = [(user, get_timestamp(conll)) for (user, conll) in tree.items()]
-    if len(timestamps) == 1:
-        last = timestamps[0][0]
-    else:
-        # print(timestamps)
-        last = sorted(timestamps, key=lambda x: x[1])[-1][0]
-        # print(last)
-    return last
-
-
-def formatTrees_new(m, trees, conll, isPackage: bool = False):
-    """
-    m is the query result from grew
-    list of trees
-    returns something like {'WAZL_15_MC-Abi_MG': {'WAZL_15_MC-Abi_MG__8': {'sentence': '# kalapotedly < you see < # ehn ...', 'conlls': {'kimgerdes': ...
-    """
-
-    user_id = m["user_id"]
-    sample_name = m["sample_id"]
-    sent_id = m["sent_id"]
-
-    if isPackage == False:
-        nodes = m["nodes"]
-        edges = m["edges"]
-    else:
-        modified_nodes = m["modified_nodes"]
-        modified_edges = m["modified_edges"]
-
-    if sample_name not in trees:
-        trees[sample_name] = {}
-
-    if sent_id not in trees[sample_name]:
-        sentenceJson = sentenceConllToJson(conll)
-        sentence_text = constructTextFromTreeJson(sentenceJson["treeJson"])
-        trees[sample_name][sent_id] = {
-            "sentence": sentence_text,
-            "conlls": {user_id: conll},
-           
-        }
-        if isPackage == False:
-            trees[sample_name][sent_id]["matches"] = {user_id: [{"edges": edges, "nodes": nodes}]}
-        else:
-            trees[sample_name][sent_id]["packages"] = {user_id: {"modified_edges": modified_edges, "modified_nodes": modified_nodes}}
     
-    
-    else:
-        trees[sample_name][sent_id]["conlls"][user_id] = conll
-        # /!\ there can be more than a single match for a same sample, sentence, user so it has to be a list
-        if isPackage == False:
-            trees[sample_name][sent_id]["matches"][user_id] = trees[sample_name][sent_id][
-                "matches"
-            ].get(user_id, []) + [{"edges": edges, "nodes": nodes}]
-        else:
-            trees[sample_name][sent_id]["packages"][user_id] = {"modified_edges": modified_edges, "modified_nodes": modified_nodes}
-
-        
-    return trees
-
 
 def check_all_diffs(left_sentence_json, right_sentence_json):
 
@@ -430,5 +278,71 @@ def post_process_diffs(grew_search_results, other_users, features):
 
                     post_processed_results[sample_name][sent_id]["conlls"][user_id] = grew_search_results[sample_name][sent_id]["conlls"][user_id]                                    
     return post_processed_results
+
+
+def get_timestamp(conll):
+    t = re.search("# timestamp = (\d+(?:\.\d+)?)\n", conll).groups()
+    if t:
+        return t[0]
+    else:
+        return False
+
+
+def get_last_user(tree):
+    timestamps = [(user, get_timestamp(conll)) for (user, conll) in tree.items()]
+    if len(timestamps) == 1:
+        last = timestamps[0][0]
+    else:
+        last = sorted(timestamps, key=lambda x: x[1])[-1][0]
+    return last
+
+
+def formatTrees_new(m, trees, conll, isPackage: bool = False):
+    """
+    m is the query result from grew
+    list of trees
+    returns something like {'WAZL_15_MC-Abi_MG': {'WAZL_15_MC-Abi_MG__8': {'sentence': '# kalapotedly < you see < # ehn ...', 'conlls': {'kimgerdes': ...
+    """
+
+    user_id = m["user_id"]
+    sample_name = m["sample_id"]
+    sent_id = m["sent_id"]
+
+    if isPackage == False:
+        nodes = m["nodes"]
+        edges = m["edges"]
+    else:
+        modified_nodes = m["modified_nodes"]
+        modified_edges = m["modified_edges"]
+
+    if sample_name not in trees:
+        trees[sample_name] = {}
+
+    if sent_id not in trees[sample_name]:
+        sentenceJson = sentenceConllToJson(conll)
+        sentence_text = constructTextFromTreeJson(sentenceJson["treeJson"])
+        trees[sample_name][sent_id] = {
+            "sentence": sentence_text,
+            "conlls": {user_id: conll},
+           
+        }
+        if isPackage == False:
+            trees[sample_name][sent_id]["matches"] = {user_id: [{"edges": edges, "nodes": nodes}]}
+        else:
+            trees[sample_name][sent_id]["packages"] = {user_id: {"modified_edges": modified_edges, "modified_nodes": modified_nodes}}
+    
+    
+    else:
+        trees[sample_name][sent_id]["conlls"][user_id] = conll
+        # /!\ there can be more than a single match for a same sample, sentence, user so it has to be a list
+        if isPackage == False:
+            trees[sample_name][sent_id]["matches"][user_id] = trees[sample_name][sent_id][
+                "matches"
+            ].get(user_id, []) + [{"edges": edges, "nodes": nodes}]
+        else:
+            trees[sample_name][sent_id]["packages"][user_id] = {"modified_edges": modified_edges, "modified_nodes": modified_nodes}
+   
+    return trees
+
 
                 

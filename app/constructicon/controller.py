@@ -1,4 +1,5 @@
 import json
+
 from flask import request
 from flask_accepts.decorators.decorators import accepts, responds
 from flask_restx import Namespace, Resource

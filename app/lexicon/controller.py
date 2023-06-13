@@ -1,13 +1,12 @@
 import json
-from typing import List
+
+from flask_login import current_user
+from flask import Response
+from flask_restx import Namespace, Resource, reqparse
 
 from app.lexicon.interface import LexiconItemInterface
 from app.lexicon.schema import LexiconItemSchema
 from app.utils.grew_utils import grew_request
-from flask_login import current_user
-from flask import Response
-from flask_accepts.decorators.decorators import responds
-from flask_restx import Namespace, Resource, reqparse
 
 api = Namespace(
     "LexiconV2", description="Endpoints for dealing with samples of project"

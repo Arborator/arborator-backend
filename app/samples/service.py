@@ -1,21 +1,21 @@
-from typing import List, Literal, Dict
-from conllup.conllup import sentenceConllToJson, readConlluFile, writeConlluFile
 import os
 import re
-
+from typing import List, Literal, Dict
 from datetime import datetime
 from collections import Counter
 
+from conllup.conllup import sentenceConllToJson, readConlluFile, writeConlluFile
+from flask import abort, Response
+from werkzeug.utils import secure_filename
+from werkzeug.datastructures import FileStorage
 
 from app import db
-from app.config import MAX_TOKENS, Config
+from app.config import Config
 from app.user.model import User
 from app.projects.service import ProjectService
 from app.utils.grew_utils import GrewService
 from app.github.service import GithubCommitStatusService, GithubSynchronizationService
-from flask import abort, Response
-from werkzeug.utils import secure_filename
-from werkzeug.datastructures import FileStorage
+
 from .model import SampleExerciseLevel, SampleRole
 
 BASE_TREE = "base_tree"
@@ -131,9 +131,6 @@ class SampleRoleService:
         db.session.commit()
 
         return
-
-    # def get_annotators_by_sample_id(project_id: int, sample_id: int) -> List[str]:
-    #     return
 
 
 class SampleExerciseLevelService:

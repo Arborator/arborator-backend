@@ -1,7 +1,4 @@
-from datetime import datetime
-
 from typing import Any, List
-
 from mypy_extensions import TypedDict
 
 

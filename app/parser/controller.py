@@ -1,11 +1,11 @@
 import os
 from typing import TypedDict, List, Union
 
-from app.utils.grew_utils import GrewService
-from app.config import Config
 from flask import request
 from flask_restx import Namespace, Resource
 
+from app.utils.grew_utils import GrewService
+from app.config import Config
 from ..samples.service import add_or_keep_timestamps, add_or_replace_userid
 from ..utils.arborator_parser_utils import ArboratorParserAPI, ModelInfo_t
 

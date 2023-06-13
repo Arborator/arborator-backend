@@ -5,18 +5,17 @@ import json
 import re 
 import shutil
 import zipfile
+from typing import List
 
 from flask import abort
 
 from app import db
-from typing import List
 from app.config import Config
-from .model import GithubRepository, GithubCommitStatus
 from app.projects.service import ProjectService
-import app.samples.service as SampleService
 from app.utils.grew_utils import GrewService, grew_request , SampleExportService
+import app.samples.service as SampleService
 
-
+from .model import GithubRepository, GithubCommitStatus
 
 
 extension = re.compile("^.*\.(conllu)$")
@@ -70,6 +69,7 @@ class GithubWorkflowService:
         project_samples = GrewService.get_samples(project_name)
         existed_samples_names = [sample["name"] for sample in project_samples]
         not_intersected_samples = [sample_name for sample_name in existed_samples_names if sample_name not in samples_names]
+        
         for sample_name in not_intersected_samples:
             GithubCommitStatusService.create(project_name, sample_name)
             GithubCommitStatusService.update(project_name, sample_name)   
@@ -120,7 +120,8 @@ class GithubWorkflowService:
     @staticmethod
     def commit_changes(access_token, full_name, updated_samples, project_name, username, message):
         
-        branch = GithubSynchronizationService.get_github_synchronized_repository(ProjectService.get_by_name(project_name).id).branch
+        project_id = ProjectService.get_by_name(project_name).id
+        branch = GithubSynchronizationService.get_github_synchronized_repository(project_id).branch
         parent = GithubService.get_sha_base_tree(access_token, full_name, branch)
         tree = GithubService.create_tree(access_token,full_name, updated_samples, project_name, username, parent)
         sha = GithubService.create_commit(access_token, tree, parent, message, full_name)
@@ -131,9 +132,10 @@ class GithubWorkflowService:
 
     @staticmethod 
     def update_file_content(content, sha, message, url, access_token):
+        headers = GithubService.base_header(access_token)
         encoded_content = base64.b64encode(content.encode("utf-8")).decode("utf-8")
         data = {'sha': sha, 'message': message, 'content': encoded_content}
-        response = requests.put(url, headers = GithubService.base_header(access_token), data = json.dumps(data))
+        response = requests.put(url, headers = headers, data = json.dumps(data))
         return response
     
 
@@ -167,8 +169,10 @@ class GithubWorkflowService:
         content = requests.get(download_url).text 
         file_name = sample_name + "_modified.conllu"
         path_file = os.path.join(Config.UPLOAD_FOLDER, file_name)
+
         with open(path_file, "w") as file:
             file.write(content)
+
         user_ids = GithubWorkflowService.preprocess_file(path_file, username)
         SampleService.convert_users_ids(path_file, user_ids)
         SampleService.add_or_keep_timestamps(path_file)
@@ -191,13 +195,14 @@ class GithubWorkflowService:
                 
     @staticmethod
     def delete_file_from_github(access_token, project_name, full_name, sample_name):
+
         file_path = sample_name+".conllu"
         project_id = ProjectService.get_by_name(project_name).id
         branch = GithubSynchronizationService.get_github_synchronized_repository(project_id).branch
         GithubService.delete_file(access_token, full_name, file_path, branch)
         GithubCommitStatusService.delete(project_name, sample_name)
         new_base_tree_sha = GithubService.get_sha_base_tree(access_token, full_name, branch)
-        GithubSynchronizationService.update_base_sha(ProjectService.get_by_name(project_name).id, full_name, new_base_tree_sha)
+        GithubSynchronizationService.update_base_sha(project_id, full_name, new_base_tree_sha)
 
 
     @staticmethod
@@ -216,14 +221,18 @@ class GithubService:
 
     @staticmethod
     def get_user_information(access_token):
-        response = requests.get("https://api.github.com/user", headers = GithubService.base_header(access_token))
+        url = "https://api.github.com/user"
+        headers =  GithubService.base_header(access_token)
+        response = requests.get(url, headers=headers)
         data = response.json()
         return data
     
 
     @staticmethod
     def get_user_email(access_token) -> str:
-        response = requests.get("https://api.github.com/user/emails", headers = GithubService.base_header(access_token))
+        url = "https://api.github.com/user/emails"
+        headers =  GithubService.base_header(access_token)
+        response = requests.get(url, headers=headers)
         data = response.json()
         return data[0].get("email")
     
@@ -253,35 +262,45 @@ class GithubService:
 
     @staticmethod
     def list_branches_repository(access_token, full_name) -> List[str]:
-        response = requests.get("https://api.github.com/repos/{}/branches".format(full_name), headers = GithubService.base_header(access_token)) 
+        url = "https://api.github.com/repos/{}/branches".format(full_name)
+        headers = GithubService.base_header(access_token)
+        response = requests.get(url, headers=headers ) 
         data = response.json()
         return [branch.get("name") for branch in data if "dependabot" not in branch.get("name")]
 
 
     @staticmethod    
     def get_repository_files_from_specific_branch(access_token, full_name, branch):
-        response = requests.get("https://api.github.com/repos/{}/contents/?ref={}".format(full_name, branch), headers = GithubService.base_header(access_token))
+        url = "https://api.github.com/repos/{}/contents/?ref={}".format(full_name, branch)
+        headers = GithubService.base_header(access_token)
+        response = requests.get(url , headers=headers)
         data = response.json()
         return data
     
 
     @staticmethod   
     def get_file_sha(access_token, full_name, file_path, branch):
-        response = requests.get("https://api.github.com/repos/{}/contents/{}?ref={}".format(full_name, file_path, branch), headers = GithubService.base_header(access_token))
+        url = "https://api.github.com/repos/{}/contents/{}?ref={}".format(full_name, file_path, branch)
+        headers = GithubService.base_header(access_token)
+        response = requests.get(url, headers=headers)
         data = response.json()
         return data.get("sha")
     
 
     @staticmethod
     def get_default_branch(access_token, full_name):
-        response = requests.get("https://api.github.com/repos/{}".format(full_name), headers = GithubService.base_header(access_token))
+        url = "https://api.github.com/repos/{}".format(full_name)
+        headers = GithubService.base_header(access_token)
+        response = requests.get(url, headers=headers )
         data = response.json()
         return data.get("default_branch")
     
     
     @staticmethod
     def get_sha_base_tree(access_token, full_name, branch):
-        response = requests.get("https://api.github.com/repos/{}/git/refs/heads/{}".format(full_name, branch), headers = GithubService.base_header(access_token))
+        url = "https://api.github.com/repos/{}/git/refs/heads/{}".format(full_name, branch)
+        headers =  GithubService.base_header(access_token)
+        response = requests.get(url, headers=headers)
         data = response.json()
         try:
             return data.get("object").get("sha")
@@ -292,7 +311,9 @@ class GithubService:
     @staticmethod
     def create_blob_for_updated_file(access_token, full_name, content):
         data = {"content": content, "encoding": "utf-8"}
-        response = requests.post("https://api.github.com/repos/{}/git/blobs".format(full_name), headers = GithubService.base_header(access_token), data = json.dumps(data) )
+        url = "https://api.github.com/repos/{}/git/blobs".format(full_name)
+        headers = GithubService.base_header(access_token)
+        response = requests.post(url, headers=headers , data = json.dumps(data) )
         data = response.json()
         return data.get("sha")
     
@@ -306,47 +327,64 @@ class GithubService:
             sha = GithubService.create_blob_for_updated_file(access_token, full_name, content)
             blob = {"path": sample_name+".conllu", "mode":"100644", "type":"blob", "sha": sha}
             tree.append(blob)
+
+        url = "https://api.github.com/repos/{}/git/trees".format(full_name)
+        headers = GithubService.base_header(access_token)
         data = {"tree": tree, "base_tree": base_tree}
-        response = requests.post("https://api.github.com/repos/{}/git/trees".format(full_name), headers = GithubService.base_header(access_token), data = json.dumps(data) )
+
+        response = requests.post(url, headers=headers, data = json.dumps(data) )
         data = response.json()
         return data.get("sha")
         
     
     @staticmethod
     def create_commit(access_token, tree, parent, message, full_name):
+        url = "https://api.github.com/repos/{}/git/commits".format(full_name)
+        headers = GithubService.base_header(access_token)
         data = {"tree": tree, "parents": [parent], "message": message}
-        response = requests.post("https://api.github.com/repos/{}/git/commits".format(full_name), headers = GithubService.base_header(access_token), data = json.dumps(data) )
+
+        response = requests.post(url, headers=headers, data = json.dumps(data) )
         data = response.json()
         return data.get("sha")
 
 
     @staticmethod
     def update_sha(access_token, full_name, branch, sha):
+        url = "https://api.github.com/repos/{}/git/refs/heads/{}".format(full_name, branch)
+        headers = GithubService.base_header(access_token)
         data = {"sha": sha}
-        response = requests.patch("https://api.github.com/repos/{}/git/refs/heads/{}".format(full_name, branch), headers = GithubService.base_header(access_token),  data= json.dumps(data))
+
+        response = requests.patch(url, headers=headers,  data= json.dumps(data))
         return response
     
 
     @staticmethod
     def create_github_repository(access_token, data):
-        response = requests.post("https://api.github.com/user/repos", headers = GithubService.base_header(access_token), data = json.dumps(data) )
+        url = "https://api.github.com/user/repos"
+        headers = GithubService.base_header(access_token)
+
+        response = requests.post(url, headers=headers, data = json.dumps(data) )
         return response
     
 
     @staticmethod
     def create_new_branch_arborator(access_token, full_name, default_branch):
+        url = "https://api.github.com/repos/{}/git/refs".format(full_name)
+        headers =  GithubService.base_header(access_token)
         sha = GithubService.get_sha_base_tree(access_token, full_name, default_branch)
         data = {
             "ref": "refs/heads/arboratorgrew",
             "sha": sha
         }
-        response = requests.post("https://api.github.com/repos/{}/git/refs".format(full_name), headers = GithubService.base_header(access_token), data = json.dumps(data))
+        response = requests.post(url, headers=headers, data = json.dumps(data))
         return response.json()
     
 
     @staticmethod
     def get_tree(access_token, full_name, base_tree):
-        response = requests.get("https://api.github.com/repos/{}/git/trees/{}".format(full_name, base_tree), headers = GithubService.base_header(access_token))
+        url = "https://api.github.com/repos/{}/git/trees/{}".format(full_name, base_tree)
+        headers = GithubService.base_header(access_token)
+        response = requests.get(url, headers=headers)
         try: 
             data = response.json()
             return data.get("tree")
@@ -356,23 +394,32 @@ class GithubService:
 
     @staticmethod
     def get_file_content_by_commit_sha(access_token, full_name, file_path, sha):
-        response = requests.get("https://api.github.com/repos/{}/contents/{}?ref={}".format(full_name, file_path, sha), headers = GithubService.base_header(access_token))
+        url = "https://api.github.com/repos/{}/contents/{}?ref={}".format(full_name, file_path, sha)
+        headers = GithubService.base_header(access_token)
+
+        response = requests.get(url, headers=headers)
         data = response.json()
         return data
     
 
     @staticmethod
     def delete_file(access_token, full_name, file_path, branch):
+        url = "https://api.github.com/repos/{}/contents/{}".format(full_name, file_path)
+        headers = GithubService.base_header(access_token)
         sha = GithubService.get_file_sha(access_token, full_name, file_path, branch)
         data = {"sha": sha, "message": "file deleted from github", "branch": branch}
-        response = requests.delete("https://api.github.com/repos/{}/contents/{}".format(full_name, file_path), headers = GithubService.base_header(access_token), data=json.dumps(data))
+
+        response = requests.delete(url, headers=headers , data=json.dumps(data))
+        return response
 
 
     @staticmethod
     def create_pull_request(access_token, full_name, username, arborator_branch, branch, title):
+        url = "https://api.github.com/repos/{}/pulls".format(full_name)
+        headers = GithubService.base_header(access_token)
         head = username + ":" + arborator_branch
         data = {"title": title, "head": head, "base": branch}
-        response = requests.post("https://api.github.com/repos/{}/pulls".format(full_name), headers = GithubService.base_header(access_token), data=json.dumps(data))
+        response = requests.post(url, headers=headers, data=json.dumps(data))
         if not response:
             error = response.json()['errors'][0].get("message") 
             abort(422, error)
@@ -380,13 +427,18 @@ class GithubService:
     
     @staticmethod 
     def merge_branch(access_token, full_name, base, head):
+        url = "https://api.github.com/repos/{}/merges".format(full_name)
+        headers = GithubService.base_header(access_token)
         data = {"base": base, "head": head}
-        response = requests.post("https://api.github.com/repos/{}/merges".format(full_name), headers=GithubService.base_header(access_token), data=json.dumps(data))
+        response = requests.post(url, headers=headers, data=json.dumps(data))
+        return response
 
 
     @staticmethod
     def delete_branch(access_token, full_name, base):
-        response = requests.delete("https://api.github.com/repos/{}/git/refs/heads/{}".format(full_name, base), headers=GithubService.base_header(access_token))
+        url = "https://api.github.com/repos/{}/git/refs/heads/{}".format(full_name, base)
+        headers = GithubService.base_header(access_token)
+        response = requests.delete(url, headers=headers)
         return response
     
 
@@ -403,7 +455,8 @@ class GithubService:
     @staticmethod
     def download_github_repository(access_token, full_name, branch):
         url = 'https://api.github.com/repos/{}/zipball/{}'.format(full_name, branch)
-        response = requests.get(url, headers=GithubService.base_header(access_token), stream=True)
+        headers = GithubService.base_header(access_token)
+        response = requests.get(url, headers=headers, stream=True)
         file_name = 'tmp.zip'
         path_file = os.path.join(Config.UPLOAD_FOLDER, file_name)
         if response.status_code == 200:
@@ -427,6 +480,7 @@ class GithubService:
 
 
 class GithubCommitStatusService:
+    
     @staticmethod
     def create(project_name, sample_name):
         project = ProjectService.get_by_name(project_name)

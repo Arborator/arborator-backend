@@ -1,6 +1,5 @@
 from datetime import datetime
 import json
-import requests
 
 from flask import (
     abort,
@@ -14,7 +13,6 @@ from flask import (
     session,
 )
 from flask_login import current_user, login_user, login_required, logout_user
-
 from authomatic.adapters import WerkzeugAdapter
 from authomatic import Authomatic
 
@@ -57,7 +55,7 @@ def parse_user(provider_name, user):
     return results_parsed
 
 
-# @auth.route('/login/<provider_name>/', methods=['GET', 'POST'])
+
 @auth.route("/login/<provider_name>/")
 def login(provider_name) -> Response:
     """
@@ -83,7 +81,6 @@ def login(provider_name) -> Response:
             results_parsed = parse_user(provider_name, result.user)
 
             # Retrieve the user
-            # user = UserService.get_by_id(results_parsed.get("id"))
             user = UserService.login_by_id(results_parsed.get("id"))
 
             # If no existing user, create a new one
@@ -101,7 +98,6 @@ def login(provider_name) -> Response:
                     "family_name": results_parsed.get("family_name"),
                     "email": results_parsed.get("email"),
                     "not_share_email": False,
-                    "receive_newsletter": False,
                     "picture_url": results_parsed.get("picture_url"),
                     "super_admin": False,
                     "created_date": datetime.utcnow(),

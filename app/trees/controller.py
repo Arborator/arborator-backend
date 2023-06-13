@@ -1,13 +1,13 @@
-from app.projects.service import LastAccessService, ProjectAccessService, ProjectService
-from app.samples.service import SampleExerciseLevelService
-from app.github.service import GithubCommitStatusService, GithubSynchronizationService
-from app.utils.grew_utils import grew_request, GrewService
-from flask import abort, current_app, jsonify
+from flask import abort
 from flask_login import current_user
 from flask_restx import Namespace, Resource, reqparse
 from conllup.conllup import sentenceConllToJson
 from conllup.processing import constructTextFromTreeJson, emptySentenceConllu, changeMetaFieldInSentenceConllu
 
+from app.projects.service import LastAccessService, ProjectAccessService, ProjectService
+from app.samples.service import SampleExerciseLevelService
+from app.github.service import GithubCommitStatusService, GithubSynchronizationService
+from app.utils.grew_utils import grew_request, GrewService
 
 BASE_TREE = "base_tree"
 TEACHER = "teacher"
@@ -73,8 +73,6 @@ class SampleTreesResource(Resource):
                 sample_trees = samples2trees(grew_sample_trees, sample_name)
             else:
                 validator = 1
-                # validator = project_service.is_validator(
-                #     project.id, sample_name, current_user.id)
                 if validator:
                     sample_trees = samples2trees(
                         grew_sample_trees,
@@ -106,11 +104,6 @@ class SampleTreesResource(Resource):
         if not conll:
             abort(400)
 
-        # TODO : add the is_annotator service
-        # if project.visibility != 2:
-        #     if not project_service.is_annotator(project.id, sample_name, current_user.id) or not project_service.is_validator(project.id, sample_name, current_user.id):
-        #         if project.exercise_mode == 0:
-        #             abort(403)
 
         if project.exercise_mode == 1 and user_id == TEACHER:
             conll = changeMetaFieldInSentenceConllu(conll, "user_id", TEACHER)
@@ -213,12 +206,11 @@ def restrict_trees(trees, restricted_users):
 def samples2trees_with_restrictions(samples, sample_name, current_user):
     """ transforms a list of samples into a trees object and restrict it to user trees and default tree(s) """
     trees = {}
-    # p = project_dao.find_by_name(project_name)
-    # default_user_trees_ids = [dut.username for dut in project_dao.find_default_user_trees(p.id)]
+   
     default_user_trees_ids = []
     default_usernames = list()
     default_usernames = default_user_trees_ids
-    # if len(default_user_trees_ids) > 0: default_usernames = user_dao.find_username_by_ids(default_user_trees_ids)
+
     if current_user.username not in default_usernames:
         default_usernames.append(current_user.username)
     for sentId, users in samples.items():

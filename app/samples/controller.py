@@ -1,17 +1,14 @@
 import json
-import os
 import re
-import requests
 
 from flask.helpers import send_file
+from flask import Response, abort, current_app, request, send_from_directory
+from flask_restx import Namespace, Resource, reqparse
 
-from app import parser_config
+
 from app.projects.service import ProjectAccessService, ProjectService
 from app.user.service import UserService
 from app.utils.grew_utils import GrewService, SampleExportService, grew_request
-from app.config import Config
-from flask import Response, abort, current_app, request, send_from_directory
-from flask_restx import Namespace, Resource, reqparse
 
 from .model import SampleRole
 from .service import (
@@ -19,9 +16,7 @@ from .service import (
     SampleExerciseLevelService,
     SampleRoleService,
     SampleUploadService,
-    add_or_keep_timestamps, add_or_replace_userid,
 )
-from ..utils.arborator_parser_utils import ArboratorParserAPI
 
 api = Namespace(
     "Samples", description="Endpoints for dealing with samples of project"
@@ -85,7 +80,6 @@ class SampleResource(Resource):
                     existing_samples=samples_names,
                     users_ids_convertor=users_ids_convertor,
                 )
-            # samples = {"samples": Sam.get_samples(project_name)}
             return {"status": "OK"}
 
 

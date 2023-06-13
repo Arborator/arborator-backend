@@ -2,9 +2,7 @@ from flask_login import UserMixin
 from sqlalchemy import Column, String, Boolean, DateTime
 
 from app import db  # noqa
-
 from app.shared.model import BaseM
-
 from .interface import UserInterface
 
 

@@ -1,19 +1,13 @@
 from datetime import datetime
-from typing import Dict, List, NewType, Union, Tuple
-import json
-import base64
-from xmlrpc.client import boolean
+from typing import Dict, List, Tuple
 
-from sqlalchemy.sql.sqltypes import Date, DateTime
-
-from app import db
 from flask import abort, current_app
 from flask_login import current_user
 
+from app import db
 from ..user.model import User
-from .interface import ProjectExtendedInterface, ProjectInterface
-from .model import Project, ProjectAccess, ProjectFeature, ProjectMetaFeature, DefaultUserTrees, LastAccess
-from ..samples.model import SampleRole
+from .interface import ProjectInterface
+from .model import Project, ProjectAccess, ProjectFeature, ProjectMetaFeature, LastAccess
 from ..user.service import UserService
 
 
@@ -190,6 +184,7 @@ class ProjectAccessService:
             abort(401, "User doesn't have admin rights on this projects")
 
         return
+    
     @staticmethod
     def check_project_access(visibility,project_id):
         """
