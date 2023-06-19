@@ -21,6 +21,9 @@ class ProjectExtendedInterface(ProjectInterface, total=False):
     number_trees: int
     number_tokens: int
 
+class ProjectShownFeaturesAndMetaInterface(TypedDict, total=False):
+    shown_features: List[str]
+    shown_meta: List[str]
 
 
 

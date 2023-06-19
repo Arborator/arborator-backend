@@ -12,9 +12,9 @@ from werkzeug.utils import secure_filename
 import werkzeug
 
 from app.utils.grew_utils import GrewService
-from .interface import ProjectExtendedInterface, ProjectInterface
+from .interface import ProjectExtendedInterface, ProjectInterface, ProjectShownFeaturesAndMetaInterface
 from .model import Project, ProjectAccess
-from .schema import ProjectExtendedSchema, ProjectSchema, ProjectSchemaCamel
+from .schema import ProjectExtendedSchema, ProjectSchema, ProjectSchemaCamel, ProjectFeaturesAndMetaSchema
 from .service import (LastAccessService, ProjectAccessService,
                       ProjectFeatureService, ProjectMetaFeatureService,
                       ProjectService)
@@ -159,6 +159,8 @@ class ProjectIdResource(Resource):
 
 @api.route("/<string:projectName>/features")
 class ProjectFeaturesResource(Resource):
+
+    @responds(schema=ProjectFeaturesAndMetaSchema, api=api)
     def get(self, projectName: str):
         """Get a single project features"""
         project = ProjectService.get_by_name(projectName)
@@ -166,27 +168,28 @@ class ProjectFeaturesResource(Resource):
 
 
         features = {
-            "shownMeta": ProjectMetaFeatureService.get_by_project_id(project.id),
-            "shownFeatures": ProjectFeatureService.get_by_project_id(project.id),
+            "shown_meta": ProjectMetaFeatureService.get_by_project_id(project.id),
+            "shown_features": ProjectFeatureService.get_by_project_id(project.id),
         }
         return features
 
+    @accepts(schema=ProjectFeaturesAndMetaSchema, api=api)
     def put(self, projectName: str):
-        parser = reqparse.RequestParser()
-        parser.add_argument(name="shownFeatures", type=str, action="append")
-        parser.add_argument(name="shownMeta", type=str, action="append")
-        args = parser.parse_args()
+        parsed_obj: ProjectShownFeaturesAndMetaInterface = request.parsed_obj
         project = ProjectService.get_by_name(projectName)
         ProjectAccessService.check_admin_access(project.id)
-        if args.get("shownFeatures"):
+
+        shown_features = parsed_obj.get("shown_features")
+        if shown_features is not None and isinstance(shown_features, list):
             ProjectFeatureService.delete_by_project_id(project.id)
-            for feature in args.shownFeatures:
+            for feature in shown_features:
                 new_attrs = {"project_id": project.id, "value": feature}
                 ProjectFeatureService.create(new_attrs)
 
-        if args.get("shownMeta"):
+        shown_meta = parsed_obj.get("shown_meta")
+        if shown_meta is not None and isinstance(shown_meta, list):
             ProjectMetaFeatureService.delete_by_project_id(project.id)
-            for feature in args.shownMeta:
+            for feature in shown_meta:
                 new_attrs = {"project_id": project.id, "value": feature}
                 ProjectMetaFeatureService.create(new_attrs)
 

@@ -61,3 +61,10 @@ class ProjectSchemaCamel(Schema):
     freezed = fields.Boolean(attribute="freezed")
     diffMode = fields.Boolean(attribute="diff_mode")
     diffUserId = fields.String(attribute="diff_user_id")
+
+
+class ProjectFeaturesAndMetaSchema(Schema):
+    """ProjectFeaturesAndMeta schema"""
+
+    shownFeatures = fields.List(fields.String(), attribute="shown_features")
+    shownMeta = fields.List(fields.String(), attribute="shownMeta")
