@@ -67,4 +67,4 @@ class ProjectFeaturesAndMetaSchema(Schema):
     """ProjectFeaturesAndMeta schema"""
 
     shownFeatures = fields.List(fields.String(), attribute="shown_features")
-    shownMeta = fields.List(fields.String(), attribute="shownMeta")
+    shownMeta = fields.List(fields.String(), attribute="shown_meta")
