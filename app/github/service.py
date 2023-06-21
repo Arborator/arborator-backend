@@ -90,7 +90,8 @@ class GithubWorkflowService:
             user_ids = GithubWorkflowService.preprocess_file(path_file, username)
             sample_name = file.split('.conllu')[0]
             GithubWorkflowService.create_sample(sample_name, path_file, project_name, user_ids)
-
+            GithubCommitStatusService.create(project_name, sample_name)
+            
 
     @staticmethod
     def preprocess_file(path_file, username):
@@ -189,8 +190,9 @@ class GithubWorkflowService:
                     sent_id = line.split("# sent_id = ")[-1] 
                     modified_sentences.append(sent_id)
         deleted_sentences = [sent_id for sent_id in sample_trees.keys() if not sent_id in modified_sentences]
-        data = {"project_id": project_name, "sample_id": sample_name, "sent_ids": json.dumps(deleted_sentences), "user_id": username}
-        grew_request("eraseGraphs", data)
+        if deleted_sentences:
+            data = {"project_id": project_name, "sample_id": sample_name, "sent_ids": json.dumps(deleted_sentences), "user_id": username}
+            grew_request("eraseGraphs", data)
         
                 
     @staticmethod
