@@ -1,3 +1,4 @@
+import json
 from typing import Dict, TypedDict, Union
 import requests
 
@@ -32,7 +33,7 @@ class ArboratorParserAPI:
                 return {
                     "status": "failure",
                     "error": f"<ArboratorParserSchemaValidation> You have a problem with at least one of the sentence "
-                             f"you sent",
+                             f"you sent : {json.dumps(data.get('schema_errors'))}",
                     "schema_errors": data.get("schema_errors"),
                         }
             return data
