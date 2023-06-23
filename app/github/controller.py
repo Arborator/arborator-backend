@@ -18,9 +18,10 @@ class GithubSynchronizationResource(Resource):
         ProjectService.check_if_project_exist(project)
         try:
             repository = GithubSynchronizationService.get_github_synchronized_repository(project.id).repository_name
-            return repository
+            branch = GithubSynchronizationService.get_github_synchronized_repository(project.id).branch
+            return {"repositoryName": repository, "branch": branch}
         except: 
-            return ''
+            return {}
     
     
     def post(self, project_name: str, username:str):
