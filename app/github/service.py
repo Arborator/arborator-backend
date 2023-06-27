@@ -116,6 +116,24 @@ class GithubWorkflowService:
             GrewService.create_sample(project_name, sample_name)
         with open(path_file, "rb") as file_to_save:
             GrewService.save_sample(project_name, sample_name, file_to_save)
+    
+    
+    @staticmethod
+    def download_github_file_content(file_name, download_url):
+        sample_name = file_name.split(".conllu")[0]
+        raw_content = requests.get(download_url)
+        path_file = os.path.join(Config.UPLOAD_FOLDER, file_name)
+        file = open(path_file, "w")
+        file.write(raw_content.text)
+        return sample_name, path_file
+
+
+    @staticmethod
+    def create_sample_from_github_file(file, download_url, username, project_name):
+        sample_name, path_file =  GithubWorkflowService.download_github_file_content(file, download_url)
+        user_ids = GithubWorkflowService.preprocess_file(path_file,username)
+        GithubWorkflowService.create_sample(sample_name, path_file, project_name, user_ids)
+        GithubCommitStatusService.create(project_name, sample_name)
 
 
     @staticmethod
