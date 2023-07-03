@@ -105,7 +105,7 @@ class SampleTokenizeResource(Resource):
         option = args.get("option")
         lang = args.get("lang")
         text = args.get("text")
-        SampleTokenizeService.tokenize_text(text, option, lang, project_name, sample_name, username)
+        SampleTokenizeService.tokenize(text, option, lang, project_name, sample_name, username)
 
 
 @api.route("/<string:project_name>/samples/<string:sample_name>/role")

@@ -8,7 +8,7 @@ from collections import Counter
 
 
 from app import db
-from app.config import MAX_TOKENS, Config
+from app.config import Config
 from app.user.model import User
 from app.projects.service import ProjectService
 from app.utils.grew_utils import GrewService
@@ -54,16 +54,27 @@ class SampleUploadService:
 class SampleTokenizeService:
 
     @staticmethod
-    def tokenize_text(text, option, lang, project_name, sample_name, username):
+    def tokenize(text, option, lang, project_name, sample_name, username):
+
+        existing_samples = GrewService.get_samples(project_name)
+        samples_names = [sample["name"] for sample in existing_samples]
+        project = ProjectService.get_by_name(project_name)
+        if sample_name not in samples_names:
+            GrewService.create_sample(project_name, sample_name)
+            index = 0
+        else: 
+            index = [sample["number_sentences"] for sample in existing_samples if sample_name == sample["name"]][0]
         conll= str()
         if lang:
-            list_tokens = tokenize(text=text, lang=lang)
-            conll = conllize(sent2toks=list_tokens,sample_name=sample_name)
+            list_tokens = tokenize_plain_text(text=text, lang=lang)
+            conll = conllize_plain_text(sent2toks=list_tokens,sample_name=sample_name, start=index)
         else: 
             sentences = split_sentences(text, option)
             for i in range(len(sentences)):
                 if (sentences[i]):
-                    conll += conllize_sentence(sentences[i], sample_name, i, option)
+                    index += 1
+                    conll += conllize_sentence(sentences[i], sample_name, index, option)
+                    
 
         file_name = sample_name + ".conllu"
         path_file = os.path.join(Config.UPLOAD_FOLDER, file_name)
@@ -73,11 +84,6 @@ class SampleTokenizeService:
         convert_users_ids(path_file, user_ids)
         add_or_keep_timestamps(path_file)
 
-        existing_samples = GrewService.get_samples(project_name)
-        samples_names = [sample["name"] for sample in existing_samples]
-        project = ProjectService.get_by_name(project_name)
-        if sample_name not in samples_names:
-            GrewService.create_sample(project_name, sample_name)
         with open(path_file, "rb") as file_to_save:
             GrewService.save_sample(project_name, sample_name, file_to_save)
             if GithubSynchronizationService.get_github_synchronized_repository(project.id):
@@ -430,20 +436,20 @@ re_spacenum = re.compile(r'\d+[ ,.]+[0-9 ,.]*\d+')
 # regex to match escapes \number\ used for special words:
 rerematch = re.compile(r'\\\d+\\')
 
-def tokenize(   text, 
-                lang,
-	     		sent_ends='.;!?\\n', 
-	     		new_sent_upper=".!?", 
-				char_in_word='_-',
-				whole_words="aujourd'hui l'on etc. Mr. M. Nr. N° ;) ;-)",
-				special_suffix="n't -je -tu -il -elle -on -nous -vous -ils -ils -elles -y -t-il -t-elle -t-ils -t-ils -t-on",
-				keep_url=True, 
-				combine_numbers=True, 
-				sent_cut="", 
-				escape = '____',
-				sent_not_cut="§§§", 
-				):
-	"""
+def tokenize_plain_text( text,
+              lang,
+              sent_ends='.;!?\\n',
+              new_sent_upper='.!?',
+              char_in_word='_-',
+              whole_words="aujourd'hui l'on etc. Mr. M. Nr. N° ;) ;-)",
+              special_suffix="n't -je -tu -il -elle -on -nous -vous -ils -ils -elles -y -t-il -t-elle -t-ils -t-ils -t-on",
+              keep_url=True, 
+              combine_numbers=True, 
+              sent_cut="", 
+              escape = '____',
+              sent_not_cut="§§§",
+             ):
+     """
 	text: 
 		Text a transformer en Conll
 	sent_ends='.;!?\\n'
@@ -473,109 +479,105 @@ def tokenize(   text,
 		This should be a unique symbol not appearing anywhere naturally in the text as it will be removed from the text.
 		for example use sent_not_cut="§§§"
 	"""
-
-	# replacing words that have to remain untouched
-	whole_words = whole_words.strip().split()
-	special_suffix = special_suffix.strip()
-	num_dot = (escape+'{}'+escape).format('NUMBERDOT')
-	space_after_esc = (escape+'{}'+escape).format('NOSPACEAFTER')
-	if lang == 'fr':
-		glue_left="'~"
-		glue_right=""
-	else:
-		glue_left=""
-		glue_right="'"
-	ind = 0
-	ntext = text
-	for word in whole_words: 
-		ntext = ntext.replace(word,'\\{ind}\\'.format(ind=ind))
-		ind +=1
-	if special_suffix:
-		respecial_suffix = re.compile(r'({})\b'.format('|'.join(special_suffix.split())))
-		for m in respecial_suffix.finditer(ntext):
-			ntext = ntext.replace(m.group(0),'\\{ind}\\'.format(ind=ind))
-			whole_words += [m.group(0)]
-			ind +=1
-	if keep_url:
-		for murl in re_url.finditer(ntext):
-			ntext = ntext.replace(murl.group(0),'\\{ind}\\'.format(ind=ind))
-			whole_words += [murl.group(0)]
-			ind +=1
-	if combine_numbers:
-		for mnum in re_spacenum.finditer(ntext):
-			ntext = ntext.replace(mnum.group(0),'\\{ind}\\'.format(ind=ind))
-			whole_words += [mnum.group(0)]
-			ind +=1
+     whole_words = whole_words.strip().split()
+     special_suffix = special_suffix.strip()
+     num_dot = (escape+'{}'+escape).format('NUMBERDOT')
+     space_after_esc = (escape+'{}'+escape).format('NOSPACEAFTER')
+     if lang == 'fr':
+        glue_left="'~"
+        glue_right=""
+     else:
+        glue_left=""
+        glue_right="'"
+     ind = 0
+     ntext = text
+     for word in whole_words: 
+        ntext = ntext.replace(word,'\\{ind}\\'.format(ind=ind))
+        ind +=1
+     if special_suffix:
+        respecial_suffix = re.compile(r'({})\b'.format('|'.join(special_suffix.split())))
+        for m in respecial_suffix.finditer(ntext):
+             ntext = ntext.replace(m.group(0),'\\{ind}\\'.format(ind=ind))
+             whole_words += [m.group(0)]
+             ind +=1
+     if keep_url:
+        for murl in re_url.finditer(ntext):
+            ntext = ntext.replace(murl.group(0),'\\{ind}\\'.format(ind=ind))
+            whole_words += [murl.group(0)]
+            ind +=1
+     if combine_numbers:
+        for mnum in re_spacenum.finditer(ntext):
+            ntext = ntext.replace(mnum.group(0),'\\{ind}\\'.format(ind=ind))
+            whole_words += [mnum.group(0)]
+            ind +=1
 
 	# replace "the 2. guy" by "the 2___NUMDOT___ guy":
-	re_num_dot = re.compile(r'\b(\d+)\.(?! [0-9A-ZÀÈÌÒÙÁÉÍÓÚÝÂÊÎÔÛÄËÏÖÜÃÑÕÆÅÐÇØ])') # num followed by . not followed by upper case
-	ntext = re_num_dot.sub(r'\1'+num_dot, ntext)
+     re_num_dot = re.compile(r'\b(\d+)\.(?! [0-9A-ZÀÈÌÒÙÁÉÍÓÚÝÂÊÎÔÛÄËÏÖÜÃÑÕÆÅÐÇØ])') # num followed by . not followed by upper case
+     ntext = re_num_dot.sub(r'\1'+num_dot, ntext)
 	# now we split into sentences:
-	if sent_cut:
-		sents = ntext.split(sent_cut)
-	else:
-		if new_sent_upper:
-			sent_ends_nopoint = re.sub(r'[{new_sent_upper}]+'.format(new_sent_upper=new_sent_upper),'', sent_ends)
-			if sent_not_cut:
-				re_sent_bounds = re.compile(
+     if sent_cut: 
+        sents = ntext.split(sent_cut)
+     else:
+        if new_sent_upper:
+            sent_ends_nopoint = re.sub(r'[{new_sent_upper}]+'.format(new_sent_upper=new_sent_upper),'', sent_ends)
+            if sent_not_cut:
+                re_sent_bounds = re.compile(
 					'(([{sent_ends_nopoint}]+(?!{sent_not_cut})\s*)|([{sent_ends}]+(?!{sent_not_cut})\s*(?=[0-9\\\A-ZÀÈÌÒÙÁÉÍÓÚÝÂÊÎÔÛÄËÏÖÜÃÑÕÆÅÐÇØ])))'.format(
 								sent_ends_nopoint=sent_ends_nopoint, 
 								sent_ends=new_sent_upper.replace('.','\.'),
 								sent_not_cut=sent_not_cut), re.U+re.M)
-			else:
-				re_sent_bounds = re.compile(
+            else:
+                re_sent_bounds = re.compile(
 					'(([{sent_ends_nopoint}]+\s*)|([{sent_ends}]+\s*(?=[0-9\\\A-ZÀÈÌÒÙÁÉÍÓÚÝÂÊÎÔÛÄËÏÖÜÃÑÕÆÅÐÇØ])))'.format(
 								sent_ends_nopoint=sent_ends_nopoint, 
 								sent_ends=new_sent_upper.replace('.','\.'),
 								sent_not_cut=sent_not_cut), re.U+re.M)
-		else:
-			if sent_not_cut:
-				re_sent_bounds = re.compile(
+        else:
+            if sent_not_cut:
+                re_sent_bounds = re.compile(
 					'([{sent_ends}](?!{sent_not_cut})+\s*)'.format(sent_ends=sent_ends, 
 						    sent_not_cut=sent_not_cut), re.U+re.M)
-			else:
-				re_sent_bounds = re.compile(
+            else:
+                re_sent_bounds = re.compile(
 					'([{sent_ends}]+\s*)'.format(sent_ends=sent_ends), re.U+re.M)
-		
-		doubsents = re_sent_bounds.split(ntext)+['']
-		sents = []
-		for i in range(0, len(doubsents), 2):
-			if doubsents[i] and doubsents[i+1]:
-				sents += [(doubsents[i].replace(sent_not_cut,'') + (doubsents[i+1] if i+1 < len(doubsents) else '')).strip()]
+        doubsents = re_sent_bounds.split(ntext)+['']
+        sents = []
+        for i in range(0, len(doubsents), 2):
+             if doubsents[i] and doubsents[i+1]:
+                sents += [(doubsents[i].replace(sent_not_cut,'') + (doubsents[i+1] if i+1 < len(doubsents) else '')).strip()]
 	
 	### now we got the sents list, making the actual tokens
-	retok = re.compile("(?!(\\\\d+\\\)|([\\\{} ]+))(\W+)(?!\d)".format(re.escape((char_in_word+glue_left+glue_right).replace('-','\-'))))
-	reglue_left = re.compile(r'([{}])'.format(glue_left)) if glue_left else None
-	reglue_right = re.compile(r'([{}])'.format(glue_right)) if glue_right else None
-	stoks = {}
-	def simplerematchreplace(matchobj): # used to reconstruct the sentence
-		return whole_words[int(matchobj.group(0)[1:-1])]
-	def rematchreplace(matchobj): # used to build the correct tokens
-		if special_suffix and respecial_suffix.match(whole_words[int(matchobj.group(0)[1:-1])]):
-			return space_after_esc+whole_words[int(matchobj.group(0)[1:-1])]
-		return whole_words[int(matchobj.group(0)[1:-1])]
+     retok = re.compile("(?!(\\\\d+\\\)|([\\\{} ]+))(\W+)(?!\d)".format(re.escape((char_in_word+glue_left+glue_right).replace('-','\-'))))
+     reglue_left = re.compile(r'([{}])'.format(glue_left)) if glue_left else None
+     reglue_right = re.compile(r'([{}])'.format(glue_right)) if glue_right else None
+     stoks = {}
+     def simplerematchreplace(matchobj): # used to reconstruct the sentence
+        return whole_words[int(matchobj.group(0)[1:-1])]
+     def rematchreplace(matchobj): # used to build the correct tokens
+        if special_suffix and respecial_suffix.match(whole_words[int(matchobj.group(0)[1:-1])]):
+            return space_after_esc+whole_words[int(matchobj.group(0)[1:-1])]
+        return whole_words[int(matchobj.group(0)[1:-1])]
+     for si,s in enumerate(sents):
+        rs = rerematch.sub(simplerematchreplace,s.replace(num_dot,'.'))
+        if glue_left: s = reglue_left.sub(r'\1 ', s)
+        if glue_right: s = reglue_right.sub(r' \1', s)
+        s = retok.sub(r'{}\3 '.format(space_after_esc), s) # adding the additional spaces
+        toks = []
+        spaceafters = []
+        for t in s.split():
+            t = t.replace(num_dot,'.')
+            ts = rerematch.sub(rematchreplace,t) if rerematch.search(t) else t
+            tsl = [tt for tt in ts.split(space_after_esc) if tt] 
+            toks+= tsl
+            spaceafters += [ii==len(tsl)-1 for ii,tt in enumerate(tsl)]
+        stoks[(si,rs)] = list(zip(toks,spaceafters)) # 'si' makes keys unique and allows duplicate sentences
+     return stoks
 
-	for si,s in enumerate(sents):
-		rs = rerematch.sub(simplerematchreplace,s.replace(num_dot,'.'))
-		if glue_left: s = reglue_left.sub(r'\1 ', s)
-		if glue_right: s = reglue_right.sub(r' \1', s)
-		s = retok.sub(r'{}\3 '.format(space_after_esc), s) # adding the additional spaces
-		toks = []
-		spaceafters = []
-		for t in s.split():
-			t = t.replace(num_dot,'.')
-			ts = rerematch.sub(rematchreplace,t) if rerematch.search(t) else t
-			tsl = [tt for tt in ts.split(space_after_esc) if tt] 
-			toks+= tsl
-			spaceafters += [ii==len(tsl)-1 for ii,tt in enumerate(tsl)]
-		stoks[(si,rs)] = list(zip(toks,spaceafters)) # 'si' makes keys unique and allows duplicate sentences
-	return stoks
-
-def conllize(sent2toks, sample_name, start=1):
+def conllize_plain_text(sent2toks, sample_name, start):
     conlls=[]
     for (si,s),toksas in sent2toks.items():
         conllines=[
-            '# sent_id = {id}__{ind}'.format(id=sample_name,ind=start),
+            '# sent_id = {id}__{ind}'.format(id=sample_name,ind=start+1),
             '# text = {s}'.format(s=s)
         ]
         for i,(tok,sa) in enumerate(toksas):
@@ -599,7 +601,7 @@ def split_sentences(text, option):
         return sentences
 
 def conllize_sentence(sentence_tokens, sample_name, index, option):
-    sent_id = '# sent_id = {}__{}\n'.format(sample_name, index+1)
+    sent_id = '# sent_id = {}__{}\n'.format(sample_name, index)
     text = '# text = '
     sentence = str()
     conll = str()
