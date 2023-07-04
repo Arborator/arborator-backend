@@ -543,7 +543,7 @@ def tokenize_plain_text( text,
         doubsents = re_sent_bounds.split(ntext)+['']
         sents = []
         for i in range(0, len(doubsents), 2):
-             if doubsents[i] and doubsents[i+1]:
+            if doubsents[i] and doubsents[i+1] is not None:
                 sents += [(doubsents[i].replace(sent_not_cut,'') + (doubsents[i+1] if i+1 < len(doubsents) else '')).strip()]
 	
 	### now we got the sents list, making the actual tokens
