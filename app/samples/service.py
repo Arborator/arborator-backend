@@ -14,7 +14,7 @@ from app.config import Config
 from app.user.model import User
 from app.projects.service import ProjectService
 from app.utils.grew_utils import GrewService
-from app.github.service import GithubCommitStatusService, GithubSynchronizationService
+from app.github.service import GithubCommitStatusService, GithubSynchronizationService, GithubWorkflowService
 
 from .model import SampleExerciseLevel, SampleRole
 
@@ -51,7 +51,46 @@ class SampleUploadService:
                 GithubCommitStatusService.create(project_name, sample_name)
                 GithubCommitStatusService.update(project_name, sample_name)
 
+class SampleTokenizeService:
 
+    @staticmethod
+    def tokenize(text, option, lang, project_name, sample_name, username):
+
+        existing_samples = GrewService.get_samples(project_name)
+        samples_names = [sample["name"] for sample in existing_samples]
+        project = ProjectService.get_by_name(project_name)
+        if sample_name not in samples_names:
+            GrewService.create_sample(project_name, sample_name)
+            index = 0
+        else: 
+            index = [sample["number_sentences"] for sample in existing_samples if sample_name == sample["name"]][0]
+        conll= str()
+        if lang:
+            list_tokens = tokenize_plain_text(text=text, lang=lang)
+            conll = conllize_plain_text(sent2toks=list_tokens,sample_name=sample_name, start=index)
+        else: 
+            sentences = split_sentences(text, option)
+            for i in range(len(sentences)):
+                if (sentences[i]):
+                    index += 1
+                    conll += conllize_sentence(sentences[i], sample_name, index, option)
+                    
+
+        file_name = sample_name + ".conllu"
+        path_file = os.path.join(Config.UPLOAD_FOLDER, file_name)
+        with open(path_file, "w") as file:
+            file.write(conll)
+        user_ids = GithubWorkflowService.preprocess_file(path_file, username)
+        convert_users_ids(path_file, user_ids)
+        add_or_keep_timestamps(path_file)
+
+        with open(path_file, "rb") as file_to_save:
+            GrewService.save_sample(project_name, sample_name, file_to_save)
+            if GithubSynchronizationService.get_github_synchronized_repository(project.id):
+                GithubCommitStatusService.create(project_name, sample_name)
+                GithubCommitStatusService.update(project_name, sample_name)
+             
+   
 class SampleRoleService:
     @staticmethod
     def create(new_attrs):
@@ -131,6 +170,9 @@ class SampleRoleService:
         db.session.commit()
 
         return
+
+    # def get_annotators_by_sample_id(project_id: int, sample_id: int) -> List[str]:
+    #     return
 
 
 class SampleExerciseLevelService:
@@ -390,4 +432,190 @@ def add_or_replace_userid(path_file: str, new_user_id: str):
 
     writeConlluFileWrapper(path_file, sentences_json)
 
+###########################"tokenizer Kim's script" ###########################
 
+re_url = re.compile(r'''(https?://|\w+@)?[\w\d\%\.]*\w\w\.\w\w[\w\d~/\%\#]*(\?[\w\d~/\%\#]+)*''', re.U+re.M+re.I)
+# combinations of numbers:
+re_spacenum = re.compile(r'\d+[ ,.]+[0-9 ,.]*\d+')
+# regex to match escapes \number\ used for special words:
+rerematch = re.compile(r'\\\d+\\')
+
+def tokenize_plain_text( text,
+              lang,
+              sent_ends='.;!?\\n',
+              new_sent_upper='.!?',
+              char_in_word='_-',
+              whole_words="aujourd'hui l'on etc. Mr. M. Nr. N° ;) ;-)",
+              special_suffix="n't -je -tu -il -elle -on -nous -vous -ils -ils -elles -y -t-il -t-elle -t-ils -t-ils -t-on",
+              keep_url=True, 
+              combine_numbers=True, 
+              sent_cut="", 
+              escape = '____',
+              sent_not_cut="§§§",
+             ):
+     """
+	text: 
+		Text a transformer en Conll
+	sent_ends='.;!?\\n'
+		These characters end a sentence backslach escapes should be double escaped like \\n
+	new_sent_upper=".!?"
+		If not empty, these characters end a sentence only if the following character is upper case, should be a subset of sent_ends
+	char_in_word='_-', 
+		Characters that should be treated as letters inside words
+	glue_left="'~", 
+		Cut token after these characters 
+	glue_right="" 
+		Cut token before these characters 
+	whole_words="aujourd'hui l'on etc. Mr. M. Nr. N° ;) ;-)", 
+		Keep these space-separated words as one tokens
+	special_suffix="n't -je -tu -il -elle -on -nous -vous -ils -ils -elles -y -t-il -t-elle -t-ils -t-ils -t-on",
+		Keep these space-separated suffixes as separate tokens
+	keep_url=True, 
+		Look for URLs and keep them together
+	combine_numbers=True, 
+		Spaces, commas, and points between numbers are grouped together such as 999 349
+	sent_cut="", 
+	 	A unique word or sequence where cutting should be done. if set, sent_ends is ignored
+	escape = '____', 
+		No need to change this. should be letters (\w) used to escape internally. 
+		Should not appear anywhere in the text
+	sent_not_cut="§§§", # symbols that have been placed after the potential sent_ends that should not end the sentence. 
+		This should be a unique symbol not appearing anywhere naturally in the text as it will be removed from the text.
+		for example use sent_not_cut="§§§"
+	"""
+     whole_words = whole_words.strip().split()
+     special_suffix = special_suffix.strip()
+     num_dot = (escape+'{}'+escape).format('NUMBERDOT')
+     space_after_esc = (escape+'{}'+escape).format('NOSPACEAFTER')
+     if lang == 'fr':
+        glue_left="'~"
+        glue_right=""
+     else:
+        glue_left=""
+        glue_right="'"
+     ind = 0
+     ntext = text
+     for word in whole_words: 
+        ntext = ntext.replace(word,'\\{ind}\\'.format(ind=ind))
+        ind +=1
+     if special_suffix:
+        respecial_suffix = re.compile(r'({})\b'.format('|'.join(special_suffix.split())))
+        for m in respecial_suffix.finditer(ntext):
+             ntext = ntext.replace(m.group(0),'\\{ind}\\'.format(ind=ind))
+             whole_words += [m.group(0)]
+             ind +=1
+     if keep_url:
+        for murl in re_url.finditer(ntext):
+            ntext = ntext.replace(murl.group(0),'\\{ind}\\'.format(ind=ind))
+            whole_words += [murl.group(0)]
+            ind +=1
+     if combine_numbers:
+        for mnum in re_spacenum.finditer(ntext):
+            ntext = ntext.replace(mnum.group(0),'\\{ind}\\'.format(ind=ind))
+            whole_words += [mnum.group(0)]
+            ind +=1
+
+	# replace "the 2. guy" by "the 2___NUMDOT___ guy":
+     re_num_dot = re.compile(r'\b(\d+)\.(?! [0-9A-ZÀÈÌÒÙÁÉÍÓÚÝÂÊÎÔÛÄËÏÖÜÃÑÕÆÅÐÇØ])') # num followed by . not followed by upper case
+     ntext = re_num_dot.sub(r'\1'+num_dot, ntext)
+	# now we split into sentences:
+     if sent_cut: 
+        sents = ntext.split(sent_cut)
+     else:
+        if new_sent_upper:
+            sent_ends_nopoint = re.sub(r'[{new_sent_upper}]+'.format(new_sent_upper=new_sent_upper),'', sent_ends)
+            if sent_not_cut:
+                re_sent_bounds = re.compile(
+					'(([{sent_ends_nopoint}]+(?!{sent_not_cut})\s*)|([{sent_ends}]+(?!{sent_not_cut})\s*(?=[0-9\\\A-ZÀÈÌÒÙÁÉÍÓÚÝÂÊÎÔÛÄËÏÖÜÃÑÕÆÅÐÇØ])))'.format(
+								sent_ends_nopoint=sent_ends_nopoint, 
+								sent_ends=new_sent_upper.replace('.','\.'),
+								sent_not_cut=sent_not_cut), re.U+re.M)
+            else:
+                re_sent_bounds = re.compile(
+					'(([{sent_ends_nopoint}]+\s*)|([{sent_ends}]+\s*(?=[0-9\\\A-ZÀÈÌÒÙÁÉÍÓÚÝÂÊÎÔÛÄËÏÖÜÃÑÕÆÅÐÇØ])))'.format(
+								sent_ends_nopoint=sent_ends_nopoint, 
+								sent_ends=new_sent_upper.replace('.','\.'),
+								sent_not_cut=sent_not_cut), re.U+re.M)
+        else:
+            if sent_not_cut:
+                re_sent_bounds = re.compile(
+					'([{sent_ends}](?!{sent_not_cut})+\s*)'.format(sent_ends=sent_ends, 
+						    sent_not_cut=sent_not_cut), re.U+re.M)
+            else:
+                re_sent_bounds = re.compile(
+					'([{sent_ends}]+\s*)'.format(sent_ends=sent_ends), re.U+re.M)
+        doubsents = re_sent_bounds.split(ntext)+['']
+        sents = []
+        for i in range(0, len(doubsents), 2):
+            if doubsents[i] and doubsents[i+1] is not None:
+                sents += [(doubsents[i].replace(sent_not_cut,'') + (doubsents[i+1] if i+1 < len(doubsents) else '')).strip()]
+	
+	### now we got the sents list, making the actual tokens
+     retok = re.compile("(?!(\\\\d+\\\)|([\\\{} ]+))(\W+)(?!\d)".format(re.escape((char_in_word+glue_left+glue_right).replace('-','\-'))))
+     reglue_left = re.compile(r'([{}])'.format(glue_left)) if glue_left else None
+     reglue_right = re.compile(r'([{}])'.format(glue_right)) if glue_right else None
+     stoks = {}
+     def simplerematchreplace(matchobj): # used to reconstruct the sentence
+        return whole_words[int(matchobj.group(0)[1:-1])]
+     def rematchreplace(matchobj): # used to build the correct tokens
+        if special_suffix and respecial_suffix.match(whole_words[int(matchobj.group(0)[1:-1])]):
+            return space_after_esc+whole_words[int(matchobj.group(0)[1:-1])]
+        return whole_words[int(matchobj.group(0)[1:-1])]
+     for si,s in enumerate(sents):
+        rs = rerematch.sub(simplerematchreplace,s.replace(num_dot,'.'))
+        if glue_left: s = reglue_left.sub(r'\1 ', s)
+        if glue_right: s = reglue_right.sub(r' \1', s)
+        s = retok.sub(r'{}\3 '.format(space_after_esc), s) # adding the additional spaces
+        toks = []
+        spaceafters = []
+        for t in s.split():
+            t = t.replace(num_dot,'.')
+            ts = rerematch.sub(rematchreplace,t) if rerematch.search(t) else t
+            tsl = [tt for tt in ts.split(space_after_esc) if tt] 
+            toks+= tsl
+            spaceafters += [ii==len(tsl)-1 for ii,tt in enumerate(tsl)]
+        stoks[(si,rs)] = list(zip(toks,spaceafters)) # 'si' makes keys unique and allows duplicate sentences
+     return stoks
+
+def conllize_plain_text(sent2toks, sample_name, start):
+    conlls=[]
+    for (si,s),toksas in sent2toks.items():
+        conllines=[
+            '# sent_id = {id}__{ind}'.format(id=sample_name,ind=start+1),
+            '# text = {s}'.format(s=s)
+        ]
+        for i,(tok,sa) in enumerate(toksas):
+            li = '{ind}\t{tok}\t_\t_\t_\t_\t_\t_\t_\t{spac}\t'.format(ind=i+1,tok=tok,spac='_' if sa else 'SpaceAfter=No')
+            conllines+=[li]
+        conlls+=['\n'.join(conllines)]
+        start+=1
+    return '\n\n'.join(conlls)+'\n'
+
+def split_sentences(text, option):
+    if option == 'horizontal':
+        return text.split("\n")
+    else:
+        sentences = []
+        for sentence in text.split('\n\n'):
+            if ' ' in sentence:
+                sentence = re.sub("\s.*\n", "\n", sentence)
+                sentences.append(sentence)
+            else:
+                sentences.append(sentence)
+        return sentences
+
+def conllize_sentence(sentence_tokens, sample_name, index, option):
+    sent_id = '# sent_id = {}__{}\n'.format(sample_name, index)
+    text = '# text = '
+    sentence = str()
+    conll = str()
+    i = 1
+    delimiter = " " if option == 'horizontal' else "\n" 
+    for token in sentence_tokens.rstrip().split(delimiter):
+        text += "{} ".format(token)
+        sentence += '{}\t{}\t_\t_\t_\t_\t_\t_\t_\t_\t\n'.format(i,token)
+        i += 1
+    conll += sent_id
+    conll += text +"\n"
+    conll += sentence + "\n"
+    return conll
