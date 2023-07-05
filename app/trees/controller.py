@@ -1,12 +1,13 @@
-from app.projects.service import LastAccessService, ProjectAccessService, ProjectService
-from app.samples.service import SampleExerciseLevelService
-from app.utils.grew_utils import grew_request, GrewService
-from flask import abort, current_app, jsonify
+from flask import abort
 from flask_login import current_user
 from flask_restx import Namespace, Resource, reqparse
 from conllup.conllup import sentenceConllToJson
 from conllup.processing import constructTextFromTreeJson, emptySentenceConllu, changeMetaFieldInSentenceConllu
 
+from app.projects.service import LastAccessService, ProjectAccessService, ProjectService
+from app.samples.service import SampleExerciseLevelService
+from app.github.service import GithubCommitStatusService, GithubSynchronizationService
+from app.utils.grew_utils import grew_request, GrewService
 
 BASE_TREE = "base_tree"
 TEACHER = "teacher"
@@ -16,16 +17,17 @@ api = Namespace(
 )  # noqa
 
 
-@api.route("/<string:projectName>/samples/<string:sampleName>/trees")
+@api.route("/<string:project_name>/samples/<string:sample_name>/trees")
 class SampleTreesResource(Resource):
     "Trees"
 
-    def get(self, projectName: str, sampleName: str):
+    def get(self, project_name: str, sample_name: str):
         """Entrypoint for getting all trees of a given sample"""
-        project = ProjectService.get_by_name(projectName)
+        project = ProjectService.get_by_name(project_name)
         ProjectService.check_if_project_exist(project)
+        ProjectService.check_if_freezed(project)
 
-        grew_sample_trees = GrewService.get_sample_trees(projectName, sampleName)
+        grew_sample_trees = GrewService.get_sample_trees(project_name, sample_name)
 
         # ProjectAccessService.require_access_level(project.id, 2)
         ##### exercise mode block #####
@@ -48,12 +50,12 @@ class SampleTreesResource(Resource):
 
         if exercise_mode:
             exercise_level_obj = SampleExerciseLevelService.get_by_sample_name(
-                project.id, sampleName
+                project.id, sample_name
             )
             if exercise_level_obj:
                 exercise_level = exercise_level_obj.exercise_level.code
 
-            sample_trees = extract_trees_from_sample(grew_sample_trees, sampleName)
+            sample_trees = extract_trees_from_sample(grew_sample_trees, sample_name)
             sample_trees = add_base_tree(sample_trees)
 
             username = "anonymous"
@@ -68,48 +70,40 @@ class SampleTreesResource(Resource):
 
         else:
             if project.show_all_trees or project.visibility == 2:
-                sample_trees = samples2trees(grew_sample_trees, sampleName)
+                sample_trees = samples2trees(grew_sample_trees, sample_name)
             else:
                 validator = 1
-                # validator = project_service.is_validator(
-                #     project.id, sampleName, current_user.id)
                 if validator:
                     sample_trees = samples2trees(
                         grew_sample_trees,
-                        sampleName,
+                        sample_name,
                     )
                 else:
                     sample_trees = samples2trees_with_restrictions(
                         grew_sample_trees,
-                        sampleName,
+                        sample_name,
                         current_user,
                     )
         if current_user.is_authenticated:
-            LastAccessService.update_last_access_per_user_and_project(current_user.id, projectName, "read")
+            LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "read")
         data = {"sample_trees": sample_trees, "exercise_level": exercise_level}
         return data
 
-    def post(self, projectName: str, sampleName: str):
+    def post(self, project_name: str, sample_name: str):
         parser = reqparse.RequestParser()
         parser.add_argument(name="sent_id", type=str)
         parser.add_argument(name="user_id", type=str)
         parser.add_argument(name="conll", type=str)
         args = parser.parse_args()
 
-        project = ProjectService.get_by_name(projectName)
-        project_name = projectName
-        sample_name = sampleName
+        project = ProjectService.get_by_name(project_name)
+        ProjectService.check_if_freezed(project)
         user_id = args.user_id
         conll = args.conll
         sent_id = args.sent_id
         if not conll:
             abort(400)
 
-        # TODO : add the is_annotator service
-        # if project.visibility != 2:
-        #     if not project_service.is_annotator(project.id, sample_name, current_user.id) or not project_service.is_validator(project.id, sample_name, current_user.id):
-        #         if project.exercise_mode == 0:
-        #             abort(403)
 
         if project.exercise_mode == 1 and user_id == TEACHER:
             conll = changeMetaFieldInSentenceConllu(conll, "user_id", TEACHER)
@@ -117,14 +111,23 @@ class SampleTreesResource(Resource):
             "project_id": project_name,
             "sample_id": sample_name,
             "user_id": user_id,
-            "sent_id": sent_id,
             "conll_graph": conll,
         }
 
         grew_request("saveGraph", data=data)
-        LastAccessService.update_last_access_per_user_and_project(current_user.id, projectName, "write")
+        LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
+        if GithubSynchronizationService.get_github_synchronized_repository(project.id):
+            GithubCommitStatusService.update(project_name, sample_name)
 
         return {"status": "success"}
+    
+
+@api.route("/<string:project_name>/samples/<string:sample_name>/trees/<string:username>")
+class UserTreesResource(Resource):
+    
+    def delete(self, project_name: str, sample_name: str, username: str):
+        data = {"project_id": project_name,  "sample_id": sample_name, "sent_ids": "[]","user_id": username, }
+        grew_request("eraseGraphs", data)  
 
 
 ################################################################################
@@ -203,12 +206,11 @@ def restrict_trees(trees, restricted_users):
 def samples2trees_with_restrictions(samples, sample_name, current_user):
     """ transforms a list of samples into a trees object and restrict it to user trees and default tree(s) """
     trees = {}
-    # p = project_dao.find_by_name(project_name)
-    # default_user_trees_ids = [dut.username for dut in project_dao.find_default_user_trees(p.id)]
+   
     default_user_trees_ids = []
     default_usernames = list()
     default_usernames = default_user_trees_ids
-    # if len(default_user_trees_ids) > 0: default_usernames = user_dao.find_username_by_ids(default_user_trees_ids)
+
     if current_user.username not in default_usernames:
         default_usernames.append(current_user.username)
     for sentId, users in samples.items():
@@ -268,3 +270,16 @@ def samples2trees_exercise_mode(trees_on_grew, sample_name, current_user, projec
                 current_user.username
             ] = user_empty_conllu
     return trees_processed
+
+
+def get_user_trees(project_name, sample_name, username):
+    
+    user_trees_sent_ids = []
+    grew_sample_trees = GrewService.get_sample_trees(project_name, sample_name)
+    sample_trees = extract_trees_from_sample(grew_sample_trees, sample_name)
+    for sent_id, trees in sample_trees.items():
+       if username in trees['conlls']: 
+           user_trees_sent_ids.append(sent_id)
+    
+    return user_trees_sent_ids
+

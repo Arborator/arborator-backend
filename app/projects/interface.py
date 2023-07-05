@@ -1,7 +1,4 @@
-from datetime import datetime
-
 from typing import Any, List
-
 from mypy_extensions import TypedDict
 
 
@@ -13,7 +10,7 @@ class ProjectInterface(TypedDict, total=False):
     visibility: int
     show_all_trees: bool
     exercise_mode: bool
-    # default_user_trees: str # TODO : What's the type ?
+    freezed: bool
 
 
 class ProjectExtendedInterface(ProjectInterface, total=False):
@@ -24,6 +21,9 @@ class ProjectExtendedInterface(ProjectInterface, total=False):
     number_trees: int
     number_tokens: int
 
+class ProjectShownFeaturesAndMetaInterface(TypedDict, total=False):
+    shown_features: List[str]
+    shown_meta: List[str]
 
 
 

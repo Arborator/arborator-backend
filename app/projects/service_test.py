@@ -52,62 +52,6 @@ class ProjectService:
         project.image = value
         db.session.commit()
         return project
-    # @staticmethod
-    # def get_settings_infos(project_name, current_user):
-    #     """ get project informations without any samples """
-    #     project = Project.query.filter(Project.project_name == project_name).first()
-    #     if not current_user.is_authenticated:  # TODO : handle anonymous user
-    #         roles = []
-    #     else:
-    #         roles = set(SampleRole.query.filter_by(project_id = project.id, user_id = current_user.id).all())
-    #     # if not roles and project.is_private: return 403 # removed for now -> the check is done in view and for each actions
-    #     admins = [a.user_id for a in ProjectAccess.query.filter_by(project_id=project.id, access_level=2).all()]
-    #     guests = [g.user_id for g in ProjectAccess.query.filter_by(project_id=project.id, access_level=1).all()]
-
-    #     # config from arborator
-    #     features = ProjectFeature.query.filter_by(project_id=project.id).all()
-    #     shown_features =  [f.value for f in features] if features else []
-
-    #     mfs = ProjectMetaFeature.query.filter_by(project_id=project.id)
-    #     shown_metafeatures = [mf.value for mf in mfs] if mfs else []
-
-    #     # config from grew
-    #     reply = grew_request("getProjectConfig", current_app, data={"project_id": project_name})
-    #     if reply["status"] != "OK":
-    #         abort(400)
-    #     annotationFeatures = reply["data"]
-    #     if annotationFeatures is None:
-    #         print("This project does not have a configuration stored on grew")
-
-    #     config = {
-    #         "shownfeatures": shown_features,
-    #         "shownmeta": shown_metafeatures,
-    #         "annotationFeatures": annotationFeatures,
-    #     }
-
-    #     # cats = [c.value for c in project_dao.find_project_cats(project.id)]
-    #     # stocks = project_dao.find_project_stocks(project.id)
-    #     # labels = [ {'id':s.id,'labels':[ {"id":l.id, "stock_id":l.stock_id , "value":l.value} for l in project_dao.find_stock_labels(s.id) ]}  for s in stocks ]
-    #     defaultUserTrees = [
-    #         u.as_json() for u in DefaultUserTrees.query.filter_by(project_id=project.id).all()
-    #     ]
-    #     # if project.image != None:
-    #     #     image = str(base64.b64encode(project.image))
-    #     # else:
-    #     #     image = ""
-    #     settings_info = {
-    #         # "name": project.project_name,
-    #         # "visibility": project.visibility,
-    #         # "description": project.description,
-    #         # "image": image,
-    #         "config": config,
-    #         # "admins": admins,
-    #         # "guests": guests,
-    #         # "show_all_trees": project.show_all_trees,
-    #         # "exercise_mode": project.exercise_mode,
-    #         # "default_user_trees": defaultUserTrees,
-    #     }
-    #     return settings_info
 
 
 class ProjectAccessService:

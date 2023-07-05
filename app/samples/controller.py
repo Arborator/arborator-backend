@@ -1,18 +1,14 @@
-from importlib.resources import path
 import json
-import os
 import re
-import requests 
 
 from flask.helpers import send_file
+from flask import Response, abort, current_app, request, send_from_directory
+from flask_restx import Namespace, Resource, reqparse
+
 
 from app.projects.service import ProjectAccessService, ProjectService
 from app.user.service import UserService
 from app.utils.grew_utils import GrewService, SampleExportService, grew_request
-from app.config import Config
-from flask import Response, abort, current_app, request, send_from_directory
-from flask_restx import Namespace, Resource, reqparse
-# from openpyxl import Workbook
 
 from .model import SampleRole
 from .service import (
@@ -20,7 +16,8 @@ from .service import (
     SampleExerciseLevelService,
     SampleRoleService,
     SampleUploadService,
-    add_or_keep_timestamps,
+    SampleTokenizeService,
+    add_or_keep_timestamps, add_or_replace_userid,
 )
 
 api = Namespace(
@@ -34,6 +31,7 @@ class SampleResource(Resource):
 
     def get(self, project_name: str):
         project = ProjectService.get_by_name(project_name)
+        ProjectService.check_if_freezed(project)
         grew_samples = GrewService.get_samples(project_name)
 
         processed_samples = []
@@ -44,6 +42,7 @@ class SampleResource(Resource):
                 "number_trees": grew_sample["number_trees"],
                 "tokens": grew_sample["number_tokens"],
                 "treesFrom": grew_sample["users"],
+                "treeByUser": grew_sample["tree_by_user"],
                 "roles": {},
             }
             sample["roles"] = SampleRoleService.get_by_sample_name(
@@ -64,7 +63,7 @@ class SampleResource(Resource):
         """Upload a sample to the server"""
         project = ProjectService.get_by_name(project_name)
         ProjectAccessService.check_admin_access(project.id)
-
+        ProjectService.check_if_freezed(project)
         users_ids_convertor = {}
         for user_id_mapping in json.loads(request.form.get("userIdsConvertor", "{}")):
             users_ids_convertor[user_id_mapping["old"]] = user_id_mapping["new"]
@@ -83,8 +82,25 @@ class SampleResource(Resource):
                     existing_samples=samples_names,
                     users_ids_convertor=users_ids_convertor,
                 )
-            # samples = {"samples": Sam.get_samples(project_name)}
             return {"status": "OK"}
+        
+@api.route("/<string:project_name>/samples/tokenize")
+class SampleTokenizeResource(Resource):
+    def post(self, project_name):
+        parser = reqparse.RequestParser()
+        parser.add_argument(name="username", type=str)
+        parser.add_argument(name="sampleName", type=str)
+        parser.add_argument(name="option", type=str)
+        parser.add_argument(name="lang", type=str)
+        parser.add_argument(name="text", type=str)
+
+        args = parser.parse_args()
+        username = args.get("username")
+        sample_name = args.get("sampleName")
+        option = args.get("option")
+        lang = args.get("lang")
+        text = args.get("text")
+        SampleTokenizeService.tokenize(text, option, lang, project_name, sample_name, username)
 
 
 @api.route("/<string:project_name>/samples/<string:sample_name>/role")
@@ -98,6 +114,7 @@ class SampleRoleResource(Resource):
 
         project = ProjectService.get_by_name(project_name)
         ProjectAccessService.check_admin_access(project.id)
+        ProjectService.check_if_freezed(project)
 
         role = SampleRole.LABEL_TO_ROLES[args.targetrole]
         user_id = UserService.get_by_username(args.username).id
@@ -161,14 +178,18 @@ class SampleEvaluationResource(Resource):
 @api.route("/<string:project_name>/samples/export")
 class ExportSampleResource(Resource):
     def post(self, project_name: str):
-        data = request.get_json(force=True)
-        sample_names = data["samples"]
-        print("requested zip", sample_names, project_name)
-        
+
+
+        parser = reqparse.RequestParser()
+        parser.add_argument("sampleNames", type=str, action="append")
+        parser.add_argument("users", type=str, action="append")
+        args = parser.parse_args()
+        sample_names = args.get("sampleNames")
+        users = args.get("users")
         sample_names, samples_with_string_content = GrewService.get_samples_with_string_contents(project_name, sample_names)
 
         memory_file = SampleExportService.contentfiles2zip(
-            sample_names, samples_with_string_content
+            sample_names, samples_with_string_content, users
         )
 
         resp = Response(
@@ -188,6 +209,7 @@ class DeleteSampleResource(Resource):
     def delete(self, project_name: str, sample_name: str):
         project = ProjectService.get_by_name(project_name)
         ProjectAccessService.check_admin_access(project.id)
+        ProjectService.check_if_freezed(project)
         ProjectService.check_if_project_exist(project)
         GrewService.delete_sample(project_name, sample_name)
         SampleRoleService.delete_by_sample_name(project.id, sample_name)
@@ -195,120 +217,4 @@ class DeleteSampleResource(Resource):
         return {
             "status": "OK",
         }
-
-DJANGO_BOOT_SERVER_URL = "http://calcul-kimgerdes.lisn.upsaclay.fr:8001"
-
-@api.route("/<string:project_name>/samples/parsing", methods = ['GET','POST'])
-class BootParsing(Resource):
-    def get(self, project_name: str):
-        #test connexion
-        
-        # reply = requests.get("http://127.0.0.1:8001/testBoot/")
-        try: 
-            reply = requests.get(f"{DJANGO_BOOT_SERVER_URL}/testBoot/")
-            return reply.text
-        except: 
-            print('controller.py parsing', reply)
-            return ""
-
-    def post(self,  project_name: str):
-        param = request.get_json(force=True)
-        #extract names of samples for training set and to parse  
-        train_samp_names = param["samples"]
-        training_user = param["training_user"]
-        grew_samples = GrewService.get_samples(project_name)
-        all_sample_names = [grew_sample["name"] for grew_sample in grew_samples]
-
-        default_to_parse = all_sample_names if param['to_parse'] == 'ALL' else param['to_parse']
-
-        #get samples 
-        train_name, train_set = GrewService.get_samples_with_string_contents(project_name, train_samp_names)
-        train_set = [sample.get(training_user, "") for sample in train_set]
-        #TODO assure parse_name not empty
-        parse_name, to_parse = GrewService.get_samples_with_string_contents(project_name, default_to_parse) 
-        to_parse = [sample.get("last", "") for sample in to_parse]
-        # return to_parse
-        data = {
-            'project_name': project_name,
-            'train_name': train_name, 
-            'train_set': train_set, 
-            'parse_name': parse_name,
-            'to_parse': to_parse, 
-            'training_user': training_user,
-            'dev': param['dev'],
-            'epochs': param['epoch'],
-            'parser': param['parser'],
-            'keep_upos': param['keep_upos'],
-            }
-
-        # reply = requests.post("http://127.0.0.1:8001/conllus/", json = data)
-        
-        
-
-        # return reply.text
-        try:
-            reply = requests.post(f"{DJANGO_BOOT_SERVER_URL}/conllus/", json = data)
-            print("controller.py parsing ########!!",reply.text)
-            reply = json.loads(reply.text)
-            
-        except:
-            return {"datasetStatus" : "Failed"}
-
-        return reply
-
-
-@api.route("/<string:project_name>/samples/parsing/results", methods = ['POST'])
-class BootParsedResults(Resource):
-    def post(self,  project_name: str):
-        param = request.get_json(force=True)
-        print(param)
-        
-        # return reply.text
-        try:
-            reply = requests.post(f"{DJANGO_BOOT_SERVER_URL}/getResults/", data = {'projectFdname': param['fdname'], 'parser': param['parser']})
-            reply = json.loads(reply.text)
-        except:
-            print('controller.py results', reply)
-            return {"status" : "Error"}
-
-        status = reply.get('status', None)
-        if 'error' in status.lower():
-            return {"status" : "Error"}
-
-        if status.lower() == 'fin':
-            filenames = reply.get('parsed_names', '')
-            files = reply.get('parsed_files', '')
-            print(len(filenames))
-
-            for fname, fcontent in zip(filenames, files):
-                path_file = os.path.join(Config.UPLOAD_FOLDER, fname)
-                print('upload parsed\n', path_file)
-                with open(path_file,'w') as f:
-                    f.write(fcontent)
-
-                add_or_keep_timestamps(path_file)
-
-                with open(path_file, "rb") as file_to_save:
-                    print('save files')
-                    GrewService.save_sample(project_name, fname, file_to_save)
-        return reply
-
-
-@api.route("/<string:project_name>/samples/parsing/removeFolder", methods = ['POST', 'PUT'])
-class BootParsedRemoveFolder(Resource):
-    def post(self,  project_name: str):
-        param = request.get_json(force=True)
-        print(param)
-        
-        # return reply.text
-        try:
-            reply = requests.post(f"{DJANGO_BOOT_SERVER_URL}/removeFolder/", data = {'projectFdname': param['fdname']})
-            reply = json.loads(reply.text)
-        except:
-            print('controller.py removeFolder', reply)
-            return {"status" : "Error"}
-        return reply
-
-
-
 

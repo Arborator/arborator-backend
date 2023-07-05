@@ -1,6 +1,9 @@
+aiohttp==3.8.4
+aiosignal==1.3.1
 alembic==1.4.3
 aniso8601==8.0.0
 appdirs==1.4.4
+async-timeout==4.0.2
 attrs==20.2.0
 Authomatic==1.0.0
 autopep8==1.6.0
@@ -8,8 +11,9 @@ black==20.8b1
 certifi==2020.6.20
 cffi==1.14.3
 chardet==3.0.4
+charset-normalizer==3.1.0
 click==7.1.2
-conllup==0.2.1
+conllup==0.4.5
 cryptography==2.9.2
 et-xmlfile==1.0.1
 Flask==1.1.2
@@ -22,6 +26,7 @@ flask-restplus==0.13.0
 flask-restx==0.2.0
 Flask-Script==2.0.6
 Flask-SQLAlchemy==2.4.4
+frozenlist==1.3.3
 idna==2.10
 iniconfig==1.1.1
 itsdangerous==1.1.0
@@ -33,6 +38,7 @@ jwt==1.0.0
 Mako==1.1.3
 MarkupSafe==1.1.1
 marshmallow==3.8.0
+multidict==6.0.4
 mypy==0.790
 mypy-extensions==0.4.3
 numpy==1.19.2
@@ -64,3 +70,4 @@ urllib3==1.25.10
 uWSGI==2.0.19.1
 Werkzeug==1.0.1
 XlsxWriter==1.3.7
+yarl==1.9.2

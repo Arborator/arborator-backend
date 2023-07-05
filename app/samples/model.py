@@ -1,5 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean
-from sqlalchemy.ext.declarative import DeclarativeMeta
+from sqlalchemy import Column, Integer, String
 from sqlalchemy_utils import ChoiceType
 
 from app import db  # noqa
@@ -15,7 +14,6 @@ class SampleRole(db.Model):
     project_id = Column(Integer, db.ForeignKey("projects.id"))
     user_id = Column(String(256), db.ForeignKey("users.id"))
     role = Column(ChoiceType(ROLES, impl=Integer()))
-    # __table_args__ = (UniqueConstraint('sample_name', 'project_id', name='_sample_name_project_id_uc'),)
 
 
 class SampleExerciseLevel(db.Model):

@@ -2,7 +2,7 @@ from app import db
 from typing import List
 from .model import User
 from .interface import UserInterface
-from flask_login import login_user
+
 
 from app import login_manager
 
@@ -46,7 +46,6 @@ class UserService:
 
     @staticmethod
     def make_valid_nickname(nickname):
-        # return re.sub('[^a-zA-Z0-9_\.]', '', nickname)
         return nickname.replace(" ", "")
 
     @staticmethod

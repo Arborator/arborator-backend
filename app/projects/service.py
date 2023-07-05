@@ -1,19 +1,14 @@
 from datetime import datetime
-from typing import Dict, List, NewType, Union, Tuple
-import json
-import base64
-from xmlrpc.client import boolean
+from typing import Dict, List, Tuple
 
-from sqlalchemy.sql.sqltypes import Date, DateTime
-
-from app import db
 from flask import abort, current_app
 from flask_login import current_user
 
+from app import db
 from ..user.model import User
-from .interface import ProjectExtendedInterface, ProjectInterface
-from .model import Project, ProjectAccess, ProjectFeature, ProjectMetaFeature, DefaultUserTrees, LastAccess
-from ..samples.model import SampleRole
+from .interface import ProjectInterface
+from .model import Project, ProjectAccess, ProjectFeature, ProjectMetaFeature, LastAccess
+from ..user.service import UserService
 
 
 class ProjectService:
@@ -63,65 +58,13 @@ class ProjectService:
         if not project:
             message = "There was no such project stored on arborator backend"
             abort(404, {"message": message})
+    
+    @staticmethod 
+    def check_if_freezed(project: Project) -> None:
+        if project.freezed and ProjectAccessService.get_admins(project.id)[0] != current_user.username: 
+            abort(403, "You can't access the project when it's freezed")
 
-    # @staticmethod
-    # def get_settings_infos(project_name, current_user):
-    #     """ get project informations without any samples """
-    #     project = Project.query.filter(Project.project_name == project_name).first()
-    #     if not current_user.is_authenticated:  # TODO : handle anonymous user
-    #         roles = []
-    #     else:
-    #         roles = set(SampleRole.query.filter_by(project_id = project.id, user_id = current_user.id).all())
-    #     # if not roles and project.is_private: return 403 # removed for now -> the check is done in view and for each actions
-    #     admins = [a.user_id for a in ProjectAccess.query.filter_by(project_id=project.id, access_level=2).all()]
-    #     guests = [g.user_id for g in ProjectAccess.query.filter_by(project_id=project.id, access_level=1).all()]
-
-    #     # config from arborator
-    #     features = ProjectFeature.query.filter_by(project_id=project.id).all()
-    #     shown_features =  [f.value for f in features] if features else []
-
-    #     mfs = ProjectMetaFeature.query.filter_by(project_id=project.id)
-    #     shown_metafeatures = [mf.value for mf in mfs] if mfs else []
-
-    #     # config from grew
-    #     reply = grew_request("getProjectConfig", current_app, data={"project_id": project_name})
-    #     if reply["status"] != "OK":
-    #         abort(400)
-    #     annotationFeatures = reply["data"]
-    #     if annotationFeatures is None:
-    #         print("This project does not have a configuration stored on grew")
-
-    #     config = {
-    #         "shownfeatures": shown_features,
-    #         "shownmeta": shown_metafeatures,
-    #         "annotationFeatures": annotationFeatures,
-    #     }
-
-    #     # cats = [c.value for c in project_dao.find_project_cats(project.id)]
-    #     # stocks = project_dao.find_project_stocks(project.id)
-    #     # labels = [ {'id':s.id,'labels':[ {"id":l.id, "stock_id":l.stock_id , "value":l.value} for l in project_dao.find_stock_labels(s.id) ]}  for s in stocks ]
-    #     defaultUserTrees = [
-    #         u.as_json() for u in DefaultUserTrees.query.filter_by(project_id=project.id).all()
-    #     ]
-    #     # if project.image != None:
-    #     #     image = str(base64.b64encode(project.image))
-    #     # else:
-    #     #     image = ""
-    #     settings_info = {
-    #         # "name": project.project_name,
-    #         # "visibility": project.visibility,
-    #         # "description": project.description,
-    #         # "image": image,
-    #         "config": config,
-    #         # "admins": admins,
-    #         # "guests": guests,
-    #         # "show_all_trees": project.show_all_trees,
-    #         # "exercise_mode": project.exercise_mode,
-    #         # "default_user_trees": defaultUserTrees,
-    #     }
-    #     return settings_info
-
-
+   
 class ProjectAccessService:
     @staticmethod
     def create(new_attrs) -> ProjectAccess:
@@ -162,7 +105,7 @@ class ProjectAccessService:
             project_id=project_id, access_level=2
         )
         if project_access_list:
-            return [project_access.user_id for project_access in project_access_list]
+            return [UserService.get_by_id(project_access.user_id).username for project_access in project_access_list]
         else:
             return []
 
@@ -172,7 +115,7 @@ class ProjectAccessService:
             project_id=project_id, access_level=1
         )
         if project_access_list:
-            return [project_access.user_id for project_access in project_access_list]
+            return [UserService.get_by_id(project_access.user_id).username for project_access in project_access_list]
         else:
             return []
 
@@ -183,8 +126,9 @@ class ProjectAccessService:
         admins, guests = [], []
         push_admin, push_guest = admins.append, guests.append
         for project_access in project_access_list: 
-            if project_access.access_level==1: push_guest(project_access.user_id)
-            elif project_access.access_level==2: push_admin(project_access.user_id)
+            username = UserService.get_by_id(project_access.user_id).username
+            if project_access.access_level==1: push_guest(username)
+            elif project_access.access_level==2: push_admin(username)
         return admins, guests
 
     @staticmethod
@@ -240,6 +184,7 @@ class ProjectAccessService:
             abort(401, "User doesn't have admin rights on this projects")
 
         return
+    
     @staticmethod
     def check_project_access(visibility,project_id):
         """
@@ -426,4 +371,3 @@ class LastAccessService:
             else:
                 last_accesss.last_write = time_now_ts
             db.session.commit()
-            
