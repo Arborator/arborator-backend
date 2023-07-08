@@ -272,6 +272,7 @@ def post_process_diffs(grew_search_results, other_users, features):
                         "sentence": grew_search_results[sample_name][sent_id]["sentence"],
                         "sample_name": sample_name,
                         "conlls": conlls,
+                        "sent_id": sent_id,
                         "matches": matches,
                         "packages": {},
                     }
@@ -324,6 +325,7 @@ def formatTrees_new(m, trees, conll, isPackage: bool = False):
         trees[sample_name][sent_id] = {
             "sentence": sentence_text,
             "conlls": {user_id: conll},
+            "sent_id": sent_id,
            
         }
         if isPackage == False:
