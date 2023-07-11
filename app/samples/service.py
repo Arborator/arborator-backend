@@ -597,11 +597,7 @@ def split_sentences(text, option):
     else:
         sentences = []
         for sentence in text.split('\n\n'):
-            if ' ' in sentence:
-                sentence = re.sub("\s.*\n", "\n", sentence)
-                sentences.append(sentence)
-            else:
-                sentences.append(sentence)
+            sentences.append(sentence)
         return sentences
 
 def conllize_sentence(sentence_tokens, sample_name, index, option):
