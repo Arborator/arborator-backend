@@ -494,10 +494,18 @@ class GithubService:
                     continue
                 if extension.search(filename):
                     source = zip_file.open(file)
-                    distination = open(os.path.join(Config.UPLOAD_FOLDER, filename), "wb")
-                    with source, distination:
-                        shutil.copyfileobj(source, distination)
+                    file_path = os.path.join(Config.UPLOAD_FOLDER, filename)
+                    destination = open(file_path, "wb")
+                    with source, destination:
+                        shutil.copyfileobj(source, destination)
+                        GithubService.check_large_file(file_path)
 
+
+    @staticmethod
+    def check_large_file(file_path):
+        file_size = (os.stat(file_path).st_size)/(1024*1024)
+        if file_size > 13:
+            abort(413, "it contains a large file")
 
 class GithubCommitStatusService:
     
