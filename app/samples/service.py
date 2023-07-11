@@ -5,7 +5,7 @@ from datetime import datetime
 from collections import Counter
 
 from conllup.conllup import sentenceConllToJson, readConlluFile, writeConlluFile
-from flask import abort, Response
+from flask import abort
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
 
@@ -80,7 +80,7 @@ class SampleTokenizeService:
         path_file = os.path.join(Config.UPLOAD_FOLDER, file_name)
         with open(path_file, "w") as file:
             file.write(conll)
-        user_ids = GithubWorkflowService.preprocess_file(path_file, username)
+        user_ids = {'default': username}
         convert_users_ids(path_file, user_ids)
         add_or_keep_timestamps(path_file)
 
