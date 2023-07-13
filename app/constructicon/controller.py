@@ -8,7 +8,11 @@ from .schema import ConstructiconSchema
 from .service import ConstructiconService
 from ..projects.service import ProjectService, ProjectAccessService
 
-api = Namespace("Constructicon", description="Endpoints for dealing with constructicon, cross-linguistical and treebank-wise")  # noqa
+api = Namespace(
+    "Constructicon",
+    description="Endpoints for dealing with constructicon, cross-linguistical and treebank-wise",
+)  # noqa
+
 
 @api.route("/project/<string:projectName>")
 class ConstructiconForProjectResource(Resource):
@@ -47,7 +51,6 @@ class ConstructiconEntryForProjectResource(Resource):
         return {"status": "success"}
 
 
-
 @api.route("/project/<string:projectName>/upload-entire-constructicon")
 class ConstructiconUploadForProjectResource(Resource):
     def post(self, projectName: str):
@@ -72,10 +75,9 @@ class ConstructiconUploadForProjectResource(Resource):
                 ConstructiconService.create_or_update(entry)
         except ValueError as e:
             print(e)
-            return {"status": "failure", 'error': 'Invalid JSON.'}
+            return {"status": "failure", "error": "Invalid JSON."}
         except Exception as e:
             print(e)
-            return {"status": "failure", 'error': 'Something went wrong.'}
+            return {"status": "failure", "error": "Something went wrong."}
 
-        return {'success': True}
-
+        return {"success": True}

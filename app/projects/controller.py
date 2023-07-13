@@ -12,14 +12,28 @@ from werkzeug.utils import secure_filename
 import werkzeug
 
 from app.utils.grew_utils import GrewService
-from .interface import ProjectExtendedInterface, ProjectInterface, ProjectShownFeaturesAndMetaInterface
+from .interface import (
+    ProjectExtendedInterface,
+    ProjectInterface,
+    ProjectShownFeaturesAndMetaInterface,
+)
 from .model import Project, ProjectAccess
-from .schema import ProjectExtendedSchema, ProjectSchema, ProjectSchemaCamel, ProjectFeaturesAndMetaSchema
-from .service import (LastAccessService, ProjectAccessService,
-                      ProjectFeatureService, ProjectMetaFeatureService,
-                      ProjectService)
+from .schema import (
+    ProjectExtendedSchema,
+    ProjectSchema,
+    ProjectSchemaCamel,
+    ProjectFeaturesAndMetaSchema,
+)
+from .service import (
+    LastAccessService,
+    ProjectAccessService,
+    ProjectFeatureService,
+    ProjectMetaFeatureService,
+    ProjectService,
+)
 
 api = Namespace("Project", description="Endpoints for dealing with projects")  # noqa
+
 
 @api.route("/")
 class ProjectResource(Resource):
@@ -32,7 +46,7 @@ class ProjectResource(Resource):
         projects_extended_list: List[ProjectExtendedInterface] = []
 
         projects: List[Project] = Project.query.all()
-        
+
         grew_projects = GrewService.get_projects()
 
         grewnames = set([project["name"] for project in grew_projects])
@@ -40,13 +54,26 @@ class ProjectResource(Resource):
         common = grewnames & dbnames
 
         for project in projects:
-            if ProjectAccessService.check_project_access(project.visibility,project.id):
-                if project.project_name not in common: continue
+            if ProjectAccessService.check_project_access(
+                project.visibility, project.id
+            ):
+                if project.project_name not in common:
+                    continue
 
-                project.admins, project.guests = ProjectAccessService.get_all(project.id)
+                (
+                    project.admins,
+                    project.validators,
+                    project.annotators,
+                    project.guests,
+                ) = ProjectAccessService.get_all(project.id)
 
                 # better version: less complexity + database calls / 2
-                last_access, last_write_access = LastAccessService.get_last_access_time_per_project(project.project_name, "any+write")
+                (
+                    last_access,
+                    last_write_access,
+                ) = LastAccessService.get_last_access_time_per_project(
+                    project.project_name, "any+write"
+                )
                 now = datetime.datetime.now().timestamp()
                 project.last_access = last_access - now
                 project.last_write_access = last_write_access - now
@@ -78,9 +105,9 @@ class ProjectResource(Resource):
         parser.add_argument(name="exerciseMode", type=bool)
         parser.add_argument(name="visibility", type=int)
         args = parser.parse_args()
-        
+
         # Sanitize the project name to correspond to Grew folders requirements
-        projectName = re.sub('[^0-9\w]+', '_', args.projectName)
+        projectName = re.sub("[^0-9\w]+", "_", args.projectName)
 
         new_project_attrs: ProjectInterface = {
             "project_name": projectName,
@@ -95,13 +122,15 @@ class ProjectResource(Resource):
         GrewService.create_project(new_project_attrs["project_name"])
 
         new_project = ProjectService.create(new_project_attrs)
-        LastAccessService.update_last_access_per_user_and_project(creator_id, projectName, "write")
+        LastAccessService.update_last_access_per_user_and_project(
+            creator_id, projectName, "write"
+        )
 
         ProjectAccessService.create(
             {
                 "user_id": creator_id,
                 "project_id": new_project.id,
-                "access_level": 2,
+                "access_level": 3,
             }
         )
 
@@ -159,13 +188,11 @@ class ProjectIdResource(Resource):
 
 @api.route("/<string:projectName>/features")
 class ProjectFeaturesResource(Resource):
-
     @responds(schema=ProjectFeaturesAndMetaSchema, api=api)
     def get(self, projectName: str):
         """Get a single project features"""
         project = ProjectService.get_by_name(projectName)
         ProjectService.check_if_project_exist(project)
-
 
         features = {
             "shown_meta": ProjectMetaFeatureService.get_by_project_id(project.id),
@@ -239,7 +266,7 @@ class ProjectAccessManyResource(Resource):
 
         project = ProjectService.get_by_name(projectName)
         ProjectService.check_if_project_exist(project)
-
+        
         access_level = ProjectAccess.LABEL_TO_LEVEL[args.targetrole]
 
         for user_id in args.user_ids:
@@ -279,17 +306,19 @@ class ProjectImageResource(Resource):
         args = parser.parse_args()
         project = ProjectService.get_by_name(projectName)
         ProjectService.check_if_project_exist(project)
-        
-        file_ext = os.path.splitext(args['files'].filename)[1]
-        if file_ext not in current_app.config['UPLOAD_IMAGE_EXTENSIONS']:
+
+        file_ext = os.path.splitext(args["files"].filename)[1]
+        if file_ext not in current_app.config["UPLOAD_IMAGE_EXTENSIONS"]:
             abort(400)
-        
-        filename = secure_filename(projectName+file_ext)
+
+        filename = secure_filename(projectName + file_ext)
         content = args["files"].read()
-        with open(os.path.join(current_app.config['PROJECT_IMAGE_FOLDER'], filename), 'wb') as f:
+        with open(
+            os.path.join(current_app.config["PROJECT_IMAGE_FOLDER"], filename), "wb"
+        ) as f:
             f.write(content)
-        
-        filepath = 'images/projectimages/%s' % (filename)
+
+        filepath = "images/projectimages/%s" % (filename)
         ProjectService.change_image(projectName, filepath)
 
         return ProjectService.get_by_name(projectName)
@@ -308,15 +337,20 @@ class LastAccessController(Resource):
         project_name = args.projectName
         username = args.username
         access_type = args.accessType or "any"
-        
+
         if project_name == None and username == None:
-            abort(400) 
-        
+            abort(400)
+
         if project_name and username:
-            return LastAccessService.get_last_access_time_per_user_and_project(username, project_name, access_type)
+            return LastAccessService.get_last_access_time_per_user_and_project(
+                username, project_name, access_type
+            )
 
         if project_name:
-            return LastAccessService.get_last_access_time_per_project(project_name, access_type)
+            return LastAccessService.get_last_access_time_per_project(
+                project_name, access_type
+            )
         if username:
-            return LastAccessService.get_last_access_time_per_user(username, access_type)
-
+            return LastAccessService.get_last_access_time_per_user(
+                username, access_type
+            )

@@ -5,14 +5,14 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument("mode", help="prod or dev")
-parser.add_argument("version", help="which commits to migrate (add_github, add_constructicon, all)")
+parser.add_argument("version", help="which commits to migrate (add_github, add_constructicon, all, new_roles)")
 args = parser.parse_args()
 
 if args.mode != 'prod' and args.mode != 'dev':
     print('mode must be prod or dev')
     exit()
 
-if args.version != 'add_github' and args.version != 'add_constructicon' and args.version != 'all':
+if args.version != 'add_github' and args.version != 'add_constructicon' and args.version != 'all' and args.version != 'new_roles':
     print('version must be add_github, add_constructicon or all')
     exit()
 
@@ -46,6 +46,9 @@ def migrate_add_constructicon(engine):
         # connection.execute('CREATE TABLE constructicon (id UUID PRIMARY KEY, title TEXT NOT NULL, description TEXT, structure TEXT NOT NULL, structure_verbose TEXT, grew_query TEXT NOT NULL, tags JSONB, project_id UUID, FOREIGN KEY (project_id) REFERENCES project(id));')
         connection.execute('CREATE TABLE constructicon ( id UUID PRIMARY KEY, title TEXT NOT NULL, description TEXT NOT NULL, grew_query TEXT NOT NULL, tags JSONB NOT NULL, project_id INTEGER NOT NULL, FOREIGN KEY (project_id) REFERENCES projects(id));')
 
+def migrate_new_roles(engine):
+    with engine.connect() as connection:
+        connection.execute('UPDATE projectaccess SET access_level = 3 WHERE projectaccess.access_level == 2')
 
 if args.version == 'add_github':
     migrate_add_github(engine)
@@ -56,3 +59,6 @@ if args.version == 'add_constructicon':
 if args.version == 'all':
     migrate_add_github(engine)
     migrate_add_constructicon(engine)
+
+if args.version == 'new_roles':
+    migrate_new_roles(engine)

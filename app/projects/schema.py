@@ -37,6 +37,8 @@ class ProjectExtendedSchema(ProjectSchema):
     """User schema to send to the frondend"""
 
     admins = fields.List(fields.String())
+    validators = fields.List(fields.String())
+    annotators = fields.List(fields.String())
     guests = fields.List(fields.String())
     numberSentences = fields.Integer(attribute='number_sentences')
     numberSamples = fields.Integer(attribute='number_samples')

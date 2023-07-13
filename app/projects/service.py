@@ -102,7 +102,27 @@ class ProjectAccessService:
     @staticmethod
     def get_admins(project_id: str) -> List[str]:
         project_access_list: List[ProjectAccess] = ProjectAccess.query.filter_by(
+            project_id=project_id, access_level=3
+        )
+        if project_access_list:
+            return [UserService.get_by_id(project_access.user_id).username for project_access in project_access_list]
+        else:
+            return []
+
+    @staticmethod
+    def get_validators(project_id: str) -> List[str]:
+        project_access_list: List[ProjectAccess] = ProjectAccess.query.filter_by(
             project_id=project_id, access_level=2
+        )
+        if project_access_list:
+            return [UserService.get_by_id(project_access.user_id).username for project_access in project_access_list]
+        else:
+            return []
+        
+    @staticmethod
+    def get_annotators(project_id: str) -> List[str]:
+        project_access_list: List[ProjectAccess] = ProjectAccess.query.filter_by(
+            project_id=project_id, access_level=1
         )
         if project_access_list:
             return [UserService.get_by_id(project_access.user_id).username for project_access in project_access_list]
@@ -123,20 +143,25 @@ class ProjectAccessService:
     def get_all(project_id: int) -> Tuple[List[str], List[str]]:
         '''optimized version dedicated to homepage. reduces the database calls but makes the code less pretty'''
         project_access_list: List[ProjectAccess] = ProjectAccess.query.filter_by(project_id=project_id).all()
-        admins, guests = [], []
-        push_admin, push_guest = admins.append, guests.append
+        admins, validators, annotators, guests = [], [], [], []
         for project_access in project_access_list: 
             username = UserService.get_by_id(project_access.user_id).username
-            if project_access.access_level==1: push_guest(username)
-            elif project_access.access_level==2: push_admin(username)
-        return admins, guests
+            if project_access.access_level==0: guests.append(username)
+            elif project_access.access_level==1: annotators.append(username)
+            elif project_access.access_level==2: validators.append(username)
+            elif project_access.access_level==3: admins.append(username)
+        return admins, validators, annotators, guests
 
     @staticmethod
     def get_users_role(project_id: str) -> Dict[str, List[str]]:
         admins = ProjectAccessService.get_admins(project_id)
+        validators = ProjectAccessService.get_validators(project_id)
+        annotators = ProjectAccessService.get_annotators(project_id)
         guests = ProjectAccessService.get_guests(project_id)
         return {
             "admins": admins,
+            "validators": validators,
+            "annotators": annotators,
             "guests": guests,
         }
 
@@ -191,7 +216,7 @@ class ProjectAccessService:
         If the project is private (visibility==0) , it's readable only by its users and by the superadmins
         else the public and the open projects are readable by all the users even those who are not logged in
         """
-        if visibility==0:
+        if visibility == 0:
             if not current_user.is_authenticated:
                return False
             if current_user.super_admin:
