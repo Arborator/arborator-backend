@@ -132,7 +132,7 @@ class ProjectAccessService:
     @staticmethod
     def get_guests(project_id: str) -> List[str]:
         project_access_list: List[ProjectAccess] = ProjectAccess.query.filter_by(
-            project_id=project_id, access_level=1
+            project_id=project_id, access_level=0
         )
         if project_access_list:
             return [UserService.get_by_id(project_access.user_id).username for project_access in project_access_list]

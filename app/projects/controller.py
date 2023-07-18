@@ -31,6 +31,7 @@ from .service import (
     ProjectMetaFeatureService,
     ProjectService,
 )
+from app.user.service import UserService
 
 api = Namespace("Project", description="Endpoints for dealing with projects")  # noqa
 
@@ -260,17 +261,20 @@ class ProjectAccessManyResource(Resource):
     def put(self, projectName: str):
         """Modify a single project users access"""
         parser = reqparse.RequestParser()
-        parser.add_argument(name="user_ids", type=str, action="append")
-        parser.add_argument(name="targetrole", type=str)
+        parser.add_argument(name="selectedUsers", type=str, action="append")
+        parser.add_argument(name="targetRole", type=str)
         args = parser.parse_args()
+        selected_users = args.get("selectedUsers")
+        target_role = args.get("targetRole")
 
         project = ProjectService.get_by_name(projectName)
         ProjectService.check_if_project_exist(project)
         
-        access_level = ProjectAccess.LABEL_TO_LEVEL[args.targetrole]
+        access_level = ProjectAccess.LABEL_TO_LEVEL[target_role]
 
-        for user_id in args.user_ids:
-            # TODO : add interface to new_attrs
+        for username in selected_users:
+        
+            user_id = UserService.get_by_username(username).id
             new_attrs = {
                 "user_id": user_id,
                 "access_level": access_level,
@@ -285,13 +289,13 @@ class ProjectAccessManyResource(Resource):
         return ProjectAccessService.get_users_role(project.id)
 
 
-@api.route("/<string:projectName>/access/<string:userId>")
+@api.route("/<string:projectName>/access/<string:username>")
 class ProjectAccessUserResource(Resource):
-    def delete(self, projectName: str, userId: str):
+    def delete(self, projectName: str, username: str):
         project = ProjectService.get_by_name(projectName)
         ProjectService.check_if_project_exist(project)
-        ProjectAccessService.delete(userId, project.id)
-
+        user_id = UserService.get_by_username(username).id
+        ProjectAccessService.delete(user_id, project.id)
         return ProjectAccessService.get_users_role(project.id)
 
 
