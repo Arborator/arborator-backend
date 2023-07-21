@@ -2,11 +2,11 @@ import json
 import re
 
 from flask.helpers import send_file
-from flask import Response, abort, current_app, request, send_from_directory
+from flask import Response, request
 from flask_restx import Namespace, Resource, reqparse
+from flask_login import current_user
 
-
-from app.projects.service import ProjectAccessService, ProjectService
+from app.projects.service import ProjectAccessService, ProjectService, LastAccessService
 from app.user.service import UserService
 from app.utils.grew_utils import GrewService, SampleExportService, grew_request
 
@@ -81,6 +81,7 @@ class SampleResource(Resource):
                     existing_samples=samples_names,
                     users_ids_convertor=users_ids_convertor,
                 )
+            LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
             return {"status": "OK"}
         
 @api.route("/<string:project_name>/samples/tokenize")
@@ -100,7 +101,7 @@ class SampleTokenizeResource(Resource):
         lang = args.get("lang")
         text = args.get("text")
         SampleTokenizeService.tokenize(text, option, lang, project_name, sample_name, username)
-
+        LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
 
 @api.route("/<string:project_name>/samples/<string:sample_name>/role")
 class SampleRoleResource(Resource):
@@ -213,6 +214,7 @@ class DeleteSampleResource(Resource):
         GrewService.delete_sample(project_name, sample_name)
         SampleRoleService.delete_by_sample_name(project.id, sample_name)
         SampleExerciseLevelService.delete_by_sample_name(project.id, sample_name)
+        LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
         return {
             "status": "OK",
         }

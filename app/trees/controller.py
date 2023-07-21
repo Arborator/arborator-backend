@@ -127,7 +127,8 @@ class UserTreesResource(Resource):
     
     def delete(self, project_name: str, sample_name: str, username: str):
         data = {"project_id": project_name,  "sample_id": sample_name, "sent_ids": "[]","user_id": username, }
-        grew_request("eraseGraphs", data)  
+        grew_request("eraseGraphs", data)
+        LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")  
 
 
 ################################################################################
