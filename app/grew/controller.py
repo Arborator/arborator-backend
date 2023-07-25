@@ -158,6 +158,8 @@ class RelationTableResource(Resource):
             user_ids = { "one": [current_user.username, "__last__"] }
         elif tableType=='recent':
             user_ids = { "one": ["__last__"] }
+        elif tableType=='validated':
+            user_ids = { "one": ["Validated"]}
         elif tableType=='all':
             user_ids = "all"
         reply = grew_request(
