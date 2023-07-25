@@ -30,12 +30,14 @@ class LexiconResource(Resource):
         lexicon_type=args.get("lexiconType")
         prune=args.get("prune")
        
-        if lexicon_type=='user':
+        if lexicon_type == 'user':
             user_ids = { "one": [current_user.username] }
-        elif lexicon_type=='user_recent':
+        elif lexicon_type == 'user_recent':
             user_ids = { "one": [current_user.username, "__last__"] }
-        elif lexicon_type=='recent':
+        elif lexicon_type == 'recent':
             user_ids = { "one": ["__last__"] }
+        elif lexicon_type == 'validated':
+            user_ids = { "one": ["Validated"] } 
         elif lexicon_type=='all':
             user_ids = "all"
 
