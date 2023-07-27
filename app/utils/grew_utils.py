@@ -261,8 +261,24 @@ class GrewService:
             else:
                 print("Error: {}".format(reply.get("message")))
         return samples_dict_for_user
+    
+    @staticmethod
+    def get_validated_trees_filled_up_with_owner_trees(project_name: str, sample_name: str, username: str):
+        reply = grew_request(
+            "getConll",
+            data={"project_id": project_name, "sample_id": sample_name},
+        )
+        validated_trees = ""
+        if reply.get("status") == "OK":
+            sample_tree = SampleExportService.servSampleTrees(reply.get("data", {}))
+            sample_tree_nots_noui = SampleExportService.servSampleTrees(reply.get("data", {}), timestamps=False, user_ids=False)
+            for sent_id in sample_tree:
+                if "Validated" in sample_tree[sent_id]["conlls"].keys():
+                    validated_trees += "".join(sample_tree_nots_noui[sent_id]["conlls"]["Validated"])
+                else:
+                    validated_trees += "".join(sample_tree_nots_noui[sent_id]["conlls"][username])
 
-
+        return validated_trees
 
 def get_timestamp(conll):
     t = re.search(r"# timestamp = (\d+(?:\.\d+)?)\n", conll)

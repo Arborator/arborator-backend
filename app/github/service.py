@@ -8,11 +8,13 @@ import zipfile
 from typing import List
 
 from flask import abort
+from flask_login import current_user
 
 from app import db
 from app.config import Config
 from app.projects.service import ProjectService
 from app.utils.grew_utils import GrewService, grew_request , SampleExportService
+from app.user.service import UserService
 import app.samples.service as SampleService
 
 from .model import GithubRepository, GithubCommitStatus
@@ -343,7 +345,11 @@ class GithubService:
         tree = []
         sample_names, sample_content_files = GrewService.get_samples_with_string_contents(project_name, updated_samples)
         for sample_name, sample in zip(sample_names,sample_content_files):
-            content = sample.get(username)
+            if (username == 'Validated'):
+                owner_username = UserService.get_by_id(current_user.id).username
+                content = GrewService.get_validated_trees_filled_up_with_owner_trees(project_name, sample_name, owner_username)
+            else:
+                content = sample.get(username)
             sha = GithubService.create_blob_for_updated_file(access_token, full_name, content)
             blob = {"path": sample_name+".conllu", "mode":"100644", "type":"blob", "sha": sha}
             tree.append(blob)
