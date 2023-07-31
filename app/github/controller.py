@@ -10,10 +10,10 @@ from .service import GithubSynchronizationService, GithubService, GithubWorkflow
 api = Namespace("Github", description="Endpoints for dealing with github repositories") 
 
 
-@api.route("/<string:project_name>/<string:username>/synchronize-github")
+@api.route("/<string:project_name>/synchronize-github")
 class GithubSynchronizationResource(Resource):
 
-    def get(self, project_name: str, username: str):
+    def get(self, project_name: str):
         project = ProjectService.get_by_name(project_name)
         ProjectService.check_if_project_exist(project)
         try:
@@ -22,24 +22,26 @@ class GithubSynchronizationResource(Resource):
             return {"repositoryName": repository, "branch": branch}
         except: 
             return {}
+        
     
-    
-    def post(self, project_name: str, username:str):
+    def post(self, project_name: str):
 
         parser = reqparse.RequestParser()
         parser.add_argument(name="repositoryName")
         parser.add_argument(name="branchImport")
         parser.add_argument(name="branchSyn")
+        parser.add_argument(name="username")
         args = parser.parse_args()
 
         repository_name = args.get("repositoryName")
         branch_import = args.get("branchImport")
         branch_syn = args.get("branchSyn")
+        username = args.get("username")
 
         project = ProjectService.get_by_name(project_name)
         ProjectService.check_if_project_exist(project)
     
-        github_access_token = UserService.get_by_id(current_user.id).github_access_token
+        github_access_token = UserService.get_by_username(username).github_access_token
         GithubWorkflowService.import_files_from_github(github_access_token, repository_name, project_name, username, branch_import, branch_syn)
         sha = GithubService.get_sha_base_tree(github_access_token, repository_name, branch_syn)
         GithubSynchronizationService.synchronize_github_repository(current_user.id, project.id, repository_name, branch_syn, sha)
