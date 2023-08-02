@@ -28,20 +28,29 @@ class SampleUploadService:
         project_name: str,
         reextensions=None,
         existing_samples=[],
-        users_ids_convertor={},
+        new_username='',
+        samples_without_sent_ids=[],
     ):	
-        project = ProjectService.get_by_name(project_name)	
+        project = ProjectService.get_by_name(project_name)
+
         if reextensions == None:
             reextensions = re.compile(r"\.(conll(u|\d+)?|txt|tsv|csv)$")
+
         filename = secure_filename(fileobject.filename)
         sample_name = reextensions.sub("", filename)
         path_file = os.path.join(Config.UPLOAD_FOLDER, filename)
 
-        print('upload\n', path_file)
         fileobject.save(path_file)
-        nrtoks = convert_users_ids(path_file, users_ids_convertor)
-        #check_duplicated_sent_id(path_file)
+
+        if samples_without_sent_ids and sample_name in samples_without_sent_ids: 
+            add_new_sent_ids(path_file, sample_name) 
+        
+        check_duplicate_sent_id(path_file, sample_name)
+        check_if_file_has_user_ids(path_file, sample_name)
+
+        add_or_replace_userid(path_file, new_username)
         add_or_keep_timestamps(path_file)
+
         if sample_name not in existing_samples: 
             GrewService.create_sample(project_name, sample_name)
 
@@ -80,8 +89,7 @@ class SampleTokenizeService:
         path_file = os.path.join(Config.UPLOAD_FOLDER, file_name)
         with open(path_file, "w") as file:
             file.write(conll)
-        user_ids = {'default': username}
-        convert_users_ids(path_file, user_ids)
+        add_or_replace_userid(path_file, username)
         add_or_keep_timestamps(path_file)
 
         with open(path_file, "rb") as file_to_save:
@@ -327,72 +335,9 @@ class SampleEvaluationService:
 #############    Helpers Function    #############
 #
 #
-def read_conll_from_disk(path_file: str) -> str:
-    try: 
-        with open(path_file, "r") as infile:
-            conll_string = infile.read()
-    except:
-        abort(415)
-    return conll_string  
-   
-
-
 def split_conll_string_to_conlls_list(conll_string) -> List[str]:
     conlls_strings = conll_string.split("\n\n")
     return conlls_strings
-
-
-def write_conll_on_disk(path_file: str, conll_string: str) -> None:
-    conll_string.rstrip()
-    conll_string += "\n\n"
-    with open(path_file, "w") as outfile:
-        outfile.write(conll_string)
-    return
-
-
-def convert_users_ids(path_file, users_ids_convertor):
-    nrtoks = 0
-    conll_string = read_conll_from_disk(path_file)
-    conlls_strings = split_conll_string_to_conlls_list(conll_string)
-    conlls_string_modified = []
-    for conll_string in conlls_strings:
-        if conll_string == "":
-            continue
-        conll_lines_modified = []
-        user_id = "default"
-
-        for line in conll_string.rstrip().split("\n"):
-            if line:
-                if "# user_id = " in line:
-                    user_id = line.split("# user_id = ")[-1]
-                else:
-                    conll_lines_modified.append(line)
-                    if line[0]!='#':
-                        nrtoks+=1
-
-        user_id_converted = users_ids_convertor[user_id]
-        conll_lines_modified = ["# user_id = {}".format(user_id_converted)] + conll_lines_modified
-        conlls_string_modified.append("\n".join(conll_lines_modified))
-    new_file_string = "\n\n".join(conlls_string_modified)
-    write_conll_on_disk(path_file, new_file_string)
-    return nrtoks
-
-
-def check_duplicated_sent_id(path_file: str):
-    conll_string = read_conll_from_disk(path_file)
-    conlls_strings = split_conll_string_to_conlls_list(conll_string)
-    sent_ids =[]
-    for conll_string in conlls_strings:
-        if conll_string == "": 
-            continue
-        for line in conll_string.rstrip().split("\n"):
-            if "# sent_id = " in line:
-                sent_ids.append(line.split("# sent_id = ")[-1])
-    sent_ids_count = Counter(sent_ids)
-    for sent_id, count in sent_ids_count.items():
-        if count > 1:
-            abort(406, "sent_id `{}` is duplicated in your file".format(sent_id))
-    return
     
 def readConlluFileWrapper(path_file: str, keepEmptyTrees: bool = False):
     """ read a conllu file and return a list of sentences """
@@ -411,7 +356,6 @@ def writeConlluFileWrapper(path_file: str, sentences_json: List[Dict]):
         print('debug_write_conll: {}'.format(str(e)))
         abort(406, str(e))
 
-
 def add_or_keep_timestamps(path_file: str, when: Literal["now", "long_ago"] = "now"):
     """ adds a timestamp on the tree if there is not one """
     sentences_json = readConlluFileWrapper(path_file, keepEmptyTrees=True)
@@ -423,13 +367,42 @@ def add_or_keep_timestamps(path_file: str, when: Literal["now", "long_ago"] = "n
 
     writeConlluFileWrapper(path_file, sentences_json)
 
-
 def add_or_replace_userid(path_file: str, new_user_id: str):
     """ adds a userid on the tree or replace it if already has one """
     sentences_json = readConlluFileWrapper(path_file, keepEmptyTrees=True)
     for sentence_json in sentences_json:
         sentence_json["metaJson"]["user_id"] = new_user_id
 
+    writeConlluFileWrapper(path_file, sentences_json)
+
+def check_duplicate_sent_id(path_file: str, sample_name: str):
+    sent_ids = []
+    sentences_json = readConlluFileWrapper(path_file, keepEmptyTrees=True)
+    for sentence_json in sentences_json:
+        sent_ids.append(sentence_json["metaJson"]["sent_id"])
+    sent_ids_count = Counter(sent_ids)
+    for count in sent_ids_count.values():
+        if count > 1:
+            abort(406, "{} has duplicated sent_ids".format(sample_name))
+    return
+    
+def check_if_file_has_user_ids(path_file: str, sample_name: str):
+    sentences_json = readConlluFileWrapper(path_file, keepEmptyTrees= True)
+    if any(sentence["metaJson"]["user_id"] for sentence in sentences_json if "user_id" in sentence["metaJson"].keys()):
+        abort(406, "{} has sentences with user_id".format(sample_name))
+
+def check_sentences_without_sent_ids(path_file: str, sample_name: str):
+    sentences_json = readConlluFileWrapper(path_file, keepEmptyTrees=True)
+    sentence_ids_number = len([sentence for sentence in sentences_json if "sent_id" in sentence["metaJson"].keys()])
+    return len(sentences_json) == sentence_ids_number
+
+def add_new_sent_ids(path_file: str, sample_name):
+    """ adds sent_id for samples that don't have sent_ids"""
+    index = 0
+    sentences_json = readConlluFileWrapper(path_file,keepEmptyTrees= True)
+    for sentence_json in sentences_json:
+        index+=1
+        sentence_json["metaJson"]["sent_id"] = '{}__{}'.format(sample_name, index)
     writeConlluFileWrapper(path_file, sentences_json)
 
 ###########################"tokenizer Kim's script" ###########################

@@ -87,29 +87,22 @@ class GithubWorkflowService:
     def clone_github_repository(files, project_name, username):
         for file in files:
             path_file = os.path.join(Config.UPLOAD_FOLDER, file)
-            user_ids = GithubWorkflowService.preprocess_file(path_file, username)
             sample_name = file.split('.conllu')[0]
-            GithubWorkflowService.create_sample(sample_name, path_file, project_name, user_ids)
+            GithubWorkflowService.create_sample(sample_name, path_file, project_name, username)
             GithubCommitStatusService.create(project_name, sample_name)
-            
-
-    @staticmethod
-    def preprocess_file(path_file, username):
-        user_ids = {}
-        user_ids["default"] = username
-        file = SampleService.read_conll_from_disk(path_file)
-        for line in file.rstrip().split("\n"):
-            if "# user_id = " in line:
-                user_id = line.split("# user_id = ")[-1]
-                user_ids[user_id] = user_id
-        return user_ids
         
 
     @staticmethod
-    def create_sample(sample_name, path_file, project_name, users_ids):
-        tokens_number = SampleService.convert_users_ids(path_file, users_ids)
+    def create_sample(sample_name, path_file, project_name, username):
+
+        if not SampleService.check_sentences_without_sent_ids(path_file, sample_name):
+            SampleService.add_new_sent_ids(path_file, sample_name)
+
+        SampleService.check_duplicate_sent_id(path_file, sample_name)
+        SampleService.check_if_file_has_user_ids(path_file, sample_name)
+        SampleService.add_or_replace_userid(path_file, username)
         SampleService.add_or_keep_timestamps(path_file)
-        SampleService.check_duplicated_sent_id(path_file)
+        
         grew_samples = GrewService.get_samples(project_name)
         samples_names = [sa["name"] for sa in grew_samples]
         if sample_name not in samples_names:
@@ -131,8 +124,7 @@ class GithubWorkflowService:
     @staticmethod
     def create_sample_from_github_file(file, download_url, username, project_name):
         sample_name, path_file =  GithubWorkflowService.download_github_file_content(file, download_url)
-        user_ids = GithubWorkflowService.preprocess_file(path_file,username)
-        GithubWorkflowService.create_sample(sample_name, path_file, project_name, user_ids)
+        GithubWorkflowService.create_sample(sample_name, path_file, project_name, username)
         GithubCommitStatusService.create(project_name, sample_name)
 
 
@@ -192,8 +184,7 @@ class GithubWorkflowService:
         with open(path_file, "w") as file:
             file.write(content)
 
-        user_ids = GithubWorkflowService.preprocess_file(path_file, username)
-        SampleService.convert_users_ids(path_file, user_ids)
+        SampleService.add_or_replace_userid(path_file, username)
         SampleService.add_or_keep_timestamps(path_file)
         with open(path_file, "rb") as file_to_save:
             GrewService.save_sample(project_name, sample_name, file_to_save)

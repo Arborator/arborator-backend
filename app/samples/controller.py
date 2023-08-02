@@ -63,23 +63,26 @@ class SampleResource(Resource):
         project = ProjectService.get_by_name(project_name)
         ProjectAccessService.check_admin_access(project.id)
         ProjectService.check_if_freezed(project)
-        users_ids_convertor = {}
-        for user_id_mapping in json.loads(request.form.get("userIdsConvertor", "{}")):
-            users_ids_convertor[user_id_mapping["old"]] = user_id_mapping["new"]
-            
+
+        username = request.form.get("userId")   
         files = request.files.to_dict(flat=False).get("files")
+        samples_without_sent_ids = request.form.get("samplesWithoutSentIds")
+        if samples_without_sent_ids:
+            samples_without_sent_ids = json.loads(samples_without_sent_ids)
+
         if files:
             reextensions = re.compile(r"\.(conll(u|\d+)?|txt|tsv|csv)$")
             grew_samples = GrewService.get_samples(project_name)
-            samples_names = [sa["name"] for sa in grew_samples]
+            existing_samples = [sa["name"] for sa in grew_samples]
 
             for file in files:
                 SampleUploadService.upload(
                     file,
                     project_name,
                     reextensions=reextensions,
-                    existing_samples=samples_names,
-                    users_ids_convertor=users_ids_convertor,
+                    existing_samples=existing_samples,
+                    new_username=username,
+                    samples_without_sent_ids=samples_without_sent_ids
                 )
             LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
             return {"status": "OK"}
