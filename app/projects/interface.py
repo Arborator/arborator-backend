@@ -11,6 +11,7 @@ class ProjectInterface(TypedDict, total=False):
     show_all_trees: bool
     exercise_mode: bool
     freezed: bool
+    config: str
 
 
 class ProjectExtendedInterface(ProjectInterface, total=False):

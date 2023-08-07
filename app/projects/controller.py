@@ -105,6 +105,7 @@ class ProjectResource(Resource):
         parser.add_argument(name="showAllTrees", type=bool)
         parser.add_argument(name="exerciseMode", type=bool)
         parser.add_argument(name="visibility", type=int)
+        parser.add_argument(name="config", type=str)
         args = parser.parse_args()
 
         # Sanitize the project name to correspond to Grew folders requirements
@@ -117,6 +118,7 @@ class ProjectResource(Resource):
             "exercise_mode": args.exerciseMode,
             "visibility": args.visibility,
             "freezed": False,
+            "config": args.config,
         }
 
         # KK : TODO : put all grew request in a seperated file and add error catching

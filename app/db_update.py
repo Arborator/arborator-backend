@@ -49,6 +49,7 @@ def migrate_add_constructicon(engine):
 def migrate_new_roles(engine):
     with engine.connect() as connection:
         connection.execute('UPDATE projectaccess SET access_level = 3 WHERE projectaccess.access_level == 2')
+        connection.execute('ALTER TABLE projects ADD config STRING')       
 
 if args.version == 'add_github':
     migrate_add_github(engine)

@@ -31,6 +31,7 @@ class ProjectSchema(Schema):
     showAllTrees = fields.Boolean(attribute="show_all_trees")
     exerciseMode = fields.Boolean(attribute="exercise_mode")
     freezed = fields.Boolean(attribute="freezed")
+    config = fields.Boolean(attribute="config")
 
 
 class ProjectExtendedSchema(ProjectSchema):
@@ -61,6 +62,7 @@ class ProjectSchemaCamel(Schema):
     showAllTrees = fields.Boolean(attribute="show_all_trees")
     exerciseMode = fields.Boolean(attribute="exercise_mode")
     freezed = fields.Boolean(attribute="freezed")
+    config = fields.String(attribute="config")
     diffMode = fields.Boolean(attribute="diff_mode")
     diffUserId = fields.String(attribute="diff_user_id")
 
