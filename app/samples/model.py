@@ -3,19 +3,6 @@ from sqlalchemy_utils import ChoiceType
 
 from app import db  # noqa
 
-
-class SampleRole(db.Model):
-    __tablename__ = "samplerole"
-    ROLES = [(1, "annotator"), (2, "validator")]
-    LABEL_TO_ROLES = {v: k for k, v in dict(ROLES).items()}
-
-    id = Column(Integer, primary_key=True)
-    sample_name = Column(String(256), nullable=False)
-    project_id = Column(Integer, db.ForeignKey("projects.id"))
-    user_id = Column(String(256), db.ForeignKey("users.id"))
-    role = Column(ChoiceType(ROLES, impl=Integer()))
-
-
 class SampleExerciseLevel(db.Model):
     __tablename__ = "exerciselevel"
     EXERCISE_LEVEL = [

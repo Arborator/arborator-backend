@@ -16,7 +16,7 @@ from app.projects.service import ProjectService
 from app.utils.grew_utils import GrewService
 from app.github.service import GithubCommitStatusService, GithubSynchronizationService, GithubWorkflowService
 
-from .model import SampleExerciseLevel, SampleRole
+from .model import SampleExerciseLevel
 
 BASE_TREE = "base_tree"
 
@@ -90,90 +90,6 @@ class SampleTokenizeService:
                 GithubCommitStatusService.create(project_name, sample_name)
                 GithubCommitStatusService.update(project_name, sample_name)
              
-   
-class SampleRoleService:
-    @staticmethod
-    def create(new_attrs):
-        new_sample_role = SampleRole(**new_attrs)
-        db.session.add(new_sample_role)
-        db.session.commit()
-        return new_sample_role
-
-    @staticmethod
-    def get_one(
-        project_id: int,
-        sample_name: str,
-        user_id: int,
-        role: int,
-    ):
-        """Get one specific user role """
-        role = (
-            db.session.query(SampleRole)
-            .filter(SampleRole.user_id == user_id)
-            .filter(SampleRole.project_id == project_id)
-            .filter(SampleRole.sample_name == sample_name)
-            .filter(SampleRole.role == role)
-            .first()
-        )
-
-    @staticmethod
-    def delete_one(
-        project_id: int,
-        sample_name: str,
-        user_id: int,
-        role: int,
-    ):
-        """Delete one specific user role """
-        role = (
-            db.session.query(SampleRole)
-            .filter(SampleRole.user_id == user_id)
-            .filter(SampleRole.project_id == project_id)
-            .filter(SampleRole.sample_name == sample_name)
-            .filter(SampleRole.role == role)
-            .first()
-        )
-        if not role:
-            return []
-        db.session.delete(role)
-        db.session.commit()
-        return [(project_id, sample_name, user_id, role)]
-
-    @staticmethod
-    def get_by_sample_name(project_id: int, sample_name: str):
-        """Get a dict of annotators and validators for a given sample"""
-        roles = {}
-        for r, label in SampleRole.ROLES:
-            role = (
-                db.session.query(User, SampleRole)
-                .filter(User.id == SampleRole.user_id)
-                .filter(SampleRole.project_id == project_id)
-                .filter(SampleRole.sample_name == sample_name)
-                .filter(SampleRole.role == r)
-                .all()
-            )
-            roles[label] = [{"key": a.username, "value": a.username} for a, b in role]
-
-        return roles
-
-    @staticmethod
-    def delete_by_sample_name(project_id: int, sample_name: str):
-        """Delete all access of a sample. Used after a sample deletion was asked by the user
-        ... perform on grew server."""
-        roles = (
-            db.session.query(SampleRole)
-            .filter(SampleRole.project_id == project_id)
-            .filter(SampleRole.sample_name == sample_name)
-            .all()
-        )
-        for role in roles:
-            db.session.delete(role)
-        db.session.commit()
-
-        return
-
-    # def get_annotators_by_sample_id(project_id: int, sample_id: int) -> List[str]:
-    #     return
-
 
 class SampleExerciseLevelService:
     @staticmethod
