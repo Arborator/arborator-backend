@@ -102,7 +102,6 @@ class ProjectResource(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument(name="projectName", type=str)
         parser.add_argument(name="description", type=str)
-        parser.add_argument(name="showAllTrees", type=bool)
         parser.add_argument(name="exerciseMode", type=bool)
         parser.add_argument(name="visibility", type=int)
         parser.add_argument(name="config", type=str)
@@ -114,7 +113,6 @@ class ProjectResource(Resource):
         new_project_attrs: ProjectInterface = {
             "project_name": projectName,
             "description": args.description,
-            "show_all_trees": args.showAllTrees,
             "exercise_mode": args.exerciseMode,
             "visibility": args.visibility,
             "freezed": False,

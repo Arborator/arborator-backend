@@ -8,7 +8,6 @@ class ProjectInterface(TypedDict, total=False):
     description: str
     image: Any
     visibility: int
-    show_all_trees: bool
     exercise_mode: bool
     freezed: bool
     config: str

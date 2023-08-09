@@ -69,7 +69,7 @@ class SampleTreesResource(Resource):
                 sample_trees = restrict_trees(sample_trees, restricted_users)
 
         else:
-            if project.show_all_trees or project.visibility == 2:
+            if  project.visibility == 2:
                 sample_trees = samples2trees(grew_sample_trees, sample_name)
             else:
                 validator = 1

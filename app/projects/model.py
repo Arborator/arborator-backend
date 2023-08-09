@@ -17,7 +17,6 @@ class Project(db.Model, BaseM):
     description = Column(String(256))
     image = Column(String(256), nullable=True)
     visibility = Column(Integer)
-    show_all_trees = Column(Boolean, default=True)
     exercise_mode = Column(Boolean, default=False)
     diff_mode = Column(Boolean, default=False)
     diff_user_id = Column(String(256), nullable=True)
