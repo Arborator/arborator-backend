@@ -32,7 +32,7 @@ class GithubSynchronizationService:
     @staticmethod
     def synchronize_github_repository(user_id, project_id, repository_name, branch, sha):
 
-        github_repository ={
+        github_repository = {
             "project_id": project_id,
             "user_id": user_id, 
             "repository_name": repository_name,
