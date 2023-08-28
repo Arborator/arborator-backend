@@ -33,6 +33,7 @@ class TagService:
             "user_id": user_id,
             "conll_graph": conll
         })
+        return sentence_json["metaJson"]
 
     @staticmethod
     def remove_tag(project_name, sample_name, tag, conll):
@@ -57,8 +58,9 @@ class TagService:
                 "user_id": user_id,
                 "conll_graph": conll
             })
+            return sentence_json["metaJson"]
         else: 
-            abort(406, "This sentence does'nt contain tags")
+            abort(406, "This sentence doesn't contain tags")
 
 
 class UserTagsService:

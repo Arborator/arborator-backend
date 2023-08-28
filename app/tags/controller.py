@@ -20,17 +20,15 @@ class TagsResource(Resource):
         data = request.get_json()
         tags = data.get("tags")
         tree = data.get("tree")
-        TagService.add_new_tags(project_name, sample_name, tags, tree)
-        return {'status': 'ok'}
+        return TagService.add_new_tags(project_name, sample_name, tags, tree) 
     
     def put(self, project_name, sample_name):
 
         data = request.get_json()
         tag = data.get("tag")
         tree = data.get("tree")
-        TagService.remove_tag(project_name, sample_name, tag, tree)
-        return {'status': 'ok'}
-
+        return TagService.remove_tag(project_name, sample_name, tag, tree)
+        
 
 @api.route("/<string:project_name>/tags/<string:username>")
 class UserTagsResource(Resource):
