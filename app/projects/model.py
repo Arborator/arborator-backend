@@ -17,7 +17,7 @@ class Project(db.Model, BaseM):
     description = Column(String(256))
     image = Column(String(256), nullable=True)
     visibility = Column(Integer)
-    exercise_mode = Column(Boolean, default=False)
+    blind_annotation_mode = Column(Boolean, default=False)
     diff_mode = Column(Boolean, default=False)
     diff_user_id = Column(String(256), nullable=True)
     freezed = Column(Boolean, default=False)

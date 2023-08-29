@@ -28,7 +28,7 @@ class ProjectSchema(Schema):
     description = fields.String(attribute="description")
     image = BlobImageField(attribute="image")
     visibility = fields.Integer(attribute="visibility")
-    exerciseMode = fields.Boolean(attribute="exercise_mode")
+    blindAnnotationMode = fields.Boolean(attribute="blind_annotation_mode")
     freezed = fields.Boolean(attribute="freezed")
     config = fields.Boolean(attribute="config")
 
@@ -58,7 +58,7 @@ class ProjectSchemaCamel(Schema):
     description = fields.String(attribute="description")
     image = BlobImageField(attribute="image")
     visibility = fields.Integer(attribute="visibility")
-    exerciseMode = fields.Boolean(attribute="exercise_mode")
+    blindAnnotationMode = fields.Boolean(attribute="blind_annotation_mode")
     freezed = fields.Boolean(attribute="freezed")
     config = fields.String(attribute="config")
     diffMode = fields.Boolean(attribute="diff_mode")

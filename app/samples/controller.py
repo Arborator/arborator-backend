@@ -12,7 +12,7 @@ from app.utils.grew_utils import GrewService, SampleExportService, grew_request
 
 from .service import (
     SampleEvaluationService,
-    SampleExerciseLevelService,
+    SampleBlindAnnotationLevelService,
     SampleUploadService,
     SampleTokenizeService,
 )
@@ -42,13 +42,13 @@ class SampleResource(Resource):
                 "treeByUser": grew_sample["tree_by_user"],
                 "roles": {},
             }
-            sample_exercise_level = SampleExerciseLevelService.get_by_sample_name(
+            blind_annotation_level = SampleBlindAnnotationLevelService.get_by_sample_name(
                 project.id, grew_sample["name"]
             )
-            if sample_exercise_level:
-                sample["exerciseLevel"] = sample_exercise_level.exercise_level.code
+            if blind_annotation_level:
+                sample["blindAnnotationLevel"] = blind_annotation_level.blind_annotation_level.code
             else:
-                sample["exerciseLevel"] = 4
+                sample["blindAnnotationLevel"] = 4
 
             processed_samples.append(sample)
         return processed_samples
@@ -99,30 +99,30 @@ class SampleTokenizeResource(Resource):
         LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
 
 
-@api.route("/<string:project_name>/samples/<string:sample_name>/exercise-level")
-class SampleExerciseLevelResource(Resource):
+@api.route("/<string:project_name>/samples/<string:sample_name>/blind-annotation-level")
+class SampleBlindAnnotationLevelResource(Resource):
     def post(self, project_name: str, sample_name: str):
         parser = reqparse.RequestParser()
-        parser.add_argument(name="exerciseLevel", type=str)
+        parser.add_argument(name="blindAnnotationLevel", type=str)
         args = parser.parse_args()
 
         project = ProjectService.get_by_name(project_name)
         ProjectAccessService.check_admin_access(project.id)
 
-        sample_exercise_level = SampleExerciseLevelService.get_by_sample_name(
+        sample_blind_annotation_level = SampleBlindAnnotationLevelService.get_by_sample_name(
             project.id, sample_name
         )
 
         new_attrs = {
             "project_id": project.id,
             "sample_name": sample_name,
-            "exercise_level": args.exerciseLevel,
+            "blind_annotation_level": args.blindAnnotationLevel,
         }
 
-        if sample_exercise_level:
-            SampleExerciseLevelService.update(sample_exercise_level, new_attrs)
+        if sample_blind_annotation_level:
+            SampleBlindAnnotationLevelService.update(sample_blind_annotation_level, new_attrs)
         else:
-            SampleExerciseLevelService.create(new_attrs)
+            SampleBlindAnnotationLevelService.create(new_attrs)
 
         return {"status": "success"}
 from app.shared.service import SharedService
@@ -175,7 +175,7 @@ class DeleteSampleResource(Resource):
         ProjectService.check_if_freezed(project)
         ProjectService.check_if_project_exist(project)
         GrewService.delete_sample(project_name, sample_name)
-        SampleExerciseLevelService.delete_by_sample_name(project.id, sample_name)
+        SampleBlindAnnotationLevelService.delete_by_sample_name(project.id, sample_name)
         LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
         return {
             "status": "OK",

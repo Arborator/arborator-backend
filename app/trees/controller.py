@@ -5,12 +5,12 @@ from conllup.conllup import sentenceConllToJson
 from conllup.processing import constructTextFromTreeJson, emptySentenceConllu, changeMetaFieldInSentenceConllu
 
 from app.projects.service import LastAccessService, ProjectAccessService, ProjectService
-from app.samples.service import SampleExerciseLevelService
+from app.samples.service import SampleBlindAnnotationLevelService
 from app.github.service import GithubCommitStatusService, GithubSynchronizationService
 from app.utils.grew_utils import grew_request, GrewService
 
 BASE_TREE = "base_tree"
-TEACHER = "teacher"
+VALIDATED = "Validated"
 
 api = Namespace(
     "Trees", description="Endpoints for dealing with trees of a sample"
@@ -31,9 +31,9 @@ class SampleTreesResource(Resource):
 
         # ProjectAccessService.require_access_level(project.id, 2)
         ##### exercise mode block #####
-        exercise_mode = project.exercise_mode
+        blind_annotation_mode = project.blind_annotation_mode
         project_access: int = 0
-        exercise_level: int = 4
+        blind_annotation_level: int = 4
         if current_user.is_authenticated:
             project_access_obj = ProjectAccessService.get_by_user_id(
                 current_user.id, project.id
@@ -48,12 +48,12 @@ class SampleTreesResource(Resource):
                 "The project is not visible and you don't have the right privileges",
             )
 
-        if exercise_mode:
-            exercise_level_obj = SampleExerciseLevelService.get_by_sample_name(
+        if blind_annotation_mode:
+            blind_annotation_level_obj = SampleBlindAnnotationLevelService.get_by_sample_name(
                 project.id, sample_name
             )
-            if exercise_level_obj:
-                exercise_level = exercise_level_obj.exercise_level.code
+            if blind_annotation_level_obj:
+                blind_annotation_level = blind_annotation_level_obj.blind_annotation_level.code
 
             sample_trees = extract_trees_from_sample(grew_sample_trees, sample_name)
             sample_trees = add_base_tree(sample_trees)
@@ -65,7 +65,7 @@ class SampleTreesResource(Resource):
                     sample_trees = add_user_tree(sample_trees, username)
 
             if project_access <= 1:
-                restricted_users = [BASE_TREE, TEACHER, username]
+                restricted_users = [BASE_TREE, VALIDATED, username]
                 sample_trees = restrict_trees(sample_trees, restricted_users)
 
         else:
@@ -86,7 +86,7 @@ class SampleTreesResource(Resource):
                     )
         if current_user.is_authenticated:
             LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "read")
-        data = {"sample_trees": sample_trees, "exercise_level": exercise_level}
+        data = {"sample_trees": sample_trees, "blind_annotation_level": blind_annotation_level}
         return data
 
     def post(self, project_name: str, sample_name: str):
@@ -105,8 +105,8 @@ class SampleTreesResource(Resource):
             abort(400)
 
 
-        if project.exercise_mode == 1 and user_id == TEACHER:
-            conll = changeMetaFieldInSentenceConllu(conll, "user_id", TEACHER)
+        if project.blind_annotation_mode == 1 and user_id == VALIDATED:
+            conll = changeMetaFieldInSentenceConllu(conll, "user_id", VALIDATED)
         data = {
             "project_id": project_name,
             "sample_id": sample_name,
@@ -181,7 +181,7 @@ def add_base_tree(trees):
         sent_conlls = sent_trees["conlls"]
         list_users = list(sent_conlls.keys())
         if BASE_TREE not in list_users:
-            model_user = TEACHER if TEACHER in list_users else list_users[0]
+            model_user = VALIDATED if VALIDATED in list_users else list_users[0]
             model_tree = sent_conlls[model_user]
             empty_conllu = emptySentenceConllu(model_tree)
             sent_conlls[BASE_TREE] = empty_conllu

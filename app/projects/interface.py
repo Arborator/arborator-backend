@@ -8,7 +8,7 @@ class ProjectInterface(TypedDict, total=False):
     description: str
     image: Any
     visibility: int
-    exercise_mode: bool
+    blind_annotation_mode: bool
     freezed: bool
     config: str
 
