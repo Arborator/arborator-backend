@@ -85,7 +85,7 @@ class SearchResource(Resource):
         if trees_type == "pending":
             for sample_name, sample_results in trees.items():
                 search_results[sample_name] = {
-                    sent_id: result for sent_id, result in sample_results.items() if 'Validated' not in result["conlls"].keys()
+                    sent_id: result for sent_id, result in sample_results.items() if 'validated' not in result["conlls"].keys()
                 }
         else: 
             search_results = trees
@@ -132,7 +132,7 @@ class SearchInSampleResource(Resource):
         search_results = {}
         if trees_type == 'pending':
             search_results[sample_name] = {
-                sent_id: result for sent_id, result in trees[sample_name].items() if 'Validated' not in result["conlls"].keys()
+                sent_id: result for sent_id, result in trees[sample_name].items() if 'validated' not in result["conlls"].keys()
             }
         else:
             search_results = trees
@@ -188,7 +188,7 @@ class RelationTableResource(Resource):
         elif tableType=='recent':
             user_ids = { "one": ["__last__"] }
         elif tableType=='validated':
-            user_ids = { "one": ["Validated"]}
+            user_ids = { "one": ["validated"]}
         elif tableType=='all':
             user_ids = "all"
         reply = grew_request(

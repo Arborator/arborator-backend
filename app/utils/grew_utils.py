@@ -167,7 +167,7 @@ class GrewService:
         elif user_type == 'recent':
             user_ids = { "one": ["__last__"] }
         elif user_type == 'validated':
-            user_ids = { "one": ["Validated"] }
+            user_ids = { "one": ["validated"] }
         elif user_type == 'all':
             user_ids = "all"
 
@@ -190,7 +190,7 @@ class GrewService:
         elif user_type == 'recent':
             user_ids = { "one": ["__last__"] }
         elif user_type == 'validated':
-            user_ids = { "one": ["Validated"] }
+            user_ids = { "one": ["validated"] }
         elif user_type == 'all':
             user_ids = "all"
         data = {
@@ -273,8 +273,8 @@ class GrewService:
             sample_tree = SampleExportService.servSampleTrees(reply.get("data", {}))
             sample_tree_nots_noui = SampleExportService.servSampleTrees(reply.get("data", {}), timestamps=False, user_ids=False)
             for sent_id in sample_tree:
-                if "Validated" in sample_tree[sent_id]["conlls"].keys():
-                    validated_trees += "".join(sample_tree_nots_noui[sent_id]["conlls"]["Validated"])
+                if "validated" in sample_tree[sent_id]["conlls"].keys():
+                    validated_trees += "".join(sample_tree_nots_noui[sent_id]["conlls"]["validated"])
                 else:
                     validated_trees += "".join(sample_tree_nots_noui[sent_id]["conlls"][username])
 

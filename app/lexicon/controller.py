@@ -37,7 +37,7 @@ class LexiconResource(Resource):
         elif lexicon_type == 'recent':
             user_ids = { "one": ["__last__"] }
         elif lexicon_type == 'validated':
-            user_ids = { "one": ["Validated"] } 
+            user_ids = { "one": ["validated"] } 
         elif lexicon_type=='all':
             user_ids = "all"
 

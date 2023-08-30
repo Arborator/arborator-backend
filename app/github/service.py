@@ -344,7 +344,7 @@ class GithubService:
         tree = []
         sample_names, sample_content_files = GrewService.get_samples_with_string_contents(project_name, updated_samples)
         for sample_name, sample in zip(sample_names,sample_content_files):
-            if (username == 'Validated'):
+            if (username == 'validated'):
                 owner_username = UserService.get_by_id(current_user.id).username
                 content = GrewService.get_validated_trees_filled_up_with_owner_trees(project_name, sample_name, owner_username)
             else:

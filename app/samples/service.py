@@ -136,7 +136,7 @@ class SampleEvaluationService:
         submitted = {}
         total = {"UPOS": 0, "DEPREL": 0, "HEAD": 0}
         for sentence_id, sentence_conlls in sample_conlls.items():
-            validated_tree_conll = sentence_conlls.get("Validated")
+            validated_tree_conll = sentence_conlls.get("validated")
             if validated_tree_conll:
                 validated_tree_sentence_json = sentenceConllToJson(
                     validated_tree_conll
@@ -168,7 +168,7 @@ class SampleEvaluationService:
 
             for user_id, user_conll in sentence_conlls.items():
 
-                if user_id != "Validated":
+                if user_id != "validated":
                     if not corrects.get(user_id):
                         corrects[user_id] = {"UPOS": 0, "DEPREL": 0, "HEAD": 0}
                     if not submitted.get(user_id):

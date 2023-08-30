@@ -13,8 +13,8 @@ class TreeService:
         trees = {}
         for sent_id, users in samples.items():
             for user_id, conll in users.items():
-                sentenceJson = sentenceConllToJson(conll)
-                sentence_text = constructTextFromTreeJson(sentenceJson["treeJson"])
+                sentence_json = sentenceConllToJson(conll)
+                sentence_text = constructTextFromTreeJson(sentence_json["treeJson"])
                 if sent_id not in trees:
                     trees[sent_id] = {
                         "sample_name": sample_name,
@@ -32,8 +32,8 @@ class TreeService:
         trees = {}
         for sent_id, users in sample.items():
             for user_id, conll in users.items():
-                sentenceJson = sentenceConllToJson(conll)
-                sentence_text = constructTextFromTreeJson(sentenceJson["treeJson"])
+                sentence_json = sentenceConllToJson(conll)
+                sentence_text = constructTextFromTreeJson(sentence_json["treeJson"])
                 if sent_id not in trees:
                     trees[sent_id] = {
                         "sample_name": sample_name,
@@ -56,7 +56,7 @@ class TreeService:
                 empty_conllu = emptySentenceConllu(model_tree)
                 sent_conlls[BASE_TREE] = empty_conllu
         return trees
-
+    
     @staticmethod
     def add_user_tree(trees, username):
         for sent_trees in trees.values():
@@ -105,46 +105,6 @@ class TreeService:
                     }
                 trees[sent_id]["conlls"][user_id] = conll
         return trees
-
-    @staticmethod
-    def samples2trees_exercise_mode(trees_on_grew, sample_name, current_user, project_name):
-        """ transforms a list of samples into a trees object and restrict it to user trees and default tree(s) """
-        trees_processed = {}
-        usernames = ["teacher", current_user.username]
-
-        for sent_id, tree_users in trees_on_grew.items():
-            trees_processed[sent_id] = {
-                "sample_name": sample_name,
-                "sentence": "",
-                "sent_id": sent_id,
-                "conlls": {},
-                "matches": {},
-            }
-            for username, conll in tree_users.items():
-                if username in usernames:
-                    trees_processed[sent_id]["conlls"][username] = conll
-                    # add the sentence to the dict
-                    # TODO : put this script on frontend and not in backend (add a conllu -> sentence in javascript)
-                    # if tree:
-                    if trees_processed[sent_id]["sentence"] == "":
-                        sentenceJson = sentenceConllToJson(conll)
-                        sentence_text = constructTextFromTreeJson(sentenceJson["treeJson"])
-                        trees_processed[sent_id]["sentence"] = sentence_text
-
-                        ### add the base tree (emptied conllu) ###
-                        empty_conllu = emptySentenceConllu(conll)
-                        base_conllu = changeMetaFieldInSentenceConllu(empty_conllu, "user_id", BASE_TREE)
-                        trees_processed[sent_id]["conlls"][BASE_TREE] = base_conllu
-
-            if current_user.username not in trees_processed[sent_id]["conlls"]:
-                empty_conllu = emptySentenceConllu(conll)
-                user_empty_conllu = changeMetaFieldInSentenceConllu(
-                    empty_conllu, "user_id", current_user.username
-                )
-                trees_processed[sent_id]["conlls"][
-                    current_user.username
-                ] = user_empty_conllu
-        return trees_processed
 
     @staticmethod
     def get_user_trees(project_name, sample_name, username):

@@ -33,8 +33,9 @@ class SampleTreesResource(Resource):
         # ProjectAccessService.require_access_level(project.id, 2)
         ##### exercise mode block #####
         blind_annotation_mode = project.blind_annotation_mode
-        project_access: int = 0
-        blind_annotation_level: int = 4
+        project_access = 0
+        blind_annotation_level = 4
+
         if current_user.is_authenticated:
             project_access_obj = ProjectAccessService.get_by_user_id(
                 current_user.id, project.id
@@ -44,10 +45,7 @@ class SampleTreesResource(Resource):
                 project_access = project_access_obj.access_level.code
 
         if project.visibility == 0 and project_access == 0:
-            abort(
-                403,
-                "The project is not visible and you don't have the right privileges",
-            )
+            abort(403, "The project is not visible and you don't have the right privileges")
 
         if blind_annotation_mode:
             blind_annotation_level_obj = SampleBlindAnnotationLevelService.get_by_sample_name(
@@ -68,23 +66,10 @@ class SampleTreesResource(Resource):
             if project_access <= 1:
                 restricted_users = [BASE_TREE, VALIDATED, username]
                 sample_trees = TreeService.restrict_trees(sample_trees, restricted_users)
-
+                
         else:
-            if  project.visibility == 2:
-                sample_trees = TreeService.samples2trees(grew_sample_trees, sample_name)
-            else:
-                validator = 1
-                if validator:
-                    sample_trees = TreeService.samples2trees(
-                        grew_sample_trees,
-                        sample_name,
-                    )
-                else:
-                    sample_trees = TreeService.samples2trees_with_restrictions(
-                        grew_sample_trees,
-                        sample_name,
-                        current_user,
-                    )
+            sample_trees = TreeService.samples2trees(grew_sample_trees, sample_name)
+               
         if current_user.is_authenticated:
             LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "read")
         data = {"sample_trees": sample_trees, "blind_annotation_level": blind_annotation_level}
