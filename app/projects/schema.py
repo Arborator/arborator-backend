@@ -30,7 +30,8 @@ class ProjectSchema(Schema):
     visibility = fields.Integer(attribute="visibility")
     blindAnnotationMode = fields.Boolean(attribute="blind_annotation_mode")
     freezed = fields.Boolean(attribute="freezed")
-    config = fields.Boolean(attribute="config")
+    config = fields.String(attribute="config")
+    language = fields.String(attribute="language")
 
 
 class ProjectExtendedSchema(ProjectSchema):
@@ -61,6 +62,7 @@ class ProjectSchemaCamel(Schema):
     blindAnnotationMode = fields.Boolean(attribute="blind_annotation_mode")
     freezed = fields.Boolean(attribute="freezed")
     config = fields.String(attribute="config")
+    language = fields.String(attribute="language")
     diffMode = fields.Boolean(attribute="diff_mode")
     diffUserId = fields.String(attribute="diff_user_id")
 

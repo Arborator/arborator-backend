@@ -55,6 +55,7 @@ def migrate_add_validated_tree(engine):
     with engine.connect() as connection:
         connection.execute('ALTER TABLE projects RENAME COLUMN exercise_mode To blind_annotation_mode')
         connection.execute('ALTER TABLE projects ADD config STRING') 
+        connection.execute('ALTER TABLE projects ADD language STRING')
         connection.execute('ALTER TABLE projects DROP show_all_trees')  
         connection.execute('ALTER TABLE exerciselevel RENAME COLUMN exercise_level TO blind_annotation_level')
         connection.execute('ALTER TABLE exerciselevel RENAME TO blindannotationlevel')

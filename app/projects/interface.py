@@ -11,6 +11,7 @@ class ProjectInterface(TypedDict, total=False):
     blind_annotation_mode: bool
     freezed: bool
     config: str
+    language: str
 
 
 class ProjectExtendedInterface(ProjectInterface, total=False):

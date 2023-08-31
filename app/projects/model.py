@@ -22,6 +22,7 @@ class Project(db.Model, BaseM):
     diff_user_id = Column(String(256), nullable=True)
     freezed = Column(Boolean, default=False)
     config = Column(String(256), nullable=True)
+    language = Column(String(256), nullable=True)
 
     feature = db.relationship("ProjectFeature", cascade="all,delete", backref="projects")
     meta_feature = db.relationship("ProjectMetaFeature", cascade="all,delete", backref="projects")
