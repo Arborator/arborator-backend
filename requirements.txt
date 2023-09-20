@@ -13,7 +13,7 @@ cffi==1.14.3
 chardet==3.0.4
 charset-normalizer==3.1.0
 click==7.1.2
-conllup==3.1.0
+conllup==3.1.1
 cryptography==2.9.2
 et-xmlfile==1.0.1
 Flask==1.1.2
