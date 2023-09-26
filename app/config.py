@@ -46,7 +46,7 @@ class DevelopmentConfig(Config):
     cert_bytes = open(fname, 'rb').read()
     PKEY = default_backend().load_pem_private_key(cert_bytes, None)
 
-    PROJECT_IMAGE_FOLDER = "/home/gael/Documents/arborator/arborator-frontend/public/images/projectimages" #"../../../arborator-frontend/public/images/projectimages"
+    PROJECT_IMAGE_FOLDER = "app/uploads/images"
     UPLOAD_IMAGE_EXTENSIONS = ['.jpg', '.png', '.gif', '.jpeg']
 
 
@@ -64,7 +64,7 @@ class TestingConfig(Config):
     basedir = os.path.dirname(os.path.abspath(__file__))
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'arborator_test.sqlite')
 
-    PROJECT_IMAGE_FOLDER = "../../../arborator-frontend/public/images/projectimages"
+    PROJECT_IMAGE_FOLDER = "app/uploads/images"
     UPLOAD_IMAGE_EXTENSIONS = ['.jpg', '.png', '.gif', '.jpeg']
 
 
@@ -91,7 +91,7 @@ class ProductionConfig(Config):
     PKEY = default_backend().load_pem_private_key(cert_bytes, None)
 
     ## WARNING : specify the DIST folder, not the quasar source code in prod
-    PROJECT_IMAGE_FOLDER = "/home/arborator/arborator-frontend/dist/spa/images/projectimages"#"../../../arborator-frontend/public/images/projectimages"
+    PROJECT_IMAGE_FOLDER = "app/uploads/images"
     UPLOAD_IMAGE_EXTENSIONS = ['.jpg', '.png', '.gif', '.jpeg']
 
 

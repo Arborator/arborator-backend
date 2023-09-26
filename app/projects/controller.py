@@ -2,9 +2,11 @@ import datetime
 import json
 import os
 import re
+import base64
 from typing import List
 
-from flask import abort, current_app, request, session
+
+from flask import abort, current_app, request, jsonify
 from flask_accepts.decorators.decorators import accepts, responds
 from flask_login import current_user
 from flask_restx import Namespace, Resource, reqparse
@@ -301,6 +303,21 @@ class ProjectAccessUserResource(Resource):
 
 @api.route("/<string:projectName>/image")
 class ProjectImageResource(Resource):
+
+    def get(self, projectName: str):
+        project = ProjectService.get_by_name(projectName)
+        ProjectService.check_if_project_exist(projectName)
+
+        project_image = project.image
+        if(project_image):
+            image_path = os.path.join(current_app.config["PROJECT_IMAGE_FOLDER"], project_image)
+            if os.path.exists(image_path):
+                with open(image_path, 'rb') as file:
+                    image_data = base64.b64encode(file.read()).decode('utf-8')
+                    return jsonify({"image_data": image_data, "image_ext": image_path.split(".")[1]})
+        return jsonify({})
+    
+
     @responds(schema=ProjectSchemaCamel)
     def post(self, projectName: str):
         parser = reqparse.RequestParser()
@@ -322,8 +339,7 @@ class ProjectImageResource(Resource):
         ) as f:
             f.write(content)
 
-        filepath = "images/projectimages/%s" % (filename)
-        ProjectService.change_image(projectName, filepath)
+        ProjectService.change_image(projectName, filename)
 
         return ProjectService.get_by_name(projectName)
 
