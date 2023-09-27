@@ -320,7 +320,11 @@ def formatTrees_new(m, trees, conll, isPackage: bool = False):
         trees[sample_name] = {}
 
     if sent_id not in trees[sample_name]:
-        sentenceJson = sentenceConllToJson(conll)
+        try: 
+            sentenceJson = sentenceConllToJson(conll)
+        except ValueError as e:
+            abort(400, 'The result of your query can not be processed by ArboratorGrew')
+            
         sentence_text = constructTextFromTreeJson(sentenceJson["treeJson"])
         trees[sample_name][sent_id] = {
             "sentence": sentence_text,
