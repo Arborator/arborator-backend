@@ -5,6 +5,7 @@ from flask import abort, current_app
 from flask_login import current_user
 
 from app import db
+from app.utils.grew_utils import grew_request
 from ..user.model import User
 from .interface import ProjectInterface
 from .model import Project, ProjectAccess, ProjectFeature, ProjectMetaFeature, LastAccess
@@ -42,7 +43,16 @@ class ProjectService:
         db.session.delete(project)
         db.session.commit()
         return project_name
-
+    
+    @staticmethod
+    def rename_project(project_name: str, new_project_name): 
+        reply = grew_request("renameProject", data= {
+            "project_id": project_name,
+            "new_project_id": new_project_name
+        })
+        if reply["status"] != 'OK':
+            abort(404)
+        
     @staticmethod
     def change_image(project_name, value):
         """ set a project image (path) and return the new project  """

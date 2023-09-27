@@ -169,6 +169,9 @@ class ProjectIdResource(Resource):
         project = ProjectService.get_by_name(projectName)
         ProjectAccessService.check_admin_access(project.id)
         changes: ProjectInterface = request.parsed_obj
+        if ('project_name' in changes.keys()):
+            ProjectService.rename_project(projectName, changes.get("project_name"))
+            
         return ProjectService.update(project, changes)
 
     def delete(self, projectName: str):
