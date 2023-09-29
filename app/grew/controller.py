@@ -59,25 +59,38 @@ class ApplyRuleResource(Resource):
 class SearchResource(Resource):
     "Search"
     def post(self, project_name: str):
+
         parser = reqparse.RequestParser()
         parser.add_argument(name="pattern", type=str)
         parser.add_argument(name="userType", type=str)
         args = parser.parse_args()
-
         pattern = args.get("pattern")
-        user_type = args.get("userType") 
+        trees_type = args.get("userType") 
         
+        user_type = 'all' if trees_type == 'pending' else trees_type
 
         reply = GrewService.search_pattern_in_graphs(project_name, pattern, user_type)
+
         if reply["status"] != "OK":
             abort(400)
+
         trees = {}
         for m in reply["data"]:
             if m["user_id"] == "":
                 abort(409)
             conll = m["conll"]
             trees = formatTrees_new(m, trees, conll)
-        return trees
+
+        search_results = {}
+        if trees_type == "pending":
+            for sample_name, sample_results in trees.items():
+                search_results[sample_name] = {
+                    sent_id: result for sent_id, result in sample_results.items() if 'validated' not in result["conlls"].keys()
+                }
+        else: 
+            search_results = trees
+        
+        return search_results
 
 
 @api.route("/<string:project_name>/sample/<string:sample_name>/search")
@@ -98,8 +111,15 @@ class SearchInSampleResource(Resource):
         args = parser.parse_args()
 
         pattern = args.get("pattern")
-        user_type = args.get("userType")
+        trees_type = args.get("userType")
+
+        user_type = 'all' if trees_type == 'pending' else trees_type
+
         reply = GrewService.search_pattern_in_graphs(project_name, pattern, user_type)
+        
+        if reply["status"] != "OK":
+            abort(400)
+
         trees = {}
         for m in reply["data"]:
             if m["sample_id"] != sample_name:
@@ -108,7 +128,16 @@ class SearchInSampleResource(Resource):
                 abort(409)
             conll = m["conll"]
             trees = formatTrees_new(m, trees, conll)
-        return trees
+
+        search_results = {}
+        if trees_type == 'pending':
+            search_results[sample_name] = {
+                sent_id: result for sent_id, result in trees[sample_name].items() if 'validated' not in result["conlls"].keys()
+            }
+        else:
+            search_results = trees
+
+        return search_results
 
 @api.route("/<string:project_name>/try-package")
 class TryPackageResource(Resource):
@@ -158,6 +187,8 @@ class RelationTableResource(Resource):
             user_ids = { "one": [current_user.username, "__last__"] }
         elif tableType=='recent':
             user_ids = { "one": ["__last__"] }
+        elif tableType=='validated':
+            user_ids = { "one": ["validated"]}
         elif tableType=='all':
             user_ids = "all"
         reply = grew_request(
@@ -267,7 +298,6 @@ def post_process_diffs(grew_search_results, other_users, features):
                                 matches[other_user_id] = list_matches
                                 conlls[other_user_id] = grew_search_results[sample_name][sent_id]["conlls"][other_user_id]           
                 if len(conlls) > 0 : 
-                    print('test')
                     post_processed_results[sample_name][sent_id] = {
                         "sentence": grew_search_results[sample_name][sent_id]["sentence"],
                         "sample_name": sample_name,

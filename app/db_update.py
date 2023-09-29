@@ -12,7 +12,7 @@ if args.mode != 'prod' and args.mode != 'dev':
     print('mode must be prod or dev')
     exit()
 
-if args.version != 'add_github' and args.version != 'add_constructicon' and args.version != 'all' and args.version != 'new_roles':
+if args.version != 'add_github' and args.version != 'add_constructicon' and args.version != 'all' and args.version != 'new_roles' and args.version != 'add_validated_tree':
     print('version must be add_github, add_constructicon or all')
     exit()
 
@@ -49,6 +49,18 @@ def migrate_add_constructicon(engine):
 def migrate_new_roles(engine):
     with engine.connect() as connection:
         connection.execute('UPDATE projectaccess SET access_level = 3 WHERE projectaccess.access_level == 2')
+           
+
+def migrate_add_validated_tree(engine):
+    with engine.connect() as connection:
+        connection.execute('ALTER TABLE projects RENAME COLUMN exercise_mode To blind_annotation_mode')
+        connection.execute('ALTER TABLE projects ADD config STRING') 
+        connection.execute('ALTER TABLE projects ADD language STRING')
+        connection.execute('ALTER TABLE projects DROP show_all_trees')  
+        connection.execute('ALTER TABLE exerciselevel RENAME COLUMN exercise_level TO blind_annotation_level')
+        connection.execute('ALTER TABLE exerciselevel RENAME TO blindannotationlevel')
+        connection.execute('CREATE TABLE user_tags (id INTEGER NOT NULL, user_id VARCHAR(256), tags JSONB, PRIMARY KEY(id), FOREIGN KEY(user_id) REFERENCES users(id))')
+        
 
 if args.version == 'add_github':
     migrate_add_github(engine)
@@ -62,3 +74,6 @@ if args.version == 'all':
 
 if args.version == 'new_roles':
     migrate_new_roles(engine)
+
+if args.version == 'add_validated_tree':
+    migrate_add_validated_tree(engine)
