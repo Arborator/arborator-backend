@@ -1,0 +1,18 @@
+version: '3'
+services:
+  arborator-backend:
+    container_name: arborator-backend
+    build: .
+    image: arborator-backend
+    ports: 
+      -  "5000:5000"
+    volumes:
+      - .:/app
+    environment:
+      - FLASK_ENV=dev
+      - FLASK_APP=wsgi.py
+networks: 
+  default: 
+    external: 
+      name: external-network
+    
