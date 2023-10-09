@@ -11,11 +11,12 @@ from werkzeug.datastructures import FileStorage
 
 from app import db
 from app.config import Config
+from app.user.model import User
 from app.projects.service import ProjectService
 from app.utils.grew_utils import GrewService
 from app.github.service import GithubCommitStatusService, GithubSynchronizationService, GithubWorkflowService
 
-from .model import SampleBlindAnnotationLevel
+from .model import SampleExerciseLevel, SampleRole
 
 BASE_TREE = "base_tree"
 
@@ -97,36 +98,120 @@ class SampleTokenizeService:
                 GithubCommitStatusService.create(project_name, sample_name)
                 GithubCommitStatusService.update(project_name, sample_name)
              
-
-class SampleBlindAnnotationLevelService:
+   
+class SampleRoleService:
     @staticmethod
-    def create(new_attrs) -> SampleBlindAnnotationLevel:
-        new_blind_annotation_level = SampleBlindAnnotationLevel(**new_attrs)
-        db.session.add(new_blind_annotation_level)
+    def create(new_attrs):
+        new_sample_role = SampleRole(**new_attrs)
+        db.session.add(new_sample_role)
         db.session.commit()
-        return new_blind_annotation_level
+        return new_sample_role
 
     @staticmethod
-    def update(blind_annotation_level: SampleBlindAnnotationLevel, changes):
-        blind_annotation_level.update(changes)
+    def get_one(
+        project_id: int,
+        sample_name: str,
+        user_id: int,
+        role: int,
+    ):
+        """Get one specific user role """
+        role = (
+            db.session.query(SampleRole)
+            .filter(SampleRole.user_id == user_id)
+            .filter(SampleRole.project_id == project_id)
+            .filter(SampleRole.sample_name == sample_name)
+            .filter(SampleRole.role == role)
+            .first()
+        )
+
+    @staticmethod
+    def delete_one(
+        project_id: int,
+        sample_name: str,
+        user_id: int,
+        role: int,
+    ):
+        """Delete one specific user role """
+        role = (
+            db.session.query(SampleRole)
+            .filter(SampleRole.user_id == user_id)
+            .filter(SampleRole.project_id == project_id)
+            .filter(SampleRole.sample_name == sample_name)
+            .filter(SampleRole.role == role)
+            .first()
+        )
+        if not role:
+            return []
+        db.session.delete(role)
         db.session.commit()
-        return blind_annotation_level
+        return [(project_id, sample_name, user_id, role)]
 
     @staticmethod
-    def get_by_sample_name(project_id: int, sample_name: str) -> SampleBlindAnnotationLevel:
-        blind_annotation_level = SampleBlindAnnotationLevel.query.filter_by(
-            sample_name=sample_name, project_id=project_id
-        ).first()
-        return blind_annotation_level
+    def get_by_sample_name(project_id: int, sample_name: str):
+        """Get a dict of annotators and validators for a given sample"""
+        roles = {}
+        for r, label in SampleRole.ROLES:
+            role = (
+                db.session.query(User, SampleRole)
+                .filter(User.id == SampleRole.user_id)
+                .filter(SampleRole.project_id == project_id)
+                .filter(SampleRole.sample_name == sample_name)
+                .filter(SampleRole.role == r)
+                .all()
+            )
+            roles[label] = [{"key": a.username, "value": a.username} for a, b in role]
+
+        return roles
 
     @staticmethod
     def delete_by_sample_name(project_id: int, sample_name: str):
         """Delete all access of a sample. Used after a sample deletion was asked by the user
         ... perform on grew server."""
         roles = (
-            db.session.query(SampleBlindAnnotationLevel)
-            .filter(SampleBlindAnnotationLevel.project_id == project_id)
-            .filter(SampleBlindAnnotationLevel.sample_name == sample_name)
+            db.session.query(SampleRole)
+            .filter(SampleRole.project_id == project_id)
+            .filter(SampleRole.sample_name == sample_name)
+            .all()
+        )
+        for role in roles:
+            db.session.delete(role)
+        db.session.commit()
+
+        return
+
+    # def get_annotators_by_sample_id(project_id: int, sample_id: int) -> List[str]:
+    #     return
+
+
+class SampleExerciseLevelService:
+    @staticmethod
+    def create(new_attrs) -> SampleExerciseLevel:
+        new_sample_access_level = SampleExerciseLevel(**new_attrs)
+        db.session.add(new_sample_access_level)
+        db.session.commit()
+        return new_sample_access_level
+
+    @staticmethod
+    def update(sample_exercise_level: SampleExerciseLevel, changes):
+        sample_exercise_level.update(changes)
+        db.session.commit()
+        return sample_exercise_level
+
+    @staticmethod
+    def get_by_sample_name(project_id: int, sample_name: str) -> SampleExerciseLevel:
+        sample_exercise_level = SampleExerciseLevel.query.filter_by(
+            sample_name=sample_name, project_id=project_id
+        ).first()
+        return sample_exercise_level
+
+    @staticmethod
+    def delete_by_sample_name(project_id: int, sample_name: str):
+        """Delete all access of a sample. Used after a sample deletion was asked by the user
+        ... perform on grew server."""
+        roles = (
+            db.session.query(SampleExerciseLevel)
+            .filter(SampleExerciseLevel.project_id == project_id)
+            .filter(SampleExerciseLevel.sample_name == sample_name)
             .all()
         )
         for role in roles:
@@ -144,12 +229,12 @@ class SampleEvaluationService:
         submitted = {}
         total = {"UPOS": 0, "DEPREL": 0, "HEAD": 0}
         for sentence_id, sentence_conlls in sample_conlls.items():
-            validated_tree_conll = sentence_conlls.get("validated")
-            if validated_tree_conll:
-                validated_tree_sentence_json = sentenceConllToJson(
-                    validated_tree_conll
+            teacher_conll = sentence_conlls.get("teacher")
+            if teacher_conll:
+                teacher_sentence_json = sentenceConllToJson(
+                    teacher_conll
                 )
-                validated_tree = validated_tree_sentence_json["treeJson"]['nodesJson']
+                teacher_tree = teacher_sentence_json["treeJson"]['nodesJson']
 
                 basetree_conll = sentence_conlls.get(BASE_TREE)
                 if basetree_conll:
@@ -160,15 +245,15 @@ class SampleEvaluationService:
                 else:
                     basetree_tree = {}
 
-                for token_id in validated_tree.keys():
-                    validated_tree_token = validated_tree.get(token_id)
-                    if validated_tree_token == None:
+                for token_id in teacher_tree.keys():
+                    teacher_token = teacher_tree.get(token_id)
+                    if teacher_token == None:
                         continue
                     basetree_token = basetree_tree.get(token_id, {})
                     for label in ["UPOS", "HEAD", "DEPREL"]:
                         if (
-                            validated_tree_token[label] != "_"
-                            and basetree_token.get(label) != validated_tree_token[label]
+                            teacher_token[label] != "_"
+                            and basetree_token.get(label) != teacher_token[label]
                         ):
                             total[label] += 1
             else:
@@ -176,7 +261,7 @@ class SampleEvaluationService:
 
             for user_id, user_conll in sentence_conlls.items():
 
-                if user_id != "validated":
+                if user_id != "teacher":
                     if not corrects.get(user_id):
                         corrects[user_id] = {"UPOS": 0, "DEPREL": 0, "HEAD": 0}
                     if not submitted.get(user_id):
@@ -188,8 +273,8 @@ class SampleEvaluationService:
                     user_tree = user_sentence_json["treeJson"]["nodesJson"]
 
                     for token_id in user_tree.keys():
-                        validated_tree_token = validated_tree.get(token_id)
-                        if validated_tree_token == None:
+                        teacher_token = teacher_tree.get(token_id)
+                        if teacher_token == None:
                             continue
 
                         user_token = user_tree.get(token_id)
@@ -197,13 +282,13 @@ class SampleEvaluationService:
 
                         for label in ["UPOS", "HEAD", "DEPREL"]:
                             if (
-                                validated_tree_token[label] != "_"
-                                and basetree_token.get(label) != validated_tree_token[label]
+                                teacher_token[label] != "_"
+                                and basetree_token.get(label) != teacher_token[label]
                             ):
                                 if user_token[label] != "_":
                                     submitted[user_id][label] += 1
                                 corrects[user_id][label] += (
-                                    validated_tree_token[label] == user_token[label]
+                                    teacher_token[label] == user_token[label]
                                 )
         GRADE = 100
         evaluations = {}

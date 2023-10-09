@@ -9,6 +9,7 @@ from flask_login import current_user
 from .interface import ProjectExtendedInterface, ProjectInterface
 from .model import Project, ProjectAccess, ProjectFeature, ProjectMetaFeature, DefaultUserTrees
 from ..utils.grew_utils import grew_request
+from ..samples.model import SampleRole
 
 
 class ProjectService:

@@ -28,10 +28,9 @@ class ProjectSchema(Schema):
     description = fields.String(attribute="description")
     image = BlobImageField(attribute="image")
     visibility = fields.Integer(attribute="visibility")
-    blindAnnotationMode = fields.Boolean(attribute="blind_annotation_mode")
+    showAllTrees = fields.Boolean(attribute="show_all_trees")
+    exerciseMode = fields.Boolean(attribute="exercise_mode")
     freezed = fields.Boolean(attribute="freezed")
-    config = fields.String(attribute="config")
-    language = fields.String(attribute="language")
 
 
 class ProjectExtendedSchema(ProjectSchema):
@@ -59,10 +58,9 @@ class ProjectSchemaCamel(Schema):
     description = fields.String(attribute="description")
     image = BlobImageField(attribute="image")
     visibility = fields.Integer(attribute="visibility")
-    blindAnnotationMode = fields.Boolean(attribute="blind_annotation_mode")
+    showAllTrees = fields.Boolean(attribute="show_all_trees")
+    exerciseMode = fields.Boolean(attribute="exercise_mode")
     freezed = fields.Boolean(attribute="freezed")
-    config = fields.String(attribute="config")
-    language = fields.String(attribute="language")
     diffMode = fields.Boolean(attribute="diff_mode")
     diffUserId = fields.String(attribute="diff_user_id")
 

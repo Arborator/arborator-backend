@@ -8,10 +8,9 @@ class ProjectInterface(TypedDict, total=False):
     description: str
     image: Any
     visibility: int
-    blind_annotation_mode: bool
+    show_all_trees: bool
+    exercise_mode: bool
     freezed: bool
-    config: str
-    language: str
 
 
 class ProjectExtendedInterface(ProjectInterface, total=False):

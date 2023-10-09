@@ -3,7 +3,6 @@ def register_routes(api, app, root="api"):
     from app.projects import register_routes as attach_projects
     from app.samples import register_routes as attach_samples
     from app.trees import register_routes as attach_trees
-    from app.tags import register_routes as attach_tags
     from app.lexicon import register_routes as attach_lexicon
     from app.constructicon import register_routes as attach_constructicon
     from app.grew import register_routes as attach_grew
@@ -16,7 +15,6 @@ def register_routes(api, app, root="api"):
     attach_projects(api, app, root)
     attach_samples(api, app, root)
     attach_trees(api, app, root)
-    attach_tags(api, app, root)
     attach_lexicon(api, app, root)
     attach_constructicon(api, app, root)
     attach_grew(api, app, root)
