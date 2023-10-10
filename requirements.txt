@@ -9,7 +9,7 @@ Authomatic==1.0.0
 autopep8==1.6.0
 black==23.9.1
 certifi==2023.7.22
-cffi==1.14.3
+cffi==1.16.0
 chardet==3.0.4
 charset-normalizer==3.1.0
 click==8.0.0
