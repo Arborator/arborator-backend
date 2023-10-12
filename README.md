@@ -14,7 +14,7 @@ FLASK_ENV=dev|prod|test
 ```
 
 ## Run the backend
-To run the backend we use the docker, the docker installing steps are [here](https://github.com/Arborator/arborator-frontend#1-install-docker-and-docker-compose)
+To run the backend we use the docker, the steps of the docker installation are [here](https://github.com/Arborator/arborator-frontend#1-install-docker-and-docker-compose)
 
 - To ensure the communication between the containers of the backend and the frontend we need to create network
 ```
