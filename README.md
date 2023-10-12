@@ -13,30 +13,18 @@ Create a .flaskenv file with the following config
 FLASK_ENV=dev|prod|test
 ```
 
-## (Linux) Installing python-dev packages 
-If on Linux, you will probably need the version of python-dev package associated to your python version
-```
-sudo apt-get install python3.<X>-dev
-```
-with `<X>` equal to your python version
+## Run the backend
+To run the backend we use the docker, the docker installing steps are [here](https://github.com/Arborator/arborator-frontend#1-install-docker-and-docker-compose)
 
-## Setting the python virtual environment
-WORKS WITH PYTHON 3.8   (DOESNT WORK FOR 3.10 !!!)
-Preferably, first create a virtualenv and activate it, perhaps with the following command:
-
+- To ensure the communication between the containers of the backend and the frontend we need to create network
 ```
-virtualenv -p python3 venv
-source venv/bin/activate
+docker network create external-network
+```
+- Run the container of the backend using docker-compose
+```
+docker-compose up --build
 ```
 
-Next, run
-
-```
-pip install --upgrade pip wheel
-pip install -r requirements.txt
-```
-
-to get the dependencies.
 
 ## Handle keys + auth_config
 Ask an admin of Arborator the keys.zip and the auth_config.py, and locate them in (from root)
