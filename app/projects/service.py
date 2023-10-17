@@ -293,97 +293,29 @@ class ProjectMetaFeatureService:
 
 
 class LastAccessService:
-    @staticmethod
-    def get_last_access_time_per_project(project_name, access_type="any"):
-        """return the last access for a project
-        project_id: string, id of the project
-        access_type: "write" ,"read", "any", "any+write"
-        """
-        if access_type not in ["any", "read", "write", "any+write"]:
-            raise f"ERROR by the coder in LastAccessService, access_type not in 'any' 'read' 'write'"
-        
-        last_accesss: List[LastAccess] = LastAccess.query.join(Project).filter(Project.project_name == project_name).all()
-        
-        # less "pretty" version but with decreased complexity
-        if access_type == "any+write":
-            last_read, last_write = 0, 0
-            for last_access in last_accesss:
-                if last_access.last_read or 0 > last_read:   last_read = last_access.last_read
-                if last_access.last_write or 0 > last_write: last_write = last_access.last_write
-            return max(last_read, last_write), last_write
-        elif access_type == "any":
-            last_read = 0
-            last_write = 0
-            for last_access in last_accesss:
-                if last_access.last_read or 0 > last_read:   last_read = last_access.last_read
-                if last_access.last_write or 0 > last_write: last_write = last_access.last_write
-            return max(last_read, last_write)
-        elif access_type == "write":
-            last_write = 0
-            for last_access in last_accesss:
-                if last_access.last_write or 0 > last_write: last_write = last_access.last_write
-            return last_write
-        elif access_type == "read":
-            last_read = 0
-            for last_access in last_accesss:
-                if last_access.last_read or 0 > last_read:   last_read = last_access.last_read
-            return last_read
-
 
     @staticmethod
-    def get_last_access_time_per_user(username, access_type="any"):
-        if access_type not in ["any", "read", "write"]:
-            raise f"ERROR by the coder in LastAccessService, access_type not in 'any' 'read' 'write'"
-
-        last_accesss: List[LastAccess] = LastAccess.join(User).query.filter(User.username == username).all()
-
-        last_read = 0
-        last_write = 0
-        for last_access in last_accesss:
-            if last_access.last_read or 0 > last_read:
-                last_read = last_access.last_read
-            if last_access.last_write or 0 > last_write:
-                last_write = last_access.last_write
-        
-        if access_type == "any":
-            return max(last_read, last_write)
-        elif access_type == "write":
-            return last_write
-        elif access_type == "read":
-            return last_read
-
-    @staticmethod
-    def get_last_access_time_per_user_and_project(username, project_name, access_type="any"):
-        if access_type not in ["any", "read", "write"]:
-            raise f"ERROR by the coder in LastAccessService, access_type not in 'any' 'read' 'write'"
-
-        last_accesss: LastAccess = LastAccess.join(User).query.filter(User.username == username).join(Project).query.filter(Project.project_name == project_name).first()
-        # TODO : is the datetime in the database a integer ? Or a special datetime object ? Be careful for the comparaison
-        last_read = 0
-        last_write = 0
-
-
-        if last_accesss:
-            last_read = last_accesss.last_read
-            last_write = last_accesss.last_write
-
-        if access_type == "any":
-            return max(last_read, last_write)
-        elif access_type == "write":
-            return last_write
-        elif access_type == "read":
-            return last_read
-        
-
+    def get_project_last_access(project_name):
+        project = ProjectService.get_by_name(project_name)
+        ProjectService.check_if_project_exist(project)
+        last_accesses: LastAccess = LastAccess.query.filter(LastAccess.project_id == project.id)
+        last_read = max(
+            (last_access.last_read for last_access in last_accesses if last_access.last_read is not None)
+            , default=0
+        )
+        last_write = max(
+            (last_access.last_write for last_access in last_accesses if last_access.last_write is not None)
+            , default= 0
+        )
+        return last_read, last_write
+    
     @staticmethod
     def update_last_access_per_user_and_project(user_id, project_name, access_type):
         if access_type not in ["read", "write"]:
             raise f"ERROR by the coder in LastAccessService, access_type not in 'read' 'write'"
 
-        project: Project = Project.query.filter(Project.project_name == project_name).first()
-        if not user_id and not project:
-            print("user or project missing")
-            return None
+        project = ProjectService.get_by_name(project_name)
+        ProjectService.check_if_project_exist(project)
 
         last_accesss: LastAccess = LastAccess.query.filter(LastAccess.user_id == user_id).filter(LastAccess.project_id == project.id).first()
         

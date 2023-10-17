@@ -74,8 +74,8 @@ class ProjectResource(Resource):
                 (
                     last_access,
                     last_write_access,
-                ) = LastAccessService.get_last_access_time_per_project(
-                    project.project_name, "any+write"
+                ) = LastAccessService.get_project_last_access(
+                    project.project_name
                 )
                 now = datetime.datetime.now().timestamp()
                 project.last_access = last_access - now
@@ -345,35 +345,3 @@ class ProjectImageResource(Resource):
         ProjectService.change_image(projectName, filename)
 
         return ProjectService.get_by_name(projectName)
-
-
-@api.route("/last_access")
-class LastAccessController(Resource):
-    @responds()
-    def post(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument(name="projectName", type=str)
-        parser.add_argument(name="username", type=str)
-        parser.add_argument(name="accessType", type=str)
-        args = parser.parse_args()
-
-        project_name = args.projectName
-        username = args.username
-        access_type = args.accessType or "any"
-
-        if project_name == None and username == None:
-            abort(400)
-
-        if project_name and username:
-            return LastAccessService.get_last_access_time_per_user_and_project(
-                username, project_name, access_type
-            )
-
-        if project_name:
-            return LastAccessService.get_last_access_time_per_project(
-                project_name, access_type
-            )
-        if username:
-            return LastAccessService.get_last_access_time_per_user(
-                username, access_type
-            )
