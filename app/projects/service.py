@@ -326,7 +326,7 @@ class LastAccessService:
                 "project_id": project.id,
                 "user_id": user_id,
                 "last_write": None if (access_type == "read") else time_now_ts,
-                "last_read": None if (access_type == "write") else time_now_ts,
+                "last_read": time_now_ts,
             }
             new_last_access = LastAccess(**new_data)
             db.session.add(new_last_access)
