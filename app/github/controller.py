@@ -49,7 +49,7 @@ class GithubSynchronizationResource(Resource):
         return {"status": "success"}
     
 
-    def delete(self, project_name: str, username: str):
+    def delete(self, project_name: str):
 
         project = ProjectService.get_by_name(project_name)
         ProjectService.check_if_project_exist(project)
