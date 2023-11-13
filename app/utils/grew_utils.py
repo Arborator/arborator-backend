@@ -193,6 +193,8 @@ class GrewService:
             user_ids = { "one": ["__last__"] }
         elif user_type == 'validated':
             user_ids = { "one": ["validated"] }
+        elif user_type == 'base_tree': 
+            user_ids = { "one": ["base_tree"]}
         elif user_type == 'all':
             user_ids = "all"
         data = {
