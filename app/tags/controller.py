@@ -37,9 +37,10 @@ class UserTagsResource(Resource):
 
         project = ProjectService.get_by_name(project_name)
         ProjectService.check_if_project_exist(project)
-        user_id = UserService.get_by_username(username).id
-        if UserTagsService.get_by_user_id(user_id):
-            return UserTagsService.get_by_user_id(user_id).tags
+        user = UserService.get_by_username(username)
+        if(user is not None):
+            if UserTagsService.get_by_user_id(user.id):
+                return UserTagsService.get_by_user_id(user.id).tags
 
 
     def post(self, project_name, username):
