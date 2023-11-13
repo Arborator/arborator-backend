@@ -104,9 +104,10 @@ class ProjectResource(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument(name="projectName", type=str)
         parser.add_argument(name="description", type=str)
-        parser.add_argument(name="showAllTrees", type=bool)
-        parser.add_argument(name="exerciseMode", type=bool)
+        parser.add_argument(name="blindAnnotationMode", type=bool)
         parser.add_argument(name="visibility", type=int)
+        parser.add_argument(name="config", type=str)
+        parser.add_argument(name="language", type=str)
         args = parser.parse_args()
 
         # Sanitize the project name to correspond to Grew folders requirements
@@ -115,10 +116,11 @@ class ProjectResource(Resource):
         new_project_attrs: ProjectInterface = {
             "project_name": projectName,
             "description": args.description,
-            "show_all_trees": args.showAllTrees,
-            "exercise_mode": args.exerciseMode,
+            "blind_annotation_mode": args.blindAnnotationMode,
             "visibility": args.visibility,
             "freezed": False,
+            "config": args.config,
+            "language": args.language
         }
 
         # KK : TODO : put all grew request in a seperated file and add error catching
