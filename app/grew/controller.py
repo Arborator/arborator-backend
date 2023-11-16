@@ -63,81 +63,26 @@ class SearchResource(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument(name="pattern", type=str)
         parser.add_argument(name="userType", type=str)
+        parser.add_argument(name="sampleIds",type=str,action="append")
+
         args = parser.parse_args()
+
         pattern = args.get("pattern")
         trees_type = args.get("userType") 
+        sample_ids = args.get("sampleIds")
         
         user_type = 'all' if trees_type == 'pending' else trees_type
+        if not sample_ids: 
+            sample_ids = [sample["name"] for sample in GrewService.get_samples(project_name)]
 
-        reply = GrewService.search_pattern_in_graphs(project_name, pattern, user_type)
-
-        if reply["status"] != "OK":
+        response = GrewService.search_pattern_in_graphs(project_name, pattern, user_type)
+        
+        if response["status"] != "OK":
             abort(400)
 
-        trees = {}
-        for m in reply["data"]:
-            if m["user_id"] == "":
-                abort(409)
-            conll = m["conll"]
-            trees = formatTrees_new(m, trees, conll)
-
-        search_results = {}
-        if trees_type == "pending":
-            for sample_name, sample_results in trees.items():
-                search_results[sample_name] = {
-                    sent_id: result for sent_id, result in sample_results.items() if 'validated' not in result["conlls"].keys()
-                }
-        else: 
-            search_results = trees
-        
+        search_results = post_process_grew_results(response["data"], sample_ids, trees_type)
         return search_results
 
-
-@api.route("/<string:project_name>/sample/<string:sample_name>/search")
-class SearchInSampleResource(Resource):
-    def post(self, project_name: str, sample_name: str):
-        """
-        Apply a grew search inside a project and sample
-        """
-        reply = grew_request("getSamples", data={"project_id": project_name})
-        data = reply.get("data")
-        samples_name = [sa["name"] for sa in data]
-        if not sample_name in samples_name:
-            abort(404)
-
-        parser = reqparse.RequestParser()
-        parser.add_argument(name="pattern", type=str)
-        parser.add_argument(name="userType", type=str)
-        args = parser.parse_args()
-
-        pattern = args.get("pattern")
-        trees_type = args.get("userType")
-
-        user_type = 'all' if trees_type == 'pending' else trees_type
-
-        reply = GrewService.search_pattern_in_graphs(project_name, pattern, user_type)
-        
-        if reply["status"] != "OK":
-            abort(400)
-
-        trees = {}
-        for m in reply["data"]:
-            if m["sample_id"] != sample_name:
-                continue
-            if m["user_id"] == "":
-                abort(409)
-            conll = m["conll"]
-            trees = formatTrees_new(m, trees, conll)
-
-        search_results = {}
-        if trees_type == 'pending':
-            search_results[sample_name] = {
-                sent_id: result for sent_id, result in trees[sample_name].items() if 'validated' not in result["conlls"].keys()
-            }
-        else:
-            search_results = trees
-
-        return search_results
 
 @api.route("/<string:project_name>/try-package")
 class TryPackageResource(Resource):
@@ -153,7 +98,7 @@ class TryPackageResource(Resource):
         user_type = args.get("userType")
         sample_id = args.get("sampleId", None)
         samples_ids = []
-        if (sample_id):
+        if sample_id:
             samples_ids = [sample_id]
         reply = GrewService.try_package(project_name, package, samples_ids, user_type)
         if reply["status"] != "OK":
@@ -162,8 +107,7 @@ class TryPackageResource(Resource):
         for m in reply["data"]:
             if m["user_id"] == "":
                 abort(409)
-            conll = m["conll"]
-            trees = formatTrees_new(m, trees, conll, isPackage=True)
+            trees = formatTrees_new(m, trees, isPackage=True)
         return trees
 
 
@@ -205,130 +149,7 @@ class RelationTableResource(Resource):
         return data
 
 
-@api.route("/<string:project_name>/show-diff")
-class ShowDiffRessource(Resource):
-    def post(self, project_name: str):
-        parser = reqparse.RequestParser()
-        parser.add_argument(name="otherUsers", type=str, action="append")
-        parser.add_argument(name="features", type=str, action="append")
-        parser.add_argument(name="sampleName", type=str)
-        args = parser.parse_args()
-
-        sample_name = args.get("sampleName")
-        other_users = args.get("otherUsers")
-        features = args.get("features")
-        pattern = "pattern { }"
-        user_type = "all"
-
-        reply = GrewService.search_pattern_in_graphs(project_name, pattern, user_type)
-        if reply["status"] != "OK":
-            abort(400)
-        trees = {}
-        for m in reply["data"]:
-            if m["user_id"] == "":
-                abort(409)
-            if sample_name and m["sample_id"] != sample_name:
-                continue  
-            conll = m["conll"]
-            trees = formatTrees_new(m, trees, conll)
-        return post_process_diffs(trees, other_users, features)
-    
-
-def check_all_diffs(left_sentence_json, right_sentence_json):
-
-    left_nodes_json = left_sentence_json["treeJson"]["nodesJson"]
-    right_nodes_json = right_sentence_json["treeJson"]["nodesJson"]
-    if len(left_nodes_json.values()) != len(right_nodes_json.values()):
-            return True
-    else: 
-        for token_id in left_nodes_json:
-            left_token = left_nodes_json[token_id]
-            right_token = right_nodes_json[token_id]
-            if json.dumps(left_token) != json.dumps(right_token):
-                return True
-
-
-def check_diffs_based_on_feats(left_sentence_json, right_sentence_json, features):
-    left_nodes_json = left_sentence_json["treeJson"]["nodesJson"]
-    right_nodes_json = right_sentence_json["treeJson"]["nodesJson"]
-    diff_token_ids =  set()
-    if len(left_nodes_json.values()) == len(right_nodes_json.values()):
-        for token_id in left_nodes_json:
-            left_token = left_nodes_json[token_id]
-            right_token = right_nodes_json[token_id]
-            if left_token['FORM'] == right_token['FORM']:
-                for feat in features:
-                    if '.' in feat: 
-                        base_feat = feat.split('.')[0]
-                        second_feat = feat.split('.')[1]
-                        if  second_feat in left_token[base_feat].keys() and second_feat in  right_token[base_feat].keys():
-                            if  left_token[base_feat][second_feat]!= right_token[base_feat][second_feat]:
-                                diff_token_ids.add(token_id)
-                    else:
-                        if left_token[feat] != right_token[feat]:
-                            diff_token_ids.add(token_id)
-
-        return diff_token_ids
-
-
-def post_process_diffs(grew_search_results, other_users, features):
-
-    user_id = other_users[0]
-    post_processed_results = {}
-    for sample_name in grew_search_results:
-        post_processed_results[sample_name] = {}
-        for sent_id in  grew_search_results[sample_name]:
-            if user_id in grew_search_results[sample_name][sent_id]["conlls"].keys():
-                user_sentence_json = sentenceConllToJson(grew_search_results[sample_name][sent_id]["conlls"][user_id])
-                conlls = {}
-                matches = {}
-                for other_user_id in other_users[1:]:
-                    if (other_user_id in grew_search_results[sample_name][sent_id]["conlls"].keys()):
-                        other_sentence_json = sentenceConllToJson(grew_search_results[sample_name][sent_id]["conlls"][other_user_id])
-                        if not features:
-                            if check_all_diffs(user_sentence_json, other_sentence_json):
-                                conlls[other_user_id] = grew_search_results[sample_name][sent_id]["conlls"][other_user_id]
-                        else:
-                            token_ids = check_diffs_based_on_feats(user_sentence_json, other_sentence_json, features)
-                            if token_ids:
-                                list_matches = []
-                                for token_id in token_ids:
-                                    list_matches.append({"edges":'' , "nodes": {"N": token_id} }) 
-                            
-                                matches[other_user_id] = list_matches
-                                conlls[other_user_id] = grew_search_results[sample_name][sent_id]["conlls"][other_user_id]           
-                if len(conlls) > 0 : 
-                    post_processed_results[sample_name][sent_id] = {
-                        "sentence": grew_search_results[sample_name][sent_id]["sentence"],
-                        "sample_name": sample_name,
-                        "conlls": conlls,
-                        "sent_id": sent_id,
-                        "matches": matches,
-                        "packages": {},
-                    }
-
-                    post_processed_results[sample_name][sent_id]["conlls"][user_id] = grew_search_results[sample_name][sent_id]["conlls"][user_id]                                    
-    return post_processed_results
-
-
-def get_timestamp(conll):
-    t = re.search("# timestamp = (\d+(?:\.\d+)?)\n", conll).groups()
-    if t:
-        return t[0]
-    else:
-        return False
-
-
-def get_last_user(tree):
-    timestamps = [(user, get_timestamp(conll)) for (user, conll) in tree.items()]
-    if len(timestamps) == 1:
-        last = timestamps[0][0]
-    else:
-        last = sorted(timestamps, key=lambda x: x[1])[-1][0]
-    return last
-
-
-def formatTrees_new(m, trees, conll, isPackage: bool = False):
+def formatTrees_new(m, trees, isPackage: bool = False):
     """
     m is the query result from grew
     list of trees
@@ -338,6 +159,7 @@ def formatTrees_new(m, trees, conll, isPackage: bool = False):
     user_id = m["user_id"]
     sample_name = m["sample_id"]
     sent_id = m["sent_id"]
+    conll = m["conll"]
 
     if isPackage == False:
         nodes = m["nodes"]
@@ -381,4 +203,26 @@ def formatTrees_new(m, trees, conll, isPackage: bool = False):
     return trees
 
 
+def post_process_grew_results(search_results, sample_ids, trees_type):
+    
+    trees = {}
+    
+    for result in search_results:
+        if result["sample_id"] not in sample_ids:
+            continue
+        trees = formatTrees_new(result, trees)
+
+    search_results = {}
+    if trees_type == 'pending':
+        for sample_id in sample_ids:
+            search_results[sample_id] = {
+            sent_id: result for sent_id, result in trees[sample_id].items() if 'validated' not in result["conlls"].keys()
+        }
+            
+    else: 
+        search_results = trees
+    
+    return search_results
+    
+        
                 
