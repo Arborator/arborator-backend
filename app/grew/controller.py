@@ -86,21 +86,21 @@ class SearchResource(Resource):
 
 @api.route("/<string:project_name>/try-package")
 class TryPackageResource(Resource):
-    "Search"
+    "rewrite"
     def post(self, project_name: str):
         parser = reqparse.RequestParser()
-        parser.add_argument(name="package", type=str)
-        parser.add_argument(name="sampleId", type=str)
+        parser.add_argument(name="query", type=str)
+        parser.add_argument(name="sampleIds", type=str, action="append")
         parser.add_argument(name="userType", type=str)
         args = parser.parse_args()
         
-        package = args.get("package")
+        package = args.get("query")
         user_type = args.get("userType")
-        sample_id = args.get("sampleId", None)
-        samples_ids = []
-        if sample_id:
-            samples_ids = [sample_id]
-        reply = GrewService.try_package(project_name, package, samples_ids, user_type)
+        sample_ids = args.get("sampleIds", None)
+        if not sample_ids: 
+            sample_ids = []
+            
+        reply = GrewService.try_package(project_name, package, sample_ids, user_type)
         if reply["status"] != "OK":
             abort(400)
         trees = {}
@@ -116,15 +116,16 @@ class RelationTableResource(Resource):
     def post(self, project_name):
 
         parser = reqparse.RequestParser()
-        parser.add_argument(name="sample_id")
+        parser.add_argument(name="sampleIds", type=str, action="append")
         parser.add_argument(name="tableType")
+
         args = parser.parse_args()
-        sample_id = args.get("sample_id")
-        if sample_id:
-            sample_ids = [sample_id]
-        else:
-            sample_ids = []
+
+        sample_ids = args.get("sampleIds")
+        
         tableType = args.get("tableType")
+        if not sample_ids: 
+            sample_ids = []
         if tableType=='user':
             user_ids = { "one": [current_user.username] }
         elif tableType=='user_recent':

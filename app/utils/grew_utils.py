@@ -183,7 +183,7 @@ class GrewService:
 
 
     @staticmethod
-    def try_package(project_id: str, package: str, sample_ids: List[str] , user_type):
+    def try_package(project_id: str, package: str, sample_ids, user_type):
         
         if user_type == 'user':
             user_ids = { "one": [current_user.username] }
