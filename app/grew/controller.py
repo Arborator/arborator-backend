@@ -64,18 +64,20 @@ class SearchResource(Resource):
         parser.add_argument(name="pattern", type=str)
         parser.add_argument(name="userType", type=str)
         parser.add_argument(name="sampleIds",type=str,action="append")
-
+        parser.add_argument(name="otherUser", type=str)
         args = parser.parse_args()
 
         pattern = args.get("pattern")
         trees_type = args.get("userType") 
         sample_ids = args.get("sampleIds")
+        other_user = args.get("otherUser")
         
+        print(other_user)
         user_type = 'all' if trees_type == 'pending' else trees_type
         if not sample_ids: 
             sample_ids = [sample["name"] for sample in GrewService.get_samples(project_name)]
 
-        response = GrewService.search_pattern_in_graphs(project_name, pattern, user_type)
+        response = GrewService.search_pattern_in_graphs(project_name, pattern, user_type, other_user)
         
         if response["status"] != "OK":
             abort(400)
@@ -92,15 +94,17 @@ class TryPackageResource(Resource):
         parser.add_argument(name="query", type=str)
         parser.add_argument(name="sampleIds", type=str, action="append")
         parser.add_argument(name="userType", type=str)
+        parser.add_argument(name="otherUser", type=str)
         args = parser.parse_args()
         
         package = args.get("query")
         user_type = args.get("userType")
+        other_user = args.get("otherUser")
         sample_ids = args.get("sampleIds", None)
         if not sample_ids: 
             sample_ids = []
             
-        reply = GrewService.try_package(project_name, package, sample_ids, user_type)
+        reply = GrewService.try_package(project_name, package, sample_ids, user_type, other_user)
         if reply["status"] != "OK":
             abort(400)
         trees = {}

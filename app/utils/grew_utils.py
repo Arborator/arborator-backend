@@ -158,7 +158,7 @@ class GrewService:
         )
 
     @staticmethod
-    def search_pattern_in_graphs(project_id: str, pattern: str, user_type: str):
+    def search_pattern_in_graphs(project_id: str, pattern: str, user_type: str, other_user: str):
         
         if user_type == 'user':
             user_ids = { "one": [current_user.username] }
@@ -170,9 +170,11 @@ class GrewService:
             user_ids = { "one": ["validated"] }
         elif user_type == 'base_tree': 
             user_ids = { "one": ["base_tree"]}
+        elif user_type == 'others': 
+            user_ids = { "one": [other_user] }
         elif user_type == 'all':
             user_ids = "all"
-
+        print('test')
         data = {
             "project_id": project_id,
             "pattern": pattern,
@@ -183,7 +185,7 @@ class GrewService:
 
 
     @staticmethod
-    def try_package(project_id: str, package: str, sample_ids, user_type):
+    def try_package(project_id: str, package: str, sample_ids, user_type, other_user):
         
         if user_type == 'user':
             user_ids = { "one": [current_user.username] }
@@ -195,6 +197,8 @@ class GrewService:
             user_ids = { "one": ["validated"] }
         elif user_type == 'base_tree': 
             user_ids = { "one": ["base_tree"]}
+        elif user_type == 'others': 
+            user_ids = { "one": [other_user] }
         elif user_type == 'all':
             user_ids = "all"
         data = {
