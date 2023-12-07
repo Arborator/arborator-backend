@@ -41,7 +41,7 @@ class GithubSynchronizationResource(Resource):
         project = ProjectService.get_by_name(project_name)
         ProjectService.check_if_project_exist(project)
     
-        github_access_token = UserService.get_by_username(username).github_access_token
+        github_access_token = UserService.get_by_id(current_user.id).github_access_token
         GithubWorkflowService.import_files_from_github(github_access_token, repository_name, project_name, username, branch_import, branch_syn)
         sha = GithubService.get_sha_base_tree(github_access_token, repository_name, branch_syn)
         GithubSynchronizationService.synchronize_github_repository(current_user.id, project.id, repository_name, branch_syn, sha)
