@@ -72,7 +72,11 @@ class SampleTreesResource(Resource):
                
         if current_user.is_authenticated:
             LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "read")
-        data = {"sample_trees": sample_trees, "blind_annotation_level": blind_annotation_level}
+        data = {
+            "sample_trees": sample_trees, 
+            "sent_ids": list(sample_trees.keys()), 
+            "blind_annotation_level": blind_annotation_level
+        }
         return data
 
     def post(self, project_name: str, sample_name: str):
@@ -115,8 +119,3 @@ class UserTreesResource(Resource):
         data = {"project_id": project_name,  "sample_id": sample_name, "sent_ids": "[]","user_id": username, }
         grew_request("eraseGraphs", data)
         LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")  
-
-
-
-
-
