@@ -294,7 +294,8 @@ def check_duplicate_sent_id(path_file: str, sample_name: str):
     sent_ids = []
     sentences_json = readConlluFileWrapper(path_file, keepEmptyTrees=True)
     for sentence_json in sentences_json:
-        sent_ids.append(sentence_json["metaJson"]["sent_id"])
+        if "sent_id" in sentence_json["metaJson"].keys():
+            sent_ids.append(sentence_json["metaJson"]["sent_id"])
     sent_ids_count = Counter(sent_ids)
     for count in sent_ids_count.values():
         if count > 1:
