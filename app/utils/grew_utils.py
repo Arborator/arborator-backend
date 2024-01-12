@@ -151,10 +151,10 @@ class GrewService:
         return
 
     @staticmethod
-    def delete_sample(project_id: str, sample_id: str) -> None:
+    def delete_samples(project_id: str, sample_ids: List[str]) -> None:
         grew_request(
-            "eraseSample",
-            data={"project_id": project_id, "sample_id": sample_id},
+            "eraseSamples",
+            data={"project_id": project_id, "sample_ids": json.dumps(sample_ids)},
         )
 
     @staticmethod

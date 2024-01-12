@@ -82,6 +82,23 @@ class SampleResource(Resource):
             LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
             return {"status": "OK"}
         
+    def patch(self, project_name: str):
+
+        project = ProjectService.get_by_name(project_name)
+        ProjectAccessService.check_admin_access(project.id)
+        ProjectService.check_if_freezed(project)
+        ProjectService.check_if_project_exist(project)
+        
+        args = request.get_json(force=True)
+        sample_ids = args.get("sampleIds")
+        
+        GrewService.delete_samples(project_name, sample_ids)
+        for sample_id in sample_ids:
+            SampleBlindAnnotationLevelService.delete_by_sample_name(project.id, sample_id)
+
+        LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
+        return { "status": "OK" }
+          
 @api.route("/<string:project_name>/samples/tokenize")
 class SampleTokenizeResource(Resource):
     def post(self, project_name):
@@ -169,18 +186,4 @@ class ExportSampleResource(Resource):
             },
         )
         return resp
-
-@api.route("/<string:project_name>/samples/<string:sample_name>")
-class DeleteSampleResource(Resource):
-    def delete(self, project_name: str, sample_name: str):
-        project = ProjectService.get_by_name(project_name)
-        ProjectAccessService.check_admin_access(project.id)
-        ProjectService.check_if_freezed(project)
-        ProjectService.check_if_project_exist(project)
-        GrewService.delete_sample(project_name, sample_name)
-        SampleBlindAnnotationLevelService.delete_by_sample_name(project.id, sample_name)
-        LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
-        return {
-            "status": "OK",
-        }
 
