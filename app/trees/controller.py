@@ -1,14 +1,14 @@
-from flask import abort
+import os
+from flask import abort, request
 from flask_login import current_user
 from flask_restx import Namespace, Resource, reqparse
-from conllup.conllup import sentenceConllToJson
-from conllup.processing import constructTextFromTreeJson, emptySentenceConllu, changeMetaFieldInSentenceConllu
+from conllup.processing import changeMetaFieldInSentenceConllu
 
 from app.projects.service import LastAccessService, ProjectAccessService, ProjectService
 from app.samples.service import SampleBlindAnnotationLevelService
 from app.github.service import GithubCommitStatusService, GithubSynchronizationService
 from app.utils.grew_utils import grew_request, GrewService
-from .service import TreeService
+from .service import TreeService, TreeSegmentationService
 
 BASE_TREE = "base_tree"
 VALIDATED = "validated"
@@ -119,3 +119,43 @@ class UserTreesResource(Resource):
         data = {"project_id": project_name,  "sample_id": sample_name, "sent_ids": "[]","user_id": username, }
         grew_request("eraseGraphs", data)
         LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")  
+
+
+@api.route("/<string:project_name>/samples/<string:sample_name>/trees/split")
+class SplitTreeResource(Resource):
+
+    def post(self, project_name: str, sample_name: str):
+        
+        project = ProjectService.get_by_name(project_name)
+        data = request.get_json()
+        sent_id = data.get("sentId")
+        inserted_sentences = []
+        inserted_sentences.append(data.get("firstSents"))
+        inserted_sentences.append(data.get("secondSents"))
+
+        TreeSegmentationService.insert_new_sentences(project_name, sample_name, sent_id, inserted_sentences)
+        GrewService.eraseSentence(project_name, sample_name, sent_id)
+
+        if GithubSynchronizationService.get_github_synchronized_repository(project.id):
+                GithubCommitStatusService.update(project_name, sample_name)
+        LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
+
+@api.route("/<string:project_name>/samples/<string:sample_name>/trees/merge")
+
+class MergeTreesResource(Resource):
+    def post(self, project_name: str, sample_name: str):
+
+        project = ProjectService.get_by_name(project_name)
+        data = request.get_json()
+        first_sent_id = data.get("firstSentId")
+        second_sent_id = data.get("secondSentId")
+        inserted_sentences = []
+        inserted_sentences.append(data.get("mergedSentences"))
+
+        TreeSegmentationService.insert_new_sentences(project_name, sample_name, first_sent_id, inserted_sentences)
+        GrewService.eraseSentence(project_name, sample_name, first_sent_id)
+        GrewService.eraseSentence(project_name, sample_name, second_sent_id)
+
+        if GithubSynchronizationService.get_github_synchronized_repository(project.id):
+                GithubCommitStatusService.update(project_name, sample_name)
+        LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")

@@ -1,6 +1,9 @@
-from conllup.conllup import sentenceConllToJson
+import os 
+
+from conllup.conllup import sentenceConllToJson, sentenceJsonToConll
 from conllup.processing import constructTextFromTreeJson, emptySentenceConllu, changeMetaFieldInSentenceConllu
 
+from app.config import Config
 from app.utils.grew_utils import GrewService
 BASE_TREE = "base_tree"
 VALIDATED = "validated"
@@ -117,4 +120,21 @@ class TreeService:
                 user_trees_sent_ids.append(sent_id)
             
             return user_trees_sent_ids
+        
+
+class TreeSegmentationService: 
+
+    @staticmethod
+    def insert_new_sentences(project_name: str, sample_name, sent_id: str, inserted_sentences):
+        conll_to_insert = ''
+        for sentences in inserted_sentences:
+            for sentence_json in sentences.values():
+                conll_to_insert += sentenceJsonToConll(sentence_json) + '\n\n'
+            
+        file_name = sample_name + "_inserted_conll.conllu"
+        path_file = os.path.join(Config.UPLOAD_FOLDER, file_name)
+        with open(path_file, "w") as file:
+            file.write(conll_to_insert)
+        with open(path_file, "rb") as conll_file:
+            GrewService.insert_conll(project_name, sample_name, sent_id, conll_file)
 

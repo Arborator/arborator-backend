@@ -209,6 +209,24 @@ class GrewService:
         }
         reply = grew_request("tryPackage", data=data)
         return reply
+    
+    @staticmethod
+    def insert_conll(project_id: str, sample_id: str, pivot_sent_id: str, conll_file):
+        data = {
+            "project_id": project_id,
+            "sample_id": sample_id,
+            "pivot_sent_id": pivot_sent_id
+        }
+        files = { "conll_file": conll_file }
+        grew_request("insertConll", data=data, files=files)
+
+    def eraseSentence(project_id: str, sample_id: str, sent_id: str):
+        data = {
+            "project_id": project_id,
+            "sample_id": sample_id,
+            "sent_id": sent_id
+        }
+        grew_request("eraseSentence", data=data)
 
     @staticmethod
     def get_samples_with_string_contents(project_name: str, sample_names: List[str]):
