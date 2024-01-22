@@ -109,9 +109,7 @@ class ProjectResource(Resource):
         parser.add_argument(name="config", type=str)
         parser.add_argument(name="language", type=str)
         args = parser.parse_args()
-
-        # Sanitize the project name to correspond to Grew folders requirements
-        projectName = re.sub("[^0-9\w]+", "_", args.projectName)
+        projectName =  args.projectName
 
         new_project_attrs: ProjectInterface = {
             "project_name": projectName,
