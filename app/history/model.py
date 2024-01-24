@@ -11,7 +11,6 @@ class History(db.Model, BaseM):
     id = Column(Integer, primary_key=True)
     user_id = Column(String(256), db.ForeignKey("users.id")) 
     project_id = Column(Integer, db.ForeignKey("projects.id"))
-    name = Column(String(256), nullable=False, unique=True)
     request = Column(String, nullable=False)
     type = Column(ChoiceType(REQUEST_TYPES, impl=Integer()))
     favorite = Column(Boolean, default=False)

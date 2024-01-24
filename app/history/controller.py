@@ -1,8 +1,10 @@
 from flask import request
 from flask_restx import Namespace, Resource
+from flask_accepts.decorators.decorators import accepts, responds
 
 from app.projects.service import ProjectService
 from .service import HistoryService
+from .schema import GrewHistorySchema
 
 api = Namespace(
     "History",
@@ -13,10 +15,13 @@ api = Namespace(
 @api.route("/<string:project_name>/history")
 class HistoryResource(Resource):
 
+    @responds(schema=GrewHistorySchema(many=True), api=api)
     def get(self, project_name):
         project = ProjectService.get_by_name(project_name)
         return HistoryService.get_all_user_history(project.id)
     
+    @accepts(schema=GrewHistorySchema, api=api)
+    @responds(schema=GrewHistorySchema, api=api)
     def post(self, project_name):
         project = ProjectService.get_by_name(project_name)
         data = request.get_json()

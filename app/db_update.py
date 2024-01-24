@@ -24,7 +24,7 @@ engine = create_engine(db_path)
 
 def migrate_add_grew_history(engine):
     with engine.connect() as connection:
-        connection.execute("CREATE TABLE history (id INTEGER NOT NULL, project_id INTEGER, user_id	VARCHAR(256), name VARCHAR(256), request TEXT, type INTEGER, favorite BOOLEAN, date FLOAT, modified_sentence INTEGER, PRIMARY KEY(id), FOREIGN KEY(project_id) REFERENCES projects(id), FOREIGN KEY(user_id) REFERENCES users(id))")
+        connection.execute("CREATE TABLE history (id INTEGER NOT NULL, project_id INTEGER, user_id	VARCHAR(256), request TEXT, type INTEGER, favorite BOOLEAN, date FLOAT, modified_sentences INTEGER, PRIMARY KEY(id), FOREIGN KEY(project_id) REFERENCES projects(id), FOREIGN KEY(user_id) REFERENCES users(id))")
 
 
 if args.version == 'add_grew_history':
