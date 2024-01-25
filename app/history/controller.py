@@ -1,6 +1,7 @@
 from flask import request
 from flask_restx import Namespace, Resource
 from flask_accepts.decorators.decorators import accepts, responds
+from flask_login import current_user
 
 from app.projects.service import ProjectService
 from .service import HistoryService
@@ -26,6 +27,7 @@ class HistoryResource(Resource):
         project = ProjectService.get_by_name(project_name)
         data = request.get_json()
         data["project_id"] = project.id
+        data["user_id"] = current_user.id
         new_history_record = HistoryService.create(data)
         return new_history_record
     

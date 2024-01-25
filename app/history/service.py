@@ -10,7 +10,7 @@ class HistoryService:
 
     @staticmethod
     def get_all_user_history(project_id) -> List[History]:
-        print(History.query.filter_by(project_id=project_id, user_id=current_user.id).all())
+        return History.query.filter_by(project_id=project_id, user_id=current_user.id).all()
     
     @staticmethod
     def create(new_attrs) -> History:

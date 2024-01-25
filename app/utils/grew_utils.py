@@ -174,7 +174,6 @@ class GrewService:
             user_ids = { "one": [other_user] }
         elif user_type == 'all':
             user_ids = "all"
-        print('test')
         data = {
             "project_id": project_id,
             "pattern": pattern,
