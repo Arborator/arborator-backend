@@ -37,12 +37,23 @@ class HistoryResource(Resource):
         return { "status": "ok" }
     
 
-@api.route("/<string:project_name>/history/<string:history_id>")
+@api.route("/<string:project_name>/history/<string:history_uuid>")
 class HistoryRecordResource(Resource):
 
-    def delete(self, project_name, history_record_id):
-        HistoryService.delete_by_id(history_record_id)
+    @responds(schema=GrewHistorySchema, api=api)
+    def put(self, project_name, history_uuid):
+        changes = request.get_json()
+        project = ProjectService.get_by_name(project_name)
+        history_record = HistoryService.get_by_uuid(project.id, history_uuid)
+        updated_record = HistoryService.update(history_record, changes)
+        return updated_record
+
+    def delete(self, project_name, history_uuid):
+        project = ProjectService.get_by_name(project_name)
+        history_record = HistoryService.get_by_uuid(project.id, history_uuid)
+        HistoryService.delete_by_id(history_record.id)
         return { "status": "ok" }
+
     
 
 

@@ -12,6 +12,10 @@ class HistoryService:
     def get_all_user_history(project_id) -> List[History]:
         return History.query.filter_by(project_id=project_id, user_id=current_user.id).all()
     
+    @staticmethod 
+    def get_by_uuid(project_id, uuid) -> History:
+        return History.query.filter_by(project_id=project_id, uuid= uuid)
+
     @staticmethod
     def create(new_attrs) -> History:
         new_history_record = History(**new_attrs)
@@ -30,8 +34,7 @@ class HistoryService:
         db.session.commit()
 
     @staticmethod
-    def update(new_attrs) -> History:
-        history_record = History.query.filter_by(new_attrs.get("id"))
+    def update(history_record: History, new_attrs) -> History:
         if history_record:
             history_record.update(new_attrs)
             db.session.commit()
