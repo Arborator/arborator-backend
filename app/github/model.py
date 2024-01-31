@@ -9,7 +9,7 @@ class GithubRepository(db.Model):
     user_id = Column(String(256), db.ForeignKey("users.id")) 
     repository_name = Column(String(256))
     branch = Column(String(256))
-    base_sha = Column(String(256))
+    base_sha = Column(String(256)) # hash of the last commit of the synchronized branch
 
     def update(self, changes):
         for key, val in changes.items():

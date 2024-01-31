@@ -13,7 +13,7 @@ from app import db
 from app.config import Config
 from app.projects.service import ProjectService
 from app.utils.grew_utils import GrewService
-from app.github.service import GithubCommitStatusService, GithubSynchronizationService, GithubWorkflowService
+from app.github.service import GithubCommitStatusService, GithubRepositoryService
 
 from .model import SampleBlindAnnotationLevel
 
@@ -55,9 +55,10 @@ class SampleUploadService:
 
         with open(path_file, "rb") as file_to_save:
             GrewService.save_sample(project_name, sample_name, file_to_save)
-            if GithubSynchronizationService.get_github_synchronized_repository(project.id):
+            if GithubRepositoryService.get_by_project_id(project.id):
                 GithubCommitStatusService.create(project_name, sample_name)
-                GithubCommitStatusService.update(project_name, sample_name)
+                if new_username == 'validated':
+                    GithubCommitStatusService.update_changes(project.id, sample_name)
 
 class SampleTokenizeService:
 

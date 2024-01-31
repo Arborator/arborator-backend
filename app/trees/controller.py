@@ -6,7 +6,7 @@ from conllup.processing import changeMetaFieldInSentenceConllu
 
 from app.projects.service import LastAccessService, ProjectAccessService, ProjectService
 from app.samples.service import SampleBlindAnnotationLevelService
-from app.github.service import GithubCommitStatusService, GithubSynchronizationService
+from app.github.service import GithubCommitStatusService, GithubRepositoryService
 from app.utils.grew_utils import grew_request, GrewService
 from .service import TreeService, TreeSegmentationService
 
@@ -106,8 +106,8 @@ class SampleTreesResource(Resource):
 
         grew_request("saveGraph", data=data)
         LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
-        if GithubSynchronizationService.get_github_synchronized_repository(project.id):
-            GithubCommitStatusService.update(project_name, sample_name)
+        if GithubRepositoryService.get_by_project_id(project.id) and user_id == VALIDATED:
+            GithubCommitStatusService.update_changes(project.id, sample_name)
 
         return {"status": "success"}
     

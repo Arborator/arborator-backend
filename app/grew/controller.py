@@ -10,7 +10,7 @@ from conllup.processing import constructTextFromTreeJson
 
 from app.config import Config
 from app.projects.service import LastAccessService, ProjectService
-from app.github.service import GithubCommitStatusService, GithubSynchronizationService
+from app.github.service import GithubCommitStatusService, GithubRepositoryService
 from app.utils.grew_utils import SampleExportService, GrewService, grew_request
 
 
@@ -40,6 +40,9 @@ class ApplyRuleResource(Resource):
             for sent_id in sample_trees:
                 if sent_id in data[sample_name].keys():
                     sample_trees[sent_id] = data[sample_name][sent_id]
+                    if ('validated' in data[sample_name][sent_id]["conlls"].keys() and 
+                        GithubRepositoryService.get_by_project_id(project.id)):
+                        GithubCommitStatusService.update_changes(project.id, sample_name)
                 for user in sample_trees[sent_id]["conlls"]:
                     new_conll += sample_trees[sent_id]["conlls"][user] + "\n\n"
             
@@ -49,9 +52,6 @@ class ApplyRuleResource(Resource):
                 file.write(new_conll)
             with open(path_file, "rb") as file_to_save:
                 GrewService.save_sample(project_name, sample_name, file_to_save)
-            if GithubSynchronizationService.get_github_synchronized_repository(project.id):
-                GithubCommitStatusService.update(project_name, sample_name)
- 
         LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
 
 
