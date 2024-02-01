@@ -136,8 +136,8 @@ class SplitTreeResource(Resource):
         TreeSegmentationService.insert_new_sentences(project_name, sample_name, sent_id, inserted_sentences)
         GrewService.eraseSentence(project_name, sample_name, sent_id)
 
-        if GithubSynchronizationService.get_github_synchronized_repository(project.id):
-                GithubCommitStatusService.update(project_name, sample_name)
+        if GithubRepositoryService.get_by_project_id(project.id):
+                GithubCommitStatusService.update_changes(project.id, sample_name)
         LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
 
 @api.route("/<string:project_name>/samples/<string:sample_name>/trees/merge")
@@ -156,6 +156,6 @@ class MergeTreesResource(Resource):
         GrewService.eraseSentence(project_name, sample_name, first_sent_id)
         GrewService.eraseSentence(project_name, sample_name, second_sent_id)
 
-        if GithubSynchronizationService.get_github_synchronized_repository(project.id):
-                GithubCommitStatusService.update(project_name, sample_name)
+        if GithubRepositoryService.get_by_project_id(project.id):
+                GithubCommitStatusService.update_changes(project.id, sample_name)
         LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")

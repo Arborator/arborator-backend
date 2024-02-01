@@ -56,7 +56,7 @@ class SampleUploadService:
         with open(path_file, "rb") as file_to_save:
             GrewService.save_sample(project_name, sample_name, file_to_save)
             if GithubRepositoryService.get_by_project_id(project.id):
-                GithubCommitStatusService.create(project_name, sample_name)
+                GithubCommitStatusService.create(project.id, sample_name)
                 if new_username == 'validated':
                     GithubCommitStatusService.update_changes(project.id, sample_name)
 
@@ -94,9 +94,10 @@ class SampleTokenizeService:
 
         with open(path_file, "rb") as file_to_save:
             GrewService.save_sample(project_name, sample_name, file_to_save)
-            if GithubSynchronizationService.get_github_synchronized_repository(project.id):
-                GithubCommitStatusService.create(project_name, sample_name)
-                GithubCommitStatusService.update(project_name, sample_name)
+            if GithubRepositoryService.get_by_project_id(project.id):
+                GithubCommitStatusService.create(project.id, sample_name)
+                if username == "validated":
+                    GithubCommitStatusService.update_changes(project.id, sample_name)
              
 
 class SampleBlindAnnotationLevelService:
@@ -135,7 +136,6 @@ class SampleBlindAnnotationLevelService:
         db.session.commit()
 
         return
-
 
 
 class SampleEvaluationService:

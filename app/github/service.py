@@ -416,9 +416,10 @@ class GithubWorkflowService:
 
     @staticmethod
     def create_sample_from_github_file(file, download_url,project_name):
+        project = ProjectService.get_by_name(project_name)
         sample_name, path_file =  GithubWorkflowService.download_github_file_content(file, download_url)
         GithubWorkflowService.create_sample(sample_name, path_file, project_name)
-        GithubCommitStatusService.create(project_name, sample_name)
+        GithubCommitStatusService.create(project.id, sample_name)
 
     @staticmethod
     def download_github_file_content(file_name, download_url):
@@ -435,7 +436,6 @@ class GithubWorkflowService:
         content = requests.get(download_url).text 
         file_name = sample_name + "_modified.conllu"
         path_file = os.path.join(Config.UPLOAD_FOLDER, file_name)
-
         with open(path_file, "w") as file:
             file.write(content)
 
