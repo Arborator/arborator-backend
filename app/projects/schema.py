@@ -21,7 +21,7 @@ class BlobImageField(fields.Field):
 
 
 class ProjectSchema(Schema):
-    """User schema"""
+    """Project schema"""
 
     id = fields.Integer(attribute="id")
     projectName = fields.String(attribute="project_name")
@@ -35,8 +35,9 @@ class ProjectSchema(Schema):
 
 
 class ProjectExtendedSchema(ProjectSchema):
-    """User schema to send to the frondend"""
+    """Project schema to send to the frontend"""
 
+    users = fields.List(fields.String())
     admins = fields.List(fields.String())
     validators = fields.List(fields.String())
     annotators = fields.List(fields.String())

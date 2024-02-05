@@ -15,6 +15,7 @@ class ProjectInterface(TypedDict, total=False):
 
 
 class ProjectExtendedInterface(ProjectInterface, total=False):
+    users: List[str]
     admins: List[str]
     validators: List[str]
     annotators: List[str]

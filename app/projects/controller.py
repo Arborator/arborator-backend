@@ -83,6 +83,7 @@ class ProjectResource(Resource):
 
                 for grew_project in grew_projects:
                     if grew_project["name"] == project.project_name:
+                        project.users = grew_project["users"]
                         project.number_sentences = grew_project["number_sentences"]
                         project.number_samples = grew_project["number_samples"]
                         project.number_tokens = grew_project["number_tokens"]
