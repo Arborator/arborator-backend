@@ -317,11 +317,11 @@ class LastAccessService:
         project = ProjectService.get_by_name(project_name)
         ProjectService.check_if_project_exist(project)
 
-        last_accesss: LastAccess = LastAccess.query.filter(LastAccess.user_id == user_id).filter(LastAccess.project_id == project.id).first()
+        last_access: LastAccess = LastAccess.query.filter(LastAccess.user_id == user_id).filter(LastAccess.project_id == project.id).first()
         
         time_now_ts = datetime.now().timestamp()
 
-        if not last_accesss:
+        if not last_access:
             new_data = {
                 "project_id": project.id,
                 "user_id": user_id,
@@ -334,7 +334,8 @@ class LastAccessService:
 
         else:
             if access_type == "read":
-                last_accesss.last_read = time_now_ts
+                last_access.last_read = time_now_ts
             else:
-                last_accesss.last_write = time_now_ts
+                last_access.last_write = time_now_ts
+                last_access.last_read = time_now_ts
             db.session.commit()
