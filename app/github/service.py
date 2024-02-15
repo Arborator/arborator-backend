@@ -212,12 +212,12 @@ class GithubService:
         return response
     
     @staticmethod
-    def create_new_branch_arborator(access_token, full_name, default_branch):
+    def create_new_branch_arborator(access_token, full_name, branch_to_create, default_branch):
         url = "https://api.github.com/repos/{}/git/refs".format(full_name)
         headers =  GithubService.base_header(access_token)
         sha = GithubService.get_sha_base_tree(access_token, full_name, default_branch)
         data = {
-            "ref": "refs/heads/arboratorgrew",
+            "ref": "refs/heads/{}".format(branch_to_create),
             "sha": sha
         }
         response = requests.post(url, headers=headers, data = json.dumps(data))
@@ -341,10 +341,8 @@ class GithubWorkflowService:
         tmp_zip_file = GithubService.download_github_repository(access_token, full_name, branch)
         GithubService.extract_repository(tmp_zip_file)
         GithubWorkflowService.clone_github_repository(conll_files, project_name)
-        if branch_syn == "arboratorgrew":
-            if (branch != branch_syn and  branch_syn in GithubService.list_repository_branches(access_token, full_name)): 
-                GithubService.delete_branch(access_token, full_name, branch_syn)    
-            GithubService.create_new_branch_arborator(access_token, full_name, branch)
+        if branch_syn != branch:  
+            GithubService.create_new_branch_arborator(access_token, full_name, branch_syn, branch)
         
     @staticmethod 
     def clone_github_repository(files, project_name):
