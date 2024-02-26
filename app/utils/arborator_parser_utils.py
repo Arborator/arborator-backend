@@ -44,8 +44,30 @@ class ArboratorParserAPI:
             return {"status": "failure", "error": f"<ArboratorParserAPI> unknown error when connecting `url={url}` : {str(e)}"}
 
     @staticmethod
+    def send_delete_request(url_suffix: str):
+        url = f"{parser_config.server}/parser/models{url_suffix}"
+        try: 
+            reply = requests.delete(url, timeout=10)
+            data = reply.json()
+            if data.get("exist_error"): 
+                return {
+                    "status": "failure",
+                    "error": "The model does not exist in the Parser server"
+                }
+            return data
+        except requests.exceptions.ReadTimeout:
+            return {"status": "failure", "error": f"<ArboratorParserAPI> connection timout with `url={url}`"}
+        except Exception as e:
+            print(f"<ArboratorParserAPI> unknown error when connecting `url={url}` : {str(e)}", e)
+            return {"status": "failure", "error": f"<ArboratorParserAPI> unknown error when connecting `url={url}` : {str(e)}"}
+              
+    @staticmethod
     def list():
         return ArboratorParserAPI.send_get_request("/list")
+    
+    @staticmethod
+    def delete_model(project_name: str, model_id: str):
+        return ArboratorParserAPI.send_delete_request("/list/{}/{}".format(project_name, model_id))
 
     @staticmethod
     def train_start(project_name: str, train_samples: Dict[str, str], max_epoch: int, base_model: Union[ModelInfo_t, None]):

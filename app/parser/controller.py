@@ -1,24 +1,42 @@
 import os
 from typing import TypedDict, List, Union
 
-from flask import request
+from flask import request, abort
 from flask_restx import Namespace, Resource
 
 from app.utils.grew_utils import GrewService
 from app.config import Config
 from ..samples.service import add_or_keep_timestamps, add_or_replace_userid
+from ..projects.service import ProjectService, ProjectAccessService
 from ..utils.arborator_parser_utils import ArboratorParserAPI, ModelInfo_t
 
 api = Namespace("Parser", description="Endpoints for dealing with the parser")  # noqa
 
 
 @api.route("/list")
-class ParserTrainStartResource(Resource):
+class ParserModelsListResource(Resource):
     def get(self):
         print("<PARSER> list/start request")
-        return ArboratorParserAPI.list()
+        response =  ArboratorParserAPI.list()
+        if response['status'] == 'failure':
+            abort(503, 'Sorry, the parsing server is unreachable and not under our control, please come back later')
+        else: 
+            pretrained_models = []
+            models = response.data
+            for model in models:
+                project = ProjectService.get_by_name(model.model_info.project_name)
+                if ProjectAccessService.check_project_access(project.visibility, project.id):
+                    pretrained_models.append({**model, "language": project.language})
+            return { "status": "success",  "data": pretrained_models }
 
 
+@api.route("/list/<string:project_name>/<string:model_id>")       
+class ParserModelIdResource(Resource): 
+    def delete(self, project_name: str, model_id: str):
+        print("<PARSER> list/model_id  delete request")
+        return ArboratorParserAPI.delete_model(project_name, model_id)
+        
+          
 class ParserTrainStart_ED(TypedDict):
     project_name: str
     train_samples_names: List[str]
@@ -43,7 +61,6 @@ class ParserTrainStartResource(Resource):
         train_samples = GrewService.get_samples_with_string_contents_as_dict(project_name, train_samples_names, train_user)
 
         return ArboratorParserAPI.train_start(project_name, train_samples, max_epoch, base_model)
-
 
 
 @api.route("/train/status")
