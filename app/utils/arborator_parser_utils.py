@@ -49,11 +49,6 @@ class ArboratorParserAPI:
         try: 
             reply = requests.delete(url, timeout=10)
             data = reply.json()
-            if data.get("exist_error"): 
-                return {
-                    "status": "failure",
-                    "error": "The model does not exist in the Parser server"
-                }
             return data
         except requests.exceptions.ReadTimeout:
             return {"status": "failure", "error": f"<ArboratorParserAPI> connection timout with `url={url}`"}
