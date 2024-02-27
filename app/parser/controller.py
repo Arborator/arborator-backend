@@ -22,13 +22,14 @@ class ParserModelsListResource(Resource):
             abort(503, 'Sorry, the parsing server is unreachable and not under our control, please come back later')
         else: 
             pretrained_models = []
-            models = response.data
+            models = response.get("data")
             for model in models:
-                project = ProjectService.get_by_name(model.model_info.project_name)
-                if ProjectAccessService.check_project_access(project.visibility, project.id):
-                    pretrained_models.append({**model, "language": project.language})
+                project_name = model['model_info']['project_name']
+                project = ProjectService.get_by_name(project_name)
+                if project != None:
+                    if ProjectAccessService.check_project_access(project.visibility, project.id):
+                        pretrained_models.append({**model, "language": project.language})
             return { "status": "success",  "data": pretrained_models }
-
 
 @api.route("/list/<string:project_name>/<string:model_id>")       
 class ParserModelIdResource(Resource): 
