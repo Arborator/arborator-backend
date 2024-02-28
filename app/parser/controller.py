@@ -28,13 +28,17 @@ class ParserModelsListResource(Resource):
                 project = ProjectService.get_by_name(project_name)
                 if project != None:
                     if ProjectAccessService.check_project_access(project.visibility, project.id):
-                        pretrained_models.append({**model, "language": project.language})
+                        pretrained_models.append({
+                            **model, 
+                            "language": project.language, 
+                            "admins": ProjectAccessService.get_admins(project.id) 
+                        })
             return { "status": "success",  "data": pretrained_models }
 
 @api.route("/list/<string:project_name>/<string:model_id>")       
 class ParserModelIdResource(Resource): 
     def delete(self, project_name: str, model_id: str):
-        print("<PARSER> list/model_id  delete request")
+        print("<PARSER> list/model_id  delete request", project_name, model_id)
         return ArboratorParserAPI.delete_model(project_name, model_id)
         
           
