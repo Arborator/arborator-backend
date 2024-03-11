@@ -1,7 +1,7 @@
 import os
 from typing import List, Type
 
-from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.serialization import load_pem_private_key
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 UPLOAD_FOLDER = "app/tmp/data/"
@@ -44,7 +44,7 @@ class DevelopmentConfig(Config):
     fname = 'keys/arborator-grew-dev.pem'
     APP_ID = open('keys/arborator-grew-dev-appid.txt').read()
     cert_bytes = open(fname, 'rb').read()
-    PKEY = default_backend().load_pem_private_key(cert_bytes, None)
+    PKEY = load_pem_private_key(cert_bytes, None)
 
     PROJECT_IMAGE_FOLDER = "app/uploads/images"
     UPLOAD_IMAGE_EXTENSIONS = ['.jpg', '.png', '.gif', '.jpeg']
@@ -88,7 +88,7 @@ class ProductionConfig(Config):
     APP_ID = open('keys/arborator-grew-appid.txt').read()
     # INSTALATION_ID = int(open('keys/arborator-grew-installationid.txt').read())
     cert_bytes = open(fname, 'rb').read()
-    PKEY = default_backend().load_pem_private_key(cert_bytes, None)
+    PKEY = load_pem_private_key(cert_bytes, None)
 
     ## WARNING : specify the DIST folder, not the quasar source code in prod
     PROJECT_IMAGE_FOLDER = "app/uploads/images"
