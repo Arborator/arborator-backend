@@ -109,11 +109,12 @@ class ProjectResource(Resource):
         parser.add_argument(name="visibility", type=int)
         parser.add_argument(name="config", type=str)
         parser.add_argument(name="language", type=str)
+        parser.add_argument(name="conllSchema", type=dict, action="append")
         args = parser.parse_args()
-        projectName =  args.projectName
+        project_name =  args.projectName
 
         new_project_attrs: ProjectInterface = {
-            "project_name": projectName,
+            "project_name": project_name,
             "description": args.description,
             "blind_annotation_mode": args.blindAnnotationMode,
             "visibility": args.visibility,
@@ -127,7 +128,7 @@ class ProjectResource(Resource):
 
         new_project = ProjectService.create(new_project_attrs)
         LastAccessService.update_last_access_per_user_and_project(
-            creator_id, projectName, "write"
+            creator_id, project_name, "write"
         )
 
         ProjectAccessService.create(
@@ -150,6 +151,8 @@ class ProjectResource(Resource):
             ProjectMetaFeatureService.create(
                 {"project_id": new_project.id, "value": feature}
             )
+        dumped_project_config = json.dumps(args.get("conllSchema"))
+        GrewService.update_project_config(project_name, dumped_project_config)
 
         return new_project
 
