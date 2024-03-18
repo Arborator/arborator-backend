@@ -77,7 +77,7 @@ class SearchResource(Resource):
         if not sample_ids: 
             sample_ids = [sample["name"] for sample in GrewService.get_samples(project_name)]
 
-        response = GrewService.search_pattern_in_graphs(project_name, pattern, user_type, other_user)
+        response = GrewService.search_request_in_graphs(project_name, pattern, user_type, other_user)
         
         if response["status"] != "OK":
             abort(400)

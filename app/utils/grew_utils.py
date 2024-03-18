@@ -132,10 +132,10 @@ class GrewService:
         return grew_samples
     
     @staticmethod
-    def create_sample(project_id: str, sample_id: str):
+    def create_samples(project_id: str, sample_ids: List[str]):
         reply = grew_request(
-            "newSample",
-            data={"project_id": project_id, "sample_id": sample_id},
+            "newSamples",
+            data={"project_id": project_id, "sample_ids": json.dumps(sample_ids)},
         )
 
         return reply
@@ -158,7 +158,7 @@ class GrewService:
         )
 
     @staticmethod
-    def search_pattern_in_graphs(project_id: str, pattern: str, user_type: str, other_user: str):
+    def search_request_in_graphs(project_id: str, request: str, user_type: str, other_user: str):
         
         if user_type == 'user':
             user_ids = { "one": [current_user.username] }
@@ -176,10 +176,10 @@ class GrewService:
             user_ids = "all"
         data = {
             "project_id": project_id,
-            "pattern": pattern,
+            "request": request,
             "user_ids": json.dumps(user_ids)
         }
-        reply = grew_request("searchPatternInGraphs", data=data)
+        reply = grew_request("searchRequestInGraphs", data=data)
         return reply
 
 

@@ -367,7 +367,7 @@ class GithubWorkflowService:
         grew_samples = GrewService.get_samples(project_name)
         samples_names = [sa["name"] for sa in grew_samples]
         if sample_name not in samples_names:
-            GrewService.create_sample(project_name, sample_name)
+            GrewService.create_samples(project_name, [sample_name])
         with open(path_file, "rb") as file_to_save:
             GrewService.save_sample(project_name, sample_name, file_to_save)
 
