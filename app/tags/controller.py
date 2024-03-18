@@ -30,7 +30,7 @@ class TagsResource(Resource):
         return TagService.remove_tag(project_name, sample_name, tag, tree)
         
 
-@api.route("/<string:project_name>/tags/<string:username>")
+@api.route("/<string:project_name>/<string:username>/tags")
 class UserTagsResource(Resource):
 
     def get(self, project_name, username):
@@ -56,7 +56,17 @@ class UserTagsResource(Resource):
         }
         UserTagsService.create_or_update(user_tags)
 
+@api.route("/<string:project_name>/<string:username>/tags/<string:tag_value>")
+class UserTagValueResource(Resource):
+    
+    def delete(self, project_name, username, tag_value):
         
+        project = ProjectService.get_by_name(project_name)
+        ProjectService.check_if_project_exist(project)
+        user = UserService.get_by_username(username)
+        UserTagsService.delete_tag(user.id, tag_value)
+        
+           
 
 
         
