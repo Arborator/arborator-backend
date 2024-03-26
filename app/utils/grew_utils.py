@@ -84,18 +84,23 @@ class GrewService:
         return grew_projects
 
     @staticmethod
-    def create_project(project_id: str) -> None:
+    def create_project(project_id: str):
         grew_request(
             "newProject",
             data={"project_id": project_id},
         )
-        return
 
     @staticmethod
-    def delete_project(project_id: str) -> None:
+    def delete_project(project_id: str):
         grew_request("eraseProject", data={"project_id": project_id})
-        return
 
+    @staticmethod
+    def rename_project(project_name: str, new_project_name): 
+        grew_request("renameProject", data= {
+            "project_id": project_name,
+            "new_project_id": new_project_name
+        })
+    
     @staticmethod
     def get_conll_schema(project_id: str):
         grew_reply = grew_request("getProjectConfig", data={"project_id": project_id})
