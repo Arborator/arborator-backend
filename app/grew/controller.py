@@ -122,24 +122,27 @@ class RelationTableResource(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument(name="sampleIds", type=str, action="append")
         parser.add_argument(name="tableType")
-
+        parser.add_argument(name="otherUser")
         args = parser.parse_args()
 
         sample_ids = args.get("sampleIds")
+        table_type = args.get("tableType")
+        other_user = args.get("otherUser")
         
-        tableType = args.get("tableType")
         if not sample_ids: 
             sample_ids = []
-        if tableType=='user':
+        if table_type=='user':
             user_ids = { "one": [current_user.username] }
-        elif tableType=='user_recent':
+        elif table_type=='user_recent':
             user_ids = { "one": [current_user.username, "__last__"] }
-        elif tableType=='recent':
+        elif table_type=='recent':
             user_ids = { "one": ["__last__"] }
-        elif tableType=='validated':
+        elif table_type=='validated':
             user_ids = { "one": ["validated"]}
-        elif tableType=='all':
+        elif table_type=='all':
             user_ids = "all"
+        elif table_type == 'others': 
+            user_ids = { "one": [other_user] }
         reply = grew_request(
             "relationTables",
             data={
