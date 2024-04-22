@@ -134,7 +134,7 @@ class SplitTreeResource(Resource):
         inserted_sentences.append(data.get("secondSents"))
 
         TreeSegmentationService.insert_new_sentences(project_name, sample_name, sent_id, inserted_sentences)
-        GrewService.eraseSentence(project_name, sample_name, sent_id)
+        GrewService.erase_sentence(project_name, sample_name, sent_id)
 
         if GithubRepositoryService.get_by_project_id(project.id):
                 GithubCommitStatusService.update_changes(project.id, sample_name)
@@ -153,8 +153,8 @@ class MergeTreesResource(Resource):
         inserted_sentences.append(data.get("mergedSentences"))
 
         TreeSegmentationService.insert_new_sentences(project_name, sample_name, first_sent_id, inserted_sentences)
-        GrewService.eraseSentence(project_name, sample_name, first_sent_id)
-        GrewService.eraseSentence(project_name, sample_name, second_sent_id)
+        GrewService.erase_sentence(project_name, sample_name, first_sent_id)
+        GrewService.erase_sentence(project_name, sample_name, second_sent_id)
 
         if GithubRepositoryService.get_by_project_id(project.id):
                 GithubCommitStatusService.update_changes(project.id, sample_name)

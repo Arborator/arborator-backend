@@ -219,7 +219,7 @@ class GrewService:
         files = { "conll_file": conll_file }
         grew_request("insertConll", data=data, files=files)
 
-    def eraseSentence(project_id: str, sample_id: str, sent_id: str):
+    def erase_sentence(project_id: str, sample_id: str, sent_id: str):
         data = {
             "project_id": project_id,
             "sample_id": sample_id,
