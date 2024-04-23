@@ -444,7 +444,7 @@ class GithubWorkflowService:
         
         conlls_strings = SampleService.split_conll_string_to_conlls_list(content)
         reply = grew_request("getConll", data={"project_id": project_name, "sample_id": sample_name},)
-        sample_trees =SampleExportService.servSampleTrees(reply.get("data", {}))
+        sample_trees =SampleExportService.serve_sample_trees(reply.get("data", {}))
         modified_sentences = []
         for conll in conlls_strings:
             for line in conll.rstrip().split("\n"):

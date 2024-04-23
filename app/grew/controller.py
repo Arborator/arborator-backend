@@ -36,7 +36,7 @@ class ApplyRuleResource(Resource):
                 "getConll",
                 data = {"project_id": project_name, "sample_id": sample_name}
             )
-            sample_trees = SampleExportService.servSampleTrees(sample_conll.get("data"))
+            sample_trees = SampleExportService.serve_sample_trees(sample_conll.get("data"))
             for sent_id in sample_trees:
                 if sent_id in data[sample_name].keys():
                     sample_trees[sent_id] = data[sample_name][sent_id]
