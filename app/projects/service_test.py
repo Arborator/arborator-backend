@@ -491,7 +491,7 @@ class TestProjectMetaFeature:
 
 class TestLastAccessService:
     
-    @pytest.mark.paramterize(
+    @pytest.mark.parametrize(
         "last_accesses", "expected_last_read", "expected_last_write"
         [
             ([1713857865.12323, None, 1713452667.56323, 1713452391.73287], 1713857865.12323, 1713452391.73287),
