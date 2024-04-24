@@ -92,6 +92,7 @@ class ProjectResource(Resource):
             creator_id = current_user.id
         except:
             abort(401, "User not loged in")
+            raise
         
         new_project_attrs: ProjectInterface = request.parsed_obj
 

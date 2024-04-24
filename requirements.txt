@@ -43,14 +43,14 @@ openpyxl==3.0.5
 packaging==22.0
 pandas==2.1.1
 pathspec==0.9.0
-pluggy==0.13.1
+pluggy==1.4
 py==1.10.0
 pycodestyle==2.8.0
 pycparser==2.20
 pyOpenSSL==19.1.0
 pyparsing==2.4.7
 pyrsistent==0.17.3
-pytest==6.1.1
+pytest==8.1.1
 python-dateutil==2.8.2
 python-dotenv==0.14.0
 python-editor==1.0.4
@@ -63,6 +63,7 @@ SQLAlchemy-Utils==0.41.1
 toml==0.10.1
 typed-ast==1.5.5
 typing-extensions==4.6.0
+unittest==3.12.3
 urllib3==1.26.18
 uWSGI==2.0.22
 Werkzeug==3.0.0

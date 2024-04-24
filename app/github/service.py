@@ -451,7 +451,7 @@ class GithubWorkflowService:
                 if "# sent_id = " in line:
                     sent_id = line.split("# sent_id = ")[-1] 
                     modified_sentences.append(sent_id)
-        deleted_sentences = [sent_id for sent_id in sample_trees.keys() if not sent_id in modified_sentences]
+        deleted_sentences = [sent_id for sent_id in sample_trees.keys() if sent_id not in modified_sentences]
         if deleted_sentences:
             data = { "project_id": project_name, "sample_id": sample_name, "sent_ids": json.dumps(deleted_sentences), "user_id": USERNAME }
             grew_request("eraseGraphs", data)

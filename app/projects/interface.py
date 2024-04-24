@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import List
 from mypy_extensions import TypedDict
 
 
@@ -6,7 +6,7 @@ class ProjectInterface(TypedDict, total=False):
     id: int
     project_name: str
     description: str
-    image: Any
+    image: str
     visibility: int
     blind_annotation_mode: bool
     freezed: bool
@@ -20,7 +20,7 @@ class ProjectExtendedInterface(ProjectInterface, total=False):
     validators: List[str]
     annotators: List[str]
     guests: List[str]
-    number_sentences: int
+    number_sentences: int 
     number_samples: int
     number_trees: int
     number_tokens: int

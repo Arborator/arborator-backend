@@ -70,20 +70,17 @@ class ProjectAccessService:
 
     @staticmethod
     def delete(user_id: str, project_id: int):
-        project_access_list = ProjectAccess.query.filter_by(user_id=user_id, project_id=project_id).all()
-        if not project_access_list:
-            return []
-        for project_access in project_access_list:
+        project_access = ProjectAccess.query.filter_by(user_id=user_id, project_id=project_id).first()
+        if project_access:
             db.session.delete(project_access)
             db.session.commit()
-        return [(project_id, user_id)]
 
     @staticmethod
-    def get_by_user_id(user_id: str, project_id: str) -> ProjectAccess:
+    def get_by_user_id(user_id: str, project_id: int) -> ProjectAccess:
         return ProjectAccess.query.filter_by(project_id=project_id, user_id=user_id).first()
 
     @staticmethod
-    def get_admins(project_id: str) -> List[str]:
+    def get_admins(project_id: int) -> List[str]:
         project_access_list: List[ProjectAccess] = ProjectAccess.query.filter_by(project_id=project_id, access_level=3)
         if project_access_list:
             return [UserService.get_by_id(project_access.user_id).username for project_access in project_access_list]
@@ -91,7 +88,7 @@ class ProjectAccessService:
             return []
 
     @staticmethod
-    def get_validators(project_id: str) -> List[str]:
+    def get_validators(project_id: int) -> List[str]:
         project_access_list: List[ProjectAccess] = ProjectAccess.query.filter_by(project_id=project_id, access_level=2)
         if project_access_list:
             return [UserService.get_by_id(project_access.user_id).username for project_access in project_access_list]
@@ -99,7 +96,7 @@ class ProjectAccessService:
             return []
         
     @staticmethod
-    def get_annotators(project_id: str) -> List[str]:
+    def get_annotators(project_id: int) -> List[str]:
         project_access_list: List[ProjectAccess] = ProjectAccess.query.filter_by(project_id=project_id, access_level=1)
         if project_access_list:
             return [UserService.get_by_id(project_access.user_id).username for project_access in project_access_list]
@@ -107,7 +104,7 @@ class ProjectAccessService:
             return []
 
     @staticmethod
-    def get_guests(project_id: str) -> List[str]:
+    def get_guests(project_id: int) -> List[str]:
         project_access_list: List[ProjectAccess] = ProjectAccess.query.filter_by(project_id=project_id, access_level=4)
         if project_access_list:
             return [UserService.get_by_id(project_access.user_id).username for project_access in project_access_list]
@@ -128,7 +125,7 @@ class ProjectAccessService:
         return admins, validators, annotators, guests
 
     @staticmethod
-    def get_users_role(project_id: str) -> Dict[str, List[str]]:
+    def get_users_role(project_id: int) -> Dict[str, List[str]]:
         admins = ProjectAccessService.get_admins(project_id)
         validators = ProjectAccessService.get_validators(project_id)
         annotators = ProjectAccessService.get_annotators(project_id)
