@@ -20,6 +20,7 @@ class ProjectExtendedSchema(ProjectSchema):
     """Project schema to send to the frontend"""
 
     users = fields.List(fields.String())
+    ownerAvatarUrl = fields.String(attribute='owner_avatar_url')
     admins = fields.List(fields.String())
     validators = fields.List(fields.String())
     annotators = fields.List(fields.String())

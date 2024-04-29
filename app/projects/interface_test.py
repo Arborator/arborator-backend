@@ -14,7 +14,9 @@ def project_interface() -> ProjectInterface:
         blind_annotation_mode=False,
         freezed=False,
         config="sud",
-        language="English"
+        language="English",
+        diff_user_id='',
+        diff_mode=False
     )
 
 def test_project_interface_create(project_interface: ProjectInterface):
@@ -27,6 +29,7 @@ def test_project_interface_retreive(project_interface: ProjectInterface):
 def project_extended_interface() -> ProjectExtendedInterface:
     return ProjectExtendedInterface(
       users=['arbo_admin', 'arbo_user'],
+      owner_avatar_url="url/to/prolfile_picture",
       admins=['arbo_admin'],
       validators=[],
       annotators=['arbo_user'],
@@ -35,6 +38,8 @@ def project_extended_interface() -> ProjectExtendedInterface:
       number_samples=4,
       number_trees=78,
       number_tokens=1000,
+      last_access=1713857865,
+      last_access_write=1713857865
     )
 
 def project_extended_interface_create(project_extended_interface: ProjectExtendedInterface):

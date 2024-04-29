@@ -12,10 +12,13 @@ class ProjectInterface(TypedDict, total=False):
     freezed: bool
     config: str
     language: str
+    diff_user_id: str
+    diff_mode: bool
 
 
 class ProjectExtendedInterface(ProjectInterface, total=False):
     users: List[str]
+    owner_avatar_url: str
     admins: List[str]
     validators: List[str]
     annotators: List[str]
@@ -24,6 +27,8 @@ class ProjectExtendedInterface(ProjectInterface, total=False):
     number_samples: int
     number_trees: int
     number_tokens: int
+    last_access: int
+    last_access_write: int
 
 class ProjectShownFeaturesAndMetaInterface(TypedDict, total=False):
     shown_features: List[str]

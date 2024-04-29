@@ -53,7 +53,9 @@ class ProjectResource(Resource):
                     project.annotators,
                     project.guests,
                 ) = ProjectAccessService.get_all(project.id)
-
+                
+                project.owner_avatar_url = UserService.get_by_username(project.admins[0]).picture_url
+                
                 (
                     last_access,
                     last_write_access,
