@@ -36,7 +36,7 @@ class ApplyRuleResource(Resource):
                 "getConll",
                 data = {"project_id": project_name, "sample_id": sample_name}
             )
-            sample_trees = SampleExportService.servSampleTrees(sample_conll.get("data"))
+            sample_trees = SampleExportService.serve_sample_trees(sample_conll.get("data"))
             for sent_id in sample_trees:
                 if sent_id in data[sample_name].keys():
                     sample_trees[sent_id] = data[sample_name][sent_id]
@@ -77,7 +77,7 @@ class SearchResource(Resource):
         if not sample_ids: 
             sample_ids = [sample["name"] for sample in GrewService.get_samples(project_name)]
 
-        response = GrewService.search_pattern_in_graphs(project_name, pattern, user_type, other_user)
+        response = GrewService.search_request_in_graphs(project_name, pattern, user_type, other_user)
         
         if response["status"] != "OK":
             abort(400)

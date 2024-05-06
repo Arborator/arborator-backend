@@ -19,43 +19,22 @@ def grew_request(fct_name, data={}, files={}):
         error_message = "<Grew requests handler> : Connection refused"
         print(error_message)
         abort(500, {"message": error_message})
-
+    
     except Exception as e:
-        error_message = (
-            "Grew requests handler> : Uncaught exception, please report {}".format(e)
-        )
+        error_message = ("Grew requests handler> : Uncaught exception, please report {}".format(e))
         print(error_message)
         abort(500, {"message": error_message})
+        
     response = json.loads(response.text)
-    if response.get("status") != "OK":
-        if response.get("data", None):
-            message = str(response["data"])
-        elif response.get("message", None):
-            message = str(response["message"]) # should already be a string
-            if 'Conllx_error' in message:
-                try:
-                    jsonmess = json.loads(message.replace('Conllx_error: ',''))
-                    messages = ['Problem in your Conll file “{filename}”'.format(filename=data['sample_id'])]
-                    messages+= [jsonmess['message']]
-                    # line numbers might not match because of additional metadata lines per tree.
-                    # so things get complicated:
-                    badline = None
-                    with open(files['conll_file'].name) as fp:
-                        for i, line in enumerate(fp):
-                            if i == jsonmess['line']-1:
-                                badline = line
-                                break
-                    messages+= ['This line looks fishy:<br><code>'+badline+'</code>'] 
-                    message = '<br>'.join(messages)
-                except:
-                    pass # just dump the message as raw. better than nothing...
+    if response.get("status") == "ERROR":
+        error_message = response.get("message")
+        print("GREW-ERROR : {}".format(error_message) )
+        abort(406, "GREW-ERROR : {}".format(error_message)) 
 
-        elif response.get("messages", None):
-            message = "; ".join(response["messages"])
-        else:
-            message = "unknown grew servor error"
-        print("GREW-ERROR : " + message)
-        abort(406, "GREW-ERROR : " + message) # GREW ERROR = 418
+    elif response.get("status") == "WARNING":
+        warning_message = response.get("message")
+        print("Grew-Warning: {}".format(warning_message))
+        
     return response
 
 
@@ -69,10 +48,10 @@ class GrewProjectInterface(TypedDict):
 
 class GrewService:
     @staticmethod
-    def get_sample_trees(projectName, sampleName) -> Dict[str, Dict[str, str]]:
+    def get_sample_trees(project_name, sample_name) -> Dict[str, Dict[str, str]]:
         response = grew_request(
             "getConll",
-            data={"project_id": projectName, "sample_id": sampleName},
+            data={"project_id": project_name, "sample_id": sample_name},
         )
         grew_sample_trees: Dict[str, Dict[str, str]] = response.get("data", {})
         return grew_sample_trees
@@ -104,7 +83,7 @@ class GrewService:
     @staticmethod
     def get_conll_schema(project_id: str):
         grew_reply = grew_request("getProjectConfig", data={"project_id": project_id})
-        # TODO : redo this. It's ugly
+        
         data = grew_reply.get("data")
         if data:
             conll_schema = {
@@ -125,7 +104,6 @@ class GrewService:
                 "config": dumped_project_config,
             },
         )
-        return {"success": True}
 
     @staticmethod
     def get_samples(project_id : str):
@@ -153,7 +131,6 @@ class GrewService:
             data={"project_id": project_id, "sample_id": sample_id},
             files={"conll_file": conll_file},
         )
-        return
 
     @staticmethod
     def delete_samples(project_id: str, sample_ids: List[str]) -> None:
@@ -163,7 +140,7 @@ class GrewService:
         )
 
     @staticmethod
-    def search_pattern_in_graphs(project_id: str, pattern: str, user_type: str, other_user: str):
+    def search_request_in_graphs(project_id: str, request: str, user_type: str, other_user: str):
         
         if user_type == 'user':
             user_ids = { "one": [current_user.username] }
@@ -181,12 +158,11 @@ class GrewService:
             user_ids = "all"
         data = {
             "project_id": project_id,
-            "pattern": pattern,
+            "request": request,
             "user_ids": json.dumps(user_ids)
         }
-        reply = grew_request("searchPatternInGraphs", data=data)
+        reply = grew_request("searchRequestInGraphs", data=data)
         return reply
-
 
     @staticmethod
     def try_package(project_id: str, package: str, sample_ids, user_type, other_user):
@@ -224,7 +200,8 @@ class GrewService:
         files = { "conll_file": conll_file }
         grew_request("insertConll", data=data, files=files)
 
-    def eraseSentence(project_id: str, sample_id: str, sent_id: str):
+    @staticmethod
+    def erase_sentence(project_id: str, sample_id: str, sent_id: str):
         data = {
             "project_id": project_id,
             "sample_id": sample_id,
@@ -243,8 +220,8 @@ class GrewService:
             if reply.get("status") == "OK":
 
                 # {"sent_id_1":{"conlls":{"user_1":"conllstring"}}}
-                sample_tree = SampleExportService.servSampleTrees(reply.get("data", {}))
-                sample_tree_nots_noui = SampleExportService.servSampleTrees(reply.get("data", {}), timestamps=False, user_ids=False)
+                sample_tree = SampleExportService.serve_sample_trees(reply.get("data", {}))
+                sample_tree_nots_noui = SampleExportService.serve_sample_trees(reply.get("data", {}), timestamps=False, user_ids=False)
                 sample_content = SampleExportService.sampletree2contentfile(sample_tree_nots_noui)
                 for sent_id in sample_tree:
                     last = SampleExportService.get_last_user(
@@ -273,8 +250,8 @@ class GrewService:
             if reply.get("status") == "OK":
 
                 # {"sent_id_1":{"conlls":{"user_1":"conllstring"}}}
-                sample_tree = SampleExportService.servSampleTrees(reply.get("data", {}))
-                sample_tree_nots_noui = SampleExportService.servSampleTrees(reply.get("data", {}), timestamps=False, user_ids=False)
+                sample_tree = SampleExportService.serve_sample_trees(reply.get("data", {}))
+                sample_tree_nots_noui = SampleExportService.serve_sample_trees(reply.get("data", {}), timestamps=False, user_ids=False)
                 sample_content = SampleExportService.sampletree2contentfile(sample_tree_nots_noui)
                 for sent_id in sample_tree:
                     last = SampleExportService.get_last_user(
@@ -300,8 +277,8 @@ class GrewService:
         )
         validated_trees = ""
         if reply.get("status") == "OK":
-            sample_tree = SampleExportService.servSampleTrees(reply.get("data", {}))
-            sample_tree_nots_noui = SampleExportService.servSampleTrees(reply.get("data", {}), timestamps=False, user_ids=False)
+            sample_tree = SampleExportService.serve_sample_trees(reply.get("data", {}))
+            sample_tree_nots_noui = SampleExportService.serve_sample_trees(reply.get("data", {}), timestamps=False, user_ids=False)
             for sent_id in sample_tree:
                 if "validated" in sample_tree[sent_id]["conlls"].keys():
                     validated_trees += "".join(sample_tree_nots_noui[sent_id]["conlls"]["validated"])
@@ -320,20 +297,20 @@ def get_timestamp(conll):
 
 class SampleExportService:
     @staticmethod
-    def servSampleTrees(samples, timestamps=True, user_ids=True):
+    def serve_sample_trees(samples, timestamps=True, user_ids=True):
         """ get samples in form of json trees """
         trees = {}
-        for sentId, users in samples.items():
+        for sent_id, users in samples.items():
             for user_id, conll in users.items():
                 conll+="\n"
-                if sentId not in trees:
-                    trees[sentId] = {"conlls": {}}
+                if sent_id not in trees:
+                    trees[sent_id] = {"conlls": {}}
                 
                 # Adapt user_id or timestamps lines depending on options
                 if not user_ids: conll = re.sub("# user_id = .+\n", '', conll)
                 if not timestamps: conll = re.sub("# timestamp = .+\n", '', conll)
 
-                trees[sentId]["conlls"][user_id] = conll
+                trees[sent_id]["conlls"][user_id] = conll
         return trees
 
     @staticmethod
@@ -341,8 +318,8 @@ class SampleExportService:
         if isinstance(tree, str):
             tree = json.loads(tree)
         usertrees: Dict[str, List[str]] = {}
-        for sentId in tree.keys():
-            for user, conll in tree[sentId]["conlls"].items():
+        for sent_id in tree.keys():
+            for user, conll in tree[sent_id]["conlls"].items():
                 if user not in usertrees:
                     usertrees[user] = list()
                 usertrees[user].append(conll)
