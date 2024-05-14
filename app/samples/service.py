@@ -51,7 +51,7 @@ class SampleUploadService:
         add_or_keep_timestamps(path_file)
 
         if sample_name not in existing_samples: 
-            GrewService.create_sample(project_name, sample_name)
+            GrewService.create_samples(project_name, [sample_name])
 
         with open(path_file, "rb") as file_to_save:
             GrewService.save_sample(project_name, sample_name, file_to_save)
@@ -69,7 +69,7 @@ class SampleTokenizeService:
         samples_names = [sample["name"] for sample in existing_samples]
         project = ProjectService.get_by_name(project_name)
         if sample_name not in samples_names:
-            GrewService.create_sample(project_name, sample_name)
+            GrewService.create_samples(project_name, [sample_name])
             index = 0
         else: 
             index = [sample["number_sentences"] for sample in existing_samples if sample_name == sample["name"]][0]

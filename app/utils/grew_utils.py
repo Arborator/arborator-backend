@@ -115,10 +115,10 @@ class GrewService:
         return grew_samples
     
     @staticmethod
-    def create_sample(project_id: str, sample_id: str):
+    def create_samples(project_id: str, sample_ids: List[str]):
         reply = grew_request(
-            "newSample",
-            data={"project_id": project_id, "sample_id": sample_id},
+            "newSamples",
+            data={"project_id": project_id, "sample_ids": json.dumps(sample_ids)},
         )
 
         return reply
