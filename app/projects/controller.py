@@ -1,7 +1,6 @@
 import datetime
 import json
 import os
-import base64
 from typing import List
 
 
@@ -66,14 +65,9 @@ class ProjectResource(Resource):
                 project.last_access = last_access - now
                 project.last_write_access = last_write_access - now
 
-                project_image = project.image
-                if project_image:
-                    image_path = os.path.join(current_app.config["PROJECT_IMAGE_FOLDER"], project_image)
-                    if os.path.exists(image_path):
-                        with open(image_path, 'rb') as file:
-                            image_data = base64.b64encode(file.read()).decode('utf-8')
-                            project.image = 'data:image/${};base64,${}'.format(image_data, image_path.split(".")[1])
-        
+                project_path = project.image
+                project.image = ProjectService.get_project_image(project_path)
+               
                 for grew_project in grew_projects:
                     if grew_project["name"] == project.project_name:
                         project.users = grew_project["users"]
@@ -294,6 +288,12 @@ class ProjectAccessUserResource(Resource):
 
 @api.route("/<string:project_name>/image")
 class ProjectImageResource(Resource):
+    
+    def get(self, project_name: str):
+        
+        image_path = ProjectService.get_by_name(project_name).image
+        image = ProjectService.get_project_image(image_path)
+        return image
     
     def post(self, project_name: str):
         """Update project image"""

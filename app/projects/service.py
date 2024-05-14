@@ -1,7 +1,9 @@
+import os
+import base64
 from datetime import datetime
 from typing import Dict, List, Tuple
 
-from flask import abort
+from flask import abort, current_app
 from flask_login import current_user
 
 from app import db
@@ -51,7 +53,16 @@ class ProjectService:
     def check_if_freezed(project: Project) -> None:
         if project.freezed and ProjectAccessService.get_admins(project.id)[0] != current_user.username: 
             abort(403, "You can't access the project when it's freezed")
-
+            
+    @staticmethod
+    def get_project_image(image_path: str) -> str:
+        if image_path:
+            image_path = os.path.join(current_app.config["PROJECT_IMAGE_FOLDER"], image_path)
+            if os.path.exists(image_path):
+                with open(image_path, 'rb') as file:
+                    image_data = base64.b64encode(file.read()).decode('utf-8')
+                    project_image = 'data:image/{};base64,{}'.format(image_path.split(".")[1], image_data)
+                    return project_image
    
 class ProjectAccessService:
     
