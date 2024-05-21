@@ -11,29 +11,10 @@ VALIDATED = "validated"
 class TreeService:
 
     @staticmethod
-    def samples2trees(samples, sample_name):
+    def samples_to_trees(samples, sample_name):
         """ transforms a list of samples into a trees object """
         trees = {}
         for sent_id, users in samples.items():
-            for user_id, conll in users.items():
-                sentence_json = sentenceConllToJson(conll)
-                sentence_text = constructTextFromTreeJson(sentence_json["treeJson"])
-                if sent_id not in trees:
-                    trees[sent_id] = {
-                        "sample_name": sample_name,
-                        "sentence": sentence_text,
-                        "sent_id": sent_id,
-                        "conlls": {},
-                        "matches": {},
-                    }
-                trees[sent_id]["conlls"][user_id] = conll
-        return trees
-
-    @staticmethod
-    def extract_trees_from_sample(sample, sample_name):
-        """ transforms a samples into a trees object """
-        trees = {}
-        for sent_id, users in sample.items():
             for user_id, conll in users.items():
                 sentence_json = sentenceConllToJson(conll)
                 sentence_text = constructTextFromTreeJson(sentence_json["treeJson"])
@@ -77,51 +58,7 @@ class TreeService:
                 if user_id not in restricted_users:
                     del sent_conlls[user_id]
         return trees
-
-    @staticmethod
-    def samples2trees_with_restrictions(samples, sample_name, current_user):
-        """ transforms a list of samples into a trees object and restrict it to user trees and default tree(s) """
-        trees = {}
-    
-        default_user_trees_ids = []
-        default_usernames = list()
-        default_usernames = default_user_trees_ids
-
-        if current_user.username not in default_usernames:
-            default_usernames.append(current_user.username)
-        for sent_id, users in samples.items():
-            filtered_users = {
-                username: users[username]
-                for username in default_usernames
-                if username in users
-            }
-            for user_id, conll in filtered_users.items():
-                sentenceJson = sentenceConllToJson(conll)
-                sentence_text = constructTextFromTreeJson(sentenceJson["treeJson"])
-                if sent_id not in trees:
-                    trees[sent_id] = {
-                        "sample_name": sample_name,
-                        "sentence": sentence_text,
-                        "sent_id": sent_id,
-                        "conlls": {},
-                        "matches": {},
-                    }
-                trees[sent_id]["conlls"][user_id] = conll
-        return trees
-
-    @staticmethod
-    def get_user_trees(project_name, sample_name, username):
         
-        user_trees_sent_ids = []
-        grew_sample_trees = GrewService.get_sample_trees(project_name, sample_name)
-        sample_trees = TreeService.extract_trees_from_sample(grew_sample_trees, sample_name)
-        for sent_id, trees in sample_trees.items():
-            if username in trees['conlls']: 
-                user_trees_sent_ids.append(sent_id)
-            
-            return user_trees_sent_ids
-        
-
 class TreeSegmentationService: 
 
     @staticmethod
