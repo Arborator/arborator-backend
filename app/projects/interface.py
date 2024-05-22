@@ -14,6 +14,7 @@ class ProjectInterface(TypedDict, total=False):
     language: str
     diff_user_id: str
     diff_mode: bool
+    collaborative_mode: bool
 
 
 class ProjectExtendedInterface(ProjectInterface, total=False):

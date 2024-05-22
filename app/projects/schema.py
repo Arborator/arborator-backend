@@ -14,6 +14,7 @@ class ProjectSchema(Schema):
     language = fields.String(attribute="language")
     diffMode = fields.Boolean(attribute="diff_mode")
     diffUserId = fields.String(attribute="diff_user_id")
+    collaborativeMode = fields.Boolean(attribute="collaborative_mode")
 
 
 class ProjectExtendedSchema(ProjectSchema):

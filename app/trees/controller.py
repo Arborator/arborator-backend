@@ -30,9 +30,9 @@ class SampleTreesResource(Resource):
 
         grew_sample_trees = GrewService.get_sample_trees(project_name, sample_name)
 
-        # ProjectAccessService.require_access_level(project.id, 2)
-        ##### exercise mode block #####
         blind_annotation_mode = project.blind_annotation_mode
+        collaborative_mode = project.collaborative_mode
+
         project_access = 0
         blind_annotation_level = 4
 
@@ -47,6 +47,11 @@ class SampleTreesResource(Resource):
         if project.visibility == 0 and project_access == 0:
             abort(403, "The project is not visible and you don't have the right privileges")
 
+        # if not collaborative mode only validated trees are visible
+        if not collaborative_mode:
+            sample_trees = TreeService.samples_to_trees(grew_sample_trees, sample_name)
+            sample_trees = TreeService.restrict_trees(sample_trees, [VALIDATED])
+
         if blind_annotation_mode:
             blind_annotation_level_obj = SampleBlindAnnotationLevelService.get_by_sample_name(
                 project.id, sample_name
@@ -54,29 +59,23 @@ class SampleTreesResource(Resource):
             if blind_annotation_level_obj:
                 blind_annotation_level = blind_annotation_level_obj.blind_annotation_level.code
 
-            sample_trees = TreeService.extract_trees_from_sample(grew_sample_trees, sample_name)
+            sample_trees = TreeService.samples_to_trees(grew_sample_trees, sample_name)
             sample_trees = TreeService.add_base_tree(sample_trees)
 
-            username = "anonymous"
             if current_user.is_authenticated:
                 username = current_user.username
                 if project_access <= 1:
-                    sample_trees = TreeService.add_user_tree(sample_trees, username)
-
-            if project_access <= 1:
-                restricted_users = [BASE_TREE, VALIDATED, username]
-                sample_trees = TreeService.restrict_trees(sample_trees, restricted_users)
+                    sample_trees = TreeService.add_user_tree(sample_trees, username)   
+                    restricted_users = [BASE_TREE, VALIDATED, username]
+                    sample_trees = TreeService.restrict_trees(sample_trees, restricted_users)
                 
         else:
-            sample_trees = TreeService.samples2trees(grew_sample_trees, sample_name)
+            sample_trees = TreeService.samples_to_trees(grew_sample_trees, sample_name)
                
         if current_user.is_authenticated:
             LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "read")
-        data = {
-            "sample_trees": sample_trees, 
-            "sent_ids": list(sample_trees.keys()), 
-            "blind_annotation_level": blind_annotation_level
-        }
+            
+        data = { "sample_trees": sample_trees, "sent_ids": list(sample_trees.keys()), "blind_annotation_level": blind_annotation_level }
         return data
 
     def post(self, project_name: str, sample_name: str):
@@ -90,10 +89,8 @@ class SampleTreesResource(Resource):
         ProjectService.check_if_freezed(project)
         user_id = args.user_id
         conll = args.conll
-        sent_id = args.sent_id
         if not conll:
             abort(400)
-
 
         if project.blind_annotation_mode == 1 and user_id == VALIDATED:
             conll = changeMetaFieldInSentenceConllu(conll, "user_id", VALIDATED)

@@ -25,6 +25,7 @@ class Project(db.Model, BaseM):
     freezed = Column(Boolean, default=False)
     config = Column(String(256), nullable=True)
     language = Column(String(256), nullable=True)
+    collaborative_mode = Column(Boolean, default=True)
 
     feature = db.relationship("ProjectFeature", cascade="all,delete", backref="projects")
     meta_feature = db.relationship("ProjectMetaFeature", cascade="all,delete", backref="projects")
