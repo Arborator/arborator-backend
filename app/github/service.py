@@ -357,7 +357,7 @@ class GithubWorkflowService:
     @staticmethod
     def create_sample(sample_name, path_file, project_name):
 
-        if not SampleService.check_sentences_without_sent_ids(path_file, sample_name):
+        if not SampleService.check_sentences_without_sent_ids(path_file):
             SampleService.add_new_sent_ids(path_file, sample_name)
 
         SampleService.check_duplicate_sent_id(path_file, sample_name)
