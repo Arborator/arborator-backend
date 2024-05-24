@@ -5,7 +5,7 @@ from typing import List
 from flask.helpers import send_file
 from flask_accepts.decorators.decorators import responds
 from flask import Response, request
-from flask_restx import Namespace, Resource, reqparse
+from flask_restx import Namespace, Resource 
 from flask_login import current_user
 
 from app.projects.service import ProjectAccessService, ProjectService, LastAccessService
@@ -174,7 +174,7 @@ class ExportSampleResource(Resource):
         users = args.get("users")
         sample_names, samples_with_string_content = GrewService.get_samples_with_string_contents(project_name, sample_names)
 
-        memory_file = SampleExportService.contentfiles2zip(
+        memory_file = SampleExportService.content_files_to_zip(
             sample_names, samples_with_string_content, users
         )
 

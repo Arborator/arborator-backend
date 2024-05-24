@@ -1,10 +1,8 @@
-import json
-import re
 import os 
 
-from flask import Response, abort, current_app, request
+from flask import abort, request
 from flask_login import current_user
-from flask_restx import Namespace, Resource, reqparse
+from flask_restx import Namespace, Resource
 from conllup.conllup import sentenceConllToJson
 from conllup.processing import constructTextFromTreeJson
 
@@ -25,9 +23,8 @@ class ApplyRuleResource(Resource):
 
         project =ProjectService.get_by_name(project_name)
         ProjectService.check_if_freezed(project)
-        parser = reqparse.RequestParser()
-        parser.add_argument(name="data", type=dict, action="append")
-        args = parser.parse_args()
+        
+        args = request.get_json()
         data = args.get("data")[0]
 
         for sample_name in data:
@@ -60,19 +57,12 @@ class SearchResource(Resource):
     "Search"
     def post(self, project_name: str):
 
-        parser = reqparse.RequestParser()
-        parser.add_argument(name="pattern", type=str)
-        parser.add_argument(name="userType", type=str)
-        parser.add_argument(name="sampleIds",type=str,action="append")
-        parser.add_argument(name="otherUser", type=str)
-        args = parser.parse_args()
-
+        args = request.get_json()
         pattern = args.get("pattern")
         trees_type = args.get("userType") 
         sample_ids = args.get("sampleIds")
         other_user = args.get("otherUser")
         
-        print(other_user)
         user_type = 'all' if trees_type == 'pending' else trees_type
         if not sample_ids: 
             sample_ids = [sample["name"] for sample in GrewService.get_samples(project_name)]
@@ -90,12 +80,8 @@ class SearchResource(Resource):
 class TryPackageResource(Resource):
     "rewrite"
     def post(self, project_name: str):
-        parser = reqparse.RequestParser()
-        parser.add_argument(name="query", type=str)
-        parser.add_argument(name="sampleIds", type=str, action="append")
-        parser.add_argument(name="userType", type=str)
-        parser.add_argument(name="otherUser", type=str)
-        args = parser.parse_args()
+    
+        args = request.get_json()
         
         package = args.get("query")
         user_type = args.get("userType")
@@ -111,7 +97,7 @@ class TryPackageResource(Resource):
         for m in reply["data"]:
             if m["user_id"] == "":
                 abort(409)
-            trees = formatTrees_new(m, trees, isPackage=True)
+            trees = format_trees_new(m, trees, is_package=True)
         return trees
 
 
@@ -119,42 +105,19 @@ class TryPackageResource(Resource):
 class RelationTableResource(Resource):
     def post(self, project_name):
 
-        parser = reqparse.RequestParser()
-        parser.add_argument(name="sampleIds", type=str, action="append")
-        parser.add_argument(name="tableType")
-
-        args = parser.parse_args()
-
+        args = request.get_json()
         sample_ids = args.get("sampleIds")
+        table_type = args.get("tableType")
+        other_user = args.get("otherUser")
         
-        tableType = args.get("tableType")
-        if not sample_ids: 
-            sample_ids = []
-        if tableType=='user':
-            user_ids = { "one": [current_user.username] }
-        elif tableType=='user_recent':
-            user_ids = { "one": [current_user.username, "__last__"] }
-        elif tableType=='recent':
-            user_ids = { "one": ["__last__"] }
-        elif tableType=='validated':
-            user_ids = { "one": ["validated"]}
-        elif tableType=='all':
-            user_ids = "all"
-        reply = grew_request(
-            "relationTables",
-            data={
-                "project_id": project_name,
-                "sample_ids": json.dumps(sample_ids),
-                "user_ids": json.dumps(user_ids),
-            },
-        )
+        reply = GrewService.get_relation_table(project_name, sample_ids, table_type, other_user)
         if reply["status"] != "OK":
             abort(400)
         data = reply.get("data")    
         return data
 
 
-def formatTrees_new(m, trees, isPackage: bool = False):
+def format_trees_new(m, trees, is_package: bool = False):
     """
     m is the query result from grew
     list of trees
@@ -166,7 +129,7 @@ def formatTrees_new(m, trees, isPackage: bool = False):
     sent_id = m["sent_id"]
     conll = m["conll"]
 
-    if isPackage == False:
+    if is_package == False:
         nodes = m["nodes"]
         edges = m["edges"]
     else:
@@ -178,18 +141,18 @@ def formatTrees_new(m, trees, isPackage: bool = False):
 
     if sent_id not in trees[sample_name]:
         try: 
-            sentenceJson = sentenceConllToJson(conll)
-        except ValueError as e:
+            sentence_json = sentenceConllToJson(conll)
+        except ValueError:
             abort(400, 'The result of your query can not be processed by ArboratorGrew')
             
-        sentence_text = constructTextFromTreeJson(sentenceJson["treeJson"])
+        sentence_text = constructTextFromTreeJson(sentence_json["treeJson"])
         trees[sample_name][sent_id] = {
             "sentence": sentence_text,
             "conlls": {user_id: conll},
             "sent_id": sent_id,
            
         }
-        if isPackage == False:
+        if is_package == False:
             trees[sample_name][sent_id]["matches"] = {user_id: [{"edges": edges, "nodes": nodes}]}
         else:
             trees[sample_name][sent_id]["packages"] = {user_id: {"modified_edges": modified_edges, "modified_nodes": modified_nodes}}
@@ -198,7 +161,7 @@ def formatTrees_new(m, trees, isPackage: bool = False):
     else:
         trees[sample_name][sent_id]["conlls"][user_id] = conll
         # /!\ there can be more than a single match for a same sample, sentence, user so it has to be a list
-        if isPackage == False:
+        if is_package == False:
             trees[sample_name][sent_id]["matches"][user_id] = trees[sample_name][sent_id][
                 "matches"
             ].get(user_id, []) + [{"edges": edges, "nodes": nodes}]
@@ -215,7 +178,7 @@ def post_process_grew_results(search_results, sample_ids, trees_type):
     for result in search_results:
         if result["sample_id"] not in sample_ids:
             continue
-        trees = formatTrees_new(result, trees)
+        trees = format_trees_new(result, trees)
 
     search_results = {}
     if trees_type == 'pending':
