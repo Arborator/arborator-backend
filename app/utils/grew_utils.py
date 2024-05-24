@@ -179,6 +179,23 @@ class GrewService:
         return reply 
     
     @staticmethod
+    def get_lexicon(project_name: str, sample_ids, user_type, other_user, prune, features):
+        
+        user_ids = GrewService.get_user_ids(user_type, other_user)
+        prune = (None, prune) [prune != 0]
+        reply = grew_request(
+            "getLexicon",
+            data={
+                "project_id": project_name, 
+                "sample_ids": json.dumps(sample_ids), 
+                "user_ids": json.dumps(user_ids), 
+                "features": json.dumps(features),
+                "prune":prune
+            },
+        )
+        return reply
+        
+    @staticmethod
     def get_user_ids(user_type: str, other_user: str):
         if user_type == 'user':
             user_ids = { "one": [current_user.username] }
