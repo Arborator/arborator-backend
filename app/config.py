@@ -5,6 +5,7 @@ from cryptography.hazmat.primitives.serialization import load_pem_private_key
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 UPLOAD_FOLDER = "app/tmp/data/"
+UPLOAD_IMAGE_FOLDER = "app/uploads/images"
 MAX_TOKENS = 200000
 
 if not os.path.isdir(UPLOAD_FOLDER):
@@ -46,7 +47,7 @@ class DevelopmentConfig(Config):
     cert_bytes = open(fname, 'rb').read()
     PKEY = load_pem_private_key(cert_bytes, None)
 
-    PROJECT_IMAGE_FOLDER = "app/uploads/images"
+    PROJECT_IMAGE_FOLDER = UPLOAD_IMAGE_FOLDER
     UPLOAD_IMAGE_EXTENSIONS = ['.jpg', '.png', '.gif', '.jpeg']
 
 
@@ -64,7 +65,7 @@ class TestingConfig(Config):
     basedir = os.path.dirname(os.path.abspath(__file__))
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'arborator_test.sqlite')
 
-    PROJECT_IMAGE_FOLDER = "app/uploads/images"
+    PROJECT_IMAGE_FOLDER = UPLOAD_IMAGE_FOLDER
     UPLOAD_IMAGE_EXTENSIONS = ['.jpg', '.png', '.gif', '.jpeg']
 
 
@@ -86,12 +87,10 @@ class ProductionConfig(Config):
     ENV = 'prod'
     fname = 'keys/arborator-grew.pem'
     APP_ID = open('keys/arborator-grew-appid.txt').read()
-    # INSTALATION_ID = int(open('keys/arborator-grew-installationid.txt').read())
     cert_bytes = open(fname, 'rb').read()
     PKEY = load_pem_private_key(cert_bytes, None)
 
-    ## WARNING : specify the DIST folder, not the quasar source code in prod
-    PROJECT_IMAGE_FOLDER = "app/uploads/images"
+    PROJECT_IMAGE_FOLDER = UPLOAD_IMAGE_FOLDER
     UPLOAD_IMAGE_EXTENSIONS = ['.jpg', '.png', '.gif', '.jpeg']
 
 

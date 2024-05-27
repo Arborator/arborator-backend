@@ -79,16 +79,14 @@ class SampleTreesResource(Resource):
         return data
 
     def post(self, project_name: str, sample_name: str):
-        parser = reqparse.RequestParser()
-        parser.add_argument(name="sent_id", type=str)
-        parser.add_argument(name="user_id", type=str)
-        parser.add_argument(name="conll", type=str)
-        args = parser.parse_args()
-
+        
+        args = request.get_json()
+        user_id = args.get("user_id")
+        conll = args.get("conll")
+        
         project = ProjectService.get_by_name(project_name)
         ProjectService.check_if_freezed(project)
-        user_id = args.user_id
-        conll = args.conll
+        
         if not conll:
             abort(400)
 
