@@ -258,7 +258,17 @@ class ProjectMetaFeatureService:
 
 
 class LastAccessService:
-
+    
+    @staticmethod
+    def get_user_by_last_access_and_project(project_name, last_access, access_type):
+        project_id = ProjectService.get_by_name(project_name).id
+        if access_type == 'write':
+            user_id = LastAccess.query.filter_by(project_id=project_id, last_write=last_access).first().user_id
+        else:
+            user_id = LastAccess.query.filter_by(project_id=project_id, last_read=last_access).first().user_id
+        username = UserService.get_by_id(user_id).username
+        return username        
+        
     @staticmethod
     def get_project_last_access(project_name):
         project = ProjectService.get_by_name(project_name)
