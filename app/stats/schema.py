@@ -12,7 +12,7 @@ class LastReadAccessSchema(Schema):
     
 class LastWriteAccessSchema(Schema):
     lastWrite = fields.Integer(attribute="last_write")
-    lastWriteUsername = fields.String(attribute="last_write_access")
+    lastWriteUsername = fields.String(attribute="last_write_username")
 
 class StatProjectSchema(Schema):
     users = fields.List(fields.String, attribute="users")

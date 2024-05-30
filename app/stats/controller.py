@@ -1,3 +1,4 @@
+import datetime
 import operator
 from collections import defaultdict
 
@@ -42,15 +43,14 @@ class StaticsProjectResource(Resource):
         }       
     
         project_last_read, project_last_write = LastAccessService.get_project_last_access(project_name)
-       
+        now = datetime.datetime.now().timestamp()
         project_stats["last_write"] = {
-            "last_write": project_last_write,
+            "last_write": project_last_write - now,
             "last_write_username": LastAccessService.get_user_by_last_access_and_project(
             project_name, project_last_write, "write")
         }
-        
         project_stats["last_read"] = {
-            "last_read": project_last_read,
+            "last_read": project_last_read - now,
             "last_read_username": LastAccessService.get_user_by_last_access_and_project(
             project_name, project_last_read, "read")
         }
