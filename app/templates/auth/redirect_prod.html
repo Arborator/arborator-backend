@@ -1,6 +1,11 @@
-<html>
-
+<!DOCTYPE html>
+<html lang="html">
 	<head>
-		<meta http-equiv="Refresh" content="0; url=https://arboratorgrew.elizia.net/#/projects ">
+		<title></title>
+		{% if has_projects == True %}
+			<meta http-equiv="Refresh" content="0; url=https://arboratorgrew.elizia.net/#/myprojects ">
+		{% else  %}
+			<meta http-equiv="Refresh" content="0; url=https://arboratorgrew.elizia.net/#/projects">
+		{% endif %}
 	</head>
 </html>

@@ -87,6 +87,14 @@ class ProjectAccessService:
             db.session.commit()
 
     @staticmethod
+    def user_has_access_to_project(user_id):
+        project_access = ProjectAccess.query.filter_by(user_id=user_id).all()
+        if project_access:
+            return True
+        else:
+            return False
+        
+    @staticmethod
     def get_by_user_id(user_id: str, project_id: int) -> ProjectAccess:
         return ProjectAccess.query.filter_by(project_id=project_id, user_id=user_id).first()
 
