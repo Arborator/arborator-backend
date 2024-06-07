@@ -35,14 +35,15 @@ class StaticsProjectResource(Resource):
         for sample in grew_samples:
             for key, value in sample["tree_by_user"].items():
                 if key != 'validated':
-                    users[key] += value        
-        max_user_trees = max(users.items(), key=operator.itemgetter(1))
+                    users[key] += value   
+        if users.items():     
+            max_user_trees = max(users.items(), key=operator.itemgetter(1))
         
-        project_stats["top_user"] = {
-            "username": max_user_trees[0],
-            "trees_number": max_user_trees[1],
-            "user_avatar": UserService.get_by_username(max_user_trees[0]).picture_url
-        }       
+            project_stats["top_user"] = {
+                "username": max_user_trees[0],
+                "trees_number": max_user_trees[1],
+                "user_avatar": UserService.get_by_username(max_user_trees[0]).picture_url
+            }       
     
         project_last_read, project_last_write = LastAccessService.get_project_last_access(project_name)
         now = datetime.datetime.now().timestamp()
