@@ -52,7 +52,7 @@ class SampleResource(Resource):
                 project.id, grew_sample["name"]
             )
             if blind_annotation_level:
-                sample["blind_annotation_level"] = blind_annotation_level.blind_annotation_level.code
+                sample["blind_annotation_level"] = blind_annotation_level.blind_annotation_level
             else:
                 sample["blind_annotation_level"] = 4
 

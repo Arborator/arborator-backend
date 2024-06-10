@@ -165,7 +165,7 @@ class ProjectAccessService:
             else:
                 access_level = ProjectAccessService.get_by_user_id(
                     current_user.id, project_id
-                ).access_level.code
+                ).access_level
 
         if access_level >= required_access_level:
             return

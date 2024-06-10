@@ -42,7 +42,7 @@ class SampleTreesResource(Resource):
             )
 
             if project_access_obj:
-                project_access = project_access_obj.access_level.code
+                project_access = project_access_obj.access_level
 
         if project.visibility == 0 and project_access == 0:
             abort(403, "The project is not visible and you don't have the right privileges")
@@ -57,7 +57,7 @@ class SampleTreesResource(Resource):
                 project.id, sample_name
             )
             if blind_annotation_level_obj:
-                blind_annotation_level = blind_annotation_level_obj.blind_annotation_level.code
+                blind_annotation_level = blind_annotation_level_obj.blind_annotation_level
 
             sample_trees = TreeService.samples_to_trees(grew_sample_trees, sample_name)
             sample_trees = TreeService.add_base_tree(sample_trees)

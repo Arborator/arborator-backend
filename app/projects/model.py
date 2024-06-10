@@ -1,5 +1,4 @@
 from sqlalchemy import Boolean, Column, Integer, String, Boolean, Float
-from sqlalchemy_utils import ChoiceType
 
 from app import db  # noqa
 
@@ -64,22 +63,15 @@ class ProjectMetaFeature(db.Model):
 class ProjectAccess(db.Model):
     
     __tablename__ = "projectaccess"
-    ACCESS = [(1, "annotator"), (2, "validator"), (3, "admin"), (4, "guest")]
-    LABEL_TO_LEVEL = {v: k for k, v in dict(ACCESS).items()}
     id = Column(Integer, primary_key=True)
     project_id = Column(Integer, db.ForeignKey("projects.id", ondelete="CASCADE"))
     user_id = Column(String(256), db.ForeignKey("users.id"))
-    access_level = Column(ChoiceType(ACCESS, impl=Integer()))
+    access_level = Column(Integer, nullable=False)
 
     def update(self, changes):
         for key, val in changes.items():
             setattr(self, key, val)
         return self
-
-    def __repr__(self):
-        return "<projectAccess,project={},user={},access={} >".format(
-            self.project_id, self.user_id, self.access_level
-        )
 
 
 class LastAccess(db.Model):
@@ -90,3 +82,4 @@ class LastAccess(db.Model):
     project_id = Column(Integer, db.ForeignKey("projects.id", ondelete="CASCADE")) # unique
     last_read = Column(Float, nullable=True )
     last_write = Column(Float, nullable=True)
+
