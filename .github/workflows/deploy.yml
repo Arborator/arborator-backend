@@ -19,8 +19,6 @@ jobs:
             cd /home/arborator/arborator-backend
             git pull origin main
             source venv/bin/activate
-            pip3 install -r requirements.txt
-            pip3 install uWSGI==2.0.22
             flask db upgrade
             sudo systemctl restart arborator-backend.service
 
