@@ -8,4 +8,4 @@ class GrewHistorySchema(Schema):
     type = fields.String(attribute="type")
     favorite = fields.Boolean(attribute="favorite")
     date = fields.Integer(attribute="date")
-    modified_sentences = fields.Integer(attribute="modified_sentences")
+    modifiedSentences = fields.Integer(attribute="modified_sentences")

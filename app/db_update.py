@@ -1,5 +1,5 @@
 import os
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 import argparse
 
 
@@ -12,7 +12,7 @@ if args.mode != 'prod' and args.mode != 'dev':
     print('mode must be prod or dev')
     exit()
 
-if args.version != 'refactor_github' and args.version != 'add_grew_history':
+if args.version != 'refactor_github' and args.version != 'add_grew_history' and args.version != 'update_dependencies':
     print('version must be refactor_github or add_grew_history')
     exit()
 
@@ -31,8 +31,15 @@ def migrate_refactor_github(engine):
         connection.execute("DELETE FROM github_repositories;")
         connection.execute("DELETE FROM commit_status;")
 
+def migrate_update_dependencies(engine):
+    with engine.connect() as connection:
+        connection.execute(text("ALTER TABLE projects ADD collaborative_mode BOOLEAN NOT NULL DEFAULT(1);"))
+
 if args.version == 'add_grew_history':
     migrate_add_grew_history(engine)
            
 if args.version == 'refactor_github':
     migrate_refactor_github(engine)
+
+if args.version == 'update_dependencies':
+    migrate_update_dependencies(engine)
