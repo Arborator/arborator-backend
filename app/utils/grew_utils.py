@@ -3,7 +3,7 @@ import json
 from typing import Dict, List, TypedDict
 
 import requests
-from flask import abort, current_app
+from flask import abort
 from flask_login import current_user
 from app import grew_config
 import re
@@ -30,7 +30,7 @@ def grew_request(fct_name, data={}, files={}):
         error_message = response.get("message")
         print("GREW-ERROR : {}".format(error_message) )
         abort(406, "GREW-ERROR : {}".format(error_message)) 
-
+        
     elif response.get("status") == "WARNING":
         warning_message = response.get("message")
         print("Grew-Warning: {}".format(warning_message))

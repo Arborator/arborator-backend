@@ -19,7 +19,7 @@ class ParserModelsListResource(Resource):
         print("<PARSER> list/start request")
         response =  ArboratorParserAPI.list()
         if response['status'] == 'failure':
-            abort(503, 'Sorry, the parsing server is unreachable and not under our control, please come back later')
+            abort(503, 'Sorry, the parsing server is unreachable, please come back later')
         else: 
             pretrained_models = []
             models = response.get("data")

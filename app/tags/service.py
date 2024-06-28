@@ -83,6 +83,19 @@ class UserTagsService:
         db.session.commit()
         return user_tags_entry
     
+    @staticmethod
+    def delete_tag(user_id, tag):
+        user_tags_entry = UserTagsService.get_by_user_id(user_id)
+        if user_tags_entry.tags: 
+            existing_tags = list(user_tags_entry.tags)
+            existing_tags.remove(tag)
+            if existing_tags: 
+                user_tags_entry.update({"tags": existing_tags })
+            else:    
+                db.session.delete(user_tags_entry)
+        db.session.commit()
+        
+    
     
         
 

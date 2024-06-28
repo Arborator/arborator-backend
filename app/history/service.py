@@ -14,7 +14,7 @@ class HistoryService:
     
     @staticmethod 
     def get_by_uuid(project_id, uuid) -> History:
-        return History.query.filter_by(project_id=project_id, uuid= uuid)
+        return History.query.filter_by(project_id=project_id, uuid= uuid).first()
 
     @staticmethod
     def create(new_attrs) -> History:

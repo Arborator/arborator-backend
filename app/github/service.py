@@ -402,15 +402,16 @@ class GithubWorkflowService:
         base_tree = GithubService.get_sha_base_tree(github_access_token, sync_repository.repository_name, sync_repository.branch)
         modified_files = GithubService.compare_two_commits(github_access_token, sync_repository.repository_name, sync_repository.base_sha, base_tree)
         for file in modified_files:
-            sample_name = file.get("filename").split(CONLL)[0]
-            file_content= GithubService.get_file_content_by_commit_sha(github_access_token, sync_repository.repository_name, file.get("filename"), base_tree)
-            download_url = file_content.get("download_url")
-            if file.get("status") == "added":
-                GithubWorkflowService.create_sample_from_github_file(sample_name, download_url, project_name)
-            if file.get("status") == "modified":
-                GithubWorkflowService.pull_change_existing_sample(project_name, sample_name, download_url)
-            if file.get("status") == "removed":
-                GithubWorkflowService.delete_sample_from_project(project_name, sample_name)
+            if extension.search(file.get('filename')):
+                sample_name = file.get("filename").split(".conllu")[0]
+                file_content= GithubService.get_file_content_by_commit_sha(github_access_token, sync_repository.repository_name, file.get("filename"), base_tree)
+                download_url = file_content.get("download_url")
+                if file.get("status") == "added":
+                    GithubWorkflowService.create_sample_from_github_file(sample_name, download_url, project_name)
+                if file.get("status") == "modified":
+                    GithubWorkflowService.pull_change_existing_sample(project_name, sample_name, download_url)
+                if file.get("status") == "removed":
+                    GithubWorkflowService.delete_sample_from_project(project_name, sample_name)
         GithubRepositoryService.update_sha(project.id, base_tree)
 
     @staticmethod
