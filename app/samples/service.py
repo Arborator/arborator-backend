@@ -25,6 +25,7 @@ class SampleUploadService:
     def upload(
         fileobject: FileStorage,
         project_name: str,
+        rtl: bool,
         reextensions=None,
         existing_samples=[],
         new_username='',
@@ -49,6 +50,9 @@ class SampleUploadService:
 
         add_or_replace_userid(path_file, new_username)
         add_or_keep_timestamps(path_file)
+        
+        if rtl:
+            add_rtl_meta_data(path_file)
 
         if sample_name not in existing_samples: 
             GrewService.create_samples(project_name, [sample_name])
@@ -63,7 +67,7 @@ class SampleUploadService:
 class SampleTokenizeService:
 
     @staticmethod
-    def tokenize(text, option, lang, project_name, sample_name, username):
+    def tokenize(text, option, lang, project_name, sample_name, username, rtl):
 
         existing_samples = GrewService.get_samples(project_name)
         samples_names = [sample["name"] for sample in existing_samples]
@@ -91,6 +95,9 @@ class SampleTokenizeService:
             file.write(conll)
         add_or_replace_userid(path_file, username)
         add_or_keep_timestamps(path_file)
+        
+        if rtl:
+            add_rtl_meta_data(path_file)
 
         with open(path_file, "rb") as file_to_save:
             GrewService.save_sample(project_name, sample_name, file_to_save)
@@ -289,6 +296,12 @@ def add_or_replace_userid(path_file: str, new_user_id: str):
     for sentence_json in sentences_json:
         sentence_json["metaJson"]["user_id"] = new_user_id
 
+    writeConlluFileWrapper(path_file, sentences_json)
+    
+def add_rtl_meta_data(path_file: str):
+    sentences_json = readConlluFileWrapper(path_file, keepEmptyTrees=True)
+    for sentence_json in sentences_json:
+        sentence_json["metaJson"]["rtl"] = "yes"   
     writeConlluFileWrapper(path_file, sentences_json)
 
 def check_duplicate_sent_id(path_file: str, sample_name: str):
