@@ -70,6 +70,10 @@ class SampleResource(Resource):
         username = request.form.get("userId")   
         files = request.files.to_dict(flat=False).get("files")
         samples_without_sent_ids = request.form.get("samplesWithoutSentIds")
+        rtl = request.form.get("rtl")
+        
+        rtl = json.loads(rtl)
+        
         if samples_without_sent_ids:
             samples_without_sent_ids = json.loads(samples_without_sent_ids)
 
@@ -82,6 +86,7 @@ class SampleResource(Resource):
                 SampleUploadService.upload(
                     file,
                     project_name,
+                    rtl,
                     reextensions=reextensions,
                     existing_samples=existing_samples,
                     new_username=username,
@@ -117,6 +122,7 @@ class SampleTokenizeResource(Resource):
         option = args.get("option")
         lang = args.get("lang")
         text = args.get("text")
+        rtl = args.get("rtl")
         
         SampleTokenizeService.tokenize(text, option, lang, project_name, sample_name, username)
         LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")

@@ -125,8 +125,11 @@ class ProjectIdResource(Resource):
     @responds(schema=ProjectSchema, api=api)
     def get(self, project_name: str):
         """Get a single project"""
-        
-        return ProjectService.get_by_name(project_name)
+        project = ProjectService.get_by_name(projectName)
+        if project:
+            return project
+        else:
+            abort(404, 'No such project in the backend')
 
     @responds(schema=ProjectSchema, api=api)
     @accepts(schema=ProjectSchema, api=api)
