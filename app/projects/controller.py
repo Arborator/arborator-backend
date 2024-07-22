@@ -125,7 +125,7 @@ class ProjectIdResource(Resource):
     @responds(schema=ProjectSchema, api=api)
     def get(self, project_name: str):
         """Get a single project"""
-        project = ProjectService.get_by_name(projectName)
+        project = ProjectService.get_by_name(project_name)
         if project:
             return project
         else:
