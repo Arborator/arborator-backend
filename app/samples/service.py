@@ -51,7 +51,7 @@ class SampleUploadService:
         add_or_replace_userid(path_file, new_username)
         add_or_keep_timestamps(path_file)
         
-        if rtl:
+        if rtl == True:
             add_rtl_meta_data(path_file)
 
         if sample_name not in existing_samples: 
@@ -96,7 +96,7 @@ class SampleTokenizeService:
         add_or_replace_userid(path_file, username)
         add_or_keep_timestamps(path_file)
         
-        if rtl:
+        if rtl == True:
             add_rtl_meta_data(path_file)
 
         with open(path_file, "rb") as file_to_save:
