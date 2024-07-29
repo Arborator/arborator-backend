@@ -44,8 +44,8 @@ class SampleTreesResource(Resource):
 
             if project_access_obj:
                 project_access = project_access_obj.access_level.code
-
-        if project.visibility == 0 and project_access == 0:
+                
+        if project.visibility == 0 and project_access == 0 and not current_user.super_admin:
             abort(403, "The project is not visible and you don't have the right privileges")
 
         if blind_annotation_mode:
