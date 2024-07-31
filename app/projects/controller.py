@@ -156,7 +156,28 @@ class ProjectResource(Resource):
 
         return new_project
 
-
+@api.route("/mismatch-projects")
+class MistmatchProjectsResource(Resource):
+    
+    def get(self):
+        
+        projects: List[Project] = Project.query.all()
+        grew_projects = GrewService.get_projects()
+        grew_project_names = set([project["name"] for project in grew_projects])
+        db_project_names = set([project.project_name for project in projects])
+       
+        diff_projects_db = db_project_names - grew_project_names
+        diff_projects_grew = grew_project_names - db_project_names
+    
+        return { "db_projects": list(diff_projects_db), "grew_projects": list(diff_projects_grew) }    
+     
+@api.route("/project-languages")
+class ProjectLanguagesResource(Resource):
+    
+    def get(self):
+       projects: List[Project] = Project.query.all()
+       return list(set([project.language for project in projects if project.language]))
+           
 @api.route("/<string:projectName>")
 class ProjectIdResource(Resource):
     """Views for dealing with single identified project"""
