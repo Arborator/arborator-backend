@@ -12,6 +12,9 @@ class ProjectInterface(TypedDict, total=False):
     freezed: bool
     config: str
     language: str
+    sync_github: str
+    owner: str
+    contact_owner: str
 
 
 class ProjectExtendedInterface(ProjectInterface, total=False):

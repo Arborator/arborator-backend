@@ -70,7 +70,13 @@ class ProjectResource(Resource):
                     project.guests,
                 ) = ProjectAccessService.get_all(project.id)
 
-                # better version: less complexity + database calls / 2
+                project.owner = project.admins[0]
+                project.contact_owner = UserService.get_by_username(project.admins[0]).email
+                if project.github_repository:
+                    project.sync_github = project.github_repository.repository_name
+                else:
+                    project.sync_github = ''
+                
                 (
                     last_access,
                     last_write_access,
@@ -170,13 +176,6 @@ class MistmatchProjectsResource(Resource):
         diff_projects_grew = grew_project_names - db_project_names
     
         return { "db_projects": list(diff_projects_db), "grew_projects": list(diff_projects_grew) }    
-     
-@api.route("/project-languages")
-class ProjectLanguagesResource(Resource):
-    
-    def get(self):
-       projects: List[Project] = Project.query.all()
-       return list(set([project.language for project in projects if project.language]))
            
 @api.route("/<string:projectName>")
 class ProjectIdResource(Resource):

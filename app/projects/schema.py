@@ -32,6 +32,9 @@ class ProjectSchema(Schema):
     freezed = fields.Boolean(attribute="freezed")
     config = fields.String(attribute="config")
     language = fields.String(attribute="language")
+    syncGithub = fields.String(attribute="sync_github") 
+    owner = fields.String(attribute="owner")
+    contactOwner = fields.String(attribute="contact_owner")
 
 
 class ProjectExtendedSchema(ProjectSchema):
