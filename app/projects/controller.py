@@ -70,8 +70,13 @@ class ProjectResource(Resource):
                     project.guests,
                 ) = ProjectAccessService.get_all(project.id)
 
-                project.owner = project.admins[0]
-                project.contact_owner = UserService.get_by_username(project.admins[0]).email
+                if project.admins:
+                    project.owner = project.admins[0]
+                    project.contact_owner = UserService.get_by_username(project.admins[0]).email
+                else: 
+                    project.owner = ''
+                    project.contact_owner = ''
+                    
                 if project.github_repository:
                     project.sync_github = project.github_repository.repository_name
                 else:
