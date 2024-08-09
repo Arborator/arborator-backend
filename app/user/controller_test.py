@@ -66,19 +66,3 @@ class TestUserResource:
             for r in results:
                 assert r in expected
 
-    # @patch.object(
-    #     UserService, "create", lambda create_request: User(**create_request)
-    # )
-    # def test_post(self, client: FlaskClient):  # noqa
-    #     with client:
-
-    #         payload = dict(username="Test user", first_name="test first name")
-    #         result = client.post(f"/api/{BASE_ROUTE}/", json=payload).get_json()
-    #         expected = (
-    #             UserSchema()
-    #             .dump(User(username=payload["username"], first_name=payload["first_name"]))
-                
-    #         )
-    #         print("result", result)
-    #         print("expected", expected)
-    #         assert result == expected

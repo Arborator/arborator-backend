@@ -6,6 +6,7 @@ from flask_login import current_user
 from app.projects.service import ProjectService
 from .service import HistoryService
 from .schema import GrewHistorySchema
+from .interface import GrewHistoryInterface
 
 api = Namespace(
     "History",
@@ -25,7 +26,7 @@ class HistoryResource(Resource):
     @responds(schema=GrewHistorySchema, api=api)
     def post(self, project_name):
         project = ProjectService.get_by_name(project_name)
-        data = request.get_json()
+        data: GrewHistoryInterface = request.parsed_obj
         data["project_id"] = project.id
         data["user_id"] = current_user.id
         new_history_record = HistoryService.create(data)
@@ -42,7 +43,7 @@ class HistoryRecordResource(Resource):
 
     @responds(schema=GrewHistorySchema, api=api)
     def put(self, project_name, history_uuid):
-        changes = request.get_json()
+        changes: GrewHistoryInterface = request.get_json()
         project = ProjectService.get_by_name(project_name)
         history_record = HistoryService.get_by_uuid(project.id, history_uuid)
         updated_record = HistoryService.update(history_record, changes)
@@ -55,12 +56,3 @@ class HistoryRecordResource(Resource):
         return { "status": "ok" }
 
     
-
-
-
-
-
-
-
-        
-
