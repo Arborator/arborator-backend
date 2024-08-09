@@ -30,7 +30,7 @@ class Project(db.Model, BaseM):
     meta_feature = db.relationship("ProjectMetaFeature", cascade="all,delete", backref="projects")
     project_access = db.relationship("ProjectAccess", cascade="all,delete", backref="projects")
     project_last_access = db.relationship("LastAccess", cascade="all,delete", backref="projects")
-    github_repository = db.relationship(GithubRepository, cascade="all,delete", backref="projects")
+    github_repository = db.relationship(GithubRepository, cascade="all,delete", backref="projects", uselist=False)
     github_commit_status = db.relationship(GithubCommitStatus, cascade="all,delete", backref="projects")
     constructicon = db.relationship(Constructicon, cascade="all, delete", backref="projects")
     history = db.relationship(History, cascade="all, delete", backref="projects")

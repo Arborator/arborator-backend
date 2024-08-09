@@ -12,6 +12,9 @@ class ProjectInterface(TypedDict, total=False):
     freezed: bool
     config: str
     language: str
+    sync_github: str
+    owner: str
+    contact_owner: str
     diff_user_id: str
     diff_mode: bool
     collaborative_mode: bool

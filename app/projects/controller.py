@@ -52,8 +52,20 @@ class ProjectResource(Resource):
                     project.annotators,
                     project.guests,
                 ) = ProjectAccessService.get_all(project.id)
-                
-                project.owner_avatar_url = UserService.get_by_username(project.admins[0]).picture_url
+
+                if project.admins:
+                    project.owner = project.admins[0]
+                    project.owner_avatar_url = UserService.get_by_username(project.admins[0]).picture_url
+                    project.contact_owner = UserService.get_by_username(project.admins[0]).email
+                else: 
+                    project.owner = ''
+                    project.owner_avatar_url = ''
+                    project.contact_owner = ''
+                    
+                if project.github_repository:
+                    project.sync_github = project.github_repository.repository_name
+                else:
+                    project.sync_github = ''
                 
                 (
                     last_access,
@@ -118,7 +130,21 @@ class ProjectResource(Resource):
 
         return new_project
 
-
+@api.route("/mismatch-projects")
+class MistmatchProjectsResource(Resource):
+    
+    def get(self):
+        
+        projects: List[Project] = Project.query.all()
+        grew_projects = GrewService.get_projects()
+        grew_project_names = set([project["name"] for project in grew_projects])
+        db_project_names = set([project.project_name for project in projects])
+       
+        diff_projects_db = db_project_names - grew_project_names
+        diff_projects_grew = grew_project_names - db_project_names
+    
+        return { "db_projects": list(diff_projects_db), "grew_projects": list(diff_projects_grew) }    
+           
 @api.route("/<string:project_name>")
 class ProjectIdResource(Resource):
 

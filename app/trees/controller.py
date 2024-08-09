@@ -4,6 +4,7 @@ from flask_login import current_user
 from flask_restx import Namespace, Resource, reqparse
 from conllup.processing import changeMetaFieldInSentenceConllu
 
+from app.config import Config
 from app.projects.service import LastAccessService, ProjectAccessService, ProjectService
 from app.samples.service import SampleBlindAnnotationLevelService
 from app.github.service import GithubCommitStatusService, GithubRepositoryService
@@ -43,8 +44,8 @@ class SampleTreesResource(Resource):
 
             if project_access_obj:
                 project_access = project_access_obj.access_level
-
-        if project.visibility == 0 and project_access == 0:
+                
+        if project.visibility == 0 and project_access == 0 and not current_user.super_admin:
             abort(403, "The project is not visible and you don't have the right privileges")
 
         # if not collaborative mode only validated trees are visible
@@ -114,7 +115,19 @@ class UserTreesResource(Resource):
         data = {"project_id": project_name,  "sample_id": sample_name, "sent_ids": "[]","user_id": username, }
         grew_request("eraseGraphs", data)
         LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")  
-
+        
+@api.route("/<string:project_name>/samples/<string:sample_name>/trees/all")
+class SaveAllTreesResource(Resource):
+    
+    def post(self, project_name: str, sample_name: str):
+        data = request.get_json()
+        
+        file_name = sample_name + "_save_all.conllu"
+        path_file = os.path.join(Config.UPLOAD_FOLDER, file_name)
+        with open(path_file, "w") as conll_file:
+            conll_file.write(data.get('conllGraph'))
+        with open(path_file, "rb") as file_to_save:
+            GrewService.save_sample(project_name, sample_name, file_to_save)
 
 @api.route("/<string:project_name>/samples/<string:sample_name>/trees/split")
 class SplitTreeResource(Resource):
