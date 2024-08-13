@@ -123,18 +123,13 @@ def login(provider_name) -> Response:
                 print("firstsuper")
                 return make_response(render_template("auth/firstsuper.html"))
 
-            # KK : TODO : It seems that these two following lines are useless because
-            # ... this view puspuse is to login (send the cookie) and not to send user
-            # ... infos as a json
-            user_json = UserSchema().dump(user)
-            resp = Response(user_json, status=200, mimetype="application/json")
             if current_app.config["ENV"] == "dev":
                 return make_response(
-                    render_template("auth/redirect_dev.html", response=resp, has_projects= has_projects)
+                    render_template("auth/redirect_dev.html", has_projects= has_projects)
                 )
             elif current_app.config["ENV"] == "prod":
                 return make_response(
-                    render_template("auth/redirect_prod.html", response=resp, has_projects= has_projects)
+                    render_template("auth/redirect_prod.html", has_projects= has_projects)
                 )
 
     return response
