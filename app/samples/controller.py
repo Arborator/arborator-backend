@@ -124,7 +124,7 @@ class SampleTokenizeResource(Resource):
         text = args.get("text")
         rtl = args.get("rtl")
         
-        SampleTokenizeService.tokenize(text, option, lang, project_name, sample_name, username)
+        SampleTokenizeService.tokenize(text, option, lang, project_name, sample_name, username, rtl)
         LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
 
 

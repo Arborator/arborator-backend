@@ -28,7 +28,6 @@
 			<div style='float:right' id='log'>
 				{% if current_user.is_authenticated %}
 					<i class="fa fa-user"></i>  Hi, {{ current_user.first_name }}! <img src="{{ current_user.picture_url }}" border="0" height="25px" alt="avatar">
-					<a href="{{ url_for('auth.logout') }}">Logout</a>	
 				{% endif %}
 			</div>
 		</div>
