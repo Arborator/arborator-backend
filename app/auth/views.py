@@ -1,5 +1,4 @@
 from datetime import datetime
-import json
 
 from flask import (
     abort,
@@ -149,18 +148,6 @@ def firstsuper():
     """
     return render_template("admin/firstsuper.html")
 
-
-@auth.route("/logout")
-def logout():
-    """
-    Handle requests to the /logout route
-    Log an employee out through the logout link
-    """
-    logout_user()
-    js = json.dumps({"logout": True}, default=str)
-    return Response(js, status=200, mimetype="application/json")
-
-
 @auth.route("/checkfirstsuper", methods=["POST"])
 @login_required
 def checkfirstsuper():
@@ -177,17 +164,5 @@ def checkfirstsuper():
     else:
         message = "Access as superadmin has been denied."
     flash(message)
-    # redirect to the login page
-    # TODO : fix this ugly thing, redirecting to url_for('auth.home_page') goes to the bad port
     return redirect("https://127.0.0.1:8080")
 
-
-@auth.route("/", methods=["GET"])
-def home_page():
-    """
-    Home page
-
-    Is almost useless now, but the superadmin page is redirecting on this. Fix it
-    """
-
-    return {}
