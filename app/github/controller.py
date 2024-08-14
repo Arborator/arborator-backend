@@ -17,6 +17,7 @@ class GithubSynchronizationResource(Resource):
     @responds(schema=GithubRepositorySchema, api=api)
     def get(self, project_name):
         project = ProjectService.get_by_name(project_name)
+        ProjectService.check_if_project_exist(project)
         return GithubRepositoryService.get_by_project_id(project.id)
     
     def post(self, project_name):
