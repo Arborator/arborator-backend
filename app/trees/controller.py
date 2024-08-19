@@ -1,7 +1,7 @@
 import os
 from flask import abort, request
 from flask_login import current_user
-from flask_restx import Namespace, Resource, reqparse
+from flask_restx import Namespace, Resource
 from conllup.processing import changeMetaFieldInSentenceConllu
 
 from app.config import Config

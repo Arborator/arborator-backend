@@ -293,7 +293,6 @@ def add_or_replace_userid(path_file: str, new_user_id: str):
         sentence_json["metaJson"]["user_id"] = new_user_id
 
     write_conllu_file_wrapper(path_file, sentences_json)
-    write_conllu_file_wrapper(path_file, sentences_json)
     
 def add_rtl_meta_data(path_file: str):
     sentences_json = read_conllu_file_wrapper(path_file, keepEmptyTrees=True)
