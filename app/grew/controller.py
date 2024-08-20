@@ -25,7 +25,7 @@ class ApplyRuleResource(Resource):
         ProjectService.check_if_freezed(project)
         
         args = request.get_json()
-        data = args.get("data")[0]
+        data = args.get("data")
 
         for sample_name in data:
             new_conll = str()
