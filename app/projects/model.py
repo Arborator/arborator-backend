@@ -63,6 +63,9 @@ class ProjectMetaFeature(db.Model):
 class ProjectAccess(db.Model):
     
     __tablename__ = "projectaccess"
+    ACCESS = [(1, "annotator"), (2, "validator"), (3, "admin"), (4, "guest")]
+    LABEL_TO_LEVEL = {v: k for k, v in dict(ACCESS).items()}
+    
     id = Column(Integer, primary_key=True)
     project_id = Column(Integer, db.ForeignKey("projects.id", ondelete="CASCADE"))
     user_id = Column(String(256), db.ForeignKey("users.id"))
