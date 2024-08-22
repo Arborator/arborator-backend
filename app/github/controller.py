@@ -17,6 +17,7 @@ class GithubSynchronizationResource(Resource):
     @responds(schema=GithubRepositorySchema, api=api)
     def get(self, project_name):
         project = ProjectService.get_by_name(project_name)
+        ProjectService.check_if_project_exist(project)
         return GithubRepositoryService.get_by_project_id(project.id)
     
     def post(self, project_name):
@@ -101,9 +102,11 @@ class GithubPullRequestResource(Resource):
         GithubService.create_pull_request(access_token, full_name, user.username, branch_base , branch, title)
         return { "status": "ok" }
     
-@api.route("/<string:project_name>/synchronize/<string:file_name>")
+@api.route("/<string:project_name>/synchronize/files")
 class GithubFileResource(Resource):
 
-    def delete(self, project_name, file_name):
+    def patch(self, project_name):
+        data = request.get_json()
+        sample_names = data.get("sampleNames")
         access_token = UserService.get_by_id(current_user.id).github_access_token
-        GithubWorkflowService.delete_file_from_github(access_token, project_name, file_name )
+        GithubWorkflowService.delete_files_from_github(access_token, project_name, sample_names)

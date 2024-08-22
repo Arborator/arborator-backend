@@ -1,7 +1,7 @@
 import os
 from flask import abort, request
 from flask_login import current_user
-from flask_restx import Namespace, Resource, reqparse
+from flask_restx import Namespace, Resource
 from conllup.processing import changeMetaFieldInSentenceConllu
 
 from app.config import Config
@@ -31,9 +31,9 @@ class SampleTreesResource(Resource):
 
         grew_sample_trees = GrewService.get_sample_trees(project_name, sample_name)
 
-        # ProjectAccessService.require_access_level(project.id, 2)
-        ##### exercise mode block #####
         blind_annotation_mode = project.blind_annotation_mode
+        collaborative_mode = project.collaborative_mode
+
         project_access = 0
         blind_annotation_level = 4
 
@@ -43,17 +43,22 @@ class SampleTreesResource(Resource):
             )
 
             if project_access_obj:
-                project_access = project_access_obj.access_level.code
+                project_access = project_access_obj.access_level
                 
         if project.visibility == 0 and project_access == 0 and not current_user.super_admin:
             abort(403, "The project is not visible and you don't have the right privileges")
+
+        # if not collaborative mode only validated trees are visible
+        if not collaborative_mode:
+            sample_trees = TreeService.samples_to_trees(grew_sample_trees, sample_name)
+            sample_trees = TreeService.restrict_trees(sample_trees, [VALIDATED])
 
         if blind_annotation_mode:
             blind_annotation_level_obj = SampleBlindAnnotationLevelService.get_by_sample_name(
                 project.id, sample_name
             )
             if blind_annotation_level_obj:
-                blind_annotation_level = blind_annotation_level_obj.blind_annotation_level.code
+                blind_annotation_level = blind_annotation_level_obj.blind_annotation_level
 
             sample_trees = TreeService.samples_to_trees(grew_sample_trees, sample_name)
             sample_trees = TreeService.add_base_tree(sample_trees)
@@ -75,16 +80,14 @@ class SampleTreesResource(Resource):
         return data
 
     def post(self, project_name: str, sample_name: str):
-        parser = reqparse.RequestParser()
-        parser.add_argument(name="sent_id", type=str)
-        parser.add_argument(name="user_id", type=str)
-        parser.add_argument(name="conll", type=str)
-        args = parser.parse_args()
-
+        
+        args = request.get_json()
+        user_id = args.get("user_id")
+        conll = args.get("conll")
+        
         project = ProjectService.get_by_name(project_name)
         ProjectService.check_if_freezed(project)
-        user_id = args.user_id
-        conll = args.conll
+        
         if not conll:
             abort(400)
 

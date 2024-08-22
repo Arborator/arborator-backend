@@ -23,6 +23,7 @@ from .model import GithubRepository, GithubCommitStatus
 extension = re.compile("^.*\.(conllu)$")
 
 USERNAME = 'validated'
+CONLL = '.conllu'
 class GithubRepositoryService:
 
     @staticmethod
@@ -251,7 +252,7 @@ class GithubService:
         for sample_name, sample in zip(sample_names,sample_content_files):
             content = sample.get(USERNAME)
             sha = GithubService.create_blob_for_updated_file(access_token, full_name, content)
-            blob = {"path": sample_name+".conllu", "mode":"100644", "type":"blob", "sha": sha}
+            blob = {"path": sample_name+"CONLL", "mode":"100644", "type":"blob", "sha": sha}
             tree.append(blob)
 
         url = "https://api.github.com/repos/{}/git/trees".format(full_name)
@@ -330,7 +331,7 @@ class GithubWorkflowService:
         repository_files = GithubService.get_repository_files_of_branch(access_token, full_name, branch)
         conll_files = [file.get("name") for file in repository_files if extension.search(file.get('name'))]
         
-        samples_names = [file.split(".conllu")[0] for file in conll_files]
+        samples_names = [file.split(CONLL)[0] for file in conll_files]
         existed_samples_names = [sample["name"] for sample in GrewService.get_samples(project_name)]
         not_intersected_samples = [sample_name for sample_name in existed_samples_names if sample_name not in samples_names]
         
@@ -348,7 +349,7 @@ class GithubWorkflowService:
     def clone_github_repository(files, project_name):
         for file in files:
             path_file = os.path.join(Config.UPLOAD_FOLDER, file)
-            sample_name = file.split('.conllu')[0]
+            sample_name = file.split(CONLL)[0]
             GithubWorkflowService.create_sample(sample_name, path_file, project_name)
             project_id = ProjectService.get_by_name(project_name).id
             GithubCommitStatusService.create(project_id, sample_name)
@@ -356,7 +357,7 @@ class GithubWorkflowService:
     @staticmethod
     def create_sample(sample_name, path_file, project_name):
 
-        if not SampleService.check_sentences_without_sent_ids(path_file, sample_name):
+        if not SampleService.check_sentences_without_sent_ids(path_file):
             SampleService.add_new_sent_ids(path_file, sample_name)
 
         SampleService.check_duplicate_sent_id(path_file, sample_name)
@@ -422,7 +423,7 @@ class GithubWorkflowService:
 
     @staticmethod
     def download_github_file_content(file_name, download_url):
-        sample_name = file_name.split(".conllu")[0]
+        sample_name = file_name.split(CONLL)[0]
         raw_content = requests.get(download_url)
         path_file = os.path.join(Config.UPLOAD_FOLDER, file_name)
         file = open(path_file, "w")
@@ -452,22 +453,22 @@ class GithubWorkflowService:
                 if "# sent_id = " in line:
                     sent_id = line.split("# sent_id = ")[-1] 
                     modified_sentences.append(sent_id)
-        deleted_sentences = [sent_id for sent_id in sample_trees.keys() if not sent_id in modified_sentences]
+        deleted_sentences = [sent_id for sent_id in sample_trees.keys() if sent_id not in modified_sentences]
         if deleted_sentences:
             data = { "project_id": project_name, "sample_id": sample_name, "sent_ids": json.dumps(deleted_sentences), "user_id": USERNAME }
             grew_request("eraseGraphs", data)
         
     @staticmethod
-    def delete_file_from_github(access_token, project_name, sample_name):
-
-        file_path = sample_name+".conllu"
-        project_id = ProjectService.get_by_name(project_name).id
-        repository = GithubRepositoryService.get_by_project_id(project_id)
-      
-        GithubService.delete_file(access_token, repository.repository_name, file_path, repository.branch)
-        GithubCommitStatusService.delete(project_name, sample_name)
-        new_base_tree_sha = GithubService.get_sha_base_tree(access_token, repository.repository_name, repository.branch)
-        GithubRepositoryService.update_sha(project_id, new_base_tree_sha)
+    def delete_files_from_github(access_token, project_name, sample_names):
+        for sample_name in sample_names:
+            file_path = sample_name + CONLL
+            project_id = ProjectService.get_by_name(project_name).id
+            repository = GithubRepositoryService.get_by_project_id(project_id)
+        
+            GithubService.delete_file(access_token, repository.repository_name, file_path, repository.branch)
+            GithubCommitStatusService.delete(project_name, sample_name)
+            new_base_tree_sha = GithubService.get_sha_base_tree(access_token, repository.repository_name, repository.branch)
+            GithubRepositoryService.update_sha(project_id, new_base_tree_sha)
     
     @staticmethod
     def delete_sample_from_project(project_name, sample_name):

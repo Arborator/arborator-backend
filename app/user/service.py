@@ -30,8 +30,8 @@ class UserService:
         return User.query.get(id)
 
     @staticmethod
-    def update(user: User, User_change_updates: UserInterface) -> User:
-        user.update(User_change_updates)
+    def update(user: User, user_change_updates: UserInterface) -> User:
+        user.update(user_change_updates)
         db.session.commit()
         return user
 

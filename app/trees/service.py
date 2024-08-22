@@ -74,4 +74,3 @@ class TreeSegmentationService:
             file.write(conll_to_insert)
         with open(path_file, "rb") as conll_file:
             GrewService.insert_conll(project_name, sample_name, sent_id, conll_file)
-

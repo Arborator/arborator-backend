@@ -1,8 +1,9 @@
 from datetime import datetime
+import json
 from typing import List
 
-from flask import request
-from flask_login import current_user
+from flask import request, Response
+from flask_login import current_user, logout_user
 from flask_accepts.decorators.decorators import responds, accepts
 from flask_restx import Namespace, Resource
 
@@ -40,3 +41,11 @@ class UserResource(Resource):
         user = UserService.get_by_id(current_user.id)
         changes: UserInterface = request.parsed_obj
         return UserService.update(user,changes)
+    
+@api.route("/logout")
+class UserLogoutResource(Resource):
+    
+    def get(self):
+        logout_user()
+        js = json.dumps({"logout": True}, default=str)
+        return Response(js, status=200, mimetype="application/json")

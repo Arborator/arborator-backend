@@ -108,6 +108,7 @@ class SampleTokenizeService:
              
 
 class SampleBlindAnnotationLevelService:
+    
     @staticmethod
     def create(new_attrs) -> SampleBlindAnnotationLevel:
         new_blind_annotation_level = SampleBlindAnnotationLevel(**new_attrs)
@@ -141,9 +142,6 @@ class SampleBlindAnnotationLevelService:
         for role in roles:
             db.session.delete(role)
         db.session.commit()
-
-        return
-
 
 class SampleEvaluationService:
     @staticmethod
@@ -234,24 +232,22 @@ class SampleEvaluationService:
 
     @staticmethod
     def evaluations_json_to_tsv(evaluations):
-        if evaluations == {}:
-            # noone works on these trees
-            return ""
+        if evaluations:
+            list_usernames = list(evaluations.keys())
+            first_username = list(evaluations.keys())[0]
+            columns = list(evaluations[first_username].keys())
 
-        list_usernames = list(evaluations.keys())
-        first_username = list(evaluations.keys())[0]
-        columns = list(evaluations[first_username].keys())
+            evaluations_tsv = "\t".join(["usernames"] + list_usernames)
 
-        evaluations_tsv = "\t".join(["usernames"] + list_usernames)
-
-        for label in columns:
-            user_tsv_line_list = [label]
-            for username in list_usernames:
-                user_tsv_line_list.append(str(evaluations[username][label]))
-            user_tsv_line_string = "\t".join(user_tsv_line_list)
-            evaluations_tsv += "\n" + user_tsv_line_string
-        return evaluations_tsv
-
+            for label in columns:
+                user_tsv_line_list = [label]
+                for username in list_usernames:
+                    user_tsv_line_list.append(str(evaluations[username][label]))
+                user_tsv_line_string = "\t".join(user_tsv_line_list)
+                evaluations_tsv += "\n" + user_tsv_line_string
+            return evaluations_tsv
+        else: 
+            abort(400, 'There is no available trees for evaluation')
 
 #
 #
@@ -262,7 +258,7 @@ def split_conll_string_to_conlls_list(conll_string) -> List[str]:
     conlls_strings = conll_string.split("\n\n")
     return conlls_strings
     
-def readConlluFileWrapper(path_file: str, keepEmptyTrees: bool = False):
+def read_conllu_file_wrapper(path_file: str, keepEmptyTrees: bool = False):
     """ read a conllu file and return a list of sentences """
     try:
         sentences_json = readConlluFile(path_file, keepEmptyTrees=keepEmptyTrees)
@@ -271,7 +267,7 @@ def readConlluFileWrapper(path_file: str, keepEmptyTrees: bool = False):
         print('debug_read_conll: {}'.format(str(e)))
         abort(406, str(e))
 
-def writeConlluFileWrapper(path_file: str, sentences_json: List[Dict]):
+def write_conllu_file_wrapper(path_file: str, sentences_json: List[Dict]):
     """ write a conllu file from a list of sentences """
     try:
         writeConlluFile(path_file, sentences_json, overwrite=True)
@@ -281,32 +277,32 @@ def writeConlluFileWrapper(path_file: str, sentences_json: List[Dict]):
 
 def add_or_keep_timestamps(path_file: str, when: Literal["now", "long_ago"] = "now"):
     """ adds a timestamp on the tree if there is not one """
-    sentences_json = readConlluFileWrapper(path_file, keepEmptyTrees=True)
+    sentences_json = read_conllu_file_wrapper(path_file, keepEmptyTrees=True)
     timestamp_str = str(datetime.timestamp(datetime.now()) * 1000)
     if when == "long_ago":
         timestamp_str = 0
     for sentence_json in sentences_json:
         sentence_json["metaJson"]["timestamp"] = sentence_json["metaJson"].get("timestamp", timestamp_str)
 
-    writeConlluFileWrapper(path_file, sentences_json)
+    write_conllu_file_wrapper(path_file, sentences_json)
 
 def add_or_replace_userid(path_file: str, new_user_id: str):
     """ adds a userid on the tree or replace it if already has one """
-    sentences_json = readConlluFileWrapper(path_file, keepEmptyTrees=True)
+    sentences_json = read_conllu_file_wrapper(path_file, keepEmptyTrees=True)
     for sentence_json in sentences_json:
         sentence_json["metaJson"]["user_id"] = new_user_id
 
-    writeConlluFileWrapper(path_file, sentences_json)
+    write_conllu_file_wrapper(path_file, sentences_json)
     
 def add_rtl_meta_data(path_file: str):
-    sentences_json = readConlluFileWrapper(path_file, keepEmptyTrees=True)
+    sentences_json = read_conllu_file_wrapper(path_file, keepEmptyTrees=True)
     for sentence_json in sentences_json:
         sentence_json["metaJson"]["rtl"] = "yes"   
-    writeConlluFileWrapper(path_file, sentences_json)
+    write_conllu_file_wrapper(path_file, sentences_json)
 
 def check_duplicate_sent_id(path_file: str, sample_name: str):
     sent_ids = []
-    sentences_json = readConlluFileWrapper(path_file, keepEmptyTrees=True)
+    sentences_json = read_conllu_file_wrapper(path_file, keepEmptyTrees=True)
     for sentence_json in sentences_json:
         if "sent_id" in sentence_json["metaJson"].keys():
             sent_ids.append(sentence_json["metaJson"]["sent_id"])
@@ -314,26 +310,26 @@ def check_duplicate_sent_id(path_file: str, sample_name: str):
     for count in sent_ids_count.values():
         if count > 1:
             abort(406, "{} has duplicated sent_ids".format(sample_name))
-    return
     
 def check_if_file_has_user_ids(path_file: str, sample_name: str):
-    sentences_json = readConlluFileWrapper(path_file, keepEmptyTrees= True)
+    sentences_json = read_conllu_file_wrapper(path_file, keepEmptyTrees= True)
     if any(sentence["metaJson"]["user_id"] for sentence in sentences_json if "user_id" in sentence["metaJson"].keys()):
         abort(406, "{} has sentences with user_id".format(sample_name))
 
-def check_sentences_without_sent_ids(path_file: str, sample_name: str):
-    sentences_json = readConlluFileWrapper(path_file, keepEmptyTrees=True)
+def check_sentences_without_sent_ids(path_file: str):
+    sentences_json = read_conllu_file_wrapper(path_file, keepEmptyTrees=True)
     sentence_ids_number = len([sentence for sentence in sentences_json if "sent_id" in sentence["metaJson"].keys()])
     return len(sentences_json) == sentence_ids_number
 
 def add_new_sent_ids(path_file: str, sample_name):
     """ adds sent_id for samples that don't have sent_ids"""
     index = 0
-    sentences_json = readConlluFileWrapper(path_file,keepEmptyTrees= True)
+    sentences_json = read_conllu_file_wrapper(path_file,keepEmptyTrees= True)
     for sentence_json in sentences_json:
         index+=1
         sentence_json["metaJson"]["sent_id"] = '{}__{}'.format(sample_name, index)
-    writeConlluFileWrapper(path_file, sentences_json)
+    write_conllu_file_wrapper(path_file, sentences_json)
+    
 
 ###########################"tokenizer Kim's script" ###########################
 

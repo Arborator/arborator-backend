@@ -19,7 +19,7 @@ def grew_request(fct_name, data={}, files={}):
         error_message = "<Grew requests handler> : Connection refused"
         print(error_message)
         abort(500, {"message": error_message})
-
+    
     except Exception as e:
         error_message = ("Grew requests handler> : Uncaught exception, please report {}".format(e))
         print(error_message)
@@ -63,20 +63,27 @@ class GrewService:
         return grew_projects
 
     @staticmethod
-    def create_project(project_id: str) -> None:
+    def create_project(project_id: str):
         grew_request(
             "newProject",
             data={"project_id": project_id},
         )
 
     @staticmethod
-    def delete_project(project_id: str) -> None:
+    def delete_project(project_id: str):
         grew_request("eraseProject", data={"project_id": project_id})
 
     @staticmethod
+    def rename_project(project_name: str, new_project_name): 
+        grew_request("renameProject", data= {
+            "project_id": project_name,
+            "new_project_id": new_project_name
+        })
+    
+    @staticmethod
     def get_conll_schema(project_id: str):
         grew_reply = grew_request("getProjectConfig", data={"project_id": project_id})
-        # TODO : redo this. It's ugly
+        
         data = grew_reply.get("data")
         if data:
             conll_schema = {
@@ -116,7 +123,6 @@ class GrewService:
 
         return reply
 
-    
     @staticmethod
     def save_sample(project_id: str, sample_id: str, conll_file) -> None:
         grew_request(
@@ -135,20 +141,7 @@ class GrewService:
     @staticmethod
     def search_request_in_graphs(project_id: str, request: str, user_type: str, other_user: str):
         
-        if user_type == 'user':
-            user_ids = { "one": [current_user.username] }
-        elif user_type == 'user_recent':
-            user_ids = { "one": [current_user.username, "__last__"] }
-        elif user_type == 'recent':
-            user_ids = { "one": ["__last__"] }
-        elif user_type == 'validated':
-            user_ids = { "one": ["validated"] }
-        elif user_type == 'base_tree': 
-            user_ids = { "one": ["base_tree"]}
-        elif user_type == 'others': 
-            user_ids = { "one": [other_user] }
-        elif user_type == 'all':
-            user_ids = "all"
+        user_ids = GrewService.get_user_ids(user_type, other_user)
         data = {
             "project_id": project_id,
             "request": request,
@@ -157,24 +150,10 @@ class GrewService:
         reply = grew_request("searchRequestInGraphs", data=data)
         return reply
 
-
     @staticmethod
     def try_package(project_id: str, package: str, sample_ids, user_type, other_user):
         
-        if user_type == 'user':
-            user_ids = { "one": [current_user.username] }
-        elif user_type == 'user_recent':
-            user_ids = { "one": [current_user.username, "__last__"] }
-        elif user_type == 'recent':
-            user_ids = { "one": ["__last__"] }
-        elif user_type == 'validated':
-            user_ids = { "one": ["validated"] }
-        elif user_type == 'base_tree': 
-            user_ids = { "one": ["base_tree"]}
-        elif user_type == 'others': 
-            user_ids = { "one": [other_user] }
-        elif user_type == 'all':
-            user_ids = "all"
+        user_ids = GrewService.get_user_ids(user_type, other_user)
         data = {
             "project_id": project_id,
             "package": package,
@@ -184,6 +163,56 @@ class GrewService:
         reply = grew_request("tryPackage", data=data)
         return reply
     
+    @staticmethod
+    def get_relation_table(project_id: str, sample_ids, user_type, other_user):
+        
+        if not sample_ids: 
+            sample_ids = []
+        user_ids = GrewService.get_user_ids(user_type, other_user)
+        reply = grew_request("relationTables",
+            data={
+                "project_id": project_id,
+                "sample_ids": json.dumps(sample_ids),
+                "user_ids": json.dumps(user_ids),
+            },
+        )
+        return reply 
+    
+    @staticmethod
+    def get_lexicon(project_name: str, sample_ids, user_type, other_user, prune, features):
+        
+        user_ids = GrewService.get_user_ids(user_type, other_user)
+        prune = (None, prune) [prune != 0]
+        reply = grew_request(
+            "getLexicon",
+            data={
+                "project_id": project_name, 
+                "sample_ids": json.dumps(sample_ids), 
+                "user_ids": json.dumps(user_ids), 
+                "features": json.dumps(features),
+                "prune":prune
+            },
+        )
+        return reply
+        
+    @staticmethod
+    def get_user_ids(user_type: str, other_user: str):
+        if user_type == 'user':
+            user_ids = { "one": [current_user.username] }
+        elif user_type == 'user_recent':
+            user_ids = { "one": [current_user.username, "__last__"] }
+        elif user_type == 'recent':
+            user_ids = { "one": ["__last__"] }
+        elif user_type == 'validated':
+            user_ids = { "one": ["validated"] }
+        elif user_type == 'base_tree': 
+            user_ids = { "one": ["base_tree"]}
+        elif user_type == 'others': 
+            user_ids = { "one": [other_user] }
+        elif user_type == 'all':
+            user_ids = "all"
+        return user_ids
+        
     @staticmethod
     def insert_conll(project_id: str, sample_id: str, pivot_sent_id: str, conll_file):
         data = {
@@ -216,7 +245,7 @@ class GrewService:
                 # {"sent_id_1":{"conlls":{"user_1":"conllstring"}}}
                 sample_tree = SampleExportService.serve_sample_trees(reply.get("data", {}))
                 sample_tree_nots_noui = SampleExportService.serve_sample_trees(reply.get("data", {}), timestamps=False, user_ids=False)
-                sample_content = SampleExportService.sampletree2contentfile(sample_tree_nots_noui)
+                sample_content = SampleExportService.sample_tree_to_content_file(sample_tree_nots_noui)
                 for sent_id in sample_tree:
                     last = SampleExportService.get_last_user(
                         sample_tree[sent_id]["conlls"]
@@ -246,7 +275,7 @@ class GrewService:
                 # {"sent_id_1":{"conlls":{"user_1":"conllstring"}}}
                 sample_tree = SampleExportService.serve_sample_trees(reply.get("data", {}))
                 sample_tree_nots_noui = SampleExportService.serve_sample_trees(reply.get("data", {}), timestamps=False, user_ids=False)
-                sample_content = SampleExportService.sampletree2contentfile(sample_tree_nots_noui)
+                sample_content = SampleExportService.sample_tree_to_content_file(sample_tree_nots_noui)
                 for sent_id in sample_tree:
                     last = SampleExportService.get_last_user(
                         sample_tree[sent_id]["conlls"]
@@ -308,7 +337,7 @@ class SampleExportService:
         return trees
 
     @staticmethod
-    def sampletree2contentfile(tree) -> Dict[str, str]:
+    def sample_tree_to_content_file(tree) -> Dict[str, str]:
         if isinstance(tree, str):
             tree = json.loads(tree)
         usertrees: Dict[str, List[str]] = {}
@@ -333,7 +362,7 @@ class SampleExportService:
         return last
 
     @staticmethod
-    def contentfiles2zip(sample_names, sampletrees, users):
+    def content_files_to_zip(sample_names, sampletrees, users):
         memory_file = io.BytesIO()
         with zipfile.ZipFile(memory_file, "w") as zf:
             for user in users:

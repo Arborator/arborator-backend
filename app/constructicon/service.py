@@ -5,12 +5,12 @@ from app.constructicon.model import Constructicon
 
 class ConstructiconService:
     @staticmethod
-    def get_by_id(entryId: str) -> Constructicon:
-        return Constructicon.query.get(entryId)
+    def get_by_id(entry_id: str) -> Constructicon:
+        return Constructicon.query.get(entry_id)
 
     @staticmethod
-    def delete_by_id(entryId: str):
-        Constructicon.query.filter_by(id=entryId).delete()
+    def delete_by_id(entry_id: str):
+        Constructicon.query.filter_by(id=entry_id).delete()
         db.session.commit()
 
     @staticmethod

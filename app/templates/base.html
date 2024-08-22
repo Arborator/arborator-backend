@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<htm lang="html">
 	<head>
 		<title>Arborator{{ title }}</title>
 		<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
@@ -23,19 +23,12 @@
 
 	<body id="body">
 			
-				
 		<div class="arbortitle fg-toolbar ui-widget-header ui-helper-clearfix">
-			<!-- <a href="{{ url_for('auth.home_page') }}" style='position: absolute;left:0px;'><img src="{{ url_for ('static', filename='images/arboratorNano.png') }}" border="0"></a> -->
 			<span style='text-align:center;margin:0 auto;position: relative;top:0px;' id='sentinfo'>{{page_title}}</span>
 			<div style='float:right' id='log'>
-						{% if current_user.is_authenticated %}
-							<i class="fa fa-user"></i>  Hi, {{ current_user.first_name }}! <img src="{{ current_user.picture_url }}" border="0" height="25px">
-							<a href="{{ url_for('auth.logout') }}">Logout</a>
-
-						{% else %}
-							<!-- <a href="{{ url_for('auth.home_page') }}">Home</a> -->
-							<!-- <a href="{{ url_for('auth.choose_provider') }}">Login</a> -->
-						{% endif %}
+				{% if current_user.is_authenticated %}
+					<i class="fa fa-user"></i>  Hi, {{ current_user.first_name }}! <img src="{{ current_user.picture_url }}" border="0" height="25px" alt="avatar">
+				{% endif %}
 			</div>
 		</div>
 		</br></br>

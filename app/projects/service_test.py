@@ -1,191 +1,585 @@
-from typing import Dict, List
-import json
-import base64
+from typing import List
+from datetime import datetime
 
-from app import db
-from flask import abort, current_app
-from flask_login import current_user
+from flask_sqlachemy import SQLAlchemy
+from werkzeug.exceptions import HTTPException
 
-from .interface import ProjectExtendedInterface, ProjectInterface
-from .model import Project, ProjectAccess, ProjectFeature, ProjectMetaFeature, DefaultUserTrees
-from ..utils.grew_utils import grew_request
+from .model import Project, ProjectAccess, ProjectFeature, ProjectMetaFeature, LastAccess 
+from .service import ProjectService, ProjectAccessService, ProjectFeatureService, ProjectMetaFeatureService, LastAccessService
+from .interface import ProjectInterface
 
-
-class ProjectService:
-    @staticmethod
-    def get_all() -> List[Project]:
-        return Project.query.all()
-
-    @staticmethod
-    def create(new_attrs: ProjectInterface) -> Project:
-        new_project = Project(**new_attrs)
-        db.session.add(new_project)
-        db.session.commit()
-        return new_project
-
-    @staticmethod
-    def get_by_name(project_name: str) -> Project:
-        return Project.query.filter(Project.project_name == project_name).first()
-
-    @staticmethod
-    def update(project: Project, changes) -> Project:
-        project.update(changes)
-        db.session.commit()
-        return project
-
-    @staticmethod
-    def delete_by_name(project_name: str) -> str:
-        project = Project.query.filter(
-            Project.project_name == project_name).first()
-        if not project:
-            return ""
-        db.session.delete(project)
-        db.session.commit()
-        return project_name
-
-    @staticmethod
-    def change_image(project_name, value):
-        """ set a project image (blob base64) and return the new project  """
-        project = Project.query.filter(
-            Project.project_name == project_name).first()
-        project.image = value
-        db.session.commit()
-        return project
-
-
-class ProjectAccessService:
-    @staticmethod
-    def create(new_attrs) -> ProjectAccess:
-        new_project_access = ProjectAccess(**new_attrs)
-        db.session.add(new_project_access)
-        db.session.commit()
-        return new_project_access
-
-    @staticmethod
-    def update(project_access: ProjectAccess, changes):
-        project_access.update(changes)
-        db.session.commit()
-        return project_access
-
-    @staticmethod
-    def delete(user_id: str, project_id: int):
-        project_access_list = ProjectAccess.query.filter_by(
-            user_id=user_id, project_id=project_id
-        ).all()
-        if not project_access_list:
-            return []
-        for project_access in project_access_list:
-            db.session.delete(project_access)
-            db.session.commit()
-        return [(project_id, user_id)]
-
-    # TODO : Rename this as `get_by_username` because we are not fetching the user_id
-    # ... but the username
-    @staticmethod
-    def get_by_user_id(user_id: str, project_id: str) -> ProjectAccess:
-        return ProjectAccess.query.filter_by(
-            project_id=project_id, user_id=user_id
-        ).first()
-
-    @staticmethod
-    def get_admins(project_id: str) -> List[str]:
-        project_access_list: List[ProjectAccess] = ProjectAccess.query.filter_by(
-            project_id=project_id, access_level=2
+class TestProjectService:
+    
+    def test_get_all(self, db:SQLAlchemy):
+        first_project: Project = Project(
+            id=1,
+            project_name="first_project",
+            description="",
+            image="/path/to/image",
+            visibility=0,
+            blind_annotation_mode=False,
+            freezed=False,
+            config="sud",
+            language="English"
         )
-        if project_access_list:
-            return [project_access.user_id for project_access in project_access_list]
-        else:
-            return []
-
-    @staticmethod
-    def get_guests(project_id: str) -> List[str]:
-        project_access_list: List[ProjectAccess] = ProjectAccess.query.filter_by(
-            project_id=project_id, access_level=1
+        second_project: Project = Project(
+            id=2,
+            project_name="second_project",
+            description="Project for test",
+            image="/path/to/image2",
+            visibility=0,
+            blind_annotation_mode=False,
+            freezed=False,
+            config="ud",
+            language="French"
         )
-        if project_access_list:
-            return [project_access.user_id for project_access in project_access_list]
-        else:
-            return []
-
-    @staticmethod
-    def get_users_role(project_id: str) -> Dict[str, List[str]]:
-        admins = ProjectAccessService.get_admins(project_id)
-        guests = ProjectAccessService.get_guests(project_id)
-        return {
-            "admins": admins,
-            "guests": guests,
+        db.session.add(first_project)
+        db.session.add(second_project)
+        db.session.commit()
+        
+        results = List[Project] = ProjectService.get_all()
+        assert len(results) == 2
+        assert first_project in results and second_project in results
+            
+    def test_create(self):
+        first_project: ProjectInterface = {
+            "id": 2,
+            "project_name": "second_project",
+            "description": "Project for test",
+            "image": "/path/to/image2",
+            "visibility": 0,
+            "blind_annotation_mode": False,
+            "freezed": False,
+            "config": "ud",
+            "language":"French"
         }
+        ProjectService.create(first_project)
+        results = List[Project] = ProjectService.get_all()
+        assert len(results) == 1
+        for k in first_project.keys():
+            assert getattr(results[0], k) == first_project[k]
 
-    @staticmethod
-    def require_access_level(project_id, required_access_level) -> None:
-        access_level = 0
-        if current_user.is_authenticated:
-            if current_user.super_admin:
-                pass
-
-            else:
-                access_level = ProjectAccessService.get_by_user_id(
-                    current_user.id, project_id
-                ).access_level.code
-
-        if access_level >= required_access_level:
-            return
-        else:
-            abort(403)
-
-
-class ProjectFeatureService:
-    @staticmethod
-    def create(new_attrs) -> ProjectFeature:
-        new_project_access = ProjectFeature(**new_attrs)
-        db.session.add(new_project_access)
+    def test_get_by_name(self, db: SQLAlchemy):
+        first_project: Project = Project(
+            id=1,
+            project_name="first_project",
+            description="",
+            image="/path/to/image",
+            visibility=0,
+            blind_annotation_mode=False,
+            freezed=False,
+            config="sud",
+            language="English"
+        )
+        second_project: Project = Project(
+            id=2,
+            project_name="second_project",
+            description="Project for test",
+            image="/path/to/image2",
+            visibility=0,
+            blind_annotation_mode=False,
+            freezed=False,
+            config="ud",
+            language="French"
+        )
+        db.session.add(first_project)
+        db.session.add(second_project)
         db.session.commit()
-        return new_project_access
-
-    @staticmethod
-    def get_by_project_id(project_id: str) -> List[str]:
-        features = ProjectFeature.query.filter_by(project_id=project_id).all()
-        if features:
-            return [f.value for f in features]
-        else:
-            return []
-
-    @staticmethod
-    def delete_by_project_id(project_id: str) -> str:
-        """TODO : Delete all the project features at once. This is a weird way of doing, but it's because we have a table specificaly
-        ...dedicated for linking project shown features and project. Maybe a simple textfield in the project settings would do the job"""
-        features = ProjectFeature.query.filter_by(project_id=project_id).all()
-        for feature in features:
-            db.session.delete(feature)
-            db.session.commit()
-        return project_id
-
-
-class ProjectMetaFeatureService:
-    @staticmethod
-    def create(new_attrs) -> ProjectMetaFeature:
-        new_project_access = ProjectMetaFeature(**new_attrs)
-        db.session.add(new_project_access)
+        
+        first_retrieved_project = ProjectService.get_by_name("first_project")
+        second_retrieved_project= ProjectService.get_by_name("second_project")
+        
+        assert first_retrieved_project.project_name == 'first_project'
+        assert first_retrieved_project.id == 1
+        
+        assert second_retrieved_project.project_name == 'second_project'
+        assert second_retrieved_project.id == 2
+    
+    def test_update(self, db: SQLAlchemy):
+        first_project: Project = Project(
+            id=1,
+            project_name="first_project",
+            description="",
+            image="/path/to/image",
+            visibility=0,
+            blind_annotation_mode=False,
+            freezed=False,
+            config="sud",
+            language="English"
+        )
+        db.session.add(first_project)
         db.session.commit()
-        return new_project_access
+        
+        updates: ProjectInterface = {
+            "description": "This is a new description",
+            "blind_annotation_mode": True,
+        }
+        
+        ProjectService.update(first_project, updates)
+        
+        result: Project = Project.query.get(first_project.id).first()
+        assert result.description == 'This is a new description'
+        assert result.blind_annotation_mode == True
+        
+    def test_delete_by_name(self, db: SQLAlchemy):
+        first_project: Project = Project(
+            id=1,
+            project_name="first_project",
+            description="",
+            image="/path/to/image",
+            visibility=0,
+            blind_annotation_mode=False,
+            freezed=False,
+            config="sud",
+            language="English"
+        )
+        second_project: Project = Project(
+            id=2,
+            project_name="second_project",
+            description="Project for test",
+            image="/path/to/image2",
+            visibility=0,
+            blind_annotation_mode=False,
+            freezed=False,
+            config="ud",
+            language="French"
+        )
+        
+        db.session.add(first_project)
+        db.session.add(second_project)
+        db.session.commit()
+        
+        ProjectService.delete_by_name("first_project")
+        
+        results: List[Project] = ProjectService.get_all()
+        
+        assert len(results) == 1
+        assert first_project not in results and second_project in results
+        
+    def test_check_if_project_exist(self, db: SQLAlchemy):
+        first_project: Project = Project(
+            id=1,
+            project_name="first_project",
+            description="",
+            image="/path/to/image",
+            visibility=0,
+            blind_annotation_mode=False,
+            freezed=False,
+            config="sud",
+            language="English"
+        )
+        second_project: Project = Project(
+            id=2,
+            project_name="second_project",
+            description="Project for test",
+            image="/path/to/image2",
+            visibility=0,
+            blind_annotation_mode=False,
+            freezed=False,
+            config="ud",
+            language="French"
+        )
+        
+        db.session.add(first_project)
+        db.session.add(second_project)
+        db.session.commit()
+        
+        ProjectService.delete_by_name("first_project")
+        project_1 = ProjectService.get_by_name("first_project")
+        
+        with pytest.raises(HTTPException) as http_error:
+            ProjectService.check_if_project_exist(project_1)
+        
+        assert http_error.value.code == 404
+        assert http_error.value.detail == 'There was no such project stored on arborator backend'
+        
+    def test_check_if_freezed(self, db: SQLAlchemy):
+        
+        first_project: Project = Project(
+            id=1,
+            project_name="first_project",
+            description="",
+            image="/path/to/image",
+            visibility=0,
+            blind_annotation_mode=False,
+            freezed=True,
+            config="sud",
+            language="English"
+        )
+        db.session.add(first_project)
+        db.session.commit()
+        
+        ProjectAccessService.create(
+            {
+                "user_id": "arbo.test@gmail.com",
+                "project_id": 1,
+                "access_level": 3,
+            }
+        )
+        project = ProjectService.get_by_name("first_project")
+        with pytest.raises(HTTPException) as http_error:
+            ProjectService.check_if_freezed(project)
+        assert http_error.value.code == 403
+        assert http_error.value.detail == "You can't access the project when it's freezed"
 
-    @staticmethod
-    def get_by_project_id(project_id: str) -> List[str]:
-        meta_features = ProjectMetaFeature.query.filter_by(
-            project_id=project_id).all()
+class TestProjectAccessService:
+    
+    def test_create(self):
+        first_access = dict(
+            id=1,
+            project_id=1,
+            user_id="arbo.test@gmail.com",
+            access_level=3
+        )
+        ProjectAccessService.create(first_access)
+        
+        results: List[ProjectService] = ProjectAccessService.query.all()
+        assert len(results) == 1
+        for k in first_access.keys():
+            assert getattr(results[0], k) == first_access[k]
+    
+    def test_update(self, db: SQLAlchemy):
+        first_access: ProjectAccess = ProjectAccess(
+            id=1,
+            project_id=1,
+            user_id="arbo.test2@gmail.com",
+            access_level=2
+        )
+        db.session.add(first_access)
+        db.session.commit()
+        
+        updates = { "access_level": 3 }
+        ProjectAccessService.update(updates)
+        result: ProjectAccess = ProjectAccess.query.get(first_access.id).first()
+        assert result.access_level == 3
+        
+    def test_delete(self, db: SQLAlchemy):
+        first_access: ProjectAccess = ProjectAccess(
+            id=1,
+            project_id=1,
+            user_id="arbo.test@gmail.com",
+            access_level=3
+        )
+        second_access: ProjectAccess = ProjectAccess(
+            id=2,
+            project_id=2,
+            user_id="arbo.test2@gmail.com"
+        )
+        db.session.add(first_access)
+        db.session.add(second_access)
+        db.session.commit()
+        
+        ProjectAccessService.delete('arbo.test@gmail.com', 1)
+        results: List[ProjectAccess] = ProjectAccess.query().all()
+        
+        assert len(results) == 1
+        assert first_access not in results and second_access in results
+        
+    def test_get_by_user_id(self, db: SQLAlchemy):
+        first_access: ProjectAccess = ProjectAccess(
+            id=1,
+            project_id=1,
+            user_id="arbo.test@gmail.com",
+            access_level=3
+        )
+        db.session.add(first_access)
+        db.session.commit()
+        
+        result = ProjectAccessService.get_by_user_id("arbo.test@gmail.com", 1)
+        assert result.access_level == 3
+        
+    def test_get_admins(self, db: SQLAlchemy):
+        first_access: ProjectAccess = ProjectAccess(
+            id=1,
+            project_id=1,
+            user_id="arbo.test@gmail.com",
+            access_level=3
+        )
+        second_access: ProjectAccess = ProjectAccess(
+            id=2,
+            project_id=1,
+            user_id="arbo.test2@gmail.com",
+            access_level=2
+        )
+            
+        
+        db.session.add(first_access)
+        db.session.add(second_access)
+        db.session.commit()
+        
+        results = ProjectAccessService.get_admins(1)
+        
+        assert len(results) == 1
+        assert results[0].user_id == "arbo.test@gmail.com"
+        
+    def test_get_validators(self, db: SQLAlchemy):
+        first_access: ProjectAccess = ProjectAccess(
+            id=1,
+            project_id=1,
+            user_id="arbo.test@gmail.com",
+            access_level=3
+        )
+        second_access: ProjectAccess = ProjectAccess(
+            id=2,
+            project_id=1,
+            user_id="arbo.test2@gmail.com",
+            access_level=2
+        )
+            
+        
+        db.session.add(first_access)
+        db.session.add(second_access)
+        db.session.commit()
+        
+        results = ProjectAccessService.get_validators(1)
+        
+        assert len(results) == 1
+        assert results[0].user_id == "arbo.test2@gmail.com"
+    
+    def test_get_annotators(self, db: SQLAlchemy):
+        first_access: ProjectAccess = ProjectAccess(
+            id=1,
+            project_id=1,
+            user_id="arbo.test@gmail.com",
+            access_level=3
+        )
+        second_access: ProjectAccess = ProjectAccess(
+            id=2,
+            project_id=1,
+            user_id="arbo.test3@gmail.com",
+            access_level=1
+        )
+            
+        
+        db.session.add(first_access)
+        db.session.add(second_access)
+        db.session.commit()
+        
+        results = ProjectAccessService.get_annotators(1)
+        
+        assert len(results) == 1
+        assert results[0].user_id == "arbo.test3@gmail.com" 
+    
+    def test_get_guests(self, db: SQLAlchemy):
+        first_access: ProjectAccess = ProjectAccess(
+            id=1,
+            project_id=1,
+            user_id="arbo.test@gmail.com",
+            access_level=3
+        )
+        second_access: ProjectAccess = ProjectAccess(
+            id=2,
+            project_id=1,
+            user_id="arbo.test4@gmail.com",
+            access_level=4
+        )
+            
+        
+        db.session.add(first_access)
+        db.session.add(second_access)
+        db.session.commit()
+        
+        results = ProjectAccessService.get_annotators(1)
+        
+        assert len(results) == 1
+        assert results[0].user_id == "arbo.test4@gmail.com" 
+        
+    
+class TestProjectFeatureService:
+    
+    def test_create(self):
+        first_feature = {
+          "id": 1,
+          "project_id": 1, 
+          "value": "FORM" 
+        }
+        ProjectFeatureService.create(first_feature)
+        results: List[ProjectFeature] = ProjectFeature.query.all()
+        
+        assert len(results) == 1
+        assert results[0].value == "FORM"
+        
+    def test_get_by_project_id(self, db):
+        first_feature: ProjectFeature = ProjectFeature(
+            id = 1,
+            project_id = 1,
+            value = "FORM",    
+        )
+        second_feature: ProjectFeature = ProjectFeature(
+            id = 2,
+            project_id = 1,
+            value = "UPOS"
+        )
+        db.session.add(first_feature)
+        db.session.add(second_feature)
+        db.session.commit()
+        
+        results = ProjectFeatureService.get_by_project_id(1)
+        assert len(results) == 2
+        assert first_feature.value in results and second_feature.value in results
+        
+    def test_delete_by_project_id(self, db:SQLAlchemy):
+        first_feature: ProjectFeature = ProjectFeature(
+            id = 1,
+            project_id = 1,
+            value = "FORM",    
+        )
+        second_feature: ProjectFeature = ProjectFeature(
+            id = 2,
+            project_id = 1,
+            value = "UPOS"
+        )
+        db.session.add(first_feature)
+        db.session.add(second_feature)
+        db.session.commit()
+        
+        ProjectFeatureService.delete_by_project_id(1)
+        results = ProjectFeature.query.all()
+        assert results == None
+        
+class TestProjectMetaFeature:
+    def test_create(self):
+        first_meta_feature = {
+          "id": 1,
+          "project_id": 1, 
+          "value": "text_en" 
+        }
+        ProjectMetaFeatureService.create(first_meta_feature)
+        results: List[ProjectMetaFeature] = ProjectMetaFeature.query.all()
+        
+        assert len(results) == 1
+        assert results[0].value == "text_en"
+        
+    def test_get_by_project_id(self, db):
+        first_meta_feature: ProjectMetaFeature = ProjectMetaFeature(
+            id = 1,
+            project_id = 1,
+            value = "text_en",    
+        )
+        second_meta_feature: ProjectMetaFeature = ProjectMetaFeature(
+            id = 2,
+            project_id = 1,
+            value = "phonetic_text"
+        )
+        db.session.add(first_meta_feature)
+        db.session.add(second_meta_feature)
+        db.session.commit()
+        
+        results = ProjectMetaFeatureService.get_by_project_id(1)
+        assert len(results) == 2
+        assert first_meta_feature.value in results and second_meta_feature.value in results
+        
+    def test_delete_by_project_id(self, db:SQLAlchemy):
+        first_meta_feature: ProjectMetaFeature = ProjectMetaFeature(
+            id = 1,
+            project_id = 1,
+            value = "FORM",    
+        )
+        second_meta_feature: ProjectMetaFeature = ProjectMetaFeature(
+            id = 2,
+            project_id = 1,
+            value = "UPOS"
+        )
+        db.session.add(first_meta_feature)
+        db.session.add(second_meta_feature)
+        db.session.commit()
+        
+        ProjectMetaFeatureService.delete_by_project_id(1)
+        results = ProjectMetaFeature.query.all()
+        assert results == None
+        
 
-        if meta_features:
-            return [meta_feature.value for meta_feature in meta_features]
-        else:
-            return []
+class TestLastAccessService:
+    
+    @pytest.mark.parametrize(
+        "last_accesses", "expected_last_read", "expected_last_write"
+        [
+            ([1713857865.12323, None, 1713452667.56323, 1713452391.73287], 1713857865.12323, 1713452391.73287),
+            ([1713857865.12323, 1713857865.12323, 1713952667.56323, 1713452391.73287], 1713952667.56323, 1713857865.12323),
+        ]
+    )
+    def test_get_project_last_access(self,last_accesses, expected_last_write, expected_last_read, db: SQLAlchemy):
+        first_project: Project = Project(
+            id=1,
+            project_name="first_project",
+            description="",
+            image="/path/to/image",
+            visibility=0,
+            blind_annotation_mode=False,
+            freezed=False,
+            config="sud",
+            language="English"
+        )
+        first_last_access: LastAccess = LastAccess(
+            id=1,
+            user_id="arbo.test@gmail.com",
+            project_id=1,
+            last_read=last_accesses[0],
+            last_write=last_accesses[1]
+        )
+        second_last_access: LastAccess = LastAccess(
+            id=1,
+            user_id="arbo.test2@gmail.com",
+            project_id=1,
+            last_read=last_accesses[2],
+            last_write=last_accesses[3]
+        )
+        db.session.add(first_project)
+        db.session.add(first_last_access)
+        db.session.add(second_last_access)
+        db.session.commit()
+        
+        last_read, last_write = LastAccessService.get_project_last_access(1)
+        assert expected_last_write == last_write and expected_last_read == last_read
+    
+    def test_create_new_last_access_per_user_and_project(self, db: SQLAlchemy):
+        first_project: Project = Project(
+            id=1,
+            project_name="first_project",
+            description="",
+            image="/path/to/image",
+            visibility=0,
+            blind_annotation_mode=False,
+            freezed=False,
+            config="sud",
+            language="English"
+        )
+        db.session.add(first_project)
+        db.session.commit()
+        
+        LastAccessService.update_last_access_per_user_and_project("arbo.test2@gmail.com", "first_project", "write")
+        last_access: List[LastAccess] = LastAccess.query.all()
+        
+        assert len(last_access) == 1
+        
+    def test_update_last_access_per_user_and_project(self, db: SQLAlchemy):
+        first_project: Project = Project(
+            id=1,
+            project_name="first_project",
+            description="",
+            image="/path/to/image",
+            visibility=0,
+            blind_annotation_mode=False,
+            freezed=False,
+            config="sud",
+            language="English"
+        )
+        time_now_ts = datetime.now().timestamp()
+        first_last_access: LastAccess = LastAccess(
+            id=1,
+            user_id="arbo.test@gmail.com",
+            project_id=1,
+            last_read=time_now_ts,
+            last_write=time_now_ts,
+        )
+        db.session.add(first_project)
+        db.session.add(first_last_access)
+        db.session.commit()
+        
+        LastAccessService.update_last_access_per_user_and_project("arbo.test@gmail.com","first_project",'read')
+        LastAccessService.update_last_access_per_user_and_project("arbo.test@gmail.com","first_project",'write')
 
-    @staticmethod
-    def delete_by_project_id(project_id: str) -> str:
-        """Delete all the project features at once. This is a weird way of doing, but it's because we have a table specificaly
-        ...dedicated for linking project shown features and project. Maybe a simple textfield in the project settings would do the job"""
-        features = ProjectMetaFeature.query.filter_by(
-            project_id=project_id).all()
-        for feature in features:
-            db.session.delete(feature)
-            db.session.commit()
-        return project_id
+        last_read, last_write = LastAccessService.get_project_last_access("first_project")
+        assert last_read != time_now_ts and last_write != time_now_ts
+
+        

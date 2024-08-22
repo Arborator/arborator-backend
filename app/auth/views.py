@@ -1,5 +1,4 @@
 from datetime import datetime
-import json
 
 from flask import (
     abort,
@@ -10,7 +9,6 @@ from flask import (
     render_template,
     request,
     Response,
-    session,
 )
 from flask_login import current_user, login_user, login_required, logout_user
 from authomatic.adapters import WerkzeugAdapter
@@ -28,6 +26,7 @@ from ..user.interface import UserInterface
 from ..user.schema import UserSchema
 from ..user.model import User
 from ..github.service import GithubService 
+from ..projects.service import ProjectAccessService
 
 
 authomatic = Authomatic(CONFIG, Config.SECRET_KEY, report_errors=True)
@@ -105,7 +104,7 @@ def login(provider_name) -> Response:
                 }
 
                 user = UserService.create(new_attrs)
-
+                has_projects = False
             else:
                 if  user.auth_provider == "4":
                     changes: UserInterface = {
@@ -117,25 +116,20 @@ def login(provider_name) -> Response:
                         "picture_url": results_parsed.get("picture_url")
                     }
                 user = UserService.update(user, changes)
+                has_projects = ProjectAccessService.user_has_access_to_project(user.id)
             login_user(user, remember=True)
             # If there is no superadmin in DB, add admin privilege to this new user
             if not User.query.filter_by(super_admin=True).first():
                 print("firstsuper")
                 return make_response(render_template("auth/firstsuper.html"))
 
-            # KK : TODO : It seems that these two following lines are useless because
-            # ... this view puspuse is to login (send the cookie) and not to send user
-            # ... infos as a json
-            userJson = UserSchema().dump(user)
-            resp = Response(userJson, status=200, mimetype="application/json")
-
             if current_app.config["ENV"] == "dev":
                 return make_response(
-                    render_template("auth/redirect_dev.html", response=resp)
+                    render_template("auth/redirect_dev.html", has_projects= has_projects)
                 )
             elif current_app.config["ENV"] == "prod":
                 return make_response(
-                    render_template("auth/redirect_prod.html", response=resp)
+                    render_template("auth/redirect_prod.html", has_projects= has_projects)
                 )
 
     return response
@@ -148,18 +142,6 @@ def firstsuper():
     Handle requests to the /firstsuper route
     """
     return render_template("admin/firstsuper.html")
-
-
-@auth.route("/logout")
-def logout():
-    """
-    Handle requests to the /logout route
-    Log an employee out through the logout link
-    """
-    logout_user()
-    js = json.dumps({"logout": True}, default=str)
-    return Response(js, status=200, mimetype="application/json")
-
 
 @auth.route("/checkfirstsuper", methods=["POST"])
 @login_required
@@ -177,17 +159,5 @@ def checkfirstsuper():
     else:
         message = "Access as superadmin has been denied."
     flash(message)
-    # redirect to the login page
-    # TODO : fix this ugly thing, redirecting to url_for('auth.home_page') goes to the bad port
     return redirect("https://127.0.0.1:8080")
 
-
-@auth.route("/", methods=["GET"])
-def home_page():
-    """
-    Home page
-
-    Is almost useless now, but the superadmin page is redirecting on this. Fix it
-    """
-
-    return {}
