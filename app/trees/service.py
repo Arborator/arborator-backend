@@ -17,7 +17,10 @@ class TreeService:
         for sent_id, users in samples.items():
             for user_id, conll in users.items():
                 sentence_json = sentenceConllToJson(conll)
-                sentence_text = sentence_json["metaJson"]["text"]
+                if 'text' in sentence_json["metaJson"].keys():
+                    sentence_text = sentence_json["metaJson"]["text"]
+                else: 
+                    sentence_text = constructTextFromTreeJson(sentence_json["treeJson"])
                 if sent_id not in trees:
                     trees[sent_id] = {
                         "sample_name": sample_name,
