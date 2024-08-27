@@ -183,9 +183,10 @@ def post_process_grew_results(search_results, sample_ids, trees_type):
     search_results = {}
     if trees_type == 'pending':
         for sample_id in sample_ids:
-            search_results[sample_id] = {
-            sent_id: result for sent_id, result in trees[sample_id].items() if 'validated' not in result["conlls"].keys()
-        }
+            if sample_id in trees.keys():
+                search_results[sample_id] = {
+                    sent_id: result for sent_id, result in trees[sample_id].items() if 'validated' not in result["conlls"].keys()
+                }
             
     else: 
         search_results = trees
