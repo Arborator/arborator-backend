@@ -252,7 +252,7 @@ class GithubService:
         for sample_name, sample in zip(sample_names,sample_content_files):
             content = sample.get(USERNAME)
             sha = GithubService.create_blob_for_updated_file(access_token, full_name, content)
-            blob = {"path": sample_name+"CONLL", "mode":"100644", "type":"blob", "sha": sha}
+            blob = {"path": sample_name+".conllu", "mode":"100644", "type":"blob", "sha": sha}
             tree.append(blob)
 
         url = "https://api.github.com/repos/{}/git/trees".format(full_name)
