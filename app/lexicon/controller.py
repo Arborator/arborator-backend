@@ -27,7 +27,7 @@ class LexiconResource(Resource):
         return reply["data"]
 
 
-@api.route("lexicon/export-json")	
+@api.route("/lexicon/export-json")	
 class LexiconExportJson(Resource):	
     def post(self):	
 
@@ -46,7 +46,7 @@ class LexiconExportTsv(Resource):
         
         args = request.get_json()
         lexicon = args.get("data")	
-
+        
         features = list(lexicon[0]["feats"].keys())	
         header = "\t".join(features)+"\tfrequence"	
         line_tsv = header+'\n'	
@@ -55,3 +55,4 @@ class LexiconExportTsv(Resource):
             line_tsv += "\t".join(str(value) for key, value in item["feats"].items())	
             line_tsv += "\t"+str(item["freq"])	
             line_tsv += "\n"	
+        return line_tsv
