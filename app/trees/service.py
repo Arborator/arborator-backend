@@ -1,4 +1,6 @@
 import os 
+import requests
+from bs4 import BeautifulSoup
 
 from conllup.conllup import sentenceConllToJson, sentenceJsonToConll
 from conllup.processing import constructTextFromTreeJson, emptySentenceConllu, changeMetaFieldInSentenceConllu
@@ -77,3 +79,21 @@ class TreeSegmentationService:
             file.write(conll_to_insert)
         with open(path_file, "rb") as conll_file:
             GrewService.insert_conll(project_name, sample_name, sent_id, conll_file)
+            
+            
+class TreeValidationService:
+    
+    @staticmethod
+    def extract_ud_languages():
+        html_text = requests.get('https://quest.ms.mff.cuni.cz/udvalidator/cgi-bin/unidep/langspec/specify_feature.pl').text
+        soup = BeautifulSoup(html_text, features="lxml")
+
+        language_mapping = {}
+        for a in soup.find_all('a'):
+            if len(a.text) > 1:
+                lang_code = a['href'].split('=')[1]
+                language_mapping[a.text] = lang_code
+        return language_mapping
+
+                
+    

@@ -1,4 +1,5 @@
 import os
+from io import StringIO
 from flask import abort, request
 from flask_login import current_user
 from flask_restx import Namespace, Resource
@@ -9,7 +10,9 @@ from app.projects.service import LastAccessService, ProjectAccessService, Projec
 from app.samples.service import SampleBlindAnnotationLevelService
 from app.github.service import GithubCommitStatusService, GithubRepositoryService
 from app.utils.grew_utils import grew_request, GrewService
-from .service import TreeService, TreeSegmentationService
+from app.utils.ud_validator.validate import validate_ud
+
+from .service import TreeService, TreeSegmentationService, TreeValidationService
 
 BASE_TREE = "base_tree"
 VALIDATED = "validated"
@@ -116,6 +119,29 @@ class UserTreesResource(Resource):
         grew_request("eraseGraphs", data)
         LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")  
         
+@api.route("/<string:project_name>/tree/validate")
+class ValidateTree(Resource):
+    
+    def post(self, project_name: str):
+        
+        args = request.get_json()
+        data = args.get("conll") + '\n\n'
+        
+        project = ProjectService.get_by_name(project_name)
+        mapped_languages = TreeValidationService.extract_ud_languages()
+        detected = False
+
+        if project.config == 'ud':
+            if project.language in mapped_languages.keys():
+                lang_code = mapped_languages[project.language]
+                message, passed = validate_ud(lang_code, 5, data)
+                detected = True
+            else:
+                message, passed = validate_ud(None, 3, data)
+                
+        
+            return { "message": message, "passed": passed, "detected": detected }
+                      
 @api.route("/<string:project_name>/samples/<string:sample_name>/trees/all")
 class SaveAllTreesResource(Resource):
     
