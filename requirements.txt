@@ -6,6 +6,7 @@ attrs==20.2.0
 Authomatic==1.2.1
 autopep8==1.6.0
 black==23.9.1
+bs4==0.0.2
 certifi==2023.7.22
 cffi==1.16.0
 chardet==3.0.4
