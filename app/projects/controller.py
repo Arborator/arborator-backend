@@ -213,19 +213,21 @@ class ProjectFeaturesResource(Resource):
         ProjectAccessService.check_admin_access(project.id)
         
         new_shown_features_shown_meta: ProjectShownFeaturesAndMetaInterface = request.parsed_obj
-        shown_features = new_shown_features_shown_meta["shown_features"]
-        if shown_features is not None and isinstance(shown_features, list):
-            ProjectFeatureService.delete_by_project_id(project.id)
-            for feature in shown_features:
-                new_attrs = {"project_id": project.id, "value": feature}
-                ProjectFeatureService.create(new_attrs)
+        if "shown_features" in new_shown_features_shown_meta.keys():
+            shown_features = new_shown_features_shown_meta["shown_features"]
+            if shown_features is not None and isinstance(shown_features, list):
+                ProjectFeatureService.delete_by_project_id(project.id)
+                for feature in shown_features:
+                    new_attrs = {"project_id": project.id, "value": feature}
+                    ProjectFeatureService.create(new_attrs)
 
-        shown_meta = new_shown_features_shown_meta["shown_features"]
-        if shown_meta is not None and isinstance(shown_meta, list):
-            ProjectMetaFeatureService.delete_by_project_id(project.id)
-            for feature in shown_meta:
-                new_attrs = {"project_id": project.id, "value": feature}
-                ProjectMetaFeatureService.create(new_attrs)
+        if "shown_meta" in new_shown_features_shown_meta.keys():
+            shown_meta = new_shown_features_shown_meta["shown_meta"]
+            if shown_meta is not None and isinstance(shown_meta, list):
+                ProjectMetaFeatureService.delete_by_project_id(project.id)
+                for feature in shown_meta:
+                    new_attrs = {"project_id": project.id, "value": feature}
+                    ProjectMetaFeatureService.create(new_attrs)
 
         return {"status": "success"}
 
