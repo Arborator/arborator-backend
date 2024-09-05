@@ -3111,7 +3111,7 @@ def get_alt_language(misc):
 
 
 def validate_ud(lang, level, data):
-    global args 
+    global args, auxdata 
     opt_parser = argparse.ArgumentParser(description="CoNLL-U validation script. Python 3 is needed to run it!")
 
     sys.stdin = io.StringIO(data)
