@@ -29,68 +29,10 @@ class ProjectResource(Resource):
     def get(self) -> List[ProjectExtendedInterface]:
         """Get all projects"""
 
-        projects_extended_list: List[ProjectExtendedInterface] = []
-
         projects: List[Project] = Project.query.all()
-
         grew_projects = GrewService.get_projects()
+        return ProjectService.get_projects_info(projects, grew_projects)
 
-        grew_projects_names = set([project["name"] for project in grew_projects])
-        db_projects_names = set([project.project_name for project in projects])
-        common = grew_projects_names & db_projects_names
-
-        for project in projects:
-            if ProjectAccessService.check_project_access(
-                project.visibility, project.id
-            ):
-                if project.project_name not in common:
-                    continue
-
-                (
-                    project.admins,
-                    project.validators,
-                    project.annotators,
-                    project.guests,
-                ) = ProjectAccessService.get_all(project.id)
-
-                if project.admins:
-                    project.owner = project.admins[0]
-                    project.owner_avatar_url = UserService.get_by_username(project.admins[0]).picture_url
-                    project.contact_owner = UserService.get_by_username(project.admins[0]).email
-                else: 
-                    project.owner = ''
-                    project.owner_avatar_url = ''
-                    project.contact_owner = ''
-                    
-                if project.github_repository:
-                    project.sync_github = project.github_repository.repository_name
-                else:
-                    project.sync_github = ''
-                
-                (
-                    last_access,
-                    last_write_access,
-                ) = LastAccessService.get_project_last_access(
-                    project.project_name
-                )
-                now = datetime.datetime.now().timestamp()
-                project.last_access = last_access - now
-                project.last_write_access = last_write_access - now
-
-                project_path = project.image
-                project.image = ProjectService.get_project_image(project_path)
-               
-                for grew_project in grew_projects:
-                    if grew_project["name"] == project.project_name:
-                        project.users = grew_project["users"]
-                        project.number_sentences = grew_project["number_sentences"]
-                        project.number_samples = grew_project["number_samples"]
-                        project.number_tokens = grew_project["number_tokens"]
-                        project.number_trees = grew_project["number_trees"]
-                projects_extended_list.append(project)
-
-        return projects_extended_list
-    
     @accepts(schema=ProjectSchema)
     @responds(schema=ProjectSchema)
     def post(self) -> Project:
@@ -130,6 +72,16 @@ class ProjectResource(Resource):
 
         return new_project
 
+@api.route("/user-projects")
+class UserProjectResource(Resource):
+    
+    @responds(schema=ProjectExtendedSchema(many=True), api=api)
+    def get(self):
+        user = UserService.get_by_id(current_user.id)
+        projects: List[Project] = Project.query.all()
+        grew_projects = GrewService.get_user_projects(user.username)
+        return ProjectService.get_projects_info(projects, grew_projects)
+      
 @api.route("/mismatch-projects")
 class MistmatchProjectsResource(Resource):
     

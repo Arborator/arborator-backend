@@ -61,6 +61,13 @@ class GrewService:
         reply = grew_request("getProjects")
         grew_projects: List[GrewProjectInterface] = reply.get("data", [])
         return grew_projects
+    
+    @staticmethod
+    def get_user_projects(username):
+        response = grew_request("getUserProjects", data={ "user_id": username })
+        user_grew_projects: List[GrewProjectInterface] = response.get("data")
+        return user_grew_projects
+    
 
     @staticmethod
     def create_project(project_id: str):
