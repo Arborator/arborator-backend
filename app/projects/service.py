@@ -87,9 +87,9 @@ class ProjectService:
                         project.guests,
                     ) = ProjectAccessService.get_all(project.id)
                     
-                    project.owner = project.admins[0] if project.admins[0] else ''
-                    project.owner_avatar_url = UserService.get_by_username(project.admins[0]).picture_url if project.admins[0] else ''
-                    project.contact_owner = UserService.get_by_username(project.admins[0]).email if project.admins[0] else ''
+                    project.owner = project.admins[0] if project.admins else ''
+                    project.owner_avatar_url = UserService.get_by_username(project.admins[0]).picture_url if project.admins else ''
+                    project.contact_owner = UserService.get_by_username(project.admins[0]).email if project.admins else ''
                     project.sync_github = project.github_repository.repository_name if project.github_repository else ''
                     
                     (last_access,last_write_access ) = LastAccessService.get_project_last_access(project.project_name)
