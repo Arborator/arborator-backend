@@ -96,7 +96,6 @@ class ProjectService:
                     now = datetime.datetime.now().timestamp()
                     project.last_access = last_access - now
                     project.last_write_access = last_write_access - now
-
                     project_path = project.image
                     project.image = ProjectService.get_project_image(project_path)
                     
@@ -346,7 +345,7 @@ class LastAccessService:
 
         last_access: LastAccess = LastAccess.query.filter(LastAccess.user_id == user_id).filter(LastAccess.project_id == project.id).first()
         
-        time_now_ts = datetime.now().timestamp()
+        time_now_ts = datetime.datetime.now().timestamp()
 
         if not last_access:
             new_data = {
