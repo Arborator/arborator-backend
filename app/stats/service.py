@@ -12,6 +12,6 @@ class StatProjectService:
                     tags = sentence_json['metaJson']['tags']
                     tags_list = tags.split(",")
                     for tag in tags_list:
-                        tags_set.add(tag)
+                        tags_set.add(tag.strip())
         return tags_set
                     
