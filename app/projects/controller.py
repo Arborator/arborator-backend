@@ -201,9 +201,11 @@ class ProjectConllSchemaResource(Resource):
         ProjectService.check_if_project_exist(project)
         ProjectAccessService.check_admin_access(project.id)
         
+        config = [] 
         args = request.get_json()
-        dumped_project_config = json.dumps(args['config'])
-        GrewService.update_project_config(project.project_name, dumped_project_config)
+        config.append(args['config'])
+
+        GrewService.update_project_config(project.project_name, config)
 
         return {"status": "success", "message": "New conllu schema was saved"}
 

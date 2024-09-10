@@ -103,12 +103,12 @@ class GrewService:
         return conll_schema
 
     @staticmethod
-    def update_project_config(project_id: str, dumped_project_config: str) -> None:
+    def update_project_config(project_id, dumped_project_config) -> None:
         grew_request(
             "updateProjectConfig",
             data={
                 "project_id": project_id,
-                "config": dumped_project_config,
+                "config": json.dumps(dumped_project_config),
             },
         )
 
