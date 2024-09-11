@@ -40,10 +40,11 @@ class TagService:
 
         sentence_json = sentenceConllToJson(conll)
         user_id = sentence_json["metaJson"]["user_id"]
-
+        
         if "tags" in sentence_json["metaJson"].keys():
-            existing_tags = sentence_json["metaJson"]["tags"].split(",")
-            existing_tags.remove(tag)
+            
+            existing_tags = list(map(lambda tag: tag.strip(), sentence_json["metaJson"]["tags"].split(",")))
+            existing_tags.remove(tag.strip())
             tags_value = ', '.join(existing_tags)
 
             if tags_value:
