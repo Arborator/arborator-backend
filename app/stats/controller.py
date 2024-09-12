@@ -12,7 +12,6 @@ from app.projects.service import LastAccessService
 from app.utils.grew_utils import GrewService
 from .interface import StatProjectInterface
 from .schema import StatProjectSchema
-from .service import StatProjectService
 
 api = Namespace("statistics", description="Endpoints for dealing with statistics of project")
 
@@ -60,19 +59,5 @@ class StaticsProjectResource(Resource):
         
         return project_stats
         
-
-@api.route('/<string:project_name>/tags')
-class ProjectTagsResource(Resource):
-    
-    def post(self, project_name):
-        tags_set = set()
-        args = request.get_json()
-        sample_names = args.get("sampleNames")
-        for sample_name in sample_names:
-            trees_conll = GrewService.get_sample_trees(project_name, sample_name)
-            tags = StatProjectService.get_projects_tags(trees_conll)
-            for tag in tags:
-                tags_set.add(tag)
-        return list(tags_set)
               
         

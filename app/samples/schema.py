@@ -8,4 +8,5 @@ class SampleSchema(Schema):
     tokens = fields.Integer(attribute="tokens")
     treesFrom = fields.List(fields.String(), attribute="trees_from")
     treeByUser = fields.Dict(keys=fields.String(), values=fields.Integer(), attribute="tree_by_user")
+    tags = fields.Dict(keys=fields.String(), values=fields.Integer(), attribute="tags")
     blindAnnotationLevel = fields.Integer(attribute="blind_annotation_level")

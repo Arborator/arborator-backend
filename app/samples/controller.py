@@ -48,6 +48,7 @@ class SampleResource(Resource):
                 "tokens": grew_sample["number_tokens"],
                 "trees_from": list(grew_sample["tree_by_user"].keys()),
                 "tree_by_user": grew_sample["tree_by_user"],
+                "tags": grew_sample["tags"]
             }
             blind_annotation_level = SampleBlindAnnotationLevelService.get_by_sample_name(
                 project.id, grew_sample["name"]
