@@ -1,5 +1,6 @@
 import os 
 import requests
+import re
 from bs4 import BeautifulSoup
 
 from conllup.conllup import sentenceConllToJson, sentenceJsonToConll
@@ -94,6 +95,14 @@ class TreeValidationService:
                 lang_code = a['href'].split('=')[1]
                 language_mapping[a.text] = lang_code
         return language_mapping
-
-                
     
+    @staticmethod
+    def parse_validation_results(message):
+        error_messages = {}
+        messages = message.split("---")
+        if len(messages) > 1:
+            for message in messages:
+                if re.findall(r"Sent (.*?) Line", message):
+                    sent_id = re.findall(r"Sent (.*?) Line", message)[0]
+                    error_messages[sent_id] = message
+        return error_messages

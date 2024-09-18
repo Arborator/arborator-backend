@@ -13,6 +13,7 @@ import werkzeug
 
 from app.utils.grew_utils import GrewService
 from app.user.service import UserService
+from app.trees.service import TreeValidationService
 
 from .interface import ProjectExtendedInterface, ProjectInterface, ProjectShownFeaturesAndMetaInterface
 from .model import Project, ProjectAccess
@@ -137,7 +138,6 @@ class ProjectIdResource(Resource):
                     project_name
                 ),
             }
-
 
 @api.route("/<string:project_name>/features")
 class ProjectFeaturesResource(Resource):
@@ -298,4 +298,14 @@ class ProjectImageResource(Resource):
         with open(os.path.join(current_app.config["PROJECT_IMAGE_FOLDER"], file_name), "wb") as f:
             f.write(content)
         ProjectService.update(project, {"image": file_name})
+        
+
+@api.route("/<string:project_name>/language-detected") 
+class ProjectLanguageDetectedResource(Resource):
+    
+    def get(self, project_name: str):
+        
+        project = ProjectService.get_by_name(project_name)
+        mapped_languages = TreeValidationService.extract_ud_languages()
+        return project.language in mapped_languages.keys()
         

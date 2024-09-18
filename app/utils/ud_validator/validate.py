@@ -102,15 +102,15 @@ def warn(msg, testclass, testlevel, testid, lineno=0, nodeid=0, explanation=None
         # Global variable (last read sentence id): sentence_id
         # Originally we used a parameter sid but we probably do not need to override the global value.
         if sentence_id:
-            sent = ' Sent ' + sentence_id
+            sent = 'Sent ' + sentence_id + ' '
         if nodeid:
             node = ' Node ' + str(nodeid)
         if lineno > 0:
-            print("[%sLine %d%s%s]: [L%d %s %s] %s" % (fn, lineno, sent, node, testlevel, testclass, testid, msg), file=sys.stderr)
+            print("[%s%sLine %d%s]: [L%d %s %s] %s" % (sent, fn, lineno, node, testlevel, testclass, testid, msg), file=sys.stderr)
         elif lineno < 0:
-            print("[%sLine %d%s%s]: [L%d %s %s] %s" % (fn, sentence_line, sent, node, testlevel, testclass, testid, msg), file=sys.stderr)
+            print("[%s%sLine %d%s]: [L%d %s %s] %s" % (sent, fn, sentence_line, node, testlevel, testclass, testid, msg), file=sys.stderr)
         else:
-            print("[%sLine %d%s%s]: [L%d %s %s] %s" % (fn, curr_line, sent, node, testlevel, testclass, testid, msg), file=sys.stderr)
+            print("[%s%sLine %d%s]: [L%d %s %s] %s" % (sent, fn, curr_line, node, testlevel, testclass, testid, msg), file=sys.stderr)
 
 ###### Support functions
 ws_re = re.compile(r"^\s+$")
@@ -2806,6 +2806,7 @@ def validate(inp, out, args, tag_sets, known_sent_ids):
             if egraph:
                 if args.level > 2:
                     validate_enhanced_annotation(egraph) # level 3
+        print('---', file=sys.stderr)            
     validate_newlines(inp) # level 1
 
 def load_file(filename):

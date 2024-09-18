@@ -1,5 +1,4 @@
 import os
-from io import StringIO
 from flask import abort, request
 from flask_login import current_user
 from flask_restx import Namespace, Resource
@@ -119,6 +118,27 @@ class UserTreesResource(Resource):
         grew_request("eraseGraphs", data)
         LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")  
         
+@api.route("/<string:project_name>/samples/<string:sample_name>/validate")
+class ValidateSampleTrees(Resource):
+    
+    def post(self, project_name: str, sample_name: str):
+        
+        project = ProjectService.get_by_name(project_name)
+        trees = GrewService.get_samples_with_string_contents(project_name, [sample_name])[1][0]
+        mapped_languages = TreeValidationService.extract_ud_languages()
+        user_trees_errors = {}
+        if project.config == 'ud':
+            for user, tree_conll in trees.items():
+                if user != 'last':
+                    if project.language in mapped_languages.keys():
+                        lang_code = mapped_languages[project.language]
+                        validation_results = validate_ud(lang_code, 5, tree_conll)[0]
+                    else:
+                        validation_results = validate_ud(None, 3, tree_conll)[0]   
+                    user_trees_errors[user] = TreeValidationService.parse_validation_results(validation_results)
+            
+            return { "message": user_trees_errors }
+                       
 @api.route("/<string:project_name>/tree/validate")
 class ValidateTree(Resource):
     
@@ -129,18 +149,14 @@ class ValidateTree(Resource):
         
         project = ProjectService.get_by_name(project_name)
         mapped_languages = TreeValidationService.extract_ud_languages()
-        detected = False
 
         if project.config == 'ud':
             if project.language in mapped_languages.keys():
                 lang_code = mapped_languages[project.language]
                 message, passed = validate_ud(lang_code, 5, data)
-                detected = True
             else:
                 message, passed = validate_ud(None, 3, data)
-                
-        
-            return { "message": message, "passed": passed, "detected": detected }
+            return { "message": message if message != '---\n' else '', "passed": passed }
                       
 @api.route("/<string:project_name>/samples/<string:sample_name>/trees/all")
 class SaveAllTreesResource(Resource):
