@@ -28,6 +28,7 @@ class StaticsProjectResource(Resource):
         project_stats["samples_number"] = project["number_samples"]
         project_stats["trees_number"] = project["number_trees"]
         project_stats["tokens_number"] = project["number_tokens"]
+        project_stats["sentences_number"] = project["number_sentences"]
         
         grew_samples = GrewService.get_samples(project_name)
         users = defaultdict(int)
