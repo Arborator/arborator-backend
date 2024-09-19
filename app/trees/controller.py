@@ -71,6 +71,9 @@ class SampleTreesResource(Resource):
                     sample_trees = TreeService.add_user_tree(sample_trees, username)   
                     restricted_users = [BASE_TREE, VALIDATED, username]
                     sample_trees = TreeService.restrict_trees(sample_trees, restricted_users)
+            else:
+                restricted_users = [BASE_TREE, VALIDATED]
+                sample_trees = TreeService.restrict_trees(sample_trees, restricted_users)
                 
         else:
             sample_trees = TreeService.samples_to_trees(grew_sample_trees, sample_name)
