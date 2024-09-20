@@ -18,12 +18,13 @@ class LexiconResource(Resource):
     def post(self, project_name: str):
         
         args = request.get_json()
-        sample_ids = args.get("samplenames")
+        sample_ids = args.get("sampleNames")
         features = args.get("features")
         lexicon_type = args.get("lexiconType")
+        other_user = args.get("otherUser")
         prune = args.get("prune")
         
-        reply = GrewService.get_lexicon(project_name, sample_ids, lexicon_type, '',prune, features)
+        reply = GrewService.get_lexicon(project_name, sample_ids, lexicon_type, other_user, prune, features)
         return reply["data"]
 
 
