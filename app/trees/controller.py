@@ -89,6 +89,7 @@ class SampleTreesResource(Resource):
         args = request.get_json()
         user_id = args.get("user_id")
         conll = args.get("conll")
+        update_commit = args.get("update_commit")
         
         project = ProjectService.get_by_name(project_name)
         ProjectService.check_if_freezed(project)
@@ -107,7 +108,7 @@ class SampleTreesResource(Resource):
 
         grew_request("saveGraph", data=data)
         LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
-        if GithubRepositoryService.get_by_project_id(project.id) and user_id == VALIDATED:
+        if GithubRepositoryService.get_by_project_id(project.id) and user_id == VALIDATED and update_commit:
             GithubCommitStatusService.update_changes(project.id, sample_name)
 
         return {"status": "success"}
