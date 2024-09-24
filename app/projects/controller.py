@@ -1,5 +1,3 @@
-import datetime
-import json
 import os
 from typing import List
 
@@ -11,9 +9,11 @@ from flask_restx import Namespace, Resource, reqparse
 from werkzeug.utils import secure_filename
 import werkzeug
 
+from app import db
 from app.utils.grew_utils import GrewService
 from app.user.service import UserService
 from app.trees.service import TreeValidationService
+from app.github.model import GithubCommitStatus
 
 from .interface import ProjectExtendedInterface, ProjectInterface, ProjectShownFeaturesAndMetaInterface
 from .model import Project, ProjectAccess
@@ -203,9 +203,17 @@ class ProjectConllSchemaResource(Resource):
         
         config = [] 
         args = request.get_json()
+        update_commit = args['updateCommit']
         config.append(args['config'])
+        
+        if update_commit and project.github_repository: # if project synchronized changing feats and misc in the config will modify data so changes will update the commit status
+            github_commit_status = GithubCommitStatus.query.filter_by(project_id=project.id).first()
+            if github_commit_status:
+                github_commit_status.update({"changes_number": github_commit_status.changes_number + 1})
+                db.session.commit()
 
         GrewService.update_project_config(project.project_name, config)
+        
 
         return {"status": "success", "message": "New conllu schema was saved"}
 
