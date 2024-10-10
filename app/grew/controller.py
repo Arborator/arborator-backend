@@ -26,9 +26,9 @@ class ApplyRuleResource(Resource):
         
         args = request.get_json()
         data = args.get("data")
-        new_conll = ''
 
         for sample_name, sample_trees in data.items():
+            new_conll = ''
             for tree in sample_trees.values():
                 
                 if 'validated' in tree["conlls"].keys() and GithubRepositoryService.get_by_project_id(project.id):
