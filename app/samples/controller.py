@@ -9,7 +9,7 @@ from flask_restx import Namespace, Resource
 from flask_login import current_user
 
 from app.projects.service import ProjectAccessService, ProjectService, LastAccessService
-from app.utils.grew_utils import GrewService, SampleExportService
+from app.utils.grew_utils import GrewService, SampleExportService, grew_request
 from app.shared.service import SharedService
 
 from .service import (
@@ -113,7 +113,23 @@ class SampleResource(Resource):
 
         LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
         return { "status": "OK" }
-          
+
+@api.route("/<string:project_name>/samples/<string:sample_name>/sample-name")
+class SampleNameResource(Resource):
+    
+    def post(self, project_name, sample_name):
+        
+        args = request.get_json()
+        new_sample_name = args.get("newSampleName")
+        
+        response = grew_request("renameSample", {
+            "project_id": project_name,
+            "sample_id": sample_name,
+            "new_sample_id": new_sample_name
+        })
+        
+        return response
+                      
 @api.route("/<string:project_name>/samples/tokenize")
 class SampleTokenizeResource(Resource):
     def post(self, project_name):
