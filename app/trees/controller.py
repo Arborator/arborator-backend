@@ -3,6 +3,7 @@ from flask import abort, request
 from flask_login import current_user
 from flask_restx import Namespace, Resource
 from conllup.processing import changeMetaFieldInSentenceConllu
+from conllup.conllup import sentenceConllToJson
 
 from app.config import Config
 from app.projects.service import LastAccessService, ProjectAccessService, ProjectService
@@ -87,9 +88,10 @@ class SampleTreesResource(Resource):
     def post(self, project_name: str, sample_name: str):
         
         args = request.get_json()
-        user_id = args.get("user_id")
+        user_id = args.get("userId")
         conll = args.get("conll")
-        update_commit = args.get("update_commit")
+        update_commit = args.get("updateCommit")
+        sent_id = args.get("sentId")
         
         project = ProjectService.get_by_name(project_name)
         ProjectService.check_if_freezed(project)
@@ -99,14 +101,19 @@ class SampleTreesResource(Resource):
 
         if project.blind_annotation_mode == 1 and user_id == VALIDATED:
             conll = changeMetaFieldInSentenceConllu(conll, "user_id", VALIDATED)
-        data = {
-            "project_id": project_name,
-            "sample_id": sample_name,
-            "user_id": user_id,
-            "conll_graph": conll,
-        }
+        
+        new_sent_id = sentenceConllToJson(conll)['metaJson']['sent_id']
+        if sent_id != new_sent_id: # in case the sent_id is modified all the sent_ids of the other trees will be changed
+            TreeService.update_sentence_trees_with_new_sent_id(project_name, sample_name, sent_id, new_sent_id)
+        else: 
+            data = {
+                "project_id": project_name,
+                "sample_id": sample_name,
+                "user_id": user_id,
+                "conll_graph": conll,
+            }
 
-        grew_request("saveGraph", data=data)
+            grew_request("saveGraph", data=data)
         LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
         if GithubRepositoryService.get_by_project_id(project.id) and user_id == VALIDATED and update_commit:
             GithubCommitStatusService.update_changes(project.id, sample_name)

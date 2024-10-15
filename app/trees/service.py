@@ -7,7 +7,7 @@ from conllup.conllup import sentenceConllToJson, sentenceJsonToConll
 from conllup.processing import constructTextFromTreeJson, emptySentenceConllu, changeMetaFieldInSentenceConllu
 
 from app.config import Config
-from app.utils.grew_utils import GrewService
+from app.utils.grew_utils import GrewService, grew_request
 BASE_TREE = "base_tree"
 VALIDATED = "validated"
 
@@ -64,7 +64,33 @@ class TreeService:
                 if user_id not in restricted_users:
                     del sent_conlls[user_id]
         return trees
+    
+    @staticmethod
+    def update_sentence_trees_with_new_sent_id(project_name, sample_name, old_sent_id, new_sent_id):
         
+        response = grew_request('getConll', {
+            "project_id": project_name,
+            "sample_id": sample_name,
+            "sent_id": old_sent_id
+        })
+        conlls = response.get("data")
+    
+        conll_inserted = ''
+        for conll in conlls.values():
+            sentence_json = sentenceConllToJson(conll)
+            sentence_json['metaJson']['sent_id'] = new_sent_id
+            conll_inserted += sentenceJsonToConll(sentence_json) + "\n\n"
+            
+            file_name = sample_name + "_new_sent_id.conllu"
+            path_file = os.path.join(Config.UPLOAD_FOLDER, file_name)
+        
+            with open(path_file, "w") as file:
+                file.write(conll_inserted)
+                
+            with open(path_file, "rb") as conll_file:
+                GrewService.insert_conll(project_name, sample_name, old_sent_id, conll_file)  
+                GrewService.erase_sentence(project_name, sample_name, old_sent_id)   
+                         
 class TreeSegmentationService: 
 
     @staticmethod
@@ -76,6 +102,7 @@ class TreeSegmentationService:
             
         file_name = sample_name + "_inserted_conll.conllu"
         path_file = os.path.join(Config.UPLOAD_FOLDER, file_name)
+        
         with open(path_file, "w") as file:
             file.write(conll_to_insert)
         with open(path_file, "rb") as conll_file:
