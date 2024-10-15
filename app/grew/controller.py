@@ -1,15 +1,14 @@
 import os 
 
-from flask import abort, request
+from flask import abort, request, Response
 from flask_login import current_user
 from flask_restx import Namespace, Resource
-from conllup.conllup import sentenceConllToJson
-from conllup.processing import constructTextFromTreeJson
 
 from app.config import Config
 from app.projects.service import LastAccessService, ProjectService
 from app.github.service import GithubCommitStatusService, GithubRepositoryService
-from app.utils.grew_utils import SampleExportService, GrewService, grew_request
+from app.utils.grew_utils import GrewService, SampleExportService
+
 
 
 api = Namespace(
@@ -68,10 +67,9 @@ class SearchResource(Resource):
         
         if response["status"] != "OK":
             abort(400)
-
-        search_results = post_process_grew_results(response["data"], sample_ids, trees_type)
+        
+        search_results = GrewService.post_process_grew_results(response["data"], sample_ids, trees_type)
         return search_results
-
 
 @api.route("/<string:project_name>/try-package")
 class TryPackageResource(Resource):
@@ -94,9 +92,8 @@ class TryPackageResource(Resource):
         for m in reply["data"]:
             if m["user_id"] == "":
                 abort(409)
-            trees = format_trees_new(m, trees, is_package=True)
+            trees = GrewService.format_trees_new(m, trees, is_package=True)
         return trees
-
 
 @api.route("/<string:project_name>/relation-table")
 class RelationTableResource(Resource):
@@ -112,83 +109,43 @@ class RelationTableResource(Resource):
             abort(400)
         data = reply.get("data")    
         return data
-
-
-def format_trees_new(m, trees, is_package: bool = False):
-    """
-    m is the query result from grew
-    list of trees
-    returns something like {'WAZL_15_MC-Abi_MG': {'WAZL_15_MC-Abi_MG__8': {'sentence': '# kalapotedly < you see < # ehn ...', 'conlls': {'kimgerdes': ...
-    """
-
-    user_id = m["user_id"]
-    sample_name = m["sample_id"]
-    sent_id = m["sent_id"]
-    conll = m["conll"]
-
-    if is_package == False:
-        nodes = m["nodes"]
-        edges = m["edges"]
-    else:
-        modified_nodes = m["modified_nodes"]
-        modified_edges = m["modified_edges"]
-
-    if sample_name not in trees:
-        trees[sample_name] = {}
-
-    if sent_id not in trees[sample_name]:
-        try: 
-            sentence_json = sentenceConllToJson(conll)
-        except ValueError:
-            abort(400, 'The result of your query can not be processed by ArboratorGrew')
-            
-        sentence_text = constructTextFromTreeJson(sentence_json["treeJson"])
-        trees[sample_name][sent_id] = {
-            "sentence": sentence_text,
-            "conlls": {user_id: conll},
-            "sent_id": sent_id,
-           
-        }
-        if is_package == False:
-            trees[sample_name][sent_id]["matches"] = {user_id: [{"edges": edges, "nodes": nodes}]}
-        else:
-            trees[sample_name][sent_id]["packages"] = {user_id: {"modified_edges": modified_edges, "modified_nodes": modified_nodes}}
     
+@api.route("/<string:project_name>/export-results")
+class ExportGrewResultsResource(Resource):
     
-    else:
-        trees[sample_name][sent_id]["conlls"][user_id] = conll
-        # /!\ there can be more than a single match for a same sample, sentence, user so it has to be a list
-        if is_package == False:
-            trees[sample_name][sent_id]["matches"][user_id] = trees[sample_name][sent_id][
-                "matches"
-            ].get(user_id, []) + [{"edges": edges, "nodes": nodes}]
-        else:
-            trees[sample_name][sent_id]["packages"][user_id] = {"modified_edges": modified_edges, "modified_nodes": modified_nodes}
-   
-    return trees
-
-
-def post_process_grew_results(search_results, sample_ids, trees_type):
-    
-    trees = {}
-    
-    for result in search_results:
-        if result["sample_id"] not in sample_ids:
-            continue
-        trees = format_trees_new(result, trees)
-
-    search_results = {}
-    if trees_type == 'pending':
-        for sample_id in sample_ids:
-            if sample_id in trees.keys():
-                search_results[sample_id] = {
-                    sent_id: result for sent_id, result in trees[sample_id].items() if 'validated' not in result["conlls"].keys()
-                }
-            
-    else: 
-        search_results = trees
-    
-    return search_results
-    
+    def post(self, project_name: str):
         
+        args = request.get_json()
+        search_results = args.get("searchResults")
+        users = args.get("users")
+        
+        trees = {}
+        sample_content_files = []
+        samples_names = []
+        
+        for sample_name, results in search_results.items():
+            samples_names.append(sample_name)
+            trees = {}
+            for sent_id, tree in results.items():
+                trees[sent_id] = tree['conlls']
+            
+            sample_tree_nots_noui = SampleExportService.serve_sample_trees(trees, timestamps=False, user_ids=False)
+            sample_content = SampleExportService.sample_tree_to_content_file(sample_tree_nots_noui)
                 
+            sample_content_files.append(sample_content)
+
+        zip_file = SampleExportService.content_files_to_zip(
+            samples_names, sample_content_files, users
+        )
+
+        resp = Response(
+            zip_file,
+            status=200,
+            mimetype="application/zip",
+            headers={
+                "Content-Disposition": "attachment;filename=dump.{}.zip".format(project_name)
+            },
+        )
+        return resp
+        
+            

@@ -1,15 +1,18 @@
-# Some utility functions for grew process
 import json
 from typing import Dict, List, TypedDict
+import re
+import io
+import time
+import zipfile
 
 import requests
 from flask import abort
 from flask_login import current_user
 from app import grew_config
-import re
-import io
-import time
-import zipfile
+
+from conllup.conllup import sentenceConllToJson
+from conllup.processing import constructTextFromTreeJson
+
 
 def grew_request(fct_name, data={}, files={}):
     try:
@@ -241,14 +244,13 @@ class GrewService:
 
     @staticmethod
     def get_samples_with_string_contents(project_name: str, sample_names: List[str]):
-        samplecontentfiles = list()
+        sample_content_files = list()
         for sample_name in sample_names:
             reply = grew_request(
                 "getConll",
                 data={"project_id": project_name, "sample_id": sample_name},
             )
             if reply.get("status") == "OK":
-
                 # {"sent_id_1":{"conlls":{"user_1":"conllstring"}}}
                 sample_tree = SampleExportService.serve_sample_trees(reply.get("data", {}))
                 sample_tree_nots_noui = SampleExportService.serve_sample_trees(reply.get("data", {}), timestamps=False, user_ids=False)
@@ -263,11 +265,11 @@ class GrewService:
 
                 # gluing back the trees
                 sample_content["last"] = "".join(sample_content.get("last", ""))
-                samplecontentfiles.append(sample_content)
+                sample_content_files.append(sample_content)
 
             else:
                 print("Error: {}".format(reply.get("message")))
-        return sample_names, samplecontentfiles
+        return sample_names, sample_content_files
     
     @staticmethod
     def get_samples_with_string_contents_as_dict(project_name: str, sample_names: List[str], user: str) -> Dict[str, str]:
@@ -316,6 +318,83 @@ class GrewService:
                     validated_trees += "".join(sample_tree_nots_noui[sent_id]["conlls"][username])
 
         return validated_trees
+    
+    @staticmethod
+    def format_trees_new(m, trees, is_package: bool = False):
+        """
+            m is the query result from grew
+            list of trees
+            returns something like {'WAZL_15_MC-Abi_MG': {'WAZL_15_MC-Abi_MG__8': {'sentence': '# kalapotedly < you see < # ehn ...', 'conlls': {'kimgerdes': ...
+        """
+
+        user_id = m["user_id"]
+        sample_name = m["sample_id"]
+        sent_id = m["sent_id"]
+        conll = m["conll"]
+
+        if is_package == False:
+            nodes = m["nodes"]
+            edges = m["edges"]
+        else:
+            modified_nodes = m["modified_nodes"]
+            modified_edges = m["modified_edges"]
+
+        if sample_name not in trees:
+            trees[sample_name] = {}
+
+        if sent_id not in trees[sample_name]:
+            try: 
+                sentence_json = sentenceConllToJson(conll)
+            except ValueError:
+                abort(400, 'The result of your query can not be processed by ArboratorGrew')
+                
+            sentence_text = constructTextFromTreeJson(sentence_json["treeJson"])
+            trees[sample_name][sent_id] = {
+                "sentence": sentence_text,
+                "conlls": {user_id: conll},
+                "sent_id": sent_id,
+            
+            }
+            if is_package == False:
+                trees[sample_name][sent_id]["matches"] = {user_id: [{"edges": edges, "nodes": nodes}]}
+            else:
+                trees[sample_name][sent_id]["packages"] = {user_id: {"modified_edges": modified_edges, "modified_nodes": modified_nodes}}
+        
+        
+        else:
+            trees[sample_name][sent_id]["conlls"][user_id] = conll
+            # /!\ there can be more than a single match for a same sample, sentence, user so it has to be a list
+            if is_package == False:
+                trees[sample_name][sent_id]["matches"][user_id] = trees[sample_name][sent_id][
+                    "matches"
+                ].get(user_id, []) + [{"edges": edges, "nodes": nodes}]
+            else:
+                trees[sample_name][sent_id]["packages"][user_id] = {"modified_edges": modified_edges, "modified_nodes": modified_nodes}
+    
+        return trees
+
+    @staticmethod
+    def post_process_grew_results(search_results, sample_ids, trees_type):
+        
+        trees = {}
+        
+        for result in search_results:
+            if result["sample_id"] not in sample_ids:
+                continue
+            trees = GrewService.format_trees_new(result, trees)
+
+        search_results = {}
+        if trees_type == 'pending':
+            for sample_id in sample_ids:
+                if sample_id in trees.keys():
+                    search_results[sample_id] = {
+                        sent_id: result for sent_id, result in trees[sample_id].items() if 'validated' not in result["conlls"].keys()
+                    }
+                
+        else: 
+            search_results = trees
+        
+        return search_results
 
 def get_timestamp(conll):
     t = re.search(r"# timestamp = (\d+(?:\.\d+)?)\n", conll)
@@ -369,11 +448,11 @@ class SampleExportService:
         return last
 
     @staticmethod
-    def content_files_to_zip(sample_names, sampletrees, users):
+    def content_files_to_zip(sample_names, sample_trees, users):
         memory_file = io.BytesIO()
         with zipfile.ZipFile(memory_file, "w") as zf:
             for user in users:
-                for sample_name, sample in zip(sample_names, sampletrees):
+                for sample_name, sample in zip(sample_names, sample_trees):
                     if user in sample.keys():
                         data = zipfile.ZipInfo()
                         data.filename = "{}/{}.conllu".format(user, sample_name) 
