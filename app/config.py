@@ -5,6 +5,7 @@ from cryptography.hazmat.primitives.serialization import load_pem_private_key
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 UPLOAD_FOLDER = "app/tmp/data/"
+CACHE_FOLDER = "app/tmp/cache/"
 UPLOAD_IMAGE_FOLDER = "app/uploads/images"
 MAX_TOKENS = 200000
 
@@ -24,6 +25,8 @@ class Config:
     SESSION_COOKIE_HTTPONLY = False
     SESSION_COOKIE_SECURE = True
     MAX_TOKENS = MAX_TOKENS
+    CACHE_TYPE = 'filesystem'
+    CACHE_DIR = CACHE_FOLDER
 
 class DevelopmentConfig(Config):
     CONFIG_NAME = "dev"

@@ -10,6 +10,7 @@ from werkzeug.utils import secure_filename
 import werkzeug
 
 from app import db
+from app import cache
 from app.utils.grew_utils import GrewService
 from app.user.service import UserService
 from app.trees.service import TreeValidationService
@@ -23,9 +24,10 @@ from .service import LastAccessService, ProjectAccessService, ProjectFeatureServ
 api = Namespace("Project", description="Endpoints for dealing with projects")  # noqa
 
 @api.route("/")
+
 class ProjectResource(Resource):
     "Project"
-
+    @cache.cached(timeout=1200, key_prefix='projects_list')
     @responds(schema=ProjectExtendedSchema(many=True), api=api)
     def get(self) -> List[ProjectExtendedInterface]:
         """Get all projects"""

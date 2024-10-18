@@ -17,7 +17,7 @@ app/public/tmp/*
 app/public/tmp/*
 
 app/uploads/images/
-
+app/tmp/cache/
 .idea/
 *.pyc
 py3/

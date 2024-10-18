@@ -2,13 +2,15 @@ from flask import Flask, jsonify, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_restx import Api
 
-from flask_login import LoginManager, current_user
+from flask_login import LoginManager
+from flask_caching import Cache
 from flask_migrate import Migrate
 
 from app.klang.config import KlangConfig
 from app.utils.grew_config import GrewConfig
 from app.utils.arborator_parser_config import ParserConfig
 
+cache = Cache()
 db = SQLAlchemy()
 login_manager = LoginManager()
 migrate = Migrate()
@@ -40,6 +42,7 @@ def create_app(env=None):
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
+    cache.init_app(app)
 
     from .auth import auth as auth_blueprint
 
