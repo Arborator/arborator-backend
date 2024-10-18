@@ -68,7 +68,7 @@ class SampleTreesResource(Resource):
 
             if current_user.is_authenticated:
                 username = current_user.username
-                if project_access <= 1:
+                if project_access <= 1 and  not current_user.super_admin:
                     sample_trees = TreeService.add_user_tree(sample_trees, username)   
                     restricted_users = [BASE_TREE, VALIDATED, username]
                     sample_trees = TreeService.restrict_trees(sample_trees, restricted_users)
