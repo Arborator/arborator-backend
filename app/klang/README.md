@@ -30,6 +30,12 @@ The sample folder contains the samples. Each sample consists of a folder *my_sam
 - my_sample.intervals.conll 
 - my_sample.mp3
 
+check that:
+- each sample must be in a subfolder with the same name, my_sample
+- the conll file must have the same name and end with intervals.conll, in your case my_sample.conll not *conllu*
+- aligns must be in miliseconds
+- private is set to false if you want others than admins to access the project.
+
 ## Technical information:
 
 When running Klang, it will save the user data into *transcription.json* files that look like this for each user that worked 
