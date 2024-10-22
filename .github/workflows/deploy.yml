@@ -20,6 +20,6 @@ jobs:
           sudo systemctl restart arborator-backend.service 
         EOF
       env:
-        SERVER_SSH_KEY: ${{ secrets.SERVER_HOST }}
+        SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
         SERVER_USERNAME: ${{ secrets.SERVER_USERNAME }}
         SERVER_HOST: ${{ secrets.SERVER_HOST }}
