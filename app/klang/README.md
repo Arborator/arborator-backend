@@ -40,7 +40,7 @@ check that:
 
 When running Klang, it will save the user data into *transcription.json* files that look like this for each user that worked 
     [ 
-        {"accent": "native", "monodia": "dialogue", "story": "fun", "user": "annesophie.foussat", "sound": "good", "title": "Fashion week", "transcription": [["bah", ",", "un", "soir", "apr\u00e8s", "la", ",", "hmm", ","], ["semaine", "de", "fashion", "week", ","], ["j'", "ai", "voulu", "emmener", "ma", "meilleure", "amie", "\u00e0", ",", "hm", ","], ["\u00e0", "une", ...]
+        {"accent": "native", "monodia": "dialogue", "story": "fun", "user": "anne.ff", "sound": "good", "title": "Fashion week", "transcription": [["bah", ",", "un", "soir", "apr\u00e8s", "la", ",", "hmm", ","], ["semaine", "de", "fashion", "week", ","], ["j'", "ai", "voulu", "emmener", "ma", "meilleure", "amie", "\u00e0", ",", "hm", ","], ["\u00e0", "une", ...]
 
 The segments are preserved, only the transcription can change. Yet, the output will be clean conll by sentence borders.
 
