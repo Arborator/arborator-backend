@@ -100,6 +100,17 @@ class MistmatchProjectsResource(Resource):
     
         return { "db_projects": list(diff_projects_db), "grew_projects": list(diff_projects_grew) }    
            
+@api.route("/popular-projects")
+class PopularProjectsResource(Resource):
+    
+    @responds(schema=ProjectExtendedSchema(many=True), api=api)
+    def get(self):
+        time_ago = 15 # recent projects from 15 days 
+        recent_projects = ProjectService.get_recent_projects(time_ago)
+        grew_projects = GrewService.get_projects()
+        
+        return ProjectService.get_projects_info(recent_projects, grew_projects)
+        
 @api.route("/<string:project_name>")
 class ProjectIdResource(Resource):
 

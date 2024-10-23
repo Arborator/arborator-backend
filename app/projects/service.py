@@ -108,7 +108,19 @@ class ProjectService:
                     projects_extended_list.append(project)
         
         return projects_extended_list
-            
+    
+    @staticmethod
+    def get_recent_projects(time_ago):
+        
+        time_before = datetime.datetime.now() - datetime.timedelta(days=time_ago)
+        timestamp = time_before.timestamp()
+        recent_projects = (db.session.query(Project)
+                           .join(LastAccess, Project.id == LastAccess.project_id)
+                           .filter(LastAccess.last_write > timestamp, Project.blind_annotation_mode == 0)
+                           .distinct()
+            ).all()
+        return recent_projects
+                
 class ProjectAccessService:
     
     @staticmethod
