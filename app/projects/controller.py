@@ -27,7 +27,7 @@ api = Namespace("Project", description="Endpoints for dealing with projects")  #
 
 class ProjectResource(Resource):
     "Project"
-    @cache.cached(timeout=1200, key_prefix='projects_list')
+    @cache.cached(timeout=1200, key_prefix=ProjectAccessService.get_cache_key)
     @responds(schema=ProjectExtendedSchema(many=True), api=api)
     def get(self) -> List[ProjectExtendedInterface]:
         """Get all projects"""

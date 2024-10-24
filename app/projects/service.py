@@ -270,6 +270,14 @@ class ProjectAccessService:
             return ProjectAccessService.get_by_user_id(current_user.id, project_id)   
         else:
             return True
+        
+    @staticmethod
+    def get_cache_key(): 
+        user_id = current_user.id
+        if user_id: 
+            return 'projects_list_user_{}'.format(user_id)
+        else:
+            return 'projects_list_non_logged_in'
             
 class ProjectFeatureService:
     @staticmethod
