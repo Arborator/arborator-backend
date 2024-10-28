@@ -241,6 +241,26 @@ class GrewService:
             "sent_id": sent_id
         }
         grew_request("eraseSentence", data=data)
+        
+    @staticmethod
+    def extract_tagset(project_id, sample_ids, grew_funct):
+        data = {
+            "project_id": project_id,
+            "sample_ids": json.dumps(sample_ids)
+        }
+        response = grew_request(grew_funct, data=data)
+        return response["data"]
+    
+    @staticmethod
+    def get_config_from_samples(project_name, sample_ids):
+        
+        initial_feats = ['form', 'lemma', 'textform', 'upos', 'xpos', 'wordform']
+        
+        pos_list = GrewService.extract_tagset(project_name, sample_ids, "getPOS")
+        relation_list = GrewService.extract_tagset(project_name, sample_ids, "getRelations")
+        features_list = [feat for feat in GrewService.extract_tagset(project_name, sample_ids, "getFeatures") if feat not in initial_feats]
+        
+        return pos_list, relation_list, features_list
 
     @staticmethod
     def get_samples_with_string_contents(project_name: str, sample_names: List[str]):

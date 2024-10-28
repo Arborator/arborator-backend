@@ -7,6 +7,7 @@ from flask_accepts.decorators.decorators import responds
 from flask import Response, request
 from flask_restx import Namespace, Resource 
 from flask_login import current_user
+from werkzeug.utils import secure_filename
 
 from app.projects.service import ProjectAccessService, ProjectService, LastAccessService
 from app.utils.grew_utils import GrewService, SampleExportService, grew_request
@@ -83,19 +84,36 @@ class SampleResource(Resource):
             reextensions = re.compile(r"\.(conll(u|\d+)?|txt|tsv|csv)$")
             grew_samples = GrewService.get_samples(project_name)
             existing_samples = [sa["name"] for sa in grew_samples]
-
+            sample_names = []
+            
             for file in files:
+                
+                filename = secure_filename(file.filename)
+                sample_name = reextensions.sub("", filename)
+                sample_names.append(sample_name)
+                
                 SampleUploadService.upload(
                     file,
                     project_name,
+                    filename, 
+                    sample_name,
                     rtl,
-                    reextensions=reextensions,
                     existing_samples=existing_samples,
                     new_username=username,
                     samples_without_sent_ids=samples_without_sent_ids
                 )
+            
+            pos_list, relation_list, features_list = GrewService.get_config_from_samples(project_name, sample_names)
+            
+            response = {
+                "pos": pos_list,
+                "relations": relation_list,
+                "feats": features_list,
+            }
+            
             LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
-            return {"status": "OK"}
+            
+            return { "status": "OK", "data": response }
         
     def patch(self, project_name: str):
 

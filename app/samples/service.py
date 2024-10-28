@@ -25,19 +25,14 @@ class SampleUploadService:
     def upload(
         fileobject: FileStorage,
         project_name: str,
+        filename, 
+        sample_name,
         rtl: bool,
-        reextensions=None,
         existing_samples=[],
         new_username='',
         samples_without_sent_ids=[],
     ):	
         project = ProjectService.get_by_name(project_name)
-
-        if reextensions == None:
-            reextensions = re.compile(r"\.(conll(u|\d+)?|txt|tsv|csv)$")
-
-        filename = secure_filename(fileobject.filename)
-        sample_name = reextensions.sub("", filename)
         path_file = os.path.join(Config.UPLOAD_FOLDER, filename)
 
         fileobject.save(path_file)
