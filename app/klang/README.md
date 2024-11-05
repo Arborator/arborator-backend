@@ -32,7 +32,7 @@ The sample folder contains the samples. Each sample consists of a folder *my_sam
 
 check that:
 - each sample must be in a subfolder with the same name, my_sample
-- the conll file must have the same name and end with intervals.conll, in your case my_sample.conll not *conllu*
+- the conll file must have the same name and end with intervals.conll, in this case my_sample.conll not *conllu*
 - aligns must be in miliseconds
 - private is set to false if you want others than admins to access the project.
 
@@ -40,7 +40,7 @@ check that:
 
 When running Klang, it will save the user data into *transcription.json* files that look like this for each user that worked 
     [ 
-        {"accent": "native", "monodia": "dialogue", "story": "fun", "user": "anne.ff", "sound": "good", "title": "Fashion week", "transcription": [["bah", ",", "un", "soir", "apr\u00e8s", "la", ",", "hmm", ","], ["semaine", "de", "fashion", "week", ","], ["j'", "ai", "voulu", "emmener", "ma", "meilleure", "amie", "\u00e0", ",", "hm", ","], ["\u00e0", "une", ...]
+        {"accent": "native", "monodia": "dialogue", "story": "fun", "user": "anne.ff", "sound": "good", "title": "Fashion week", "transcription": [["bah", ",", "un", "soir", "après", "la", ",", "hmm", ","], ["semaine", "de", "fashion", "week", ","], ["j'", "ai", "voulu", "emmener", "ma", "meilleure", "amie", "à", ",", "hm", ","], ["à", "une", ...]
 
 The segments are preserved, only the transcription can change. Yet, the output will be clean conll by sentence borders.
 
