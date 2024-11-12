@@ -4,6 +4,7 @@ import re
 import io
 import time
 import zipfile
+from bs4 import BeautifulSoup
 
 import requests
 from flask import abort
@@ -27,19 +28,22 @@ def grew_request(fct_name, data={}, files={}):
         error_message = ("Grew requests handler> : Uncaught exception, please report {}".format(e))
         print(error_message)
         abort(500, {"message": error_message})
+    try: 
+        response = json.loads(response.text)
+        if response.get("status") == "ERROR":
+            error_message = response.get("message")
+            print("GREW-ERROR : {}".format(error_message) )
+            abort(406, "GREW-ERROR : {}".format(error_message)) 
+            
+        elif response.get("status") == "WARNING":
+            warning_message = response.get("message")
+            print("Grew-Warning: {}".format(warning_message))
+            
+        return response
+    except Exception as e:
+        parsed_error_msg = BeautifulSoup(response.text, features="lxml").find('p').contents[0]
+        abort(500, str(parsed_error_msg))
         
-    response = json.loads(response.text)
-    if response.get("status") == "ERROR":
-        error_message = response.get("message")
-        print("GREW-ERROR : {}".format(error_message) )
-        abort(406, "GREW-ERROR : {}".format(error_message)) 
-        
-    elif response.get("status") == "WARNING":
-        warning_message = response.get("message")
-        print("Grew-Warning: {}".format(warning_message))
-        
-    return response
-
 
 class GrewProjectInterface(TypedDict):
     name: str
