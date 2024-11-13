@@ -2,8 +2,11 @@ import os
 from typing import List, Type
 
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
+from dotenv import load_dotenv
 
 basedir = os.path.abspath(os.path.dirname(__file__))
+load_dotenv(dotenv_path=".flaskenv", verbose=True)
+
 UPLOAD_FOLDER = "app/tmp/data/"
 CACHE_FOLDER = "app/tmp/cache/"
 UPLOAD_IMAGE_FOLDER = "app/uploads/images"
@@ -27,7 +30,14 @@ class Config:
     MAX_TOKENS = MAX_TOKENS
     CACHE_TYPE = 'filesystem'
     CACHE_DIR = CACHE_FOLDER
-
+    MAIL_SERVER = 'smtp.gmail.com'
+    MAIL_PORT = 465
+    MAIL_USERNAME = os.getenv("MAIL_USERNAME")
+    MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
+    MAIL_DEFAULT_SENDER = os.getenv("MAIL_USERNAME")
+    MAIL_USE_TLS = False
+    MAIL_USE_SSL = True
+    
 class DevelopmentConfig(Config):
     CONFIG_NAME = "dev"
     SECRET_KEY = os.getenv(

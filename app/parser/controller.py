@@ -8,6 +8,7 @@ from app.utils.grew_utils import GrewService
 from app.config import Config
 from ..samples.service import add_or_keep_timestamps, add_or_replace_userid
 from ..projects.service import ProjectService, ProjectAccessService
+from ..user.service import EmailService
 from ..utils.arborator_parser_utils import ArboratorParserAPI, ModelInfo_t
 
 api = Namespace("Parser", description="Endpoints for dealing with the parser")  # noqa
@@ -19,7 +20,9 @@ class ParserModelsListResource(Resource):
         print("<PARSER> list/start request")
         response =  ArboratorParserAPI.list()
         if response['status'] == 'failure':
-            abort(503, 'Sorry, the parsing server is unreachable, please come back later')
+            error_message = 'Sorry, the parsing server is unreachable, please come back later'
+            EmailService.send_alert_email('Parsing server', error_message)
+            abort(503, error_message)
         else: 
             pretrained_models = []
             models = response.get("data")

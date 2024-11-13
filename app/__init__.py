@@ -5,6 +5,7 @@ from flask_restx import Api
 from flask_login import LoginManager
 from flask_caching import Cache
 from flask_migrate import Migrate
+from flask_mail import Mail
 
 from app.klang.config import KlangConfig
 from app.utils.grew_config import GrewConfig
@@ -14,6 +15,7 @@ cache = Cache()
 db = SQLAlchemy()
 login_manager = LoginManager()
 migrate = Migrate()
+mail = Mail()
 
 klang_config = KlangConfig()
 grew_config = GrewConfig()
@@ -43,6 +45,7 @@ def create_app(env=None):
     migrate.init_app(app, db)
     login_manager.init_app(app)
     cache.init_app(app)
+    mail.init_app(app)
 
     from .auth import auth as auth_blueprint
 

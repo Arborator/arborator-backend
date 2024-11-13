@@ -3,6 +3,7 @@ from typing import Dict, TypedDict, Union
 import requests
 
 from app import parser_config
+from app.user.service import EmailService
 
 
 class ModelInfo_t(TypedDict):
@@ -17,10 +18,14 @@ class ArboratorParserAPI:
             reply = requests.get(url, timeout=10)
             return reply.json()
         except requests.exceptions.ReadTimeout:
-            return {"status": "failure", "error": f"<ArboratorParserAPI> connection timout with `url={url}`"}
+            error_message = f"<ArboratorParserAPI> connection timout with `url={url}`"
+            EmailService.send_alert_email('Parser server error', error_message)
+            return {"status": "failure", "error": error_message }
         except Exception as e:
-            print(f"<ArboratorParserAPI> unknown error when connecting `url={url}` : {str(e)}", e)
-            return {"status": "failure", "error": f"<ArboratorParserAPI> unknown error when connecting `url={url}` : {str(e)}"}
+            error_message = f"<ArboratorParserAPI> unknown error when connecting `url={url}` : {str(e)}"
+            EmailService.send_alert_email('Parser server error', error_message)
+            print(error_message)
+            return {"status": "failure", "error": error_message}
 
 
     @staticmethod
@@ -35,13 +40,17 @@ class ArboratorParserAPI:
                     "error": f"<ArboratorParserSchemaValidation> You have a problem with at least one of the sentence "
                              f"you sent : {json.dumps(data.get('schema_errors'))}",
                     "schema_errors": data.get("schema_errors"),
-                        }
+                }
             return data
         except requests.exceptions.ReadTimeout:
-            return {"status": "failure", "error": f"<ArboratorParserAPI> connection timout with `url={url}`"}
+            error_message = f"<ArboratorParserAPI> connection timout with `url={url}`"
+            EmailService.send_alert_email('Parser server error', error_message)
+            return {"status": "failure", "error": error_message }
         except Exception as e:
-            print(f"<ArboratorParserAPI> unknown error when connecting `url={url}` : {str(e)}", e)
-            return {"status": "failure", "error": f"<ArboratorParserAPI> unknown error when connecting `url={url}` : {str(e)}"}
+            error_message = f"<ArboratorParserAPI> unknown error when connecting `url={url}` : {str(e)}"
+            EmailService.send_alert_email('Parser server error', error_message)
+            print(error_message)
+            return {"status": "failure", "error": error_message}
 
     @staticmethod
     def send_delete_request(url_suffix: str):

@@ -73,6 +73,7 @@ python manage.py remove_super_admin --username $username
 ### Run the app for local development
 
 In .flaskenv, set the `FLASK_ENV` to dev and `FLASK_APP` to wsgi.py
+There is two other variables `MAIL_USERNAME` and `MAIL_PASSWORD` that you need to set with your email address and password in order to user `Flask-Mail` library
 ```
 FLASK_ENV=dev
 FLASK_APP=wsgi.py

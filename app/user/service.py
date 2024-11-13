@@ -1,4 +1,6 @@
-from app import db
+from flask_mail import Message
+
+from app import db, mail
 from typing import List
 from .model import User
 from .interface import UserInterface
@@ -11,6 +13,11 @@ class UserService:
     @staticmethod
     def get_all() -> List[User]:
         return User.query.all()
+    
+    @staticmethod
+    def get_super_admins_emails() -> List[str]:
+        super_admins = User.query.filter_by(super_admin=1)
+        return [super_admin.email for super_admin in super_admins]
     
     @staticmethod
     def get_all_emails() -> List[str]:
@@ -79,4 +86,18 @@ class UserService:
             print("<super_admin manager> : superadmin '{}' was {}".format(user.username, "ADDED" if super_admin else "REMOVED"))
         else:
             print("<super_admin manager> : no user found, operation cancelled")
+               
+class EmailService:
+    
+    @staticmethod
+    def send_alert_email(title: str, alert: str):
+        super_admins_emails = UserService.get_super_admins_emails()
+        
+        mail_message = Message(
+            title,
+            recipients=super_admins_emails
+        )
 
+        mail_message.body = alert
+        mail.send(mail_message)
+            

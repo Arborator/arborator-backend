@@ -10,6 +10,7 @@ import requests
 from flask import abort
 from flask_login import current_user
 from app import grew_config
+from app.user.service import EmailService
 
 from conllup.conllup import sentenceConllToJson
 from conllup.processing import constructTextFromTreeJson
@@ -42,6 +43,7 @@ def grew_request(fct_name, data={}, files={}):
         return response
     except Exception as e:
         parsed_error_msg = BeautifulSoup(response.text, features="lxml").find('p').contents[0]
+        EmailService.send_alert_email('Grew server error', str(parsed_error_msg))
         abort(500, str(parsed_error_msg))
         
 
