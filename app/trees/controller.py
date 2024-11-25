@@ -112,7 +112,7 @@ class SampleTreesResource(Resource):
                 "user_id": user_id,
                 "conll_graph": conll,
             }
-
+            print('tree saved under name: {} by user_id {}'.format(user_id, current_user.id))
             grew_request("saveGraph", data=data)
         LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
         if GithubRepositoryService.get_by_project_id(project.id) and user_id == VALIDATED and update_commit:
