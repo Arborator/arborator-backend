@@ -12,6 +12,7 @@ import werkzeug
 from app import db
 from app import cache
 from app.utils.grew_utils import GrewService
+from app.utils.logging_utils import log_request
 from app.user.service import UserService
 from app.trees.service import TreeValidationService
 from app.github.model import GithubCommitStatus
@@ -27,6 +28,8 @@ api = Namespace("Project", description="Endpoints for dealing with projects")  #
 
 class ProjectResource(Resource):
     "Project"
+    
+    @log_request
     @cache.cached(timeout=1200, key_prefix=ProjectAccessService.get_cache_key)
     @responds(schema=ProjectExtendedSchema(many=True), api=api)
     def get(self) -> List[ProjectExtendedInterface]:
@@ -143,7 +146,7 @@ class ProjectIdResource(Resource):
         project_name = ProjectService.delete_by_name(project_name)
         if project_name:
             GrewService.delete_project(project_name)
-            return {"status": "Success", "project_name": project_name}
+            return {"": "Success", "project_name": project_name}
         else:
             return {
                 "status": "Error",
