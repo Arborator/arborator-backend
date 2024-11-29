@@ -4,7 +4,7 @@ import re
 from bs4 import BeautifulSoup
 
 from conllup.conllup import sentenceConllToJson, sentenceJsonToConll
-from conllup.processing import constructTextFromTreeJson, emptySentenceConllu, changeMetaFieldInSentenceConllu
+from conllup.processing import constructTextFromTreeJson, emptySentenceConllu
 
 from app.config import Config
 from app.utils.grew_utils import GrewService, grew_request

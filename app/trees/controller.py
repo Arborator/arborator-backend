@@ -3,10 +3,11 @@ from flask import abort, request
 from flask_login import current_user
 from flask_restx import Namespace, Resource
 from conllup.processing import changeMetaFieldInSentenceConllu
-from conllup.conllup import sentenceConllToJson
+from conllup.conllup import sentenceConllToJson, sentenceJsonToConll
 
 from app.config import Config
 from app.projects.service import LastAccessService, ProjectAccessService, ProjectService
+from app.user.service import UserService
 from app.samples.service import SampleBlindAnnotationLevelService
 from app.github.service import GithubCommitStatusService, GithubRepositoryService
 from app.utils.grew_utils import grew_request, GrewService
@@ -98,7 +99,12 @@ class SampleTreesResource(Resource):
         
         if not conll:
             abort(400)
-
+            
+        if user_id == VALIDATED:
+            sentence_json = sentenceConllToJson(conll)
+            sentence_json["metaJson"]["validated_by"] = UserService.get_by_id(current_user.id).username
+            conll = sentenceJsonToConll(sentence_json)
+            
         if project.blind_annotation_mode == 1 and user_id == VALIDATED:
             conll = changeMetaFieldInSentenceConllu(conll, "user_id", VALIDATED)
         
@@ -118,7 +124,7 @@ class SampleTreesResource(Resource):
         if GithubRepositoryService.get_by_project_id(project.id) and user_id == VALIDATED and update_commit:
             GithubCommitStatusService.update_changes(project.id, sample_name)
 
-        return {"status": "success"}
+        return { "status": "success", "new_conll": conll }
     
 
 @api.route("/<string:project_name>/samples/<string:sample_name>/trees/<string:username>")
