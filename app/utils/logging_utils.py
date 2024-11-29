@@ -19,7 +19,7 @@ def log_request(func):
         
         logger.info('Request method {}'.format(request.method))
         logger.info('Request path {}'.format(request.path))
-        if current_user.id:
+        if current_user.is_authenticated:
             logger.info('Request done by {}'.format(current_user.id))
         else:
             logger.info('Request done by anonymous user')

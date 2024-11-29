@@ -272,10 +272,9 @@ class ProjectAccessService:
             return True
         
     @staticmethod
-    def get_cache_key(): 
-        user_id = current_user.id
-        if user_id: 
-            return 'projects_list_user_{}'.format(user_id)
+    def get_cache_key():
+        if current_user.is_authenticated: 
+            return 'projects_list_user_{}'.format(current_user.id)
         else:
             return 'projects_list_non_logged_in'
             
