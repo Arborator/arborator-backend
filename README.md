@@ -163,6 +163,8 @@ Set the environement and install requirements.
 python -m venv ven
 source venv/bin/activate
 pip install -r requirements.txt
+pip install uwsgi   # this package is installed only for the prod 
+uwsgi --ini arborator-backend.ini # create .sock file for wsgi
 
 ```
 In .flaskenv, set `FLASK_ENV` to prod
