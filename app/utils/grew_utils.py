@@ -9,6 +9,7 @@ from bs4 import BeautifulSoup
 import requests
 from flask import abort
 from flask_login import current_user
+import werkzeug
 from app import grew_config
 from app.user.service import EmailService
 
@@ -34,14 +35,16 @@ def grew_request(fct_name, data={}, files={}):
         if response.get("status") == "ERROR":
             error_message = response.get("message")
             print("GREW-ERROR : {}".format(error_message) )
-            abort(406, "GREW-ERROR : {}".format(error_message)) 
+            abort(406, "GREW-ERROR : {}".format(error_message))
             
         elif response.get("status") == "WARNING":
             warning_message = response.get("message")
-            print("Grew-Warning: {}".format(warning_message))
-            
+            print("Grew-Warning: {}".format(warning_message))    
         return response
+    
     except Exception as e:
+        if isinstance(e, werkzeug.exceptions.NotAcceptable): # to fix the problem of abort inside try-except block
+            raise
         parsed_error_msg = BeautifulSoup(response.text, features="lxml").find('p').contents[0]
         EmailService.send_alert_email('Grew server error', str(parsed_error_msg))
         abort(500, str(parsed_error_msg))
