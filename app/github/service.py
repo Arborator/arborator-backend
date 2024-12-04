@@ -353,6 +353,7 @@ class GithubWorkflowService:
             GithubWorkflowService.create_sample(sample_name, path_file, project_name)
             project_id = ProjectService.get_by_name(project_name).id
             GithubCommitStatusService.create(project_id, sample_name)
+            os.remove(path_file)
 
     @staticmethod
     def create_sample(sample_name, path_file, project_name):
@@ -420,6 +421,7 @@ class GithubWorkflowService:
         sample_name, path_file =  GithubWorkflowService.download_github_file_content(file, download_url)
         GithubWorkflowService.create_sample(sample_name, path_file, project_name)
         GithubCommitStatusService.create(project.id, sample_name)
+        os.remove(path_file)
 
     @staticmethod
     def download_github_file_content(file_name, download_url):
@@ -441,8 +443,10 @@ class GithubWorkflowService:
 
         SampleService.add_or_replace_userid(path_file, USERNAME)
         SampleService.add_or_keep_timestamps(path_file)
+        
         with open(path_file, "rb") as file_to_save:
             GrewService.save_sample(project_name, sample_name, file_to_save)
+        os.remove(path_file)
         
         conlls_strings = SampleService.split_conll_string_to_conlls_list(content)
         reply = grew_request("getConll", data={"project_id": project_name, "sample_id": sample_name},)

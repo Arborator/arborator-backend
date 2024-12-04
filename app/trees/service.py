@@ -81,15 +81,17 @@ class TreeService:
             sentence_json['metaJson']['sent_id'] = new_sent_id
             conll_inserted += sentenceJsonToConll(sentence_json) + "\n\n"
             
-            file_name = sample_name + "_new_sent_id.conllu"
-            path_file = os.path.join(Config.UPLOAD_FOLDER, file_name)
+        file_name = sample_name + "_new_sent_id.conllu"
+        path_file = os.path.join(Config.UPLOAD_FOLDER, file_name)
+    
+        with open(path_file, "w") as file:
+            file.write(conll_inserted)
+            
+        with open(path_file, "rb") as conll_file:
+            GrewService.insert_conll(project_name, sample_name, old_sent_id, conll_file)  
+            GrewService.erase_sentence(project_name, sample_name, old_sent_id)   
         
-            with open(path_file, "w") as file:
-                file.write(conll_inserted)
-                
-            with open(path_file, "rb") as conll_file:
-                GrewService.insert_conll(project_name, sample_name, old_sent_id, conll_file)  
-                GrewService.erase_sentence(project_name, sample_name, old_sent_id)   
+        os.remove(path_file)
                          
 class TreeSegmentationService: 
 
@@ -107,6 +109,8 @@ class TreeSegmentationService:
             file.write(conll_to_insert)
         with open(path_file, "rb") as conll_file:
             GrewService.insert_conll(project_name, sample_name, sent_id, conll_file)
+        
+        os.remove(path_file)
             
             
 class TreeValidationService:

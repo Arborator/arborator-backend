@@ -44,7 +44,9 @@ class ApplyRuleResource(Resource):
                 
             with open(path_file, "rb") as file_to_save:
                 GrewService.save_sample(project_name, sample_name, file_to_save)
-                    
+            
+            os.remove(path_file)    
+                
         LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
 
 

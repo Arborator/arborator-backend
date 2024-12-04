@@ -58,6 +58,8 @@ class SampleUploadService:
                 GithubCommitStatusService.create(project.id, sample_name)
                 if new_username == 'validated':
                     GithubCommitStatusService.update_changes(project.id, sample_name)
+        
+        os.remove(path_file)
 
 class SampleTokenizeService:
 
@@ -86,8 +88,10 @@ class SampleTokenizeService:
 
         file_name = sample_name + ".conllu"
         path_file = os.path.join(Config.UPLOAD_FOLDER, file_name)
+        
         with open(path_file, "w") as file:
             file.write(conll)
+            
         add_or_replace_userid(path_file, username)
         add_or_keep_timestamps(path_file)
         
@@ -100,7 +104,8 @@ class SampleTokenizeService:
                 GithubCommitStatusService.create(project.id, sample_name)
                 if username == "validated":
                     GithubCommitStatusService.update_changes(project.id, sample_name)
-             
+        
+        os.remove(path_file)    
 
 class SampleBlindAnnotationLevelService:
     

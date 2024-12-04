@@ -183,10 +183,14 @@ class SaveAllTreesResource(Resource):
         
         file_name = sample_name + "_save_all.conllu"
         path_file = os.path.join(Config.UPLOAD_FOLDER, file_name)
+        
         with open(path_file, "w") as conll_file:
             conll_file.write(data.get('conllGraph'))
+            
         with open(path_file, "rb") as file_to_save:
             GrewService.save_sample(project_name, sample_name, file_to_save)
+
+        os.remove(path_file)
 
 @api.route("/<string:project_name>/samples/<string:sample_name>/trees/split")
 class SplitTreeResource(Resource):

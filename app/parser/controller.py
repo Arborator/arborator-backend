@@ -144,7 +144,8 @@ class ParserParseStatus(Resource):
                     with open(path_file, "rb") as file_to_save:
                         print('save files')
                         GrewService.save_sample(project_name, sample_name, file_to_save)
-
+                    os.remove(path_file)
+                    
             del data["parsed_samples"]
 
         return {"status": "success", "data": data}
