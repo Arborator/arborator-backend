@@ -174,6 +174,14 @@ class ValidateTree(Resource):
             else:
                 message, passed = validate_ud(None, 3, data)
             return { "message": message if message != '---\n' else '', "passed": passed }
+        else: #for the moment if sud we check only the cycles
+            cycle_nodes = TreeService.check_cycle(data)
+            if cycle_nodes: 
+                error_message = 'Non tree structure, tokens: ' + ', '.join([str(tuple_nodes) for tuple_nodes in cycle_nodes]) + ' form a cycle'
+                return { "message": error_message, "passed": False }
+            else:
+                return { "message": '', "passed": True }               
+            
                       
 @api.route("/<string:project_name>/samples/<string:sample_name>/trees/all")
 class SaveAllTreesResource(Resource):

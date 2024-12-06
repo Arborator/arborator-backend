@@ -12,7 +12,28 @@ BASE_TREE = "base_tree"
 VALIDATED = "validated"
 
 class TreeService:
-
+    
+    @staticmethod
+    def check_cycle(conll): 
+        sentence_json = sentenceConllToJson(conll)
+        nodes_json = sentence_json['treeJson']['nodesJson']
+        
+        nodes_children_list = {}
+        for index in nodes_json:
+            token_head = str(nodes_json[index]['HEAD'])
+            if token_head not in nodes_children_list.keys():
+                nodes_children_list[token_head] = [index]
+            else:
+                nodes_children_list[token_head].append(index)
+        
+        cycle_nodes = []        
+        for node, list_children in nodes_children_list.items():
+            for child in list_children:
+                if child in nodes_children_list.keys() and node in nodes_children_list[child]:
+                   cycle_nodes.append((child, node))
+        
+        return list(set(tuple(sorted(nodes_tuple)) for nodes_tuple in cycle_nodes))
+                       
     @staticmethod
     def samples_to_trees(samples, sample_name):
         """ transforms a list of samples into a trees object """
