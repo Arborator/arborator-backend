@@ -7,9 +7,9 @@ from .interface import UserInterface
 
 
 class User(UserMixin, db.Model, BaseM):
-
+    
+    """User representation in db"""
     __tablename__ = "users"
-
     id = Column(String(256), primary_key=True)
     auth_provider = Column(String(256))
     github_access_token = Column(String(256))

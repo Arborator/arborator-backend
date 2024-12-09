@@ -2,7 +2,7 @@ from marshmallow import fields, Schema
 
 
 class UserSchema(Schema):
-    """User schema"""
+    """User schema user object serialization"""
 
     id = fields.String(attribute="id")
     authProvider = fields.String(attribute="auth_provider")

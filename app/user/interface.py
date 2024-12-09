@@ -3,6 +3,7 @@ from datetime import datetime
 
 
 class UserInterface(TypedDict, total=False):
+    """Typed interface to deal with user entity"""
     id: str
     auth_provider: str
     github_access_token: str

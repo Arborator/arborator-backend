@@ -18,18 +18,27 @@ api = Namespace("User", description="Single namespace, single entity")  # noqa
 
 @api.route("/")
 class UsersResource(Resource):
-    "Users"
+    
     @responds(schema=UserSchema(many=True), api=api)
     def get(self) -> List[User]:
+        """Get the list of users in the app
+
+        Returns:
+            List[User]: the list of the users in the app
+        """
         return UserService.get_all()
 
 
 @api.route("/me")
 class UserResource(Resource):
-    "User"
 
     @responds(schema=UserSchema, api=api)
     def get(self) -> User:
+        """Get user information after log in and update last_seen value
+
+        Returns:
+            User: User entity
+        """
         user = UserService.get_by_id(current_user.id)
         changes: UserInterface = {"last_seen": datetime.utcnow()}
         user = UserService.update(user, changes)
@@ -38,6 +47,11 @@ class UserResource(Resource):
     @responds(schema=UserSchema, api=api)
     @accepts(schema=UserSchema, api=api)
     def put(self): 
+        """Update information of user
+
+        Returns:
+            User: return user entity with the updated values
+        """
         user = UserService.get_by_id(current_user.id)
         changes: UserInterface = request.parsed_obj
         return UserService.update(user,changes)
@@ -46,6 +60,11 @@ class UserResource(Resource):
 class UserLogoutResource(Resource):
     
     def get(self):
+        """Logout user 
+
+        Returns:
+            Response: flask response
+        """
         logout_user()
         js = json.dumps({"logout": True}, default=str)
         return Response(js, status=200, mimetype="application/json")
