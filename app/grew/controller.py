@@ -60,18 +60,16 @@ class SearchResource(Resource):
         trees_type = args.get("userType") 
         sample_ids = args.get("sampleIds")
         other_user = args.get("otherUser")
-        
-        user_type = 'all' if trees_type == 'pending' else trees_type
         if not sample_ids: 
-            sample_ids = [sample["name"] for sample in GrewService.get_samples(project_name)]
+            sample_ids = []
 
-        response = GrewService.search_request_in_graphs(project_name, pattern, user_type, other_user)
+        response = GrewService.search_request_in_graphs(project_name, pattern, sample_ids, trees_type, other_user)
+        search_results = response["data"]
         
-        if response["status"] != "OK":
-            abort(400)
-        
-        search_results = GrewService.post_process_grew_results(response["data"], sample_ids, trees_type)
-        return search_results
+        trees = {}
+        for result in search_results:
+            trees = GrewService.format_trees_new(result, trees)
+        return trees
 
 @api.route("/<string:project_name>/try-package")
 class TryPackageResource(Resource):
@@ -87,14 +85,12 @@ class TryPackageResource(Resource):
         if not sample_ids: 
             sample_ids = []
             
-        reply = GrewService.try_package(project_name, package, sample_ids, user_type, other_user)
-        if reply["status"] != "OK":
-            abort(400)
+        response = GrewService.try_package(project_name, package, sample_ids, user_type, other_user)
+        try_package_results = response["data"]
+        
         trees = {}
-        for m in reply["data"]:
-            if m["user_id"] == "":
-                abort(409)
-            trees = GrewService.format_trees_new(m, trees, is_package=True)
+        for result in try_package_results:
+            trees = GrewService.format_trees_new(result, trees, is_package=True)
         return trees
 
 @api.route("/<string:project_name>/relation-table")

@@ -103,12 +103,13 @@ class SampleResource(Resource):
                     samples_without_sent_ids=samples_without_sent_ids
                 )
             
-            pos_list, relation_list, features_list = GrewService.get_config_from_samples(project_name, sample_names)
+            pos_list, relation_list, feat_list, misc_list = GrewService.get_config_from_samples(project_name, sample_names)
             
             response = {
                 "pos": pos_list,
                 "relations": relation_list,
-                "feats": features_list,
+                "feats": feat_list,
+                "misc": misc_list
             }
             
             LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")

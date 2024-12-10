@@ -158,13 +158,14 @@ class GrewService:
         )
 
     @staticmethod
-    def search_request_in_graphs(project_id: str, request: str, user_type: str, other_user: str):
+    def search_request_in_graphs(project_id: str, request: str, sample_ids: List[str], user_type: str, other_user: str):
         
         user_ids = GrewService.get_user_ids(user_type, other_user)
         data = {
             "project_id": project_id,
             "request": request,
-            "user_ids": json.dumps(user_ids)
+            "user_ids": json.dumps(user_ids),
+            "sample_ids": json.dumps(sample_ids)
         }
         reply = grew_request("searchRequestInGraphs", data=data)
         return reply
@@ -263,13 +264,12 @@ class GrewService:
     @staticmethod
     def get_config_from_samples(project_name, sample_ids):
         
-        initial_feats = ['form', 'lemma', 'textform', 'upos', 'xpos', 'wordform']
-        
         pos_list = GrewService.extract_tagset(project_name, sample_ids, "getPOS")
         relation_list = GrewService.extract_tagset(project_name, sample_ids, "getRelations")
-        features_list = [feat for feat in GrewService.extract_tagset(project_name, sample_ids, "getFeatures") if feat not in initial_feats]
-        
-        return pos_list, relation_list, features_list
+        features = GrewService.extract_tagset(project_name, sample_ids, "getFeatures") 
+        feat_list = features['FEATS']
+        misc_list = features['MISC']
+        return pos_list, relation_list, feat_list, misc_list
 
     @staticmethod
     def get_samples_with_string_contents(project_name: str, sample_names: List[str]):
@@ -401,29 +401,6 @@ class GrewService:
                 trees[sample_name][sent_id]["packages"][user_id] = {"modified_edges": modified_edges, "modified_nodes": modified_nodes}
     
         return trees
-
-    @staticmethod
-    def post_process_grew_results(search_results, sample_ids, trees_type):
-        
-        trees = {}
-        
-        for result in search_results:
-            if result["sample_id"] not in sample_ids:
-                continue
-            trees = GrewService.format_trees_new(result, trees)
-
-        search_results = {}
-        if trees_type == 'pending':
-            for sample_id in sample_ids:
-                if sample_id in trees.keys():
-                    search_results[sample_id] = {
-                        sent_id: result for sent_id, result in trees[sample_id].items() if 'validated' not in result["conlls"].keys()
-                    }
-                
-        else: 
-            search_results = trees
-        
-        return search_results
 
 def get_timestamp(conll):
     t = re.search(r"# timestamp = (\d+(?:\.\d+)?)\n", conll)
