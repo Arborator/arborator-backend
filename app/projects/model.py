@@ -11,6 +11,7 @@ from .interface import ProjectInterface
 
 
 class Project(db.Model, BaseM):
+    """Project entity"""
     
     __tablename__ = "projects"
     id = Column(Integer, primary_key=True)
@@ -45,6 +46,7 @@ class Project(db.Model, BaseM):
 
 
 class ProjectFeature(db.Model):
+    """Feature entity represents the feature that is visible in the tree view"""
     
     __tablename__ = "feature"
     id = Column(Integer, primary_key=True)
@@ -53,6 +55,7 @@ class ProjectFeature(db.Model):
 
 
 class ProjectMetaFeature(db.Model):
+    """Meta feature entity represents the feature that is also visible in the tree view"""
     
     __tablename__ = "metafeature"
     id = Column(Integer, primary_key=True)
@@ -61,6 +64,7 @@ class ProjectMetaFeature(db.Model):
 
 
 class ProjectAccess(db.Model):
+    """Different type of user access in the project"""
     
     __tablename__ = "projectaccess"
     ACCESS = [(1, "annotator"), (2, "validator"), (3, "admin"), (4, "guest")]
@@ -78,7 +82,8 @@ class ProjectAccess(db.Model):
 
 
 class LastAccess(db.Model):
-
+    """Last user access entity that contains the last read and the last write"""
+    
     __tablename__ = "last_access"
     id = Column(Integer, primary_key=True)
     user_id = Column(String(256), db.ForeignKey("users.id")) # unique

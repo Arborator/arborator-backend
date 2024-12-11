@@ -27,14 +27,18 @@ api = Namespace("Project", description="Endpoints for dealing with projects")  #
 @api.route("/")
 
 class ProjectResource(Resource):
-    "Project"
+    "Class that deals with project entity endpoints"
     
     @log_request
     @cache.cached(timeout=1200, key_prefix=ProjectAccessService.get_cache_key)
     @responds(schema=ProjectExtendedSchema(many=True), api=api)
     def get(self) -> List[ProjectExtendedInterface]:
-        """Get all projects"""
-
+        """
+            Get all projects in the application, in this function 
+            We use two decorator one for the logs and other for the cache
+        Returns:
+            projects_list(List[projectExtendedInterface])
+        """
         projects: List[Project] = Project.query.all()
         grew_projects = GrewService.get_projects()
         return ProjectService.get_projects_info(projects, grew_projects)
@@ -44,45 +48,45 @@ class ProjectResource(Resource):
     def post(self) -> Project:
         """Create a single Project"""
         
-        try:
+        if current_user.is_authenticated:
             creator_id = current_user.id
-        except:
+            new_project_attrs: ProjectInterface = request.parsed_obj
+
+            GrewService.create_project(new_project_attrs["project_name"])
+            new_project = ProjectService.create(new_project_attrs)
+            
+            LastAccessService.update_last_access_per_user_and_project(
+                creator_id, new_project_attrs["project_name"], "write"
+            )
+
+            ProjectAccessService.create(
+                {
+                    "user_id": creator_id,
+                    "project_id": new_project.id,
+                    "access_level": 3,
+                }
+            )
+
+            default_features = ["FORM", "UPOS", "LEMMA", "MISC.Gloss"]
+            default_metafeatures = ["text_en"]
+
+            for feature in default_features:
+                ProjectFeatureService.create({"project_id": new_project.id, "value": feature})
+
+            for feature in default_metafeatures:
+                ProjectMetaFeatureService.create({"project_id": new_project.id, "value": feature})
+
+            return new_project
+        else:
             abort(401, "User not loged in")
-            raise
-        
-        new_project_attrs: ProjectInterface = request.parsed_obj
-
-        GrewService.create_project(new_project_attrs["project_name"])
-        new_project = ProjectService.create(new_project_attrs)
-        
-        LastAccessService.update_last_access_per_user_and_project(
-            creator_id, new_project_attrs["project_name"], "write"
-        )
-
-        ProjectAccessService.create(
-            {
-                "user_id": creator_id,
-                "project_id": new_project.id,
-                "access_level": 3,
-            }
-        )
-
-        default_features = ["FORM", "UPOS", "LEMMA", "MISC.Gloss"]
-        default_metafeatures = ["text_en"]
-
-        for feature in default_features:
-            ProjectFeatureService.create({"project_id": new_project.id, "value": feature})
-
-        for feature in default_metafeatures:
-            ProjectMetaFeatureService.create({"project_id": new_project.id, "value": feature})
-
-        return new_project
 
 @api.route("/user-projects")
 class UserProjectResource(Resource):
-    
+    "Class that deals with user projects endpoints"
+
     @responds(schema=ProjectExtendedSchema(many=True), api=api)
     def get(self):
+        """Get user projects"""
         user = UserService.get_by_id(current_user.id)
         projects: List[Project] = Project.query.all()
         grew_projects = GrewService.get_user_projects(user.username)
@@ -90,9 +94,14 @@ class UserProjectResource(Resource):
       
 @api.route("/mismatch-projects")
 class MistmatchProjectsResource(Resource):
-    
+
     def get(self):
-        
+        """
+            This feature is for superdamins to help them to detect the projects 
+            that exist in grew server and not in the db or projects the opposite
+        Returns:
+            projects_list(List[projectExtendedInterface])
+        """
         projects: List[Project] = Project.query.all()
         grew_projects = GrewService.get_projects()
         grew_project_names = set([project["name"] for project in grew_projects])
@@ -108,6 +117,11 @@ class PopularProjectsResource(Resource):
     
     @responds(schema=ProjectExtendedSchema(many=True), api=api)
     def get(self):
+        """
+            Get list of popular projects, projects that are active in the last 15 days
+        Returns:
+            projects_list(List[projectExtendedInterface])
+        """
         time_ago = 15 # recent projects from 15 days 
         recent_projects = ProjectService.get_recent_projects(time_ago)
         grew_projects = GrewService.get_projects()
@@ -143,7 +157,7 @@ class ProjectIdResource(Resource):
         project = ProjectService.get_by_name(project_name)
         ProjectAccessService.check_admin_access(project.id)
 
-        project_name = ProjectService.delete_by_name(project_name)
+        ProjectService.delete_by_name(project_name)
         if project_name:
             GrewService.delete_project(project_name)
             return {"": "Success", "project_name": project_name}
@@ -204,7 +218,11 @@ class ProjectFeaturesResource(Resource):
 class ProjectConllSchemaResource(Resource):
     
     def get(self, project_name: str):
-        """Get project conll schema"""
+        """
+        Get project conll schema
+        Returns:
+            - conll_schema(dict)
+        """
         
         project = ProjectService.get_by_name(project_name)
         ProjectService.check_if_project_exist(project)
@@ -238,7 +256,11 @@ class ProjectConllSchemaResource(Resource):
 class ProjectAccessResource(Resource):
     
     def get(self, project_name: str):
-        """Get project users access"""
+        """
+            Get project users access
+        Returns: 
+            - dict(str, List[str]): list of user roles
+        """
         
         project = ProjectService.get_by_name(project_name)
         ProjectService.check_if_project_exist(project)
@@ -249,7 +271,11 @@ class ProjectAccessResource(Resource):
 class ProjectAccessManyResource(Resource):
     
     def put(self, project_name: str):
-        """Modify project users access"""
+        """
+            Modify project users access
+        Returns: 
+            - dict(str, List[str]): list of user roles
+        """
         
         args = request.get_json()
         selected_users = args["selectedUsers"]
@@ -282,7 +308,11 @@ class ProjectAccessManyResource(Resource):
 class ProjectAccessUserResource(Resource):
     
     def delete(self, project_name: str, username: str):
-        """Remove project user access"""
+        """
+            Remove project user access
+        Returns: 
+            - dict(str, List[str]): list of user roles
+        """
         
         project = ProjectService.get_by_name(project_name)
         ProjectService.check_if_project_exist(project)
@@ -297,13 +327,24 @@ class ProjectAccessUserResource(Resource):
 class ProjectImageResource(Resource):
     
     def get(self, project_name: str):
-        
+        """Get project image
+
+        Args:
+            project_name (str)
+
+        Returns:
+            image(str): image encoded in b64
+        """
         image_path = ProjectService.get_by_name(project_name).image
         image = ProjectService.get_project_image(image_path)
         return image
     
     def post(self, project_name: str):
-        """Update project image"""
+        """
+            Update project image
+        Args: 
+            - files(File): image file uploaded
+        """
         
         parser = reqparse.RequestParser()
         parser.add_argument("files", type=werkzeug.datastructures.FileStorage, location="files")
@@ -328,7 +369,14 @@ class ProjectImageResource(Resource):
 class ProjectLanguageDetectedResource(Resource):
     
     def get(self, project_name: str):
-        
+        """check if language is detected
+
+        Args:
+            project_name (str)
+
+        Returns:
+            boolean
+        """
         project = ProjectService.get_by_name(project_name)
         mapped_languages = TreeValidationService.extract_ud_languages()
         return project.language in mapped_languages.keys()

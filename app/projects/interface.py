@@ -3,6 +3,8 @@ from mypy_extensions import TypedDict
 
 
 class ProjectInterface(TypedDict, total=False):
+    """Project interface correponds the project entity in db"""
+    
     id: int
     project_name: str
     description: str
@@ -21,6 +23,8 @@ class ProjectInterface(TypedDict, total=False):
 
 
 class ProjectExtendedInterface(ProjectInterface, total=False):
+    """Extended Project interface with extra attributes that will be used to communicate with the frontend"""
+    
     users: List[str]
     owner_avatar_url: str
     admins: List[str]
@@ -35,6 +39,7 @@ class ProjectExtendedInterface(ProjectInterface, total=False):
     last_access_write: int
 
 class ProjectShownFeaturesAndMetaInterface(TypedDict, total=False):
+    """Interface that contains list of features and meta features that will be displayed in the tree view"""
     shown_features: List[str]
     shown_meta: List[str]
 

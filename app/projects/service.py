@@ -1,7 +1,7 @@
 import os
 import base64
 import datetime
-from typing import Dict, List, Tuple
+from typing import Dict, List
 
 from flask import abort, current_app
 from flask_login import current_user
@@ -11,14 +11,28 @@ from .interface import ProjectInterface, ProjectExtendedInterface
 from .model import Project, ProjectAccess, ProjectFeature, ProjectMetaFeature, LastAccess
 from ..user.service import UserService
 
-
 class ProjectService:
+    """Class deals with the methods that concerns project entity"""
+    
     @staticmethod
     def get_all() -> List[Project]:
+        """Get all list of project in db
+
+        Returns:
+            List[Project]
+        """
         return Project.query.all()
 
     @staticmethod
     def create(new_attrs: ProjectInterface) -> Project:
+        """Create new project in db
+
+        Args:
+            new_attrs (ProjectInterface): dict of project attributes
+
+        Returns:
+            Project: new project entity
+        """
         new_project = Project(**new_attrs)
         db.session.add(new_project)
         db.session.commit()
@@ -26,36 +40,88 @@ class ProjectService:
 
     @staticmethod
     def get_by_name(project_name: str) -> Project:
+        """Get project entity by its name
+
+        Args:
+            project_name (str) 
+
+        Returns:
+            Project: project entity
+        """
+        
         return Project.query.filter(Project.project_name == project_name).first()
 
     @staticmethod
     def update(project: Project, changes) -> Project:
+        """update project propreties
+
+        Args:
+            project (Project) 
+            changes (ProjectInterface): dict of propreties to be updated
+
+        Returns:
+            Project: updated project entity
+        """
+        
         project.update(changes)
         db.session.commit()
         return project
 
     @staticmethod
-    def delete_by_name(project_name: str) -> str:
+    def delete_by_name(project_name: str):
+        """Delete project by its name
+
+        Args:
+            project_name (str)
+
+        Returns:
+            prject_name: returns project name if the project exists in db else empty string 
+        """
         project = Project.query.filter(
             Project.project_name == project_name).first()
-        if not project:
+        if project:
+            db.session.delete(project)
+            db.session.commit()
+            return project_name
+        else:
             return ""
-        db.session.delete(project)
-        db.session.commit()
-        return project_name
 
     @staticmethod
     def check_if_project_exist(project: Project) -> None:
+        """check if the project exist in database
+
+        Args:
+            project (Project)
+        """
         if not project:
             abort(404, "There was no such project stored on arborator backend")
     
     @staticmethod 
     def check_if_freezed(project: Project) -> None:
+        """
+            Freezed projects are project that can't be edited
+            by the user, only the owner of the project who can
+            freeze the project, so if the project is freezed no one 
+            have access to the samples or features that update data
+
+        Args:
+            project (Project)
+        """
         if project.freezed and (not current_user.is_authenticated or ProjectAccessService.get_admins(project.id)[0] != current_user.username): 
             abort(403, "You can't access the project when it's freezed")
             
     @staticmethod
     def get_project_image(image_path: str) -> str:
+        """
+            Get the  project image from the project image folder 
+            and send it to the frontend in base64 coding format
+
+        Args:
+            image_path (str): path of the image in db
+
+        Returns:
+            str: string the contains the encoding of the image
+        """
         if image_path:
             image_path = os.path.join(current_app.config["PROJECT_IMAGE_FOLDER"], image_path)
             if os.path.exists(image_path):
@@ -66,6 +132,16 @@ class ProjectService:
     
     @staticmethod
     def get_projects_info(db_projects, grew_projects):
+        
+        """
+            Get project information, since some of the projects information 
+            are stored in the db and in grew server so we have to send both information to the frontend
+        Args:
+            db_projects(List[Project]): list of the project in the db
+            grew_projects(List[GrewProject])
+        Returns:
+            projects_extended_list(List[ProjectExtendedInterface]): union of db_projects and grew_projects with different info
+        """
         
         projects_extended_list: List[ProjectExtendedInterface] = []
         grew_projects_names = set([project["name"] for project in grew_projects])
@@ -111,7 +187,14 @@ class ProjectService:
     
     @staticmethod
     def get_recent_projects(time_ago):
-        
+        """Get recent active project based on time_ago 
+
+        Args:
+            time_ago (number): number of days ago
+
+        Returns:
+            recent_projects(List[Project]): List of recent projects 
+        """
         time_before = datetime.datetime.now() - datetime.timedelta(days=time_ago)
         timestamp = time_before.timestamp()
         recent_projects = (db.session.query(Project)
@@ -122,9 +205,18 @@ class ProjectService:
         return recent_projects
                 
 class ProjectAccessService:
+    """Class of methods that deal with project access entity"""
     
     @staticmethod
     def create(new_attrs) -> ProjectAccess:
+        """Create new ProjectAccess entity
+
+        Args:
+            new_attrs: dict of project access attributes
+
+        Returns:
+            new_project_access: new project_access entity
+        """
         new_project_access = ProjectAccess(**new_attrs)
         db.session.add(new_project_access)
         db.session.commit()
@@ -132,12 +224,27 @@ class ProjectAccessService:
 
     @staticmethod
     def update(project_access: ProjectAccess, changes):
+        """update project access entity
+
+        Args:
+            project_access (ProjectAccess)
+            changes (dict)
+
+        Returns:
+            project_access: updated project_access entity
+        """
         project_access.update(changes)
         db.session.commit()
         return project_access
 
     @staticmethod
     def delete(user_id: str, project_id: int):
+        """delete the access a user for a specific project
+
+        Args:
+            user_id (str)
+            project_id (int)
+        """
         project_access = ProjectAccess.query.filter_by(user_id=user_id, project_id=project_id).first()
         if project_access:
             db.session.delete(project_access)
@@ -145,6 +252,17 @@ class ProjectAccessService:
 
     @staticmethod
     def user_has_access_to_project(user_id):
+        """
+            Check if a user has access to any project in db
+            to use it later to to redirect users to my projects page 
+            either all projects when they logged in
+
+        Args:
+            user_id (str): 
+
+        Returns:
+            boolan
+        """
         project_access = ProjectAccess.query.filter_by(user_id=user_id).all()
         if project_access:
             return True
@@ -153,10 +271,27 @@ class ProjectAccessService:
         
     @staticmethod
     def get_by_user_id(user_id: str, project_id: int) -> ProjectAccess:
+        """Get access by user and project
+
+        Args:
+            user_id (str)
+            project_id (int)
+
+        Returns:
+            ProjectAccess
+        """
         return ProjectAccess.query.filter_by(project_id=project_id, user_id=user_id).first()
 
     @staticmethod
     def get_admins(project_id: int) -> List[str]:
+        """Get admins of a project
+
+        Args:
+            project_id (int)
+
+        Returns:
+            List[str]: list of admins usernames
+        """
         project_access_list: List[ProjectAccess] = ProjectAccess.query.filter_by(project_id=project_id, access_level=3)
         if project_access_list:
             return [UserService.get_by_id(project_access.user_id).username for project_access in project_access_list]
@@ -165,6 +300,14 @@ class ProjectAccessService:
 
     @staticmethod
     def get_validators(project_id: int) -> List[str]:
+        """Get validators of a project
+
+        Args:
+            project_id (int)
+
+        Returns:
+            List[str]: list of validators usernames
+        """
         project_access_list: List[ProjectAccess] = ProjectAccess.query.filter_by(project_id=project_id, access_level=2)
         if project_access_list:
             return [UserService.get_by_id(project_access.user_id).username for project_access in project_access_list]
@@ -173,6 +316,14 @@ class ProjectAccessService:
         
     @staticmethod
     def get_annotators(project_id: int) -> List[str]:
+        """Get annotators of a project
+
+        Args:
+            project_id (int)
+
+        Returns:
+            List[str]: list of annotators username
+        """
         project_access_list: List[ProjectAccess] = ProjectAccess.query.filter_by(project_id=project_id, access_level=1)
         if project_access_list:
             return [UserService.get_by_id(project_access.user_id).username for project_access in project_access_list]
@@ -181,6 +332,14 @@ class ProjectAccessService:
 
     @staticmethod
     def get_guests(project_id: int) -> List[str]:
+        """Get guests of a project
+
+        Args:
+            project_id (int)
+
+        Returns:
+            List[str]: list of guests username
+        """
         project_access_list: List[ProjectAccess] = ProjectAccess.query.filter_by(project_id=project_id, access_level=4)
         if project_access_list:
             return [UserService.get_by_id(project_access.user_id).username for project_access in project_access_list]
@@ -188,8 +347,15 @@ class ProjectAccessService:
             return []
 
     @staticmethod
-    def get_all(project_id: int) -> Tuple[List[str], List[str]]:
-        
+    def get_all(project_id: int):
+        """Get all accesses of project
+
+        Args:
+            project_id (int)
+
+        Returns:
+            list of usernames of every type of user access
+        """
         project_access_list: List[ProjectAccess] = ProjectAccess.query.filter_by(project_id=project_id).all()
         admins, validators, annotators, guests = [], [], [], []
         for project_access in project_access_list: 
@@ -213,6 +379,24 @@ class ProjectAccessService:
             "guests": guests,
         }
 
+
+    @staticmethod
+    def require_access_level(project_id, required_access_level) -> None:
+        access_level = 0
+        if current_user.is_authenticated:
+            if current_user.super_admin:
+                return 
+            else:
+                access_level = ProjectAccessService.get_by_user_id(
+                    current_user.id, project_id
+                ).access_level
+
+        if access_level >= required_access_level:
+            return
+        else:
+            abort(403)
+
+    
     @staticmethod
     def require_access_level(project_id, required_access_level) -> None:
         access_level = 0
@@ -232,11 +416,13 @@ class ProjectAccessService:
     @staticmethod
     def check_admin_access(project_id) -> None:
         """
-        Will check, for a project, if user is admin (or super_admin). If not, the service will interupt the controller (abort) and return a 
-        401 error with the corresponding error message :
-        - User not loged in
-        - User doesn't belong to this project
-        - User doesn't have admin rights on this projects
+            Will check, for a project, if user is admin (or super_admin). If not, the service will interupt the controller (abort) and return a 
+            401 error with the corresponding error message :
+            - User not loged in
+            - User doesn't belong to this project
+            - User doesn't have admin rights on this projects
+        Args:
+            project_id (int)
         """
 
 
@@ -257,10 +443,15 @@ class ProjectAccessService:
 
     
     @staticmethod
-    def check_project_access(visibility,project_id):
+    def check_project_access(visibility, project_id):
         """
-        If the project is private (visibility==0) , it's readable only by its users and by the superadmins
-        else the public and the open projects are readable by all the users even those who are not logged in
+            If the project is private (visibility==0) , it's readable only by its users and by the superadmins
+            else the public and the open projects are readable by all the users even those who are not logged in
+        Args:
+            visibility(int): project visibility
+            project_id(int)
+        Return:
+            boolean
         """
         if visibility == 0:
             if not current_user.is_authenticated:
@@ -273,14 +464,32 @@ class ProjectAccessService:
         
     @staticmethod
     def get_cache_key():
+        """
+            All users have their own cache, and to access to the cache
+            you have to use key in our case keys are string concat with user_id
+            if user is logged in else it's only string 
+
+        Returns:
+            string
+        """
         if current_user.is_authenticated: 
             return 'projects_list_user_{}'.format(current_user.id)
         else:
             return 'projects_list_non_logged_in'
             
 class ProjectFeatureService:
+    """Class that deals with project features to be shown in the tree view"""
+
     @staticmethod
     def create(new_attrs) -> ProjectFeature:
+        """Create new project feature
+
+        Args:
+            new_attrs (dict)
+
+        Returns:
+            ProjectFeature: new project feature entity
+        """
         new_project_access = ProjectFeature(**new_attrs)
         db.session.add(new_project_access)
         db.session.commit()
@@ -288,6 +497,14 @@ class ProjectFeatureService:
 
     @staticmethod
     def get_by_project_id(project_id: str) -> List[str]:
+        """Get all features of project based on project id
+
+        Args:
+            project_id (str)
+
+        Returns:
+            List[str]
+        """
         features = ProjectFeature.query.filter_by(project_id=project_id).all()
         if features:
             return [f.value for f in features]
@@ -296,6 +513,11 @@ class ProjectFeatureService:
 
     @staticmethod
     def delete_by_project_id(project_id: str) -> str:
+        """Delete features by project id
+
+        Args:
+            project_id (str)
+        """
         features = ProjectFeature.query.filter_by(project_id=project_id).all()
         for feature in features:
             db.session.delete(feature)
@@ -304,6 +526,7 @@ class ProjectFeatureService:
 
 
 class ProjectMetaFeatureService:
+    """Class that deals with metaFeatue entity"""
     @staticmethod
     def create(new_attrs) -> ProjectMetaFeature:
         new_project_access = ProjectMetaFeature(**new_attrs)
@@ -330,9 +553,20 @@ class ProjectMetaFeatureService:
 
 
 class LastAccessService:
+    """Class that contains methods that deal with last access entity"""
     
     @staticmethod
     def get_user_by_last_access_and_project(project_name, last_access, access_type):
+        """Get username of the user who had the last access of read or write in the project
+
+        Args:
+            project_name (str)
+            last_access (int)
+            access_type (str): write | read
+
+        Returns:
+            username(str)
+        """
         project_id = ProjectService.get_by_name(project_name).id
         if access_type == 'write':
             user_id = LastAccess.query.filter_by(project_id=project_id, last_write=last_access).first().user_id
@@ -343,6 +577,14 @@ class LastAccessService:
         
     @staticmethod
     def get_project_last_access(project_name):
+        """Get last accesses to the project
+
+        Args:
+            project_name (str)
+
+        Returns:
+            last_read, last_write(Tuple(int, int))
+        """
         project = ProjectService.get_by_name(project_name)
         ProjectService.check_if_project_exist(project)
         last_accesses: LastAccess = LastAccess.query.filter(LastAccess.project_id == project.id)
@@ -358,7 +600,13 @@ class LastAccessService:
     
     @staticmethod
     def update_last_access_per_user_and_project(user_id, project_name, access_type):
-        
+        """Update or cerate the last access entity of the user for specific project
+
+        Args:
+            user_id (str): the last user who visited or write in the project
+            project_name (str)
+            access_type (str): write | read
+        """
         project = ProjectService.get_by_name(project_name)
         ProjectService.check_if_project_exist(project)
 
