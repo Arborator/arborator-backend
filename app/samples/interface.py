@@ -2,6 +2,7 @@ from typing import List
 from mypy_extensions import TypedDict
 
 class SampleInterface(TypedDict, total=False):
+    """Typed class of information concerns sample information"""
     sample_name: str
     sentences: int
     number_trees: int

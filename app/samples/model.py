@@ -3,7 +3,7 @@ from sqlalchemy import Column, Integer, String
 from app import db  # noqa
 
 class SampleBlindAnnotationLevel(db.Model):
-    """
+    """ This class represents the level of blind annotation 
         blind annotation levels are 
             1: validated_visible
             2: local_feedback

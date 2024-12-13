@@ -32,6 +32,18 @@ class SampleUploadService:
         new_username='',
         samples_without_sent_ids=[],
     ):	
+        """uplaod new sample
+
+        Args:
+            fileobject (FileStorage): 
+            project_name (str):
+            filename (str): 
+            sample_name (str): filename without the extension
+            rtl (bool): _description_
+            existing_samples (list[str]): existing sample
+            new_username (str): the custom username used of the uploaded trees, or the same as the username
+            samples_without_sent_ids (list[str]): list of samples that doesn't contain sent_ids Defaults to [].
+        """
         project = ProjectService.get_by_name(project_name)
         path_file = os.path.join(Config.UPLOAD_FOLDER, filename)
 
@@ -65,7 +77,17 @@ class SampleTokenizeService:
 
     @staticmethod
     def tokenize(text, option, lang, project_name, sample_name, username, rtl):
+        """tokenize and upload the tokenized text
 
+        Args:
+            text (str) 
+            option (str): horizontal | vertical | plain_text
+            lang (str): if plain text we have a tokenizer for french or english
+            project_name (str)
+            sample_name (str)
+            username (str)
+            rtl (bool): right to left script
+        """
         existing_samples = GrewService.get_samples(project_name)
         samples_names = [sample["name"] for sample in existing_samples]
         project = ProjectService.get_by_name(project_name)
@@ -109,8 +131,17 @@ class SampleTokenizeService:
 
 class SampleBlindAnnotationLevelService:
     
+    """class that deals with blind annotatio level entity"""
     @staticmethod
     def create(new_attrs) -> SampleBlindAnnotationLevel:
+        """create new blind annotation level entity
+
+        Args:
+            new_attrs (dict)
+
+        Returns:
+            SampleBlindAnnotationLevel
+        """
         new_blind_annotation_level = SampleBlindAnnotationLevel(**new_attrs)
         db.session.add(new_blind_annotation_level)
         db.session.commit()
@@ -118,12 +149,30 @@ class SampleBlindAnnotationLevelService:
 
     @staticmethod
     def update(blind_annotation_level: SampleBlindAnnotationLevel, changes):
+        """update blind annotation level
+
+        Args:
+            blind_annotation_level (SampleBlindAnnotationLevel)
+            changes (dict(changes))
+
+        Returns:
+           updated blind annotation level
+        """
         blind_annotation_level.update(changes)
         db.session.commit()
         return blind_annotation_level
 
     @staticmethod
     def get_by_sample_name(project_id: int, sample_name: str) -> SampleBlindAnnotationLevel:
+        """Get the blind annotation level by sample_name
+
+        Args:
+            project_id (int)
+            sample_name (str)
+
+        Returns:
+            SampleBlindAnnotationLevel
+        """
         blind_annotation_level = SampleBlindAnnotationLevel.query.filter_by(
             sample_name=sample_name, project_id=project_id
         ).first()
@@ -146,9 +195,18 @@ class SampleBlindAnnotationLevelService:
 class SampleEvaluationService:
     @staticmethod
     def evaluate_sample(sample_conlls):
+        """Evaluate samples
+
+        Args:
+            sample_conlls (2-levels dict sent_id -> user_id -> conll_string)
+
+        Returns:
+            evaluations (2-level dict user_id -> evaluation -> percentage)
+        """
         corrects = {}
         submitted = {}
         total = {"UPOS": 0, "DEPREL": 0, "HEAD": 0}
+        print(sample_conlls)
         for sentence_id, sentence_conlls in sample_conlls.items():
             validated_tree_conll = sentence_conlls.get("validated")
             if validated_tree_conll:
@@ -232,6 +290,14 @@ class SampleEvaluationService:
 
     @staticmethod
     def evaluations_json_to_tsv(evaluations):
+        """Convert eval to tsv file
+
+        Args:
+            evaluations (dict)
+
+        Returns:
+            evaluation_tsv(str)
+        """
         if evaluations:
             list_usernames = list(evaluations.keys())
             first_username = list(evaluations.keys())[0]

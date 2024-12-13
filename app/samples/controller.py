@@ -33,7 +33,14 @@ class SampleResource(Resource):
     
     @responds(schema=SampleSchema(many=True), api=api)
     def get(self, project_name: str):
-        
+        """Get list of samples of project
+
+        Args:
+            project_name (str)
+
+        Returns:
+            List[SampleSchema]
+        """
         project = ProjectService.get_by_name(project_name)
         ProjectService.check_if_project_exist(project)
         ProjectService.check_if_freezed(project)
@@ -65,6 +72,18 @@ class SampleResource(Resource):
 
     def post(self, project_name: str):
         
+        """Upload new samples
+
+        Args: 
+            - project_name(str)
+            - user_id(str): username used to the uploaded trees
+            - files(List[File])
+            - rtl(bool): right to lef script
+            - samples_without_sent_ids(List[str])
+
+        Returns:
+            - { "status": ok, "response": list of detected annotation tag in the uploaded samples}
+        """
         
         project = ProjectService.get_by_name(project_name)
         ProjectAccessService.check_admin_access(project.id)
@@ -117,6 +136,13 @@ class SampleResource(Resource):
             return { "status": "OK", "data": response }
         
     def patch(self, project_name: str):
+        """
+            Delete samples in the project instead of using delete method and 
+            since we can delete a batch of samples so we are using patch
+
+        Args:
+            project_name (str)
+        """
 
         project = ProjectService.get_by_name(project_name)
         ProjectAccessService.check_admin_access(project.id)
@@ -138,6 +164,12 @@ class SampleNameResource(Resource):
     
     def post(self, project_name, sample_name):
         
+        """Rename an existing sample
+        Args:
+            - project_name(str)
+            - sample_name(str)
+            - newSampleName(str)
+        """
         args = request.get_json()
         new_sample_name = args.get("newSampleName")
         
@@ -152,7 +184,16 @@ class SampleNameResource(Resource):
 @api.route("/<string:project_name>/samples/tokenize")
 class SampleTokenizeResource(Resource):
     def post(self, project_name):
-        
+        """Create new sample using tokenizer
+
+        Args:
+            project_name (str)
+            username: the username used for the uploaded trees
+            option(str): horizontal, vertical or plain text
+            lang(str): for plain text there is two languages (french or english)
+            text(str)
+            rtl(bool): right to left script
+        """
         args = request.get_json()
         username = args.get("username")
         sample_name = args.get("sampleName")
@@ -169,7 +210,13 @@ class SampleTokenizeResource(Resource):
 class SampleBlindAnnotationLevelResource(Resource):
     
     def post(self, project_name: str, sample_name: str):
-        
+        """update blind annotation level of a sample
+
+        Args:
+            project_name (str)
+            sample_name (str)
+            blind_annotation_level(int)
+        """
         args = request.get_json()
         blind_annotation_level = args.get("blindAnnotationLevel")
 
@@ -198,7 +245,15 @@ class SampleBlindAnnotationLevelResource(Resource):
 class SampleEvaluationResource(Resource):
     
     def get(self, project_name, sample_name):
-        
+        """
+            Export evaluation of students in blind annotation mode in a tsv file 
+        Args:
+            project_name (str)
+            sample_name (str)
+
+        Returns:
+            file send as an attachement
+        """
         sample_conlls = GrewService.get_sample_trees(project_name, sample_name)
         evaluations = SampleEvaluationService.evaluate_sample(sample_conlls)
         evaluations_tsv = SampleEvaluationService.evaluations_json_to_tsv(evaluations)
@@ -211,7 +266,15 @@ class SampleEvaluationResource(Resource):
 class ExportSampleResource(Resource):
     
     def post(self, project_name: str):
-        
+        """Export trees from samples
+
+        Args:
+            project_name (str)
+            sample_names (List[str])
+            users (List[str]): the trees of user that will be exported
+        Returns:
+            zip file as an attachement
+        """
         args = request.get_json()
         sample_names = args.get("sampleNames")
         users = args.get("users")

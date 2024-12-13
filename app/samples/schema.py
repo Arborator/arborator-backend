@@ -1,7 +1,7 @@
 from marshmallow import fields, Schema
 
 class SampleSchema(Schema):
-    
+    """sample information to be send to the frontend"""
     sampleName = fields.String(attribute="sample_name")
     sentences = fields.Integer(attribute="sentences")
     numberTrees = fields.Integer(attribute="number_trees")
