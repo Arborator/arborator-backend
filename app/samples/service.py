@@ -320,12 +320,20 @@ class SampleEvaluationService:
 #############    Helpers Function    #############
 #
 #
-def split_conll_string_to_conlls_list(conll_string) -> List[str]:
+def split_conll_string_to_conlls_list(conll_string) -> List[str]: 
+    """Split conll to list of strings 
+
+    Args:
+        conll_string (str)
+
+    Returns:
+        List[str]: list of sentences
+    """
     conlls_strings = conll_string.split("\n\n")
     return conlls_strings
     
 def read_conllu_file_wrapper(path_file: str, keepEmptyTrees: bool = False):
-    """ read a conllu file and return a list of sentences """
+    """ read a conllu file and return a list of sentences in json format """
     try:
         sentences_json = readConlluFile(path_file, keepEmptyTrees=keepEmptyTrees)
         return sentences_json
@@ -334,7 +342,7 @@ def read_conllu_file_wrapper(path_file: str, keepEmptyTrees: bool = False):
         abort(406, str(e))
 
 def write_conllu_file_wrapper(path_file: str, sentences_json: List[Dict]):
-    """ write a conllu file from a list of sentences """
+    """ write a conllu file from a list of sentences sentences in json format """
     try:
         writeConlluFile(path_file, sentences_json, overwrite=True)
     except Exception as e:
@@ -361,12 +369,14 @@ def add_or_replace_userid(path_file: str, new_user_id: str):
     write_conllu_file_wrapper(path_file, sentences_json)
     
 def add_rtl_meta_data(path_file: str):
+    """Add metadata rtl to the sentences in order to display dependency tree in rtl mode"""
     sentences_json = read_conllu_file_wrapper(path_file, keepEmptyTrees=True)
     for sentence_json in sentences_json:
         sentence_json["metaJson"]["rtl"] = "yes"   
     write_conllu_file_wrapper(path_file, sentences_json)
 
 def check_duplicate_sent_id(path_file: str, sample_name: str):
+    """Check if there is duplicated sent_id in the sample"""
     sent_ids = []
     sentences_json = read_conllu_file_wrapper(path_file, keepEmptyTrees=True)
     for sentence_json in sentences_json:
@@ -378,11 +388,13 @@ def check_duplicate_sent_id(path_file: str, sample_name: str):
             abort(406, "{} has duplicated sent_ids".format(sample_name))
     
 def check_if_file_has_user_ids(path_file: str, sample_name: str):
+    """check if in the file there is sentences with user_id"""
     sentences_json = read_conllu_file_wrapper(path_file, keepEmptyTrees= True)
     if any(sentence["metaJson"]["user_id"] for sentence in sentences_json if "user_id" in sentence["metaJson"].keys()):
         abort(406, "{} has sentences with user_id".format(sample_name))
 
 def check_sentences_without_sent_ids(path_file: str):
+    """check if there is sentences in the sample without sent_id"""
     sentences_json = read_conllu_file_wrapper(path_file, keepEmptyTrees=True)
     sentence_ids_number = len([sentence for sentence in sentences_json if "sent_id" in sentence["metaJson"].keys()])
     return len(sentences_json) == sentence_ids_number
