@@ -155,7 +155,7 @@ class UserAuthService:
             new_attrs: UserInterface = {
                 "id": parsed_user_info["id"],
                 "auth_provider": parsed_user_info["auth_provider"],
-                "github_access_token": parsed_user_info["access_token"],
+                "github_access_token": parsed_user_info["access_token"] if "access_token" in parsed_user_info.keys() else "",
                 "username": parsed_user_info["username"],
                 "first_name": parsed_user_info["first_name"],
                 "family_name": parsed_user_info["family_name"],
