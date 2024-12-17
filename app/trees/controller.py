@@ -87,7 +87,18 @@ class SampleTreesResource(Resource):
         return data
 
     def post(self, project_name: str, sample_name: str):
-        
+        """
+            Entrypoint to save new tree
+        Args:
+            project_name (str)
+            sample_name (str)
+            user_id (str)
+            conll (str)
+            update_commit (bool): if true we update changes number of the sample
+            sent_id (str)
+        Returns: 
+            { "status": "success", "new_conll": with new changes to update frontend view}
+        """
         args = request.get_json()
         user_id = args.get("userId")
         conll = args.get("conll")
@@ -131,6 +142,7 @@ class SampleTreesResource(Resource):
 class UserTreesResource(Resource):
     
     def delete(self, project_name: str, sample_name: str, username: str):
+        """Remove trees of specific user """
         data = {"project_id": project_name,  "sample_id": sample_name, "sent_ids": "[]","user_id": username, }
         grew_request("eraseGraphs", data)
         LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")  
@@ -139,7 +151,14 @@ class UserTreesResource(Resource):
 class ValidateSampleTrees(Resource):
     
     def post(self, project_name: str, sample_name: str):
-        
+        """
+            Validate all sample
+        Args: 
+            project_name (str)
+            sample_name (str)
+        Returns: 
+            { message: {"user_1": {"sent_id": message, ....}}}
+        """
         project = ProjectService.get_by_name(project_name)
         trees = GrewService.get_samples_with_string_contents(project_name, [sample_name])[1][0]
         mapped_languages = TreeValidationService.extract_ud_languages()
@@ -160,7 +179,13 @@ class ValidateSampleTrees(Resource):
 class ValidateTree(Resource):
     
     def post(self, project_name: str):
-        
+        """
+            Validate a specific tree when saving it 
+        Args: 
+            conll (str)
+        Returns: 
+            { "message": "validation message", "passed": True | False }
+        """
         args = request.get_json()
         data = args.get("conll") + '\n\n'
         
@@ -187,6 +212,13 @@ class ValidateTree(Resource):
 class SaveAllTreesResource(Resource):
     
     def post(self, project_name: str, sample_name: str):
+        """Save all trees of sample
+
+        Args:
+            project_name (str)
+            sample_name (str)
+            conllGraph (str)
+        """
         data = request.get_json()
         
         file_name = sample_name + "_save_all.conllu"
@@ -204,14 +236,22 @@ class SaveAllTreesResource(Resource):
 class SplitTreeResource(Resource):
 
     def post(self, project_name: str, sample_name: str):
-        
+        """Save splitted sentences, insert new sentences and erase the last sentences
+
+        Args:
+            project_name (str)
+            sample_name (str)
+            sent_id (str)
+            firstSents ({ "user_id1": sentence_json, ....})
+            secondSents ({ "user_id1": sentence_json })
+        """
         project = ProjectService.get_by_name(project_name)
         data = request.get_json()
         sent_id = data.get("sentId")
         inserted_sentences = []
         inserted_sentences.append(data.get("firstSents"))
         inserted_sentences.append(data.get("secondSents"))
-
+        print(inserted_sentences)
         TreeSegmentationService.insert_new_sentences(project_name, sample_name, sent_id, inserted_sentences)
         GrewService.erase_sentence(project_name, sample_name, sent_id)
 
@@ -223,7 +263,15 @@ class SplitTreeResource(Resource):
 
 class MergeTreesResource(Resource):
     def post(self, project_name: str, sample_name: str):
+        """Save merged sentences, insert new sentence and erase the two merged sentences
 
+        Args:
+            project_name (str)
+            sample_name (str)
+            sent_id (str)
+            firstSents ({ "user_id1": sentence_json, ....})
+            secondSents ({ "user_id1": sentence_json })
+        """
         project = ProjectService.get_by_name(project_name)
         data = request.get_json()
         first_sent_id = data.get("firstSentId")

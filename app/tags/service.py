@@ -12,7 +12,7 @@ class TagService:
 
     @staticmethod
     def add_new_tags(project_name, sample_name, tags, conll):
-        
+        """Add new tag to the metadata tag # tag and save the graph"""
         tags_value = ''
         new_tags = ', '.join(tags)
 
@@ -37,7 +37,7 @@ class TagService:
 
     @staticmethod
     def remove_tag(project_name, sample_name, tag, conll):
-
+        """Remove the tag from the metadata # tags and save the graph"""
         sentence_json = sentenceConllToJson(conll)
         user_id = sentence_json["metaJson"]["user_id"]
         
@@ -65,13 +65,15 @@ class TagService:
 
 
 class UserTagsService:
-
+    """Class deals with user tags entity"""
     @staticmethod
     def get_by_user_id(user_id) -> UserTags:
+        """Get json list of user tags"""
         return UserTags.query.filter(UserTags.user_id == user_id).first()
     
     @staticmethod
     def create_or_update(new_attrs) -> UserTags:
+        """Create or update new user tags entity in the db"""
         user_tags_entry = UserTagsService.get_by_user_id(new_attrs.get("user_id"))
         if user_tags_entry:
             existing_tags = user_tags_entry.tags
@@ -86,6 +88,7 @@ class UserTagsService:
     
     @staticmethod
     def delete_tag(user_id, tag):
+        """Remove tag from tags list in user tags entity and update the entity"""
         user_tags_entry = UserTagsService.get_by_user_id(user_id)
         if user_tags_entry.tags: 
             existing_tags = list(user_tags_entry.tags)

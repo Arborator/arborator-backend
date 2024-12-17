@@ -16,15 +16,17 @@ api = Namespace(
 
 @api.route("/<string:project_name>/history")
 class HistoryResource(Resource):
-
+    """Class contains endpoints of user search and rewrite history inside a specific project"""
     @responds(schema=GrewHistorySchema(many=True), api=api)
     def get(self, project_name):
+        """Get all user history"""
         project = ProjectService.get_by_name(project_name)
         return HistoryService.get_all_user_history(project.id)
     
     @accepts(schema=GrewHistorySchema, api=api)
     @responds(schema=GrewHistorySchema, api=api)
     def post(self, project_name):
+        """Create history entry"""
         project = ProjectService.get_by_name(project_name)
         data: GrewHistoryInterface = request.parsed_obj
         data["project_id"] = project.id
@@ -33,6 +35,7 @@ class HistoryResource(Resource):
         return new_history_record
     
     def delete(self, project_name):
+        """delete all history"""
         project = ProjectService.get_by_name(project_name)
         HistoryService.delete_all_history(project.id)
         return { "status": "ok" }
@@ -40,9 +43,10 @@ class HistoryResource(Resource):
 
 @api.route("/<string:project_name>/history/<string:history_uuid>")
 class HistoryRecordResource(Resource):
-
+    """Class contains endpoints for specific history entry"""
     @responds(schema=GrewHistorySchema, api=api)
     def put(self, project_name, history_uuid):
+        """Update history entry (favorite)"""
         changes: GrewHistoryInterface = request.get_json()
         project = ProjectService.get_by_name(project_name)
         history_record = HistoryService.get_by_uuid(project.id, history_uuid)
@@ -50,6 +54,7 @@ class HistoryRecordResource(Resource):
         return updated_record
 
     def delete(self, project_name, history_uuid):
+        """Delete history entry"""
         project = ProjectService.get_by_name(project_name)
         history_record = HistoryService.get_by_uuid(project.id, history_uuid)
         HistoryService.delete_by_id(history_record.id)

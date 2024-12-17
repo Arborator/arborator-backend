@@ -6,6 +6,7 @@ from app import db  # noqa
 from app.shared.model import BaseM
 
 class Constructicon(db.Model, BaseM):
+    """Constructicon representation in the db"""
     __tablename__ = 'constructicon'
 
     id = Column(String(256), primary_key=True)

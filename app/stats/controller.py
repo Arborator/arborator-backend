@@ -20,6 +20,7 @@ class StaticsProjectResource(Resource):
     
     @responds(schema=StatProjectSchema, api=api)
     def get(self, project_name):
+        """Get project statistics"""
         project_stats: StatProjectInterface = {}
         grew_projects = GrewService.get_projects()
         project = [project for project in grew_projects if project["name"] == project_name][0]

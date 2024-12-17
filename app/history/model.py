@@ -4,6 +4,7 @@ from app import db
 from app.shared.model import BaseM
 
 class History(db.Model, BaseM):
+    """History representation in the db"""
     __tablename__ = "history"
 
     id = Column(Integer, primary_key=True)

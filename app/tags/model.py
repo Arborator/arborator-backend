@@ -4,6 +4,7 @@ from app import db
 from app.shared.model import BaseM
 
 class UserTags(db.Model, BaseM):
+    """representation of user tags in the db"""
     __tablename__ = 'user_tags'
     id = Column(Integer, primary_key=True)
     user_id = Column(String(256), db.ForeignKey("users.id")) 

@@ -16,14 +16,14 @@ api = Namespace(
 class TagsResource(Resource):
 
     def post(self, project_name, sample_name):
-
+        """add new tags to the the tree"""
         data = request.get_json()
         tags = data.get("tags")
         tree = data.get("tree")
         return TagService.add_new_tags(project_name, sample_name, tags, tree) 
     
     def put(self, project_name, sample_name):
-
+        """Remove a tag from tree by updating tags metadata"""
         data = request.get_json()
         tag = data.get("tag")
         tree = data.get("tree")
@@ -34,7 +34,7 @@ class TagsResource(Resource):
 class UserTagsResource(Resource):
 
     def get(self, project_name, username):
-
+        """Get user tags """
         project = ProjectService.get_by_name(project_name)
         ProjectService.check_if_project_exist(project)
         user = UserService.get_by_username(username)
@@ -43,7 +43,7 @@ class UserTagsResource(Resource):
 
 
     def post(self, project_name, username):
-
+        """Create or add new user tag"""
         project = ProjectService.get_by_name(project_name)
         ProjectService.check_if_project_exist(project)
         data = request.get_json()
@@ -59,7 +59,7 @@ class UserTagsResource(Resource):
 class UserTagValueResource(Resource):
     
     def delete(self, project_name, username, tag_value):
-        
+        """delete user tags"""
         project = ProjectService.get_by_name(project_name)
         ProjectService.check_if_project_exist(project)
         user = UserService.get_by_username(username)

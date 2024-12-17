@@ -19,7 +19,11 @@ api = Namespace(
 @api.route("/<string:project_name>/apply-rule")
 class ApplyRuleResource(Resource):
     def post(self, project_name: str):
+        """Apply rule, save selected rewrite results
 
+        Args:
+            project_name (str)
+        """
         project =ProjectService.get_by_name(project_name)
         ProjectService.check_if_freezed(project)
         
@@ -52,9 +56,20 @@ class ApplyRuleResource(Resource):
 
 @api.route("/<string:project_name>/search")
 class SearchResource(Resource):
-    "Search"
+    
     def post(self, project_name: str):
+        """
+            Grew search
 
+        Args:
+            project_name (str)
+            pattern (str)
+            user_type (str) 
+            sample_ids (List[str] | [])
+            otherUser (str | "" )
+        Returns:
+            trees
+        """
         args = request.get_json()
         pattern = args.get("pattern")
         trees_type = args.get("userType") 
@@ -75,7 +90,18 @@ class SearchResource(Resource):
 class TryPackageResource(Resource):
     "rewrite"
     def post(self, project_name: str):
-    
+        """
+            Grew rewrite
+
+        Args:
+            project_name (str)
+            pattern (str)
+            user_type (str) 
+            sample_ids (List[str] | [])
+            otherUser (str | "" )
+        Returns:
+            trees
+        """
         args = request.get_json()
         
         package = args.get("query")
@@ -96,7 +122,17 @@ class TryPackageResource(Resource):
 @api.route("/<string:project_name>/relation-table")
 class RelationTableResource(Resource):
     def post(self, project_name):
+        """
+            Relation table
 
+        Args:
+            project_name (str)
+            table_type (str): same as user_type 
+            sample_ids (List[str] | [])
+            otherUser (str | "" )
+        Returns:
+            trees
+        """
         args = request.get_json()
         sample_ids = args.get("sampleIds")
         table_type = args.get("tableType")
@@ -112,7 +148,17 @@ class RelationTableResource(Resource):
 class ExportGrewResultsResource(Resource):
     
     def post(self, project_name: str):
-        
+        """
+            Export search results
+
+        Args:
+            project_name (str)
+            users (List[str])
+            search_results (tree type)
+
+        Returns:
+            rsponse: zip file attachement
+        """
         args = request.get_json()
         search_results = args.get("searchResults")
         users = args.get("users")

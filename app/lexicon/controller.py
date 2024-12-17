@@ -14,9 +14,20 @@ api = Namespace(
 @api.route("/<string:project_name>/lexicon")
 class LexiconResource(Resource):
     "Lexicon"
-
     def post(self, project_name: str):
-        
+        """Generate lexicon
+
+        Args:
+            project_name (str)
+            sample_names (List[str] | [])
+            features (List[str])
+            lexicon_type (str): Same as user_type in grew search and table_type in relation table
+            other_user (str)
+            prune (int): only the subset of depth = prune is reported as ambiguous strutures see grew server doc to understand more 
+
+        Returns:
+            lexicon
+        """
         args = request.get_json()
         sample_ids = args.get("sampleNames")
         features = args.get("features")
@@ -32,6 +43,7 @@ class LexiconResource(Resource):
 class LexiconExportJson(Resource):	
     def post(self):	
 
+        """Export lexicon in json format"""
         args = request.get_json()	
         lexicon = args.get("data")	
         for element in lexicon:	
@@ -44,7 +56,7 @@ class LexiconExportJson(Resource):
 @api.route("/lexicon/export-tsv")	
 class LexiconExportTsv(Resource):	
     def post(self):	
-        
+        """Export lexicon as tsv format"""
         args = request.get_json()
         lexicon = args.get("data")	
         

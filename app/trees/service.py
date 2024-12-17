@@ -12,9 +12,17 @@ BASE_TREE = "base_tree"
 VALIDATED = "validated"
 
 class TreeService:
-    
+    """this class contains all methods that deal with trees"""
     @staticmethod
     def check_cycle(conll): 
+        """check if there is a cycle in the graph
+
+        Args:
+            conll (str): user tree
+
+        Returns:
+            cycle_nodes (List[Tuple(node1, node2)])
+        """
         sentence_json = sentenceConllToJson(conll)
         nodes_json = sentence_json['treeJson']['nodesJson']
         
@@ -35,10 +43,17 @@ class TreeService:
         return list(set(tuple(sorted(nodes_tuple)) for nodes_tuple in cycle_nodes))
                        
     @staticmethod
-    def samples_to_trees(samples, sample_name):
-        """ transforms a list of samples into a trees object """
+    def samples_to_trees(sample_trees, sample_name):
+        """ 
+            transforms a list of samples into a trees object  
+        Args: 
+            samples_trees (grew_sample_trees) 
+            sample_name (str)
+        Returns: 
+            {"sent_id": {"sample_name": "", "sentence": "", "sent_id": "", "conlls": {"user_id1": ""}, "matches": {}}}
+        """
         trees = {}
-        for sent_id, users in samples.items():
+        for sent_id, users in sample_trees.items():
             for user_id, conll in users.items():
                 sentence_json = sentenceConllToJson(conll)
                 if 'text' in sentence_json["metaJson"].keys():
@@ -58,6 +73,13 @@ class TreeService:
 
     @staticmethod
     def add_base_tree(trees):
+        """
+            for blind annotation mode we add base tree in trees object 
+        Args:
+            trees (trees_object): {"sent_id": {"sample_name": "", "sentence": "", "sent_id": "", "conlls": {"user_id1": ""}, "matches": {}}}
+        Returns:
+            trees (trees_object)     
+        """
         for sent_trees in trees.values():
             sent_conlls = sent_trees["conlls"]
             list_users = list(sent_conlls.keys())
@@ -70,6 +92,15 @@ class TreeService:
     
     @staticmethod
     def add_user_tree(trees, username):
+        """Add user tree in blind annotation mode all users start with empty base tree
+
+        Args:
+            trees (tree_object)
+            username (str)
+
+        Returns:
+           trees
+        """
         for sent_trees in trees.values():
             sent_conlls = sent_trees["conlls"]
             list_users = list(sent_conlls.keys())
@@ -79,6 +110,15 @@ class TreeService:
 
     @staticmethod
     def restrict_trees(trees, restricted_users):
+        """Remove all users trees that are ont in restricted_users list
+
+        Args:
+            trees (trees_object)
+            restricted_users (List[str]): list of username
+
+        Returns:
+            trees
+        """
         for sent_trees in trees.values():
             sent_conlls = sent_trees["conlls"]
             for user_id in list(sent_conlls.keys()):
@@ -88,7 +128,17 @@ class TreeService:
     
     @staticmethod
     def update_sentence_trees_with_new_sent_id(project_name, sample_name, old_sent_id, new_sent_id):
-        
+        """
+            This function is used when we update sent_id of sentence, 
+            since saveGraph uses sent_id so we can't use it in our case 
+            so we use saveConll instead and use change all the trees of a sentence
+
+        Args:
+            project_name (str)
+            sample_name (str)
+            old_sent_id (str)
+            new_sent_id (str)
+        """
         response = grew_request('getConll', {
             "project_id": project_name,
             "sample_id": sample_name,
@@ -115,9 +165,17 @@ class TreeService:
         os.remove(path_file)
                          
 class TreeSegmentationService: 
-
+    """this class used for tree segmentation feature"""
     @staticmethod
     def insert_new_sentences(project_name: str, sample_name, sent_id: str, inserted_sentences):
+        """Insert new sentences in specific position, this function is used for sentence split and merge
+
+        Args:
+            project_name (str)
+            sample_name (str)
+            sent_id (str)
+            inserted_sentences (sentenceJson)
+        """
         conll_to_insert = ''
         for sentences in inserted_sentences:
             for sentence_json in sentences.values():
@@ -135,9 +193,10 @@ class TreeSegmentationService:
             
             
 class TreeValidationService:
-    
+    """This class deals with trees validation features"""
     @staticmethod
     def extract_ud_languages():
+        """extract ud languages list"""
         html_text = requests.get('https://quest.ms.mff.cuni.cz/udvalidator/cgi-bin/unidep/langspec/specify_feature.pl').text
         soup = BeautifulSoup(html_text, features="lxml")
 
@@ -150,6 +209,14 @@ class TreeValidationService:
     
     @staticmethod
     def parse_validation_results(message):
+        """Parse validation result message
+
+        Args:
+            message (str)
+
+        Returns:
+            error_messages ({"sent_id": "message" })
+        """
         error_messages = {}
         messages = message.split("---")
         if len(messages) > 1:

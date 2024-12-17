@@ -17,6 +17,11 @@ api = Namespace("Parser", description="Endpoints for dealing with the parser")  
 @api.route("/list")
 class ParserModelsListResource(Resource):
     def get(self):
+        """Get list of available models in GPU server
+
+        Returns:
+            { "status": "ok", "data": list_parser (List[parser]) }
+        """
         print("<PARSER> list/start request")
         response =  ArboratorParserAPI.list()
         if response['status'] == 'failure':
@@ -41,11 +46,13 @@ class ParserModelsListResource(Resource):
 @api.route("/list/<string:project_name>/<string:model_id>")       
 class ParserModelIdResource(Resource): 
     def delete(self, project_name: str, model_id: str):
+        """Delete model from GPU server"""
         print("<PARSER> list/model_id  delete request", project_name, model_id)
         return ArboratorParserAPI.delete_model(project_name, model_id)
         
           
 class ParserTrainStart_ED(TypedDict):
+    """Typed interface to start train request"""
     project_name: str
     train_samples_names: List[str]
     train_user: str
@@ -55,6 +62,7 @@ class ParserTrainStart_ED(TypedDict):
 @api.route("/train/start")
 class ParserTrainStartResource(Resource):
     def post(self):
+        """Start train request"""
         params: ParserTrainStart_ED = request.get_json(force=True)
         print("<PARSER> train/start request :", params)
         project_name = params["project_name"]
@@ -74,6 +82,7 @@ class ParserTrainStartResource(Resource):
 @api.route("/train/status")
 class ParserTrainStatusResource(Resource):
     def post(self):
+        """Get training status this request is send every 10 seconds after starting the parsing"""
         params = request.get_json(force=True)
 
         print("<PARSER> parser/info request :", params)
@@ -92,6 +101,7 @@ class ParserTrainStatusResource(Resource):
 @api.route("/parse/start")
 class ParserParseStartResource(Resource):
     def post(self):
+        """Start parsing endpoint"""
         params = request.get_json(force=True)
         print("<PARSER> parse/start request :", params)
 
@@ -111,6 +121,7 @@ class ParserParseStartResource(Resource):
 @api.route("/parse/status")
 class ParserParseStatus(Resource):
     def post(self):
+        """Get parsing status, this request is also send every 10s after start parsing"""
         params = request.get_json(force=True)
         print("<PARSER> parse/status request :", params)
 

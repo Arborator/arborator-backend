@@ -1,6 +1,5 @@
 import os
 import requests
-import base64
 import json
 import re 
 import shutil
@@ -25,19 +24,35 @@ extension = re.compile("^.*\.(conllu)$")
 USERNAME = 'validated'
 CONLL = '.conllu'
 class GithubRepositoryService:
-
+    """Class contains the methods that deal with GithubRepository entity """
     @staticmethod
     def get_by_project_id(project_id):
+        """Get GithubRepository entity by project_id
+
+        Args:
+            project_id (int)
+
+        Returns:
+           GithubRepository
+        """
         return GithubRepository.query.filter(GithubRepository.project_id == project_id).first()
     
     @staticmethod
     def create(new_attrs):
+        """Create new GithubRepository entity"""
         github_repository = GithubRepository(**new_attrs)
         db.session.add(github_repository)
         db.session.commit()
     
     @staticmethod
     def update_sha(project_id, sha):
+        """
+            Every commit or pull the value of sha (last commit hash) is changed 
+            and for that we need to update the sha of the synchronized repo
+        Args:
+            - project_id(int)
+            - sha(str)
+        """
         github_repository = GithubRepository.query.filter_by(project_id=project_id).first()
         if github_repository:
             github_repository.base_sha = sha
@@ -45,14 +60,28 @@ class GithubRepositoryService:
         
     @staticmethod
     def delete_by_project_id(project_id):
+        """Delete synchronized github repository by the project id
+
+        Args:
+            project_id (int)
+        """
         github_repository = GithubRepository.query.filter_by(project_id=project_id).first()
         db.session.delete(github_repository)
         db.session.commit()
 
 class GithubCommitStatusService:
-    
+    """Class that deals with commit status (changes number by sample)"""
     @staticmethod
     def create(project_id, sample_name):
+        """Create new CommitStatus entity
+
+        Args:
+            project_id (int)
+            sample_name (str)
+
+        Returns:
+           new GithubCommitStatus
+        """
         new_attrs = {
             "project_id": project_id,
             "sample_name": sample_name,
@@ -65,6 +94,12 @@ class GithubCommitStatusService:
 
     @staticmethod
     def update_changes(project_id, sample_name):
+        """Every time the data changed the number of changes in the GithubCommitStatus is incremented
+
+        Args:
+            project_id (int)
+            sample_name (str)
+        """
         github_commit_status = GithubCommitStatus.query.filter_by(project_id=project_id, sample_name=sample_name).first()
         if github_commit_status:
             github_commit_status.update({"changes_number": github_commit_status.changes_number + 1})
@@ -72,17 +107,41 @@ class GithubCommitStatusService:
 
     @staticmethod
     def get_modified_samples(project_id) -> List[str]:
+        """
+            In order to commit only the modified samples we use this method 
+            to get samples that have changes_number > 0
+
+        Args:
+            project_id (id)
+
+        Returns:
+            List[str]: list of sample_names
+        """
         modified_samples = GithubCommitStatus.query.filter(GithubCommitStatus.project_id == project_id).filter(GithubCommitStatus.changes_number > 0)
         return [modified_sample.sample_name for modified_sample in modified_samples]
     
 
     @staticmethod
     def get_changes_number(project_id):
+        """Get the total number of changes done in the project
+
+        Args:
+            project_id (int)
+
+        Returns:
+            changes_number(int)
+        """
         modified_samples = GithubCommitStatus.query.filter(GithubCommitStatus.project_id == project_id).filter(GithubCommitStatus.changes_number > 0)
         return sum(modified_sample.changes_number for modified_sample in modified_samples)
         
     @staticmethod
     def reset_samples(project_id, modified_samples):
+        """
+            After a commit all the changes number in the modified samples will be reset to 0
+        Args: 
+            project_id(int)
+            modified_samples(List[str])
+        """
         for sample_name in modified_samples:
             github_commit_status = GithubCommitStatus.query.filter_by(project_id=project_id, sample_name=sample_name).first()
             github_commit_status.changes_number = 0
@@ -91,27 +150,45 @@ class GithubCommitStatusService:
 
     @staticmethod
     def delete(project_id, sample_name):
+        """
+            Delete commit status for specific sample 
+        Args:
+            project_id(int)
+            sample_name(str)
+        """
         github_commit_status = GithubCommitStatus.query.filter_by(project_id=project_id, sample_name=sample_name).first()
         if github_commit_status:
             db.session.delete(github_commit_status)
             db.session.commit()
 
 class GithubService:
-
+    """
+        This class concerns all methods that deal with github API
+        Here is the link of the documentation of the endpoints used in the following  methods
+        https://docs.github.com/en/rest/git
+    """
     @staticmethod    
     def base_header(access_token):
+        """Base header is key-value pair that is used to send requests to github api
+
+        Args:
+            access_token (str): access token generated after loggin with github
+
+        Returns:
+           authorization dict(str, str)
+        """
         return {"Authorization": "bearer " + access_token}
     
     @staticmethod
-    def get_user_information(access_token):
-        url = "https://api.github.com/user"
-        headers =  GithubService.base_header(access_token)
-        response = requests.get(url, headers=headers)
-        data = response.json()
-        return data
-    
-    @staticmethod
     def get_user_email(access_token) -> str:
+        """Afte
+
+        Args:
+            access_token (_type_): _description_
+
+        Returns:
+            str: _description_
+        """
         url = "https://api.github.com/user/emails"
         headers =  GithubService.base_header(access_token)
         response = requests.get(url, headers=headers)
@@ -120,6 +197,15 @@ class GithubService:
     
     @staticmethod    
     def get_repositories(access_token):
+        """
+            List user repositories, the repositories are paginated 
+            100 repos per page
+
+        Args:
+            access_token (str)
+        Returns:
+            list_repos: list of {"name": str, "owner_name": str, "owner_avatar": str}
+        """
         repositories = []
         data = []
         url = "https://api.github.com/user/repos?per_page=100"
@@ -143,6 +229,15 @@ class GithubService:
 
     @staticmethod
     def list_repository_branches(access_token, full_name) -> List[str]:
+        """List of repository branches, without dependbot branches
+
+        Args:
+            access_token (str)
+            full_name (str): full_name is "github_username/repository_name"
+
+        Returns:
+            List[str]: list of branches
+        """
         url = "https://api.github.com/repos/{}/branches".format(full_name)
         headers = GithubService.base_header(access_token)
         response = requests.get(url, headers=headers ) 
@@ -151,6 +246,16 @@ class GithubService:
 
     @staticmethod    
     def get_repository_files_of_branch(access_token, full_name, branch):
+        """Get list of files of specific repo in specific branch
+
+        Args:
+            access_token (str)
+            full_name (str)
+            branch (str)
+
+        Returns:
+            list_files(List[files])
+        """
         url = "https://api.github.com/repos/{}/contents/?ref={}".format(full_name, branch)
         headers = GithubService.base_header(access_token)
         response = requests.get(url , headers=headers)
@@ -159,6 +264,17 @@ class GithubService:
    
     @staticmethod   
     def get_file_sha(access_token, full_name, file_path, branch):
+        """Get file sha hash of the last of commit of specific file
+
+        Args:
+            access_token (str)
+            full_name (str)
+            file_path (str)
+            branch (_type_)
+
+        Returns:
+            sha(str)
+        """
         url = "https://api.github.com/repos/{}/contents/{}?ref={}".format(full_name, file_path, branch)
         headers = GithubService.base_header(access_token)
         response = requests.get(url, headers=headers)
@@ -166,15 +282,17 @@ class GithubService:
         return data.get("sha")
     
     @staticmethod
-    def get_default_branch(access_token, full_name):
-        url = "https://api.github.com/repos/{}".format(full_name)
-        headers = GithubService.base_header(access_token)
-        response = requests.get(url, headers=headers )
-        data = response.json()
-        return data.get("default_branch")
-    
-    @staticmethod
     def get_sha_base_tree(access_token, full_name, branch):
+        """Get the hash of the tree object of the github repo
+
+        Args:
+            access_token (str)
+            full_name (str)
+            branch (str)
+
+        Returns:
+            sha(str)
+        """
         url = "https://api.github.com/repos/{}/git/refs/heads/{}".format(full_name, branch)
         headers =  GithubService.base_header(access_token)
         response = requests.get(url, headers=headers)
@@ -186,6 +304,16 @@ class GithubService:
               
     @staticmethod
     def create_blob_for_updated_file(access_token, full_name, content):
+        """Git blob is the object used to store the content of each file in a repository 
+
+        Args:
+            access_token (str)
+            full_name (str)
+            content (str)
+
+        Returns:
+            blob_sha(str)
+        """
         data = {"content": content, "encoding": "utf-8"}
         url = "https://api.github.com/repos/{}/git/blobs".format(full_name)
         headers = GithubService.base_header(access_token)
@@ -195,6 +323,16 @@ class GithubService:
     
     @staticmethod
     def download_github_repository(access_token, full_name, branch):
+        """Download a github repository in tmp.zip file
+
+        Args:
+            access_token (str)
+            full_name (str)
+            branch (str)
+
+        Returns:
+            path_file(str)
+        """
         url = 'https://api.github.com/repos/{}/zipball/{}'.format(full_name, branch)
         headers = GithubService.base_header(access_token)
         response = requests.get(url, headers=headers, stream=True)
@@ -206,14 +344,18 @@ class GithubService:
         return path_file
     
     @staticmethod
-    def delete_branch(access_token, full_name, base):
-        url = "https://api.github.com/repos/{}/git/refs/heads/{}".format(full_name, base)
-        headers = GithubService.base_header(access_token)
-        response = requests.delete(url, headers=headers)
-        return response
-    
-    @staticmethod
     def create_new_branch_arborator(access_token, full_name, branch_to_create, default_branch):
+        """Create new branch to be synchronized with AG
+
+        Args:
+            access_token (str)
+            full_name (str)
+            branch_to_create (str)
+            default_branch (str)
+
+        Returns:
+            response
+        """
         url = "https://api.github.com/repos/{}/git/refs".format(full_name)
         headers =  GithubService.base_header(access_token)
         sha = GithubService.get_sha_base_tree(access_token, full_name, default_branch)
@@ -226,6 +368,12 @@ class GithubService:
 
     @staticmethod
     def extract_repository(file_path):
+        """
+        extract the zip folder that compress github repository we extract files with specefic size 
+
+        Args:
+            file_path (str)
+        """
         with zipfile.ZipFile(file_path, 'r') as zip_file:
             for file in zip_file.namelist():
                 filename = os.path.basename(file)
@@ -241,12 +389,31 @@ class GithubService:
     
     @staticmethod
     def check_large_file(file_path):
+        """check if file is large if it's bigger then 13MB
+
+        Args:
+            file_path (str)
+        """
         file_size = (os.stat(file_path).st_size)/(1024*1024)
         if file_size > 13:
             abort(413, "it contains a large file")
     
     @staticmethod 
     def create_tree(access_token, full_name, updated_samples, project_name, base_tree):
+        """
+            In order to commit changes we need to create a tree which that contains 
+            blobs of modified files 
+
+        Args:
+            access_token (str)
+            full_name (str)
+            updated_samples (str) list of modified samples
+            project_name (str)
+            base_tree (str): the sha of an existing tree object which will be used as the base for the new tree
+
+        Returns:
+            new_base_sha(str)
+        """
         tree = []
         sample_names, sample_content_files = GrewService.get_samples_with_string_contents(project_name, updated_samples)
         for sample_name, sample in zip(sample_names,sample_content_files):
@@ -265,6 +432,18 @@ class GithubService:
     
     @staticmethod
     def create_commit(access_token, tree, parent, message, full_name):
+        """create a commit
+
+        Args:
+            access_token (str)
+            tree (str)
+            parent (str): base_tree sha
+            message (str): commit message
+            full_name (str)
+
+        Returns:
+            tree_sha(str): sha of the new tree
+        """
         url = "https://api.github.com/repos/{}/git/commits".format(full_name)
         headers = GithubService.base_header(access_token)
         data = {"tree": tree, "parents": [parent], "message": message}
@@ -274,6 +453,14 @@ class GithubService:
     
     @staticmethod
     def update_sha(access_token, full_name, branch, sha):
+        """_summary_
+
+        Args:
+            access_token (str)
+            full_name (str)
+            branch (str)
+            sha (str): new sha
+        """
         url = "https://api.github.com/repos/{}/git/refs/heads/{}".format(full_name, branch)
         headers = GithubService.base_header(access_token)
         data = {"sha": sha}
@@ -283,6 +470,17 @@ class GithubService:
     
     @staticmethod
     def compare_two_commits(access_token, full_name, previous_commit, new_commit):
+        """Compare between commits in order to get the modified to use it later for the pull
+
+        Args:
+            access_token (str)
+            full_name (str)
+            previous_commit (str): sha of actual base tree in AG
+            new_commit (str): the new base tree sha
+
+        Returns:
+            list_files: list of updated files {"filename": str, "status": 'modified' | 'added' | 'removed' }
+        """
         url = 'https://api.github.com/repos/{}/compare/{}...{}'.format(full_name, previous_commit, new_commit)
         headers = GithubService.base_header(access_token)
         response = requests.get(url, headers=headers)
@@ -292,6 +490,14 @@ class GithubService:
     
     @staticmethod
     def get_file_content_by_commit_sha(access_token, full_name, file_path, sha):
+        """Get content of a file in repo based on the commit sha
+
+        Args:
+            access_token (str)
+            full_name (str)
+            file_path (str)
+            sha (str)
+        """
         url = "https://api.github.com/repos/{}/contents/{}?ref={}".format(full_name, file_path, sha)
         headers = GithubService.base_header(access_token)
 
@@ -301,6 +507,16 @@ class GithubService:
     
     @staticmethod
     def create_pull_request(access_token, full_name, username, arborator_branch, branch, title):
+        """ Create a pull request
+
+        Args:
+            access_token (str)
+            full_name (str)
+            username (str)
+            arborator_branch (str)
+            branch (str)
+            title (str): the title of the pull request
+        """
         url = "https://api.github.com/repos/{}/pulls".format(full_name)
         headers = GithubService.base_header(access_token)
         head = username + ":" + arborator_branch
@@ -312,6 +528,14 @@ class GithubService:
     
     @staticmethod
     def delete_file(access_token, full_name, file_path, branch):
+        """ Delete file 
+
+        Args:
+            access_token (str)
+            full_name (str)
+            file_path (str)
+            branch (str)
+        """
         url = "https://api.github.com/repos/{}/contents/{}".format(full_name, file_path)
         headers = GithubService.base_header(access_token)
         sha = GithubService.get_file_sha(access_token, full_name, file_path, branch)
@@ -325,7 +549,19 @@ class GithubWorkflowService:
 
     @staticmethod
     def import_files_from_github(full_name, project_name, branch, branch_syn):
+        """Import files from github:
+            - Get repository files names of specific branch 
+            - For non existing samples we create commit status for every new file
+            - In order to not download file by file we import directly repo in zip file
+            - We extract the zip file and create new samples from the extracted file
+            - Create new branch if user choosed to use branch dedicated for the sync
 
+        Args:
+            full_name (str)
+            project_name (str)
+            branch (str): branch used for the import
+            branch_syn (str): branch used for the synchronization
+        """
         project = ProjectService.get_by_name(project_name)
         access_token = UserService.get_by_id(current_user.id).github_access_token
         repository_files = GithubService.get_repository_files_of_branch(access_token, full_name, branch)
@@ -347,6 +583,14 @@ class GithubWorkflowService:
         
     @staticmethod 
     def clone_github_repository(files, project_name):
+        """
+            Clone github repository means create new samples from the files 
+            of sync repo and create commit status for each sample
+
+        Args:
+            files (List[str])
+            project_name (str)
+        """
         for file in files:
             path_file = os.path.join(Config.UPLOAD_FOLDER, file)
             sample_name = file.split(CONLL)[0]
@@ -357,7 +601,13 @@ class GithubWorkflowService:
 
     @staticmethod
     def create_sample(sample_name, path_file, project_name):
+        """Create new sample
 
+        Args:
+            sample_name (str)
+            path_file (str)
+            project_name (str)
+        """
         if not SampleService.check_sentences_without_sent_ids(path_file):
             SampleService.add_new_sent_ids(path_file, sample_name)
 
@@ -375,6 +625,15 @@ class GithubWorkflowService:
 
     @staticmethod
     def commit_changes(updated_samples, project_name, message):
+        """Commit changes 
+        Args:
+            updated_samples (List[str]):modified samples
+            project_name (int)
+            message (str): commit message
+
+        Returns:
+            sha(str): new sha after the commit
+        """
         access_token = UserService.get_by_id(current_user.id).github_access_token
         project = ProjectService.get_by_name(project_name)
         sync_repository = GithubRepositoryService.get_by_project_id(project.id)
@@ -388,6 +647,15 @@ class GithubWorkflowService:
     
     @staticmethod
     def check_pull(access_token, project_name):
+        """Check if there is changes to pull, if the base_tree sha of AG is different from base_tree in Github
+
+        Args:
+            access_token (str)
+            project_name (str)
+
+        Returns:
+            boolean
+        """
         project = ProjectService.get_by_name(project_name)
         sync_repository = GithubRepositoryService.get_by_project_id(project.id)
         base_tree = GithubService.get_sha_base_tree(access_token, sync_repository.repository_name, sync_repository.branch)
@@ -395,7 +663,17 @@ class GithubWorkflowService:
     
     @staticmethod 
     def pull_changes(project_name):
+        """Pull changes:
+            - compare between two commits
+            - get the modified files 
+            - from every status:
+                - added: create new sample from new added file 
+                - modified: pull changes 
+                - removed: deleted the sample of the removed file from AG project
 
+        Args:
+            project_name (str)
+        """
         project = ProjectService.get_by_name(project_name)
         sync_repository = GithubRepositoryService.get_by_project_id(project.id)
         github_access_token = UserService.get_by_id(current_user.id).github_access_token
@@ -416,7 +694,14 @@ class GithubWorkflowService:
         GithubRepositoryService.update_sha(project.id, base_tree)
 
     @staticmethod
-    def create_sample_from_github_file(file, download_url,project_name):
+    def create_sample_from_github_file(file, download_url, project_name):
+        """Create new sample after a pull using the download url
+
+        Args:
+            file (str): sample name
+            download_url (str)
+            project_name (str)
+        """
         project = ProjectService.get_by_name(project_name)
         sample_name, path_file =  GithubWorkflowService.download_github_file_content(file, download_url)
         GithubWorkflowService.create_sample(sample_name, path_file, project_name)
@@ -425,6 +710,15 @@ class GithubWorkflowService:
 
     @staticmethod
     def download_github_file_content(file_name, download_url):
+        """Download modified file and save it in AG
+
+        Args:
+            file_name (str)
+            download_url (str)
+
+        Returns:
+            sample_name, path_file(Tuple(str, str))
+        """
         sample_name = file_name.split(CONLL)[0]
         raw_content = requests.get(download_url)
         path_file = os.path.join(Config.UPLOAD_FOLDER, file_name)
@@ -434,7 +728,13 @@ class GithubWorkflowService:
     
     @staticmethod
     def pull_change_existing_sample(project_name, sample_name, download_url):
-        
+        """pull changes of an existing file 
+
+        Args:
+            project_name (str)
+            sample_name (str)
+            download_url (str)
+        """
         content = requests.get(download_url).text 
         file_name = sample_name + "_modified.conllu"
         path_file = os.path.join(Config.UPLOAD_FOLDER, file_name)
@@ -464,6 +764,13 @@ class GithubWorkflowService:
         
     @staticmethod
     def delete_files_from_github(access_token, project_name, sample_names):
+        """delete files from github
+
+        Args:
+            access_token (str)
+            project_name (str)
+            sample_names (List[str])
+        """
         for sample_name in sample_names:
             file_path = sample_name + CONLL
             project_id = ProjectService.get_by_name(project_name).id

@@ -13,14 +13,23 @@ api = Namespace("Github", description="Endpoints for dealing with github reposit
 
 @api.route("/<string:project_name>/synchronize")
 class GithubSynchronizationResource(Resource):
-
+    """Class contains endpoints that deals with the synchronization"""
     @responds(schema=GithubRepositorySchema, api=api)
     def get(self, project_name):
+        """Get the synchronized repository"""
         project = ProjectService.get_by_name(project_name)
         ProjectService.check_if_project_exist(project)
         return GithubRepositoryService.get_by_project_id(project.id)
     
     def post(self, project_name):
+        """Create synchronization
+
+        Args:
+            project_name (str)
+            full_name(str): the name of the repository to be synchronized
+            branch_import(str): branch used for the import
+            branch_sync(str): branch to be used for the synchronization
+        """
         data = request.get_json()
         full_name = data.get("fullName")
         branch_import = data.get("branchImport")
@@ -35,20 +44,22 @@ class GithubSynchronizationResource(Resource):
         GithubRepositoryService.create(data)
 
     def delete(self, project_name):
+        """Delete synchronization"""
         project = ProjectService.get_by_name(project_name)
         GithubRepositoryService.delete_by_project_id(project.id)
         return { "status": "ok" }
     
 @api.route("/github")
 class UserGithubRepositories(Resource):
-
+    """Class contains the endpoint to get user repositories"""
     def get(self):
+        """List user github repos"""
         github_access_token = UserService.get_by_id(current_user.id).github_access_token
         return GithubService.get_repositories(github_access_token)
     
 @api.route("/github/branch")
 class GithubRepositoryBranch(Resource):
-
+    """class contains the endpoint to get the branch of specific repo"""
     def get(self):
         data = request.args
         full_name = data.get("full_name")
@@ -57,12 +68,14 @@ class GithubRepositoryBranch(Resource):
     
 @api.route("/<string:project_name>/synchronize/commit")
 class GithubCommitResource(Resource):
-
+    """Class contains endpoints related to commit"""
     def get(self, project_name):
+        """Get the number of changes to be committed"""
         project = ProjectService.get_by_name(project_name)
         return GithubCommitStatusService.get_changes_number(project.id)
     
     def post(self, project_name):
+        """Create and push a commit"""
         data = request.get_json()
         commit_message = data.get("commitMessage")
         project = ProjectService.get_by_name(project_name)
@@ -75,20 +88,29 @@ class GithubCommitResource(Resource):
 
 @api.route("/<string:project_name>/synchronize/pull")
 class GithubPullResource(Resource):
-
+    """Class contains methods deals with the pulls"""
     def get(self, project_name):
+        """Check if there is changes to pull"""
         github_access_token = UserService.get_by_id(current_user.id).github_access_token
         return GithubWorkflowService.check_pull(github_access_token, project_name)
     
     def post(self, project_name):
+        """Pull changes"""
         GithubWorkflowService.pull_changes(project_name)
         LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
         return { "status": "ok" }
 
 @api.route("/<string:project_name>/synchronize/pull-request")
 class GithubPullRequestResource(Resource):
-
+    """Class deals with pull requests"""
     def post(self,project_name):
+        """_summary_
+
+        Args:
+            project_name (str)
+            branch (str) 
+            title (str)
+        """
         data = request.get_json()
         branch = data.get("branch")
         title = data.get("title")
