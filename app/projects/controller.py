@@ -10,7 +10,6 @@ from werkzeug.utils import secure_filename
 import werkzeug
 
 from app import db
-from app import cache
 from app.utils.grew_utils import GrewService
 from app.utils.logging_utils import log_request
 from app.user.service import UserService
@@ -49,7 +48,7 @@ class ProjectResource(Resource):
         if languages is not None or name is not None:
             projects = ProjectService.filter_project_by_name_or_language(name, languages)
         else:
-            projects = Project.query.all()
+            projects = ProjectService.get_all()
 
         grew_projects = GrewService.get_projects()
         extended_project_list, total_pages = ProjectService.get_projects_info(projects, grew_projects, page, 12, projects_type)

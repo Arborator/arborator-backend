@@ -5,6 +5,7 @@ from typing import Dict, List
 
 from flask import abort, current_app
 from flask_login import current_user
+from sqlalchemy import desc
 
 from app import db
 from .interface import ProjectInterface, ProjectExtendedInterface
@@ -16,12 +17,12 @@ class ProjectService:
     
     @staticmethod
     def get_all() -> List[Project]:
-        """Get all list of project in db
+        """Get all list of project in db ordered by last access value
 
         Returns:
             List[Project]
         """
-        return Project.query.all()
+        return Project.query.join(LastAccess).order_by(desc(LastAccess.last_read)).all()
 
     @staticmethod
     def create(new_attrs: ProjectInterface) -> Project:
