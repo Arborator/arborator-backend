@@ -1,5 +1,5 @@
 import os
-from typing import List, Tuple
+from typing import List
 
 
 from flask import abort, current_app, request
@@ -44,8 +44,8 @@ class ProjectResource(Resource):
         page = data.get("page")
         languages = data.get("languages").split(",") if data.get("languages") else None
         name = data.get("name")
-        
-        if languages is not None or name is not None:
+
+        if languages is not None or name != '':
             projects = ProjectService.filter_project_by_name_or_language(name, languages)
         else:
             projects = ProjectService.get_all()
