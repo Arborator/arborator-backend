@@ -28,6 +28,7 @@ api = Namespace("Project", description="Endpoints for dealing with projects")  #
 
 class ProjectResource(Resource):
     "Class that deals with project entity endpoints"
+
     @responds(schema=ProjectResponseSchema, api=api)
     def get(self)-> dict:
         """
@@ -39,10 +40,17 @@ class ProjectResource(Resource):
             projects_list(List[projectExtendedInterface])
         """
         data = request.args
+
         projects_type = data.get("type")
         page = data.get("page")
+        languages = data.get("languages").split(",") if data.get("languages") else None
+        name = data.get("name")
+        
+        if languages is not None or name is not None:
+            projects = ProjectService.filter_project_by_name_or_language(name, languages)
+        else:
+            projects = Project.query.all()
 
-        projects: List[Project] = Project.query.all()
         grew_projects = GrewService.get_projects()
         extended_project_list, total_pages = ProjectService.get_projects_info(projects, grew_projects, page, 12, projects_type)
         return { "projects": extended_project_list, "total_pages": total_pages }
@@ -385,3 +393,9 @@ class ProjectLanguageDetectedResource(Resource):
         mapped_languages = TreeValidationService.extract_ud_languages()
         return project.language in mapped_languages.keys()
         
+@api.route("/languages")
+class ProjectLanguagesResource(Resource):
+    
+    def get(self):
+        """Get list of languages"""
+        return [Project.language for Project in Project.query.distinct(Project.language).all()]

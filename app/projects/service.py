@@ -197,6 +197,25 @@ class ProjectService:
         return projects, total_pages
     
     @staticmethod
+    def filter_project_by_name_or_language(name, languages):
+        """
+            Filter projects by name or language
+
+        Args:
+            name (str): project name
+            languages (List[str]): project languages to filter 
+
+        Returns:
+            projects (List[Project]): list of projects
+        """
+        projects: List[Project] = Project.query.all()
+        if name:
+            projects = [project for project in projects if name.lower() in project.project_name.lower()]
+        if languages is not None:
+            projects = [project for project in projects if project.language in languages]
+        return projects
+    
+    @staticmethod
     def filter_project_by_type(project, project_type):
         """filter project by type
 
