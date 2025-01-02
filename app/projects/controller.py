@@ -1,5 +1,5 @@
 import os
-from typing import List
+from typing import List, Tuple
 
 
 from flask import abort, current_app, request
@@ -19,7 +19,7 @@ from app.github.model import GithubCommitStatus
 
 from .interface import ProjectExtendedInterface, ProjectInterface, ProjectShownFeaturesAndMetaInterface
 from .model import Project, ProjectAccess
-from .schema import ProjectExtendedSchema, ProjectSchema, ProjectFeaturesAndMetaSchema
+from .schema import ProjectExtendedSchema, ProjectSchema, ProjectFeaturesAndMetaSchema, ProjectResponseSchema
 from .service import LastAccessService, ProjectAccessService, ProjectFeatureService, ProjectMetaFeatureService, ProjectService
 
 api = Namespace("Project", description="Endpoints for dealing with projects")  # noqa
@@ -28,20 +28,24 @@ api = Namespace("Project", description="Endpoints for dealing with projects")  #
 
 class ProjectResource(Resource):
     "Class that deals with project entity endpoints"
-    
-    @log_request
-    @cache.cached(timeout=1200, key_prefix=ProjectAccessService.get_cache_key)
-    @responds(schema=ProjectExtendedSchema(many=True), api=api)
-    def get(self) -> List[ProjectExtendedInterface]:
+    @responds(schema=ProjectResponseSchema, api=api)
+    def get(self)-> dict:
         """
             Get all projects in the application, in this function 
             We use two decorator one for the logs and other for the cache
+        Args:
+            - type(str): type of the project, can be my_projects | other_projects | all_projects | old_projects
         Returns:
             projects_list(List[projectExtendedInterface])
         """
+        data = request.args
+        projects_type = data.get("type")
+        page = data.get("page")
+
         projects: List[Project] = Project.query.all()
         grew_projects = GrewService.get_projects()
-        return ProjectService.get_projects_info(projects, grew_projects)
+        extended_project_list, total_pages = ProjectService.get_projects_info(projects, grew_projects, page, 12, projects_type)
+        return { "projects": extended_project_list, "total_pages": total_pages }
 
     @accepts(schema=ProjectSchema)
     @responds(schema=ProjectSchema)
@@ -90,7 +94,7 @@ class UserProjectResource(Resource):
         user = UserService.get_by_id(current_user.id)
         projects: List[Project] = Project.query.all()
         grew_projects = GrewService.get_user_projects(user.username)
-        return ProjectService.get_projects_info(projects, grew_projects)
+        return ProjectService.get_projects_info(projects, grew_projects, 1, -1, "all_projects")[0]
       
 @api.route("/mismatch-projects")
 class MistmatchProjectsResource(Resource):
@@ -126,7 +130,7 @@ class PopularProjectsResource(Resource):
         recent_projects = ProjectService.get_recent_projects(time_ago)
         grew_projects = GrewService.get_projects()
         
-        return ProjectService.get_projects_info(recent_projects, grew_projects)
+        return ProjectService.get_projects_info(recent_projects, grew_projects, 1, -1, "all_projects")[0]
         
 @api.route("/<string:project_name>")
 class ProjectIdResource(Resource):

@@ -42,3 +42,7 @@ class ProjectFeaturesAndMetaSchema(Schema):
 
     shownFeatures = fields.List(fields.String(), attribute="shown_features")
     shownMeta = fields.List(fields.String(), attribute="shown_meta")
+
+class ProjectResponseSchema(Schema):
+    projects = fields.List(fields.Nested(ProjectExtendedSchema))
+    totalPages = fields.Integer(attribute='total_pages')
