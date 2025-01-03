@@ -238,6 +238,30 @@ class EmailService:
     """Class contains method to send alert using email"""
     
     @staticmethod
+    def send_email_to_user(username: str, role: str, project_name: str):
+        """
+        Send email to user when they are added to a new project
+
+        Args:
+            username (str)
+            role (str): role of the user in the project
+            project_name (str)
+        """
+        user_email = UserService.get_by_username(username).email
+    
+        if user_email:
+            mail_message = Message(
+                "You are added to a new project on ArboratorGrew",
+                recipients=[user_email]
+            )
+            mail_message.body = f"""Hello {username},\n\nYou are added to the project '{project_name}' 
+            on ArboratorGrew as a {role} role.\nHere is the link of the project
+            https://arborator.grew.fr/#/projects/{project_name}\n\nBest regards,\nArboratorGrew team."""
+            mail.send(mail_message)
+        else:
+            return
+
+    @staticmethod
     def send_alert_email(title: str, alert: str):
         """
         Send alert email to superadmins when error happened in the servers of grew, parser, arborator 

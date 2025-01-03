@@ -10,7 +10,7 @@ from flask_restx import Namespace, Resource
 from .interface import UserInterface
 from .model import User
 from .schema import UserSchema
-from .service import UserService
+from .service import UserService, EmailService
 
 api = Namespace("User", description="Single namespace, single entity")  # noqa
 
@@ -68,3 +68,15 @@ class UserLogoutResource(Resource):
         logout_user()
         js = json.dumps({"logout": True}, default=str)
         return Response(js, status=200, mimetype="application/json")
+
+@api.route("/send-email")
+class SendEmailResource(Resource):
+
+    def post(self):
+        """Send email to user when they are added to a new project"""
+        data = request.get_json()
+        username = data.get("username")
+        role = data.get("role")
+        project_name = data.get("projectName")
+
+        EmailService.send_email_to_user(username, role, project_name)
