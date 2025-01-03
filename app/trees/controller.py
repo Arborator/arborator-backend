@@ -202,7 +202,7 @@ class ValidateTree(Resource):
         else: #for the moment if sud we check only the cycles
             cycle_nodes = TreeService.check_cycle(data)
             if cycle_nodes: 
-                error_message = 'Non tree structure, tokens: ' + ', '.join([str(tuple_nodes) for tuple_nodes in cycle_nodes]) + ' form a cycle'
+                error_message = 'Non tree structure, tokens: ' + ', '.join([str(list_nodes) for list_nodes in cycle_nodes]) + ' form a cycle'
                 return { "message": error_message, "passed": False }
             else:
                 return { "message": '', "passed": True }               

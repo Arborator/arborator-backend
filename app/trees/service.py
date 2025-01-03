@@ -13,6 +13,7 @@ VALIDATED = "validated"
 
 class TreeService:
     """this class contains all methods that deal with trees"""
+
     @staticmethod
     def check_cycle(conll): 
         """check if there is a cycle in the graph
@@ -21,27 +22,52 @@ class TreeService:
             conll (str): user tree
 
         Returns:
-            cycle_nodes (List[Tuple(node1, node2)])
+            cycle_nodes (List[List[str]]): list of cycles nodes
         """
         sentence_json = sentenceConllToJson(conll)
         nodes_json = sentence_json['treeJson']['nodesJson']
         
         nodes_children_list = {}
         for index in nodes_json:
+            if index not in nodes_children_list.keys():
+                nodes_children_list[index] = []
             token_head = str(nodes_json[index]['HEAD'])
             if token_head not in nodes_children_list.keys():
                 nodes_children_list[token_head] = [index]
             else:
                 nodes_children_list[token_head].append(index)
+        print(nodes_children_list)
+
+        # check if there is a cycle in the tree using recursive dfs
+        def dfs_recursive(first_node, visited, stack, path):
+            visited.add(first_node)
+            stack.add(first_node)
+            path.append(first_node)
+            
+            for child in nodes_children_list[first_node]:
+                if child not in visited:
+                    if dfs_recursive(child, visited, stack, path):
+                        return True
+                elif child in stack:
+                    path.append(child)
+                    return True
+            stack.remove(first_node)
+            path.pop()
+            return False
         
-        cycle_nodes = []        
-        for node, list_children in nodes_children_list.items():
-            for child in list_children:
-                if child in nodes_children_list.keys() and node in nodes_children_list[child]:
-                   cycle_nodes.append((child, node))
-        
-        return list(set(tuple(sorted(nodes_tuple)) for nodes_tuple in cycle_nodes))
-                       
+        visited = set()
+        stack = set()
+        cycle_nodes = []
+
+        for node in nodes_children_list:
+            if node not in visited:
+                path = []
+                if dfs_recursive(node, visited, stack, path):
+                    cycle_start_index = cycle_nodes.index(path[-1]) if path[-1] in cycle_nodes else 0
+                    cycle_nodes.append(path[cycle_start_index:])
+
+        return cycle_nodes
+                     
     @staticmethod
     def samples_to_trees(sample_trees, sample_name):
         """ 
