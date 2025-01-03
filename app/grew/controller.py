@@ -173,7 +173,7 @@ class ExportGrewResultsResource(Resource):
             for sent_id, tree in results.items():
                 trees[sent_id] = tree['conlls']
             
-            sample_tree_nots_noui = SampleExportService.serve_sample_trees(trees, timestamps=False, user_ids=False)
+            sample_tree_nots_noui = SampleExportService.serve_sample_trees(trees, timestamps=False, user_ids=False, validated_by=False)
             sample_content = SampleExportService.sample_tree_to_content_file(sample_tree_nots_noui)
                 
             sample_content_files.append(sample_content)

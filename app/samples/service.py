@@ -206,7 +206,7 @@ class SampleEvaluationService:
         corrects = {}
         submitted = {}
         total = {"UPOS": 0, "DEPREL": 0, "HEAD": 0}
-        print(sample_conlls)
+
         for sentence_id, sentence_conlls in sample_conlls.items():
             validated_tree_conll = sentence_conlls.get("validated")
             if validated_tree_conll:

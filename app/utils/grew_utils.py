@@ -476,7 +476,7 @@ class GrewService:
             if reply.get("status") == "OK":
                 # {"sent_id_1":{"conlls":{"user_1":"conllstring"}}}
                 sample_tree = SampleExportService.serve_sample_trees(reply.get("data", {}))
-                sample_tree_nots_noui = SampleExportService.serve_sample_trees(reply.get("data", {}), timestamps=False, user_ids=False)
+                sample_tree_nots_noui = SampleExportService.serve_sample_trees(reply.get("data", {}), timestamps=False, user_ids=False, validated_by=False)
                 sample_content = SampleExportService.sample_tree_to_content_file(sample_tree_nots_noui)
                 for sent_id in sample_tree:
                     last = SampleExportService.get_last_user(
@@ -516,7 +516,7 @@ class GrewService:
 
                 # {"sent_id_1":{"conlls":{"user_1":"conllstring"}}}
                 sample_tree = SampleExportService.serve_sample_trees(reply.get("data", {}))
-                sample_tree_nots_noui = SampleExportService.serve_sample_trees(reply.get("data", {}), timestamps=False, user_ids=False)
+                sample_tree_nots_noui = SampleExportService.serve_sample_trees(reply.get("data", {}), timestamps=False, user_ids=False, validated_by=False)
                 sample_content = SampleExportService.sample_tree_to_content_file(sample_tree_nots_noui)
                 for sent_id in sample_tree:
                     last = SampleExportService.get_last_user(
@@ -607,7 +607,7 @@ def get_timestamp(conll):
 class SampleExportService:
     """Class contains sample export functions"""
     @staticmethod
-    def serve_sample_trees(samples, timestamps=True, user_ids=True):
+    def serve_sample_trees(samples, timestamps=True, user_ids=True, validated_by=True):
         """ get samples in form of json trees """
         trees = {}
         for sent_id, users in samples.items():
@@ -619,6 +619,7 @@ class SampleExportService:
                 # Adapt user_id or timestamps lines depending on options
                 if not user_ids: conll = re.sub("# user_id = .+\n", '', conll)
                 if not timestamps: conll = re.sub("# timestamp = .+\n", '', conll)
+                if not validated_by: conll = re.sub("# validated_by = .+\n", '', conll)
 
                 trees[sent_id]["conlls"][user_id] = conll
         return trees
