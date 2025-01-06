@@ -153,7 +153,8 @@ class ProjectService:
         common = [project for project in db_projects_names if project in grew_projects_names]
    
         filtered_common = [project for project in  common if (
-            ProjectService.filter_project_by_type(ProjectService.get_by_name(project), projects_type)
+            ProjectService.filter_project_by_type(ProjectService.get_by_name(project), projects_type) and
+            ProjectAccessService.check_project_access(ProjectService.get_by_name(project).visibility, ProjectService.get_by_name(project).id)
         )]
         if total_projects != -1:
             start_index = (int(page) - 1) * total_projects
@@ -166,35 +167,33 @@ class ProjectService:
         for project_name in paginated_common:
             grew_project = next(project for project in grew_projects if project["name"] == project_name)
             project = ProjectService.get_by_name(project_name)
-            if ProjectAccessService.check_project_access(
-                project.visibility, project.id
-            ):
-                (
-                    project.admins,
-                    project.validators,
-                    project.annotators,
-                    project.guests,
-                ) = ProjectAccessService.get_all(project.id)
-                
-                project.owner = project.admins[0] if project.admins else ''
-                project.owner_avatar_url = UserService.get_by_username(project.admins[0]).picture_url if project.admins else ''
-                project.contact_owner = UserService.get_by_username(project.admins[0]).email if project.admins else ''
-                project.sync_github = project.github_repository.repository_name if project.github_repository else ''
-                
-                (last_access, last_write_access) = LastAccessService.get_project_last_access(project.project_name)
-                now = datetime.datetime.now().timestamp()
-                project.last_access = last_access - now
-                project.last_write_access = last_write_access - now
-                project_path = project.image
-                project.image = ProjectService.get_project_image(project_path)
-                
-                project.users = grew_project["users"]
-                project.number_sentences = grew_project["number_sentences"]
-                project.number_samples = grew_project["number_samples"]
-                project.number_tokens = grew_project["number_tokens"]
-                project.number_trees = grew_project["number_trees"]            
+           
+            (
+                project.admins,
+                project.validators,
+                project.annotators,
+                project.guests,
+            ) = ProjectAccessService.get_all(project.id)
             
-                projects.append(project)
+            project.owner = project.admins[0] if project.admins else ''
+            project.owner_avatar_url = UserService.get_by_username(project.admins[0]).picture_url if project.admins else ''
+            project.contact_owner = UserService.get_by_username(project.admins[0]).email if project.admins else ''
+            project.sync_github = project.github_repository.repository_name if project.github_repository else ''
+            
+            (last_access, last_write_access) = LastAccessService.get_project_last_access(project.project_name)
+            now = datetime.datetime.now().timestamp()
+            project.last_access = last_access - now
+            project.last_write_access = last_write_access - now
+            project_path = project.image
+            project.image = ProjectService.get_project_image(project_path)
+            
+            project.users = grew_project["users"]
+            project.number_sentences = grew_project["number_sentences"]
+            project.number_samples = grew_project["number_samples"]
+            project.number_tokens = grew_project["number_tokens"]
+            project.number_trees = grew_project["number_trees"]            
+        
+            projects.append(project)
         return projects, total_pages
     
     @staticmethod
