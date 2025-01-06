@@ -217,21 +217,27 @@ class TreeSegmentationService:
         
         os.remove(path_file)
             
-            
 class TreeValidationService:
+
+    # Global variable to store the mapping for further uses (avoid repeated GET requests)
+    language_mapping = None
+
     """This class deals with trees validation features"""
     @staticmethod
     def extract_ud_languages():
         """extract ud languages list"""
-        html_text = requests.get('https://quest.ms.mff.cuni.cz/udvalidator/cgi-bin/unidep/langspec/specify_feature.pl').text
-        soup = BeautifulSoup(html_text, features="lxml")
 
-        language_mapping = {}
-        for a in soup.find_all('a'):
-            if len(a.text) > 1:
-                lang_code = a['href'].split('=')[1]
-                language_mapping[a.text] = lang_code
-        return language_mapping
+        if not TreeValidationService.language_mapping:
+            html_text = requests.get('https://quest.ms.mff.cuni.cz/udvalidator/cgi-bin/unidep/langspec/specify_feature.pl').text
+            soup = BeautifulSoup(html_text, features="lxml")
+
+            language_mapping = {}
+            for a in soup.find_all('a'):
+                if len(a.text) > 1:
+                    lang_code = a['href'].split('=')[1]
+                    language_mapping[a.text] = lang_code
+            TreeValidationService.language_mapping = language_mapping
+        return TreeValidationService.language_mapping
     
     @staticmethod
     def parse_validation_results(message):
