@@ -31,12 +31,12 @@ class Config:
     CACHE_TYPE = 'filesystem'
     CACHE_DIR = CACHE_FOLDER
     MAIL_SERVER = 'smtp.gmail.com'
-    MAIL_PORT = 465
+    MAIL_PORT = 587
     MAIL_USERNAME = os.getenv("MAIL_USERNAME")
     MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
     MAIL_DEFAULT_SENDER = os.getenv("MAIL_USERNAME")
-    MAIL_USE_TLS = False
-    MAIL_USE_SSL = True
+    MAIL_USE_TLS = True
+    MAIL_USE_SSL = False
     
 class DevelopmentConfig(Config):
     CONFIG_NAME = "dev"
