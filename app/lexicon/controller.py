@@ -7,7 +7,7 @@ from flask_restx import Namespace, Resource
 from app.utils.grew_utils import GrewService
 
 api = Namespace(
-    "LexiconV2", description="Endpoints for dealing with samples of project"
+    "Lexicon", description="Endpoints for dealing with samples of project"
 )
 
 

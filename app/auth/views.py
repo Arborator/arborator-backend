@@ -1,9 +1,7 @@
 from flask import (
     abort,
     current_app,
-    flash,
     make_response,
-    redirect,
     render_template,
     request,
     Response,
@@ -63,17 +61,10 @@ def login(provider_name) -> Response:
             
             # If there is no superadmin in DB, add admin privilege to this new user
             if not User.query.filter_by(super_admin=True).first():
-                print("firstsuper")
                 return make_response(render_template("auth/firstsuper.html"))
-
-            if current_app.config["ENV"] == "dev":
-                return make_response(
-                    render_template("auth/redirect_dev.html", has_projects= has_projects)
-                )
-            elif current_app.config["ENV"] == "prod":
-                return make_response(
-                    render_template("auth/redirect_prod.html", has_projects= has_projects)
-                )
+            
+            template_to_render = "auth/redirect_dev.html" if current_app.config["ENV"] == "dev" else "auth/redirect_prod.html"
+            return make_response(render_template(template_to_render, has_projects= has_projects))       
     return response
 
 
