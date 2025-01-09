@@ -72,7 +72,11 @@ class GithubCommitResource(Resource):
     def get(self, project_name):
         """Get the number of changes to be committed"""
         project = ProjectService.get_by_name(project_name)
-        return GithubCommitStatusService.get_changes_number(project.id)
+        modified_samples = GithubCommitStatusService.get_modified_samples(project.id)
+        for sample in modified_samples:
+            diff_string = GithubCommitStatusService.compare_changes_sample(project_name, sample["sample_name"])
+            sample["diff"] = diff_string
+        return modified_samples
     
     def post(self, project_name):
         """Create and push a commit"""
@@ -80,10 +84,11 @@ class GithubCommitResource(Resource):
         commit_message = data.get("commitMessage")
         project = ProjectService.get_by_name(project_name)
         modified_samples = GithubCommitStatusService.get_modified_samples(project.id)
-        sha = GithubWorkflowService.commit_changes(modified_samples, project_name, commit_message)
-
+        modified_samples_names = [sample["sample_name"] for sample in modified_samples]
+        sha = GithubWorkflowService.commit_changes(modified_samples_names, project_name, commit_message)
+        
         GithubRepositoryService.update_sha(project.id, sha)
-        GithubCommitStatusService.reset_samples(project.id, modified_samples)
+        GithubCommitStatusService.reset_samples(project.id, modified_samples_names)
         return { "status": "ok" }
 
 @api.route("/<string:project_name>/synchronize/pull")

@@ -4,6 +4,7 @@ import json
 import re 
 import shutil
 import zipfile
+from difflib import unified_diff
 from typing import List
 
 from flask import abort
@@ -105,34 +106,10 @@ class GithubCommitStatusService:
             github_commit_status.update({"changes_number": github_commit_status.changes_number + 1})
             db.session.commit()
 
-    @staticmethod
-    def get_modified_samples(project_id) -> List[str]:
-        """
-            In order to commit only the modified samples we use this method 
-            to get samples that have changes_number > 0
-
-        Args:
-            project_id (id)
-
-        Returns:
-            List[str]: list of sample_names
-        """
+    @staticmethod 
+    def get_modified_samples(project_id):
         modified_samples = GithubCommitStatus.query.filter(GithubCommitStatus.project_id == project_id).filter(GithubCommitStatus.changes_number > 0)
-        return [modified_sample.sample_name for modified_sample in modified_samples]
-    
-
-    @staticmethod
-    def get_changes_number(project_id):
-        """Get the total number of changes done in the project
-
-        Args:
-            project_id (int)
-
-        Returns:
-            changes_number(int)
-        """
-        modified_samples = GithubCommitStatus.query.filter(GithubCommitStatus.project_id == project_id).filter(GithubCommitStatus.changes_number > 0)
-        return sum(modified_sample.changes_number for modified_sample in modified_samples)
+        return [{ "sample_name": modified_sample.sample_name, "changes_number": modified_sample.changes_number } for modified_sample in modified_samples]
         
     @staticmethod
     def reset_samples(project_id, modified_samples):
@@ -146,7 +123,7 @@ class GithubCommitStatusService:
             github_commit_status = GithubCommitStatus.query.filter_by(project_id=project_id, sample_name=sample_name).first()
             github_commit_status.changes_number = 0
             db.session.commit()
-    
+
 
     @staticmethod
     def delete(project_id, sample_name):
@@ -160,6 +137,23 @@ class GithubCommitStatusService:
         if github_commit_status:
             db.session.delete(github_commit_status)
             db.session.commit()
+
+    @staticmethod
+    def compare_changes_sample(project_name, sample_name):
+
+        project = ProjectService.get_by_name(project_name)
+        sha = GithubRepositoryService.get_by_project_id(project.id).base_sha
+        full_name = GithubRepositoryService.get_by_project_id(project.id).repository_name
+        github_access_token = UserService.get_by_id(current_user.id).github_access_token
+
+        download_url = GithubService.get_file_content_by_commit_sha(github_access_token, full_name, sample_name+CONLL, sha).get("download_url")
+        sample_content_github = requests.get(download_url).text
+        sample_content_ag = GrewService.get_samples_with_string_contents_as_dict(project_name, [sample_name], 'validated')[sample_name]
+       
+        diff = unified_diff(sample_content_ag.split('\n'), sample_content_github.split('\n'), lineterm='\n')
+        diff_string = '\n'.join(list(diff))
+       
+        return diff_string
 
 class GithubService:
     """
