@@ -140,7 +140,16 @@ class GithubCommitStatusService:
 
     @staticmethod
     def compare_changes_sample(project_name, sample_name):
+        """
+        Compare the changes between a sample in a project and its corresponding file on GitHub.
 
+        Args:
+            project_name (str): The name of the project.
+            sample_name (str): The name of the sample.
+
+        Returns:
+            str: The unified diff between the sample content on GitHub and the sample content in the project.
+        """
         project = ProjectService.get_by_name(project_name)
         sha = GithubRepositoryService.get_by_project_id(project.id).base_sha
         full_name = GithubRepositoryService.get_by_project_id(project.id).repository_name
