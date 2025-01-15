@@ -150,7 +150,7 @@ class GithubCommitStatusService:
         sample_content_github = requests.get(download_url).text
         sample_content_ag = GrewService.get_samples_with_string_contents_as_dict(project_name, [sample_name], 'validated')[sample_name]
        
-        diff = unified_diff(sample_content_ag.split('\n'), sample_content_github.split('\n'), lineterm='\n')
+        diff = unified_diff(sample_content_github.split('\n'), sample_content_ag.split('\n'),  lineterm='\n')
         diff_string = '\n'.join(list(diff))
        
         return diff_string
