@@ -17,3 +17,4 @@ class UserSchema(Schema):
     superAdmin = fields.Boolean(attribute="super_admin")
     createdDate = fields.DateTime(attribute="created_date")
     lastSeen = fields.DateTime(attribute="last_seen")
+    canToggleSuperAdmin = fields.Boolean(attribute="can_toggle_super_admin")

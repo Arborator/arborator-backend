@@ -17,3 +17,4 @@ class UserInterface(TypedDict, total=False):
     super_admin: bool
     created_date: datetime
     last_seen: datetime
+    can_toggle_super_admin: bool

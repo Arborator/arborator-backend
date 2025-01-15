@@ -1,5 +1,6 @@
 from datetime import datetime
 import json
+import os
 from typing import List
 
 from flask import request, Response
@@ -40,7 +41,8 @@ class UserResource(Resource):
             User: User entity
         """
         user = UserService.get_by_id(current_user.id)
-        changes: UserInterface = {"last_seen": datetime.utcnow()}
+        super_admins = os.getenv("SUPER_ADMINS").split(",")
+        changes: UserInterface = {"last_seen": datetime.utcnow(), "can_toggle_super_admin": user.username in super_admins }
         user = UserService.update(user, changes)
         return user
     

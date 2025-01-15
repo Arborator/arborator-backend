@@ -5,8 +5,10 @@ from flask import (
     render_template,
     request,
     Response,
+    flash,
+    redirect
 )
-from flask_login import login_user, login_required
+from flask_login import login_user, login_required, current_user
 from authomatic.adapters import WerkzeugAdapter
 from authomatic import Authomatic
 
@@ -17,8 +19,9 @@ from . import auth
 
 from .auth_config import CONFIG
 
-from ..user.service import UserAuthService
+from ..user.service import UserAuthService, UserService
 from ..user.model import User
+from ..user.interface import UserInterface
 
 from ..projects.service import ProjectAccessService
 
@@ -79,3 +82,22 @@ def firstsuper():
     return render_template("admin/firstsuper.html")
 
 
+@auth.route("/checkfirstsuper", methods=["POST"])
+@login_required
+def checkfirstsuper():
+    """
+    Handle requests to the /firstsuper route
+    """
+    mdp = request.form.get("password")
+    if mdp == Config.FIRSTADMINKEY:
+
+        user = UserService.get_by_id(current_user.id)
+        changes: UserInterface = {"super_admin": True}
+        UserService.update(user, changes)
+        message = "You are logged in as the first super user"
+    else:
+        message = "Access as superadmin has been denied."
+    flash(message)
+    # redirect to the login page
+    # TODO : fix this ugly thing, redirecting to url_for('auth.home_page') goes to the bad port
+    return redirect("https://127.0.0.1:8080")
