@@ -4,7 +4,7 @@ from typing import List, Literal, Dict
 from datetime import datetime
 from collections import Counter
 
-from conllup.conllup import sentenceConllToJson, readConlluFile, writeConlluFile
+from conllup.conllup import sentenceConllToJson, readConlluFile, sentenceJsonToConll
 from flask import abort
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
@@ -343,11 +343,11 @@ def read_conllu_file_wrapper(path_file: str, keepEmptyTrees: bool = False):
 
 def write_conllu_file_wrapper(path_file: str, sentences_json: List[Dict]):
     """ write a conllu file from a list of sentences sentences in json format """
-    try:
-        writeConlluFile(path_file, sentences_json, overwrite=True)
-    except Exception as e:
-        print('debug_write_conll: {}'.format(str(e)))
-        abort(406, str(e))
+    
+    with open(path_file, "w", encoding="utf-8") as outfile:
+        for sentence_json in sentences_json:
+            sentence_conll = sentenceJsonToConll(sentence_json)
+            outfile.write(sentence_conll + "\n")
 
 def add_or_keep_timestamps(path_file: str, when: Literal["now", "long_ago"] = "now"):
     """ adds a timestamp on the tree if there is not one """
