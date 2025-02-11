@@ -560,8 +560,8 @@ class GrewService:
         if sent_id not in trees[sample_name]:
             try: 
                 sentence_json = sentenceConllToJson(conll)
-            except ValueError:
-                abort(400, 'The result of your query can not be processed by ArboratorGrew')
+            except Exception as e:
+                abort(400, 'The result of your query can not be processed by ArboratorGrew beacuse: {}'.format(str(e)))
                 
             sentence_text = constructTextFromTreeJson(sentence_json["treeJson"])
             trees[sample_name][sent_id] = {
