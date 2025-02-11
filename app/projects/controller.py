@@ -146,9 +146,11 @@ class ProjectIdResource(Resource):
     def get(self, project_name: str):
         """Get a single project"""
         project = ProjectService.get_by_name(project_name)
-        ProjectAccessService.check_admin_access(project.id)
         ProjectService.check_if_project_exist(project)
-        return project
+        if ProjectAccessService.check_project_access(project.visibility, project.id):
+            return project
+        else: 
+            abort(403, 'Access denied to this project')
     
     @responds(schema=ProjectSchema, api=api)
     @accepts(schema=ProjectSchema, api=api)
