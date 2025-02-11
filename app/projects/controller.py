@@ -146,6 +146,7 @@ class ProjectIdResource(Resource):
     def get(self, project_name: str):
         """Get a single project"""
         project = ProjectService.get_by_name(project_name)
+        ProjectAccessService.check_admin_access(project.id)
         ProjectService.check_if_project_exist(project)
         return project
     
