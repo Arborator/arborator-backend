@@ -41,7 +41,7 @@ class UserResource(Resource):
             User: User entity
         """
         user = UserService.get_by_id(current_user.id)
-        super_admins = os.getenv("SUPER_ADMINS").split(",")
+        super_admins = os.getenv("SUPER_ADMINS",default="").split(",")
         changes: UserInterface = {"last_seen": datetime.utcnow(), "can_toggle_super_admin": user.username in super_admins }
         user = UserService.update(user, changes)
         return user
