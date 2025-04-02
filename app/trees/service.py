@@ -2,6 +2,7 @@ import os
 import requests
 import re
 from bs4 import BeautifulSoup
+from flask import abort
 
 from conllup.conllup import sentenceConllToJson, sentenceJsonToConll
 from conllup.processing import constructTextFromTreeJson, emptySentenceConllu
@@ -81,7 +82,11 @@ class TreeService:
         trees = {}
         for sent_id, users in sample_trees.items():
             for user_id, conll in users.items():
-                sentence_json = sentenceConllToJson(conll)
+                try:
+                    sentence_json = sentenceConllToJson(conll)
+                except Exception as e:
+                    abort(400, f"Error in conll format: {e}")
+                
                 if 'text' in sentence_json["metaJson"].keys():
                     sentence_text = sentence_json["metaJson"]["text"]
                 else: 
