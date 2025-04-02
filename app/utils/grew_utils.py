@@ -563,9 +563,9 @@ class GrewService:
             except Exception as e:
                 abort(400, 'The result of your query can not be processed by ArboratorGrew in sentence `{}` because: {}'.format(sent_id, str(e)))
 
-            sentence_text = constructTextFromTreeJson(sentence_json["treeJson"])
+            
             trees[sample_name][sent_id] = {
-                "sentence": sentence_text,
+                "sentence": sentence_json["metaJson"]["text"],
                 "conlls": {user_id: conll},
                 "sent_id": sent_id,
             
