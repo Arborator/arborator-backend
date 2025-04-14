@@ -565,7 +565,7 @@ class GrewService:
 
             
             trees[sample_name][sent_id] = {
-                "sentence": sentence_json["metaJson"]["text"],
+                "sentence": sentence_json["metaJson"]["text"] if "text" in sentence_json["metaJson"].keys() else constructTextFromTreeJson(sentence_json["treeJson"]),
                 "conlls": {user_id: conll},
                 "sent_id": sent_id,
             
