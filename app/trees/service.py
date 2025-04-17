@@ -37,7 +37,6 @@ class TreeService:
                 nodes_children_list[token_head] = [index]
             else:
                 nodes_children_list[token_head].append(index)
-        print(nodes_children_list)
 
         # check if there is a cycle in the tree using recursive dfs
         def dfs_recursive(first_node, visited, stack, path):
