@@ -187,8 +187,9 @@ class ValidateTree(Resource):
             { "message": "validation message", "passed": True | False }
         """
         args = request.get_json()
-        data = args.get("conll") + '\n\n'
-        
+        data = args.get("conll")
+        data = data + '\n' if data.endswith('\n') else data + '\n\n'
+
         project = ProjectService.get_by_name(project_name)
         mapped_languages = TreeValidationService.extract_ud_languages()
 
