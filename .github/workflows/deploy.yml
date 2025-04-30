@@ -5,7 +5,7 @@ on:
       - main
 jobs:
   build:
-    runs-on: self-hosted 
+    runs-on: [self-hosted, arborator-host]
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
