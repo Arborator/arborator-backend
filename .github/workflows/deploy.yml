@@ -5,23 +5,16 @@ on:
       - main
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
 
     - name: Access to repository and run the instructions 
       run: |
-        echo "$SERVER_SSH_KEY" > key.pem
-        chmod 600 key.pem
-        ssh -o StrictHostKeyChecking=no -i key.pem $SERVER_USERNAME@$SERVER_HOST<< EOF
-          cd arborator-backend
-          git pull origin main 
-          source venv/bin/activate
-          pip3 install -r requirements.txt    
-          sudo systemctl restart arborator-backend.service 
-        EOF
-      env:
-        SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
-        SERVER_USERNAME: ${{ secrets.SERVER_USERNAME }}
-        SERVER_HOST: ${{ secrets.SERVER_HOST }}
+        cd arborator-backend
+        git pull origin main 
+        source venv/bin/activate
+        pip3 install -r requirements.txt    
+        sudo systemctl restart arborator-backend.service 
+    
