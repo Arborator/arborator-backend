@@ -9,21 +9,18 @@ from flask import (
     redirect
 )
 from flask_login import login_user, login_required, current_user
+
 from authomatic.adapters import WerkzeugAdapter
 from authomatic import Authomatic
-
 
 from app.config import Config
 
 from . import auth
-
 from .auth_config import CONFIG
-
+from ..projects.service import ProjectAccessService
 from ..user.service import UserAuthService, UserService
 from ..user.model import User
 from ..user.interface import UserInterface
-
-from ..projects.service import ProjectAccessService
 
 authomatic = Authomatic(CONFIG, Config.SECRET_KEY, report_errors=True)
 
@@ -71,20 +68,9 @@ def login(provider_name) -> Response:
     return response
 
 
-@auth.route("/firstsuper")
-@login_required
-def firstsuper():
-    """Handle the request for /firstsuper
-
-    Returns:
-        template: render the template of the first user 
-    """
-    return render_template("admin/firstsuper.html")
-
-
 @auth.route("/checkfirstsuper", methods=["POST"])
 @login_required
-def checkfirstsuper():
+def check_first_super():
     """
     Handle requests to the /firstsuper route
     """
@@ -98,6 +84,4 @@ def checkfirstsuper():
     else:
         message = "Access as superadmin has been denied."
     flash(message)
-    # redirect to the login page
-    # TODO : fix this ugly thing, redirecting to url_for('auth.home_page') goes to the bad port
     return redirect("https://127.0.0.1:8080")
