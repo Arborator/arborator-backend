@@ -578,6 +578,7 @@ def split_sentences(text, option):
         return sentences
 
 def conllize_sentence(sentence_tokens, sample_name, index, option):
+    sentence_tokens = sentence_tokens.replace("\t", ' ')
     sent_id = '# sent_id = {}__{}\n'.format(sample_name, index)
     text = '# text = '
     sentence = str()
