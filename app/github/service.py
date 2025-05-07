@@ -149,6 +149,7 @@ class GithubCommitStatusService:
 
         Returns:
             str: The unified diff between the sample content on GitHub and the sample content in the project.
+            sample_content
         """
         project = ProjectService.get_by_name(project_name)
         sha = GithubRepositoryService.get_by_project_id(project.id).base_sha
@@ -156,10 +157,13 @@ class GithubCommitStatusService:
         github_access_token = UserService.get_by_id(current_user.id).github_access_token
 
         download_url = GithubService.get_file_content_by_commit_sha(github_access_token, full_name, sample_name+CONLL, sha).get("download_url")
-        sample_content_github = requests.get(download_url).text
+        if not download_url:
+           sample_to_diff = '' 
+        else:
+            sample_to_diff = requests.get(download_url).text
         sample_content_ag = GrewService.get_samples_with_string_contents_as_dict(project_name, [sample_name], 'validated')[sample_name]
        
-        diff = unified_diff(sample_content_github.split('\n'), sample_content_ag.split('\n'),  lineterm='\n')
+        diff = unified_diff(sample_to_diff.split('\n'), sample_content_ag.split('\n'),  lineterm='\n')
         diff_string = '\n'.join(list(diff))
        
         return diff_string
