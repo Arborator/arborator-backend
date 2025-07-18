@@ -4,6 +4,6 @@ class GrewConfig:
 
     def set_url(self, env):
         if env == "prod":
-            self.server = "http://arborator-prod.grew.fr"
+            self.server = "http://ag-prod.grew.fr"
         else:  # if env is dev or test
             self.server = "http://arborator-dev.grew.fr"
