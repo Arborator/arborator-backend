@@ -11,7 +11,6 @@ import werkzeug
 
 from app import db
 from app.utils.grew_utils import GrewService
-from app.utils.logging_utils import log_request
 from app.user.service import UserService
 from app.trees.service import TreeValidationService
 from app.github.model import GithubCommitStatus
