@@ -2,7 +2,6 @@ Authomatic==1.2.1
 bs4==0.0.2
 conllup==3.1.1
 cryptography==43.0.1
-dotenv==0.0.5
 Flask==3.0.0
 flask-accepts==0.17.4
 Flask-Caching==2.3.0
@@ -18,4 +17,4 @@ mypy-extensions==1.0.0
 regex==2024.9.11
 requests==2.32.0
 udapi==0.4.0
-Werkzeug==3.0.3
+lxml==6.0.0
