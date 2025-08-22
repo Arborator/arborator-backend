@@ -128,9 +128,10 @@ class ProjectService:
             if os.path.exists(image_path):
                 with open(image_path, 'rb') as file:
                     image_data = base64.b64encode(file.read()).decode('utf-8')
-                    project_image = 'data:image/{};base64,{}'.format(image_path.split(".")[1], image_data)
-                    return project_image
-    
+                    if len(image_path.split(".")) > 1:
+                        project_image = 'data:image/{};base64,{}'.format(image_path.split(".")[1], image_data)
+                        return project_image
+     
     @staticmethod
     def get_projects_info(db_projects, grew_projects, page, total_projects, projects_type):
         
