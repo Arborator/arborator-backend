@@ -254,10 +254,20 @@ class TreeValidationService:
             error_messages ({"sent_id": "message" })
         """
         error_messages = {}
-        messages = message.split("---")
-        if len(messages) > 1:
-            for message in messages:
-                if re.findall(r"Sent (.*?) Line", message):
-                    sent_id = re.findall(r"Sent (.*?) Line", message)[0]
-                    error_messages[sent_id] = message
+        
+        pattern = re.compile(r"Sent\s([\w\-]+)")
+        sent_ids = set(pattern.findall(message))
+
+        messages = message.splitlines()
+
+        for error_message in messages:
+            for sent_id in sent_ids:
+                if f"Sent {sent_id}" in error_message:
+                    if sent_id in error_messages:
+                        error_messages[sent_id] += "\n" + error_message
+                    else:
+                        error_messages[sent_id] = error_message
+                    break
+
         return error_messages
+            
