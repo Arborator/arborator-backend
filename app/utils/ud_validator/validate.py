@@ -37,6 +37,9 @@ class State:
     this class.
     """
     def __init__(self):
+        self.clear()
+
+    def clear(self):
         # Name of the current input file.
         self.current_file_name = None
         # Current line in the input file, or, more precisely, the last line
@@ -4015,6 +4018,8 @@ def validate_ud(lang, level, data):
         data => is the conll
     """
     global args
+    state.clear()
+
     sys.stdin = io.StringIO(data) # khensa: since the script takes a file as an input
     temp_stderr = sys.stderr # khensa: redirect stderr to a tmp variable
     sys.stderr = io.StringIO() # khensa: initialize stderr to a StringIO object to capture the output
