@@ -254,10 +254,9 @@ class ProjectConllSchemaResource(Resource):
         config.append(args['config'])
         
         if update_commit and project.github_repository: # if project synchronized changing feats and misc in the config will modify data so changes will update the commit status
-            github_commit_status = GithubCommitStatus.query.filter_by(project_id=project.id).first()
-            if github_commit_status:
+            for github_commit_status in GithubCommitStatus.query.filter_by(project_id=project.id):
                 github_commit_status.update({"changes_number": github_commit_status.changes_number + 1})
-                db.session.commit()
+            db.session.commit()
 
         GrewService.update_project_config(project.project_name, config)
         
