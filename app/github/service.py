@@ -492,7 +492,7 @@ class GithubService:
         headers = GithubService.base_header(access_token)
         response = requests.get(url, headers=headers)
         data = response.json()
-        modified_files = [{"filename": file.get("filename"), "status": file.get("status")} for file in data.get('files')]
+        modified_files = data.get('files')
         return modified_files
     
     @staticmethod
@@ -692,6 +692,11 @@ class GithubWorkflowService:
                 sample_name = file.get("filename").split(".conllu")[0]
                 file_content= GithubService.get_file_content_by_commit_sha(github_access_token, sync_repository.repository_name, file.get("filename"), base_tree)
                 download_url = file_content.get("download_url")
+                if file.get("status") == "renamed":
+                    previous_filename = file.get("previous_filename")
+                    previous_sample_name = previous_filename.split(".conllu")[0]
+                    GithubWorkflowService.delete_sample_from_project(project_name, previous_sample_name)
+                    GithubWorkflowService.create_sample_from_github_file(sample_name, download_url, project_name)
                 if file.get("status") == "added":
                     GithubWorkflowService.create_sample_from_github_file(sample_name, download_url, project_name)
                 if file.get("status") == "modified":
