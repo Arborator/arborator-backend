@@ -810,6 +810,7 @@ class GithubWorkflowService:
         project = ProjectService.get_by_name(project_name)
         sample_ids = [sample_name] 
         GrewService.delete_samples(project_name, sample_ids)
+        GithubCommitStatusService.delete_sample(project.id, sample_name)
         SampleService.SampleBlindAnnotationLevelService.delete_by_sample_name(project.id, sample_name)
 
 
