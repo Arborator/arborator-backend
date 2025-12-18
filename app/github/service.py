@@ -126,7 +126,7 @@ class GithubCommitStatusService:
 
 
     @staticmethod
-    def delete(project_id, sample_name):
+    def delete_sample(project_id, sample_name):
         """
             Delete commit status for specific sample 
         Args:
@@ -790,7 +790,7 @@ class GithubWorkflowService:
             repository = GithubRepositoryService.get_by_project_id(project_id)
         
             GithubService.delete_file(access_token, repository.repository_name, file_path, repository.branch)
-            GithubCommitStatusService.delete(project_id, sample_name)
+            GithubCommitStatusService.delete_sample(project_id, sample_name)
             new_base_tree_sha = GithubService.get_sha_base_tree(access_token, repository.repository_name, repository.branch)
             GithubRepositoryService.update_sha(project_id, new_base_tree_sha)
     
