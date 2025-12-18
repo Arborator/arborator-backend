@@ -92,6 +92,15 @@ class GithubCommitResource(Resource):
         GithubCommitStatusService.reset_samples(project.id, modified_samples_names)
         return { "status": "ok" }
 
+# route for pushing new samples immediatly (independently from other pending changes)
+@api.route("/<string:project_name>/synchronize/commit_samples")
+class GithubCommitSamples(Resource):
+    def post(self, project_name):
+        project = ProjectService.get_by_name(project_name)
+        data = request.get_json()
+        sha = GithubWorkflowService.commit_changes(data['new_samples'], project_name, "new samples added in ArboratorGrew")
+        GithubRepositoryService.update_sha(project.id, sha)
+
 @api.route("/<string:project_name>/synchronize/pull")
 class GithubPullResource(Resource):
     """Class contains methods deals with the pulls"""

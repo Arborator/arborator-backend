@@ -96,6 +96,8 @@ class SampleResource(Resource):
         
         rtl = json.loads(rtl)
         
+        samples_to_commit = []
+ 
         if samples_without_sent_ids:
             samples_without_sent_ids = json.loads(samples_without_sent_ids)
 
@@ -121,14 +123,17 @@ class SampleResource(Resource):
                     new_username=username,
                     samples_without_sent_ids=samples_without_sent_ids
                 )
-            
+                if not sample_name in existing_samples and user_id == "validated":
+                    samples_to_commit.append(sample_name)
+
             pos_list, relation_list, feat_list, misc_list = GrewService.get_config_from_samples(project_name, sample_names)
-            
+
             response = {
                 "pos": pos_list,
                 "relations": relation_list,
                 "feats": feat_list,
-                "misc": misc_list
+                "misc": misc_list,
+                "samples_to_commit": samples_to_commit
             }
             
             LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
