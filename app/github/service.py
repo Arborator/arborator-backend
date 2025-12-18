@@ -139,6 +139,17 @@ class GithubCommitStatusService:
             db.session.commit()
 
     @staticmethod
+    def unsynchronize_project(project_id):
+        """
+            Delete commit status for specific project  
+        Args:
+            project_id(int)
+        """
+        for github_commit_status in GithubCommitStatus.query.filter_by(project_id=project_id):
+            db.session.delete(github_commit_status)
+        db.session.commit()
+
+    @staticmethod
     def compare_changes_sample(project_name, sample_name):
         """
         Compare the changes between a sample in a project and its corresponding file on GitHub.

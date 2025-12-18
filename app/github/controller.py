@@ -47,6 +47,7 @@ class GithubSynchronizationResource(Resource):
         """Delete synchronization"""
         project = ProjectService.get_by_name(project_name)
         GithubRepositoryService.delete_by_project_id(project.id)
+        GithubCommitStatusService.unsynchronize_project(project.id)
         return { "status": "ok" }
     
 @api.route("/github")
