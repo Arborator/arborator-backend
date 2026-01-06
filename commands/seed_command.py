@@ -1,20 +1,15 @@
-from flask_script import Command
-
 from app import db
 
-class SeedCommand(Command):
-    """ Seed the DB."""
+def seed_database():
+    """Seed the DB."""
+    import click
 
-    def run(self):
-        if (
-            input(
-                "Are you sure you want to drop all tables and recreate? (y/N)\n"
-            ).lower()
-            == "y"
-        ):
-            print("Dropping tables...")
-            db.drop_all()
-            db.create_all()
-            # seed_things()
-            db.session.commit()
-            print("DB successfully seeded.")
+    if click.confirm("Are you sure you want to drop all tables and recreate?"):
+        print("Dropping tables...")
+        db.drop_all()
+        db.create_all()
+        # seed_things()
+        db.session.commit()
+        print("DB successfully seeded.")
+    else:
+        print("Aborted.")
