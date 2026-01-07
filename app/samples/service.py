@@ -66,11 +66,16 @@ class SampleUploadService:
 
         with open(path_file, "rb") as file_to_save:
             GrewService.save_sample(project_name, sample_name, file_to_save)
-            if GithubRepositoryService.get_by_project_id(project.id):
+
+        # take care about `commit_status` table in DB`
+        if new_username == "validated":
+            if sample_name in existing_samples:
+                # alredy existing sample --> increment the changes counter
+                GithubCommitStatusService.update_changes(project.id, sample_name)
+            else:
+                # really new sample --> create it in the DB
                 GithubCommitStatusService.create(project.id, sample_name)
-                if new_username == 'validated':
-                    GithubCommitStatusService.update_changes(project.id, sample_name)
-        
+                    
         os.remove(path_file)
 
 class SampleTokenizeService:
@@ -89,9 +94,9 @@ class SampleTokenizeService:
             rtl (bool): right to left script
         """
         existing_samples = GrewService.get_samples(project_name)
-        samples_names = [sample["name"] for sample in existing_samples]
+        existing_samples_names = [sample["name"] for sample in existing_samples]
         project = ProjectService.get_by_name(project_name)
-        if sample_name not in samples_names:
+        if sample_name not in existing_samples_names:
             GrewService.create_samples(project_name, [sample_name])
             index = 0
         else: 
@@ -122,12 +127,17 @@ class SampleTokenizeService:
 
         with open(path_file, "rb") as file_to_save:
             GrewService.save_sample(project_name, sample_name, file_to_save)
-            if GithubRepositoryService.get_by_project_id(project.id):
+
+        # take care about `commit_status` table in DB`
+        if username == "validated":
+            if sample_name in existing_samples_names:
+                # alredy existing sample --> increment the changes counter
+                GithubCommitStatusService.update_changes(project.id, sample_name)
+            else:
+                # really new sample --> create it in the DB
                 GithubCommitStatusService.create(project.id, sample_name)
-                if username == "validated":
-                    GithubCommitStatusService.update_changes(project.id, sample_name)
-        
-        os.remove(path_file)    
+
+        os.remove(path_file)
 
 class SampleBlindAnnotationLevelService:
     

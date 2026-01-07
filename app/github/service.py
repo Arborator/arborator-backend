@@ -1,5 +1,6 @@
 import os
 import requests
+import base64
 import json
 import re 
 import shutil
@@ -73,7 +74,7 @@ class GithubRepositoryService:
 class GithubCommitStatusService:
     """Class that deals with commit status (changes number by sample)"""
     @staticmethod
-    def create(project_id, sample_name):
+    def create(project_id, sample_name, init = 0):
         """Create new CommitStatus entity
 
         Args:
@@ -86,7 +87,7 @@ class GithubCommitStatusService:
         new_attrs = {
             "project_id": project_id,
             "sample_name": sample_name,
-            "changes_number": 0,
+            "changes_number": init,
         }
         github_commit_status = GithubCommitStatus(**new_attrs)
         db.session.add(github_commit_status)
@@ -105,6 +106,10 @@ class GithubCommitStatusService:
         if github_commit_status:
             github_commit_status.update({"changes_number": github_commit_status.changes_number + 1})
             db.session.commit()
+        else:
+            # This can happen when we save the first "validated" tree in a sample: a new entry is added in the DB
+            GithubCommitStatusService.create(project_id, sample_name, init = 1)
+
 
     @staticmethod 
     def get_modified_samples(project_id):
@@ -136,6 +141,20 @@ class GithubCommitStatusService:
         github_commit_status = GithubCommitStatus.query.filter_by(project_id=project_id, sample_name=sample_name).first()
         if github_commit_status:
             db.session.delete(github_commit_status)
+            db.session.commit()
+
+    @staticmethod
+    def rename_sample(project_id, old_sample_name, new_sample_name):
+        old_github_commit_status = GithubCommitStatus.query.filter_by(project_id=project_id, sample_name=old_sample_name).first()
+        if old_github_commit_status:
+            db.session.delete(old_github_commit_status)
+            new_attrs = {
+                "project_id": project_id,
+                "sample_name": new_sample_name,
+                "changes_number": old_github_commit_status.changes_number,
+            }
+            new_github_commit_status = GithubCommitStatus(**new_attrs)
+            db.session.add(new_github_commit_status)
             db.session.commit()
 
     @staticmethod
@@ -561,6 +580,69 @@ class GithubService:
 
         response = requests.delete(url, headers=headers , data=json.dumps(data))
         return response
+
+    @staticmethod
+    def rename_file_in_github_repo(
+        access_token,
+        full_name,
+        old_file_path,
+        new_file_path,
+        branch,
+    ):
+        """
+        Rename a file in a GitHub repository using the GitHub API
+        
+        :param repo_owner: Owner of the repository
+        :param repo_name: Name of the repository
+        :param old_file_path: Current path of the file
+        :param new_file_path: New path for the file
+        :param branch: Branch to perform the operation on (default is 'main')
+        :param access_token: GitHub Personal Access Token
+        """
+        # GitHub API base URL
+        base_url = f'https://api.github.com/repos/{full_name}'
+        
+        # Headers for the API request
+        headers = {
+            'Accept': 'application/vnd.github.v3+json',
+            'Authorization': f'token {access_token}' if access_token else ''
+        }
+        
+        # Step 1: Get the current file content and SHA
+        get_file_url = f'{base_url}/contents/{old_file_path}?ref={branch}'
+        response = requests.get(get_file_url, headers=headers)
+        response.raise_for_status()
+        
+        file_data = response.json()
+        file_content = base64.b64decode(file_data['content']).decode('utf-8')
+        file_sha = file_data['sha']
+        
+        # Step 2: Create a commit to rename the file
+        commit_url = f'{base_url}/contents/{new_file_path}'
+        
+        commit_payload = {
+            'message': f'Rename {old_file_path} to {new_file_path}',
+            'content': base64.b64encode(file_content.encode('utf-8')).decode('utf-8'),
+            'branch': branch,
+            'sha': file_sha
+        }
+        
+        # Create the new file
+        response = requests.put(commit_url, json=commit_payload, headers=headers)
+        response.raise_for_status()
+        
+        # Step 3: Delete the old file
+        delete_payload = {
+            'message': f'Remove old file {old_file_path} after renaming',
+            'sha': file_sha,
+            'branch': branch
+        }
+        
+        delete_url = f'{base_url}/contents/{old_file_path}'
+        response = requests.delete(delete_url, json=delete_payload, headers=headers)
+        response.raise_for_status()
+        
+        print(f'Successfully renamed {old_file_path} to {new_file_path}')
 
 
 class GithubWorkflowService:

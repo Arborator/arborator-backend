@@ -123,7 +123,7 @@ class SampleResource(Resource):
                     new_username=username,
                     samples_without_sent_ids=samples_without_sent_ids
                 )
-                if not sample_name in existing_samples and user_id == "validated":
+                if not sample_name in existing_samples and username == "validated":
                     samples_to_commit.append(sample_name)
 
             pos_list, relation_list, feat_list, misc_list = GrewService.get_config_from_samples(project_name, sample_names)

@@ -92,6 +92,21 @@ class GithubCommitResource(Resource):
         GithubCommitStatusService.reset_samples(project.id, modified_samples_names)
         return { "status": "ok" }
 
+@api.route("/<string:project_name>/synchronize/rename")
+class GithubRenameSample(Resource):
+    def post(self, project_name):
+        data = request.get_json()
+        old_sample_name = data.get("oldName")
+        old_file_name = old_sample_name+".conllu"
+        new_sample_name = data.get("newName")
+        new_file_name = new_sample_name+".conllu"
+        github_access_token = UserService.get_by_id(current_user.id).github_access_token
+        project = ProjectService.get_by_name(project_name)
+        repo = GithubRepositoryService.get_by_project_id(project.id)
+
+        GithubService.rename_file_in_github_repo(github_access_token, repo.repository_name, old_file_name, new_file_name, repo.branch)
+        GithubCommitStatusService.rename_sample(project.id, old_sample_name, new_sample_name)
+
 # route for pushing new samples immediatly (independently from other pending changes)
 @api.route("/<string:project_name>/synchronize/commit_samples")
 class GithubCommitSamples(Resource):
@@ -129,14 +144,14 @@ class GithubPullRequestResource(Resource):
         data = request.get_json()
         branch = data.get("branch")
         title = data.get("title")
+
         user = UserService.get_by_id(current_user.id)
-
-        project_id = ProjectService.get_by_name(project_name).id
         access_token = user.github_access_token
-        branch_base = GithubRepositoryService.get_by_project_id(project_id).branch
-        full_name = GithubRepositoryService.get_by_project_id(project_id).repository_name
 
-        GithubService.create_pull_request(access_token, full_name, user.username, branch_base , branch, title)
+        project = ProjectService.get_by_name(project_name)
+        repo = GithubRepositoryService.get_by_project_id(project.id)
+
+        GithubService.create_pull_request(access_token, repo.repository_name, user.username, repo.branch, branch, title)
         return { "status": "ok" }
     
 @api.route("/<string:project_name>/synchronize/files")
