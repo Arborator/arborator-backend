@@ -1,1 +1,1 @@
-from .seed_command import SeedCommand
+"""Commands package for manage.py CLICK."""
