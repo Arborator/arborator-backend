@@ -1,0 +1,22 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: arborator-backend-dev
+    env_file:
+      - .flaskenv
+    volumes:
+      - ./:/app
+    ports:
+      - "5000:5000"
+    command: flask run --host=0.0.0.0 --cert=adhoc
+    networks:
+      - arborator-dev
+    environment:
+      - EXTERNAL_SERVER_URL=http://host.docker.internal:8222
+
+networks:
+  arborator-dev:
+    external:
+      name: arborator-dev-network
