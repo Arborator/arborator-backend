@@ -18,6 +18,8 @@ RUN python -m pip install --upgrade pip setuptools wheel \
 
 COPY . .
 
+RUN bash fetch_validator_data.sh
+
 RUN useradd --create-home --shell /bin/bash appuser \
  && chown -R appuser:appuser /app
 USER appuser
