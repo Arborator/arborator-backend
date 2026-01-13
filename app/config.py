@@ -107,9 +107,31 @@ class ProductionConfig(Config):
     UPLOAD_IMAGE_EXTENSIONS = ['.jpg', '.png', '.gif', '.jpeg']
 
 
+class PreprodConfig(Config):
+    CONFIG_NAME = "preprod"
+    SECRET_KEY = os.getenv("PREPROD_SECRET_KEY", "I'm Ron Burgundy?")
+    DEBUG = False
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    TESTING = False
+    SQLALCHEMY_DATABASE_URI = "sqlite:///{0}/app-preprod.db".format(basedir)
+
+    DEBUG = False
+    basedir = os.path.dirname(os.path.abspath(__file__))
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
+            'sqlite:///' + os.path.join(basedir, 'arborator_preprod.sqlite')
+    
+    SQLALCHEMY_TRACK_MODIFICATIONS = True
+
+    ENV = 'preprod'
+
+    PROJECT_IMAGE_FOLDER = UPLOAD_IMAGE_FOLDER
+    UPLOAD_IMAGE_EXTENSIONS = ['.jpg', '.png', '.gif', '.jpeg']
+
+
 EXPORT_CONFIGS: List[Type[Config]] = [
     DevelopmentConfig,
     TestingConfig,
     ProductionConfig,
+    PreprodConfig,
 ]
 config_by_name = {cfg.CONFIG_NAME: cfg for cfg in EXPORT_CONFIGS}
