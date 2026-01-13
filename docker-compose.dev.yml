@@ -18,5 +18,5 @@ services:
 
 networks:
   arborator-dev:
-    external:
-      name: arborator-dev-network
+    external: true
+    name: arborator-dev-network

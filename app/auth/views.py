@@ -65,9 +65,14 @@ def login(provider_name) -> Response:
             # If there is no superadmin in DB, add admin privilege to this new user
             if not User.query.filter_by(super_admin=True).first():
                 return make_response(render_template("auth/firstsuper.html"))
-            
-            template_to_render = "auth/redirect_dev.html" if current_app.config["ENV"] == "dev" else "auth/redirect_prod.html"
-            return make_response(render_template(template_to_render, has_projects= has_projects))       
+
+            if current_app.config["ENV"] == 'preprod':
+                template_to_render = "auth/redirect_preprod.html"
+            elif current_app.config["ENV"] == "dev":
+                template_to_render = "auth/redirect_dev.html"
+            else:
+                template_to_render = "auth/redirect_prod.html"
+            return make_response(render_template(template_to_render, has_projects=has_projects))       
     return response
 
 
