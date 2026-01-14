@@ -11,6 +11,9 @@ from app.klang.config import KlangConfig
 from app.utils.grew_config import GrewConfig
 from app.utils.arborator_parser_config import ParserConfig
 
+from werkzeug.middleware.proxy_fix import ProxyFix
+
+
 cache = Cache()
 db = SQLAlchemy()
 login_manager = LoginManager()
@@ -26,6 +29,7 @@ def create_app(env=None):
     from app.routes import register_routes
     app_env = env or "test"
     app = Flask(__name__, instance_relative_config=False)
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_prefix=1)
     app.config.from_object(config_by_name[app_env])
     klang_config.set_path(app_env)
     grew_config.set_url(app_env)
