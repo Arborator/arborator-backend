@@ -24,14 +24,9 @@ parser_config = ParserConfig()
 def create_app(env=None):
     from app.config import config_by_name
     from app.routes import register_routes
-    from werkzeug.middleware.proxy_fix import ProxyFix
-    
     app_env = env or "test"
     app = Flask(__name__, instance_relative_config=False)
     app.config.from_object(config_by_name[app_env])
-    
-    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
-    
     klang_config.set_path(app_env)
     grew_config.set_url(app_env)
     parser_config.set_url(app_env)

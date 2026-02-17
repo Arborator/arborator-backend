@@ -61,21 +61,18 @@ def login(provider_name) -> Response:
             
             has_projects = ProjectAccessService.user_has_access_to_project(user.id)
             login_user(user, remember=True)
-
-            # Check superadmin SAUF en preprod
-            if current_app.config["ENV"] != 'preprod':
-                if not User.query.filter_by(super_admin=True).first():
-                    return make_response(render_template("auth/firstsuper.html"))
+            
+            # If there is no superadmin in DB, add admin privilege to this new user
+            if not User.query.filter_by(super_admin=True).first():
+                return make_response(render_template("auth/firstsuper.html"))
 
             if current_app.config["ENV"] == 'preprod':
-                redirect_url = "https://ag-preprod.grew.fr/#/myprojects" if has_projects else "https://ag-preprod.grew.fr/#/projects"
+                template_to_render = "auth/redirect_preprod.html"
             elif current_app.config["ENV"] == "dev":
-                redirect_url = "https://127.0.0.1:8080/#/myprojects" if has_projects else "https://127.0.0.1:8080/#/projects"
+                template_to_render = "auth/redirect_dev.html"
             else:
-                redirect_url = "https://arborator.grew.fr/#/myprojects" if has_projects else "https://arborator.grew.fr/#/projects"
-            
-            return redirect(redirect_url)
-    
+                template_to_render = "auth/redirect_prod.html"
+            return make_response(render_template(template_to_render, has_projects=has_projects))       
     return response
 
 
