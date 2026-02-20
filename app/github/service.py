@@ -729,8 +729,9 @@ class GithubWorkflowService:
         sample_name = file_name.split(CONLL)[0]
         raw_content = requests.get(download_url)
         path_file = os.path.join(Config.UPLOAD_FOLDER, file_name)
-        file = open(path_file, "w")
+        file = open(path_file, "w", encoding='utf-8')
         file.write(raw_content.text)
+        file.close()
         return sample_name, path_file
     
     @staticmethod
@@ -745,7 +746,7 @@ class GithubWorkflowService:
         content = requests.get(download_url).text 
         file_name = sample_name + "_modified.conllu"
         path_file = os.path.join(Config.UPLOAD_FOLDER, file_name)
-        with open(path_file, "w") as file:
+        with open(path_file, "w", encoding='utf-8') as file:
             file.write(content)
 
         SampleService.add_or_replace_userid(path_file, USERNAME)
