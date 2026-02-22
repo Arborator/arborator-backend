@@ -6,7 +6,7 @@ class GrewConfig:
 
     def set_url(self, env):
         if env == "prod":
-            self.server = "http://arborator-prod.grew.fr"
+            self.server = "http://arborator-ocaml.grew.fr"
         elif env == "preprod":
             self.server = os.getenv('EXTERNAL_PREPROD_SERVER_URL', "https://arborator-preprod.grew.fr")
         else:  # if env is dev or test
