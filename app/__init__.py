@@ -10,6 +10,7 @@ from flask_mail import Mail
 from app.klang.config import KlangConfig
 from app.utils.grew_config import GrewConfig
 from app.utils.arborator_parser_config import ParserConfig
+from app.utils.update_daemon import start_update_daemon
 
 cache = Cache()
 db = SQLAlchemy()
@@ -30,6 +31,7 @@ def create_app(env=None):
     klang_config.set_path(app_env)
     grew_config.set_url(app_env)
     parser_config.set_url(app_env)
+    start_update_daemon()
 
     api = Api(
         app,

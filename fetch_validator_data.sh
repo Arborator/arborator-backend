@@ -8,7 +8,7 @@ cd "app/utils/ud_validator/"
 
 curl -L -o "repo.zip" "https://github.com/UniversalDependencies/tools/archive/refs/heads/master.zip"
 
-unzip -q "repo.zip" -d "temp_unzip_dir"
+python3 -m zipfile -e "repo.zip" "temp_unzip_dir"
 
 rm -rf ./data
 
