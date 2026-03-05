@@ -225,7 +225,7 @@ class SaveAllTreesResource(Resource):
         file_name = sample_name + "_save_all.conllu"
         path_file = os.path.join(Config.UPLOAD_FOLDER, file_name)
         
-        with open(path_file, "w") as conll_file:
+        with open(path_file, "w", encoding="utf-8") as conll_file:
             conll_file.write(data.get('conllGraph'))
             
         with open(path_file, "rb") as file_to_save:

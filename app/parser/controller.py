@@ -147,7 +147,7 @@ class ParserParseStatus(Resource):
                 for sample_name, sample_content in task_parsed_samples.items():
                     path_file = os.path.join(Config.UPLOAD_FOLDER, sample_name)
                     print('upload parsed\n', path_file)
-                    with open(path_file,'w') as f:
+                    with open(path_file,'w', encoding='utf-8') as f:
                         f.write(sample_content)
 
                     add_or_keep_timestamps(path_file, when="long_ago")
