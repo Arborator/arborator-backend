@@ -203,13 +203,13 @@ class UserAuthService:
             results_parsed["id"] = data.get("id")
             results_parsed["username"] = data.get("login")
             results_parsed["picture_url"] = data.get("avatar_url")
-            results_parsed["email"] = data.get("email")
+            results_parsed["email"] = None
 
         elif provider_name == "google":
             results_parsed["auth_provider"] = "3"
             results_parsed["id"] = user.email
             results_parsed["username"] = user.email.split("@")[0]
-            results_parsed["email"] = user.email
+            results_parsed["email"] = None
             results_parsed["first_name"] = user.first_name
             results_parsed["family_name"] = user.last_name
             results_parsed["picture_url"] = user.picture
