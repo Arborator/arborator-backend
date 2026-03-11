@@ -43,7 +43,7 @@ class ApplyRuleResource(Resource):
             file_name = sample_name + "_modified.conllu"
             path_file = os.path.join(Config.UPLOAD_FOLDER, file_name)
             
-            with open(path_file, "w") as file:
+            with open(path_file, "w", encoding="utf-8") as file:
                 file.write(new_conll)
                 
             with open(path_file, "rb") as file_to_save:

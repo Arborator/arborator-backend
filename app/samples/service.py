@@ -111,7 +111,7 @@ class SampleTokenizeService:
         file_name = sample_name + ".conllu"
         path_file = os.path.join(Config.UPLOAD_FOLDER, file_name)
         
-        with open(path_file, "w") as file:
+        with open(path_file, "w", encoding="utf-8") as file:
             file.write(conll)
             
         add_or_replace_userid(path_file, username)

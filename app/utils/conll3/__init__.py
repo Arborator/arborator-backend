@@ -279,7 +279,7 @@ def conll2tree(conllstring):
 
 def conllFile2trees(path :str, encoding="utf-8"):
 	trees=[]
-	with open(path) as f:
+	with open(path, encoding=encoding) as f:
 		conlltext=""
 		for li in f:
 			li=li.strip()
@@ -306,7 +306,7 @@ def conllString2trees(conllstring, encoding="utf-8"):
 	return trees
 
 def trees2conllFile(trees, outfile, sentencefeatures=True, columns="u"): # changed default from 10 to u!
-	with open(outfile,"w") as f:
+	with open(outfile,"w", encoding="utf-8") as f:
 		for tree in trees:
 			if columns=="u": # conllu format
 				treestring = tree.conllu()
@@ -351,8 +351,8 @@ def sentences2emptyConllFile(infile, outfile):
 	"""
 	transforms a list of sentences into conll format without trees
 	"""
-	inf = open(infile)
-	with open(outfile, "w") as outf:
+	inf = open(infile, encoding="utf-8")
+	with open(outfile, "w", encoding="utf-8") as outf:
 		counter=0
 		for line in inf:
 			line=line.strip()
@@ -405,7 +405,7 @@ def conllFolder2trees(folder):
 	return trees
 
 def trees2transcription(trees, outfile, delim=" "):
-	with open(outfile, "w") as outf:
+	with open(outfile, "w", encoding="utf-8") as outf:
 		for t in trees:
 			for node in t.values():
 				outf.write(node["t"]+delim)

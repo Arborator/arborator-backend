@@ -30,6 +30,7 @@ def grew_request(fct_name, data={}, files={}):
     """
     try:
         response = requests.post("%s/%s" % (grew_config.server, fct_name), files=files, data=data)
+        response.encoding = 'utf-8'
 
     except requests.ConnectionError:
         error_message = "<Grew requests handler> : Connection refused"
@@ -41,16 +42,16 @@ def grew_request(fct_name, data={}, files={}):
         print(error_message)
         abort(500, {"message": error_message})
     try: 
-        response = json.loads(response.text)
-        if response.get("status") == "ERROR":
-            error_message = response.get("message")
+        response_json = json.loads(response.text)
+        if response_json.get("status") == "ERROR":
+            error_message = response_json.get("message")
             print("GREW-ERROR : {}".format(error_message) )
             abort(406, "GREW-ERROR : {}".format(error_message))
             
-        elif response.get("status") == "WARNING":
-            warning_message = response.get("message")
+        elif response_json.get("status") == "WARNING":
+            warning_message = response_json.get("message")
             print("Grew-Warning: {}".format(warning_message))    
-        return response
+        return response_json
     
     except Exception as e:
         if isinstance(e, werkzeug.exceptions.NotAcceptable): # to fix the problem of abort inside try-except block
