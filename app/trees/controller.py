@@ -220,18 +220,25 @@ class SaveAllTreesResource(Resource):
             sample_name (str)
             conllGraph (str)
         """
+        project = ProjectService.get_by_name(project_name)
+        ProjectService.check_if_freezed(project)
         data = request.get_json()
+        conll_graph = data.get('conllGraph', '')
+
+        if GithubRepositoryService.get_by_project_id(project.id) and '# user_id = validated' in conll_graph:
+            GithubCommitStatusService.update_changes(project.id, sample_name)
         
         file_name = sample_name + "_save_all.conllu"
         path_file = os.path.join(Config.UPLOAD_FOLDER, file_name)
         
         with open(path_file, "w", encoding="utf-8") as conll_file:
-            conll_file.write(data.get('conllGraph'))
+            conll_file.write(conll_graph)
             
         with open(path_file, "rb") as file_to_save:
             GrewService.save_sample(project_name, sample_name, file_to_save)
 
         os.remove(path_file)
+        LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
 
 @api.route("/<string:project_name>/samples/<string:sample_name>/trees/split")
 class SplitTreeResource(Resource):
