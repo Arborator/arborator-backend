@@ -29,7 +29,7 @@ def migrate_add_grew_history(engine):
 def migrate_refactor_github(engine):
     with engine.connect() as connection:
         connection.execute("DELETE FROM github_repositories;")
-        connection.execute("DELETE FROM commit_status;")
+        connection.execute("DROP TABLE IF EXISTS commit_status;")
 
 def migrate_update_dependencies(engine):
     with engine.connect() as connection:

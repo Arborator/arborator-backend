@@ -6,7 +6,6 @@ from flask_restx import Namespace, Resource
 
 from app.config import Config
 from app.projects.service import LastAccessService, ProjectService
-from app.github.service import GithubCommitStatusService, GithubRepositoryService
 from app.utils.grew_utils import GrewService, SampleExportService
 
 
@@ -33,10 +32,6 @@ class ApplyRuleResource(Resource):
         for sample_name, sample_trees in data.items():
             new_conll = ''
             for tree in sample_trees.values():
-                
-                if 'validated' in tree["conlls"].keys() and GithubRepositoryService.get_by_project_id(project.id):
-                    GithubCommitStatusService.update_changes(project.id, sample_name)
-                    
                 for user in tree["conlls"]:
                     new_conll += tree["conlls"][user] + "\n\n"
                     

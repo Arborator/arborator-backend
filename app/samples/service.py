@@ -11,9 +11,7 @@ from werkzeug.datastructures import FileStorage
 
 from app import db
 from app.config import Config
-from app.projects.service import ProjectService
 from app.utils.grew_utils import GrewService
-from app.github.service import GithubCommitStatusService, GithubRepositoryService
 
 from .model import SampleBlindAnnotationLevel
 
@@ -44,7 +42,6 @@ class SampleUploadService:
             new_username (str): the custom username used of the uploaded trees, or the same as the username
             samples_without_sent_ids (list[str]): list of samples that doesn't contain sent_ids Defaults to [].
         """
-        project = ProjectService.get_by_name(project_name)
         path_file = os.path.join(Config.UPLOAD_FOLDER, filename)
 
         fileobject.save(path_file)
@@ -66,15 +63,6 @@ class SampleUploadService:
 
         with open(path_file, "rb") as file_to_save:
             GrewService.save_sample(project_name, sample_name, file_to_save)
-
-        # take care about `commit_status` table in DB`
-        if new_username == "validated":
-            if sample_name in existing_samples:
-                # alredy existing sample --> increment the changes counter
-                GithubCommitStatusService.update_changes(project.id, sample_name)
-            else:
-                # really new sample --> create it in the DB
-                GithubCommitStatusService.create(project.id, sample_name)
                     
         os.remove(path_file)
 
@@ -95,7 +83,6 @@ class SampleTokenizeService:
         """
         existing_samples = GrewService.get_samples(project_name)
         existing_samples_names = [sample["name"] for sample in existing_samples]
-        project = ProjectService.get_by_name(project_name)
         if sample_name not in existing_samples_names:
             GrewService.create_samples(project_name, [sample_name])
             index = 0
@@ -127,15 +114,6 @@ class SampleTokenizeService:
 
         with open(path_file, "rb") as file_to_save:
             GrewService.save_sample(project_name, sample_name, file_to_save)
-
-        # take care about `commit_status` table in DB`
-        if username == "validated":
-            if sample_name in existing_samples_names:
-                # alredy existing sample --> increment the changes counter
-                GithubCommitStatusService.update_changes(project.id, sample_name)
-            else:
-                # really new sample --> create it in the DB
-                GithubCommitStatusService.create(project.id, sample_name)
 
         os.remove(path_file)
 

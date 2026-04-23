@@ -18,7 +18,7 @@ from app.utils.grew_utils import GrewService, grew_request , SampleExportService
 from app.user.service import UserService
 import app.samples.service as SampleService
 
-from .model import GithubRepository, GithubCommitStatus
+from .model import GithubRepository
 
 
 extension = re.compile("^.*\.(conllu)$")
@@ -72,131 +72,130 @@ class GithubRepositoryService:
         db.session.commit()
 
 class GithubCommitStatusService:
-    """Class that deals with commit status (changes number by sample)"""
-    @staticmethod
-    def create(project_id, sample_name, init = 0):
-        """Create new CommitStatus entity
-
-        Args:
-            project_id (int)
-            sample_name (str)
-
-        Returns:
-           new GithubCommitStatus
-        """
-        new_attrs = {
-            "project_id": project_id,
-            "sample_name": sample_name,
-            "changes_number": init,
-        }
-        github_commit_status = GithubCommitStatus(**new_attrs)
-        db.session.add(github_commit_status)
-        db.session.commit()
-        return github_commit_status
+    """Build git-like status information from AG content and the synchronized GitHub base commit."""
 
     @staticmethod
-    def update_changes(project_id, sample_name):
-        """Every time the data changed the number of changes in the GithubCommitStatus is incremented
-
-        Args:
-            project_id (int)
-            sample_name (str)
-        """
-        github_commit_status = GithubCommitStatus.query.filter_by(project_id=project_id, sample_name=sample_name).first()
-        if github_commit_status:
-            github_commit_status.update({"changes_number": github_commit_status.changes_number + 1})
-            db.session.commit()
-        else:
-            # This can happen when we save the first "validated" tree in a sample: a new entry is added in the DB
-            GithubCommitStatusService.create(project_id, sample_name, init = 1)
-
-
-    @staticmethod 
-    def get_modified_samples(project_id):
-        modified_samples = GithubCommitStatus.query.filter(GithubCommitStatus.project_id == project_id).filter(GithubCommitStatus.changes_number > 0)
-        return [{ "sample_name": modified_sample.sample_name, "changes_number": modified_sample.changes_number } for modified_sample in modified_samples]
-        
-    @staticmethod
-    def reset_samples(project_id, modified_samples):
-        """
-            After a commit all the changes number in the modified samples will be reset to 0
-        Args: 
-            project_id(int)
-            modified_samples(List[str])
-        """
-        for sample_name in modified_samples:
-            github_commit_status = GithubCommitStatus.query.filter_by(project_id=project_id, sample_name=sample_name).first()
-            github_commit_status.changes_number = 0
-            db.session.commit()
-
-
-    @staticmethod
-    def delete_sample(project_id, sample_name):
-        """
-            Delete commit status for specific sample 
-        Args:
-            project_id(int)
-            sample_name(str)
-        """
-        github_commit_status = GithubCommitStatus.query.filter_by(project_id=project_id, sample_name=sample_name).first()
-        if github_commit_status:
-            db.session.delete(github_commit_status)
-            db.session.commit()
-
-    @staticmethod
-    def rename_sample(project_id, old_sample_name, new_sample_name):
-        old_github_commit_status = GithubCommitStatus.query.filter_by(project_id=project_id, sample_name=old_sample_name).first()
-        if old_github_commit_status:
-            db.session.delete(old_github_commit_status)
-            new_attrs = {
-                "project_id": project_id,
-                "sample_name": new_sample_name,
-                "changes_number": old_github_commit_status.changes_number,
-            }
-            new_github_commit_status = GithubCommitStatus(**new_attrs)
-            db.session.add(new_github_commit_status)
-            db.session.commit()
-
-    @staticmethod
-    def unsynchronize_project(project_id):
-        """
-            Delete commit status for specific project  
-        Args:
-            project_id(int)
-        """
-        for github_commit_status in GithubCommitStatus.query.filter_by(project_id=project_id):
-            db.session.delete(github_commit_status)
-        db.session.commit()
-
-    @staticmethod
-    def compare_changes_sample(project_name, sample_name):
-        """
-        Compare the changes between a sample in a project and its corresponding file on GitHub.
-
-        Args:
-            project_name (str): The name of the project.
-            sample_name (str): The name of the sample.
-
-        Returns:
-            str: The unified diff between the sample content on GitHub and the sample content in the project.
-            sample_content
-        """
+    def _get_sync_context(project_name):
         project = ProjectService.get_by_name(project_name)
-        sha = GithubRepositoryService.get_by_project_id(project.id).base_sha
-        full_name = GithubRepositoryService.get_by_project_id(project.id).repository_name
+        sync_repository = GithubRepositoryService.get_by_project_id(project.id)
+        if not sync_repository:
+            abort(404, "This project is not synchronized with GitHub")
         github_access_token = UserService.get_by_id(current_user.id).github_access_token
+        return project, sync_repository, github_access_token
 
-        download_url = GithubService.get_file_content_by_commit_sha(github_access_token, full_name, sample_name+CONLL, sha).get("download_url")
+    @staticmethod
+    def _list_base_samples(access_token, repository_name, ref):
+        repository_files = GithubService.get_repository_files_of_branch(access_token, repository_name, ref)
+        return {
+            file.get("name").split(CONLL)[0]
+            for file in repository_files
+            if file.get("name") and extension.search(file.get("name"))
+        }
+
+    @staticmethod
+    def _get_base_sample_content(access_token, repository_name, base_sha, sample_name):
+        file_metadata = GithubService.get_file_content_by_commit_sha(access_token, repository_name, sample_name + CONLL, base_sha)
+        download_url = file_metadata.get("download_url")
         if not download_url:
-           sample_to_diff = '' 
-        else:
-            sample_to_diff = requests.get(download_url).text
-        sample_content_ag = GrewService.get_samples_with_string_contents_as_dict(project_name, [sample_name], 'validated')[sample_name]
-       
-        diff = unified_diff(sample_to_diff.split('\n'), sample_content_ag.split('\n'),  lineterm='\n')
-        diff_string = '\n'.join(list(diff))
-       
-        return diff_string
+            return ""
+        return requests.get(download_url).text
+
+    @staticmethod
+    def _build_diff(base_content, current_content, sample_name):
+        diff = unified_diff(
+            base_content.splitlines(),
+            current_content.splitlines(),
+            fromfile=sample_name + CONLL,
+            tofile=sample_name + CONLL,
+            lineterm=''
+        )
+        return '\n'.join(list(diff))
+
+    @staticmethod
+    def _count_changed_lines(diff_string):
+        return sum(
+            1
+            for line in diff_string.splitlines()
+            if line and (line.startswith('+') or line.startswith('-')) and not line.startswith('+++') and not line.startswith('---')
+        )
+
+    @staticmethod
+    def _get_status_kind(sample_name, base_samples, current_samples):
+        if sample_name not in base_samples:
+            return 'added'
+        if sample_name not in current_samples:
+            return 'deleted'
+        return 'modified'
+
+    @staticmethod
+    def get_modified_samples(project_name):
+        _, sync_repository, github_access_token = GithubCommitStatusService._get_sync_context(project_name)
+        current_samples = {sample["name"] for sample in GrewService.get_samples(project_name)}
+        current_contents = GrewService.get_samples_with_string_contents_as_dict(project_name, sorted(current_samples), USERNAME) if current_samples else {}
+        base_samples = GithubCommitStatusService._list_base_samples(
+            github_access_token,
+            sync_repository.repository_name,
+            sync_repository.base_sha,
+        )
+
+        modified_samples = []
+        for sample_name in sorted(base_samples.union(current_samples)):
+            base_content = GithubCommitStatusService._get_base_sample_content(
+                github_access_token,
+                sync_repository.repository_name,
+                sync_repository.base_sha,
+                sample_name,
+            )
+            current_content = current_contents.get(sample_name, "")
+            if base_content == current_content:
+                continue
+
+            diff_string = GithubCommitStatusService._build_diff(base_content, current_content, sample_name)
+            modified_samples.append({
+                "sample_name": sample_name,
+                "changes_number": GithubCommitStatusService._count_changed_lines(diff_string),
+                "status": GithubCommitStatusService._get_status_kind(sample_name, base_samples, current_samples),
+                "diff": diff_string,
+            })
+
+        return modified_samples
+
+    @staticmethod
+    def reset_samples(project_name, modified_samples):
+        project, sync_repository, github_access_token = GithubCommitStatusService._get_sync_context(project_name)
+        current_samples = {sample["name"] for sample in GrewService.get_samples(project_name)}
+
+        for sample_name in modified_samples:
+            file_metadata = GithubService.get_file_content_by_commit_sha(
+                github_access_token,
+                sync_repository.repository_name,
+                sample_name + CONLL,
+                sync_repository.base_sha,
+            )
+            download_url = file_metadata.get("download_url")
+
+            if not download_url:
+                if sample_name in current_samples:
+                    GrewService.delete_samples(project_name, [sample_name])
+                    SampleService.SampleBlindAnnotationLevelService.delete_by_sample_name(project.id, sample_name)
+                continue
+
+            file_name = sample_name + "_reset.conllu"
+            path_file = os.path.join(Config.UPLOAD_FOLDER, file_name)
+            content = requests.get(download_url).text
+            with open(path_file, "w", encoding="utf-8") as file:
+                file.write(content)
+
+            SampleService.add_or_replace_userid(path_file, USERNAME)
+            SampleService.add_or_keep_timestamps(path_file)
+
+            if sample_name not in current_samples:
+                GrewService.create_samples(project_name, [sample_name])
+
+            with open(path_file, "rb") as file_to_save:
+                GrewService.save_sample(project_name, sample_name, file_to_save)
+
+            os.remove(path_file)
 
 class GithubService:
     """
@@ -452,12 +451,18 @@ class GithubService:
             new_base_sha(str)
         """
         tree = []
-        sample_names, sample_content_files = GrewService.get_samples_with_string_contents(project_name, updated_samples)
-        for sample_name, sample in zip(sample_names,sample_content_files):
+        current_samples = {sample["name"] for sample in GrewService.get_samples(project_name)}
+        existing_samples = [sample_name for sample_name in updated_samples if sample_name in current_samples]
+        sample_names, sample_content_files = GrewService.get_samples_with_string_contents(project_name, existing_samples)
+        for sample_name, sample in zip(sample_names, sample_content_files):
             content = sample.get(USERNAME)
             sha = GithubService.create_blob_for_updated_file(access_token, full_name, content)
-            blob = {"path": sample_name+".conllu", "mode":"100644", "type":"blob", "sha": sha}
+            blob = {"path": sample_name + CONLL, "mode": "100644", "type": "blob", "sha": sha}
             tree.append(blob)
+
+        deleted_samples = [sample_name for sample_name in updated_samples if sample_name not in current_samples]
+        for sample_name in deleted_samples:
+            tree.append({"path": sample_name + CONLL, "mode": "100644", "type": "blob", "sha": None})
 
         url = "https://api.github.com/repos/{}/git/trees".format(full_name)
         headers = GithubService.base_header(access_token)
@@ -651,7 +656,6 @@ class GithubWorkflowService:
     def import_files_from_github(full_name, project_name, branch, branch_syn):
         """Import files from github:
             - Get repository files names of specific branch 
-            - For non existing samples we create commit status for every new file
             - In order to not download file by file we import directly repo in zip file
             - We extract the zip file and create new samples from the extracted file
             - Create new branch if user choosed to use branch dedicated for the sync
@@ -662,18 +666,9 @@ class GithubWorkflowService:
             branch (str): branch used for the import
             branch_syn (str): branch used for the synchronization
         """
-        project = ProjectService.get_by_name(project_name)
         access_token = UserService.get_by_id(current_user.id).github_access_token
         repository_files = GithubService.get_repository_files_of_branch(access_token, full_name, branch)
         conll_files = [file.get("name") for file in repository_files if extension.search(file.get('name'))]
-        
-        samples_names = [file.split(CONLL)[0] for file in conll_files]
-        existed_samples_names = [sample["name"] for sample in GrewService.get_samples(project_name)]
-        not_intersected_samples = [sample_name for sample_name in existed_samples_names if sample_name not in samples_names]
-        
-        for sample_name in not_intersected_samples:
-            GithubCommitStatusService.create(project.id, sample_name)
-            GithubCommitStatusService.update_changes(project.id, sample_name)   
 
         tmp_zip_file = GithubService.download_github_repository(access_token, full_name, branch)
         GithubService.extract_repository(tmp_zip_file)
@@ -685,7 +680,7 @@ class GithubWorkflowService:
     def clone_github_repository(files, project_name):
         """
             Clone github repository means create new samples from the files 
-            of sync repo and create commit status for each sample
+            of sync repo
 
         Args:
             files (List[str])
@@ -695,8 +690,6 @@ class GithubWorkflowService:
             path_file = os.path.join(Config.UPLOAD_FOLDER, file)
             sample_name = file.split(CONLL)[0]
             GithubWorkflowService.create_sample(sample_name, path_file, project_name)
-            project_id = ProjectService.get_by_name(project_name).id
-            GithubCommitStatusService.create(project_id, sample_name)
             os.remove(path_file)
 
     @staticmethod
@@ -807,10 +800,8 @@ class GithubWorkflowService:
             download_url (str)
             project_name (str)
         """
-        project = ProjectService.get_by_name(project_name)
         sample_name, path_file =  GithubWorkflowService.download_github_file_content(file, download_url)
         GithubWorkflowService.create_sample(sample_name, path_file, project_name)
-        GithubCommitStatusService.create(project.id, sample_name)
         os.remove(path_file)
 
     @staticmethod
@@ -883,7 +874,6 @@ class GithubWorkflowService:
             repository = GithubRepositoryService.get_by_project_id(project_id)
         
             GithubService.delete_file(access_token, repository.repository_name, file_path, repository.branch)
-            GithubCommitStatusService.delete_sample(project_id, sample_name)
             new_base_tree_sha = GithubService.get_sha_base_tree(access_token, repository.repository_name, repository.branch)
             GithubRepositoryService.update_sha(project_id, new_base_tree_sha)
     
@@ -892,7 +882,6 @@ class GithubWorkflowService:
         project = ProjectService.get_by_name(project_name)
         sample_ids = [sample_name] 
         GrewService.delete_samples(project_name, sample_ids)
-        GithubCommitStatusService.delete_sample(project.id, sample_name)
         SampleService.SampleBlindAnnotationLevelService.delete_by_sample_name(project.id, sample_name)
 
 
