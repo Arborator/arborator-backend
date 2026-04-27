@@ -108,9 +108,15 @@ class GithubRenameSample(Resource):
         project = ProjectService.get_by_name(project_name)
         repo = GithubRepositoryService.get_by_project_id(project.id)
 
-        GithubService.rename_file_in_github_repo(github_access_token, repo.repository_name, old_file_name, new_file_name, repo.branch)
-        new_sha = GithubService.get_sha_base_tree(github_access_token, repo.repository_name, repo.branch)
+        new_sha = GithubService.rename_file_in_github_repo(
+            github_access_token,
+            repo.repository_name,
+            old_file_name,
+            new_file_name,
+            repo.branch,
+        ) or GithubService.get_sha_base_tree(github_access_token, repo.repository_name, repo.branch)
         GithubRepositoryService.update_sha(project.id, new_sha)
+        return { "status": "ok" }
 
 # route for pushing new samples immediatly (independently from other pending changes)
 @api.route("/<string:project_name>/synchronize/commit_samples")

@@ -337,6 +337,15 @@ class GithubService:
             return data.get("object").get("sha")
         except:
             abort(400, "The Github repository doesn't exist anymore") 
+
+    @staticmethod
+    def get_commit_tree_sha(access_token, full_name, commit_sha):
+        url = "https://api.github.com/repos/{}/git/commits/{}".format(full_name, commit_sha)
+        headers = GithubService.base_header(access_token)
+        response = requests.get(url, headers=headers)
+        data = response.json()
+        tree = data.get("tree", {})
+        return tree.get("sha")
               
     @staticmethod
     def create_blob_for_updated_file(access_token, full_name, content):
@@ -594,60 +603,38 @@ class GithubService:
         new_file_path,
         branch,
     ):
-        """
-        Rename a file in a GitHub repository using the GitHub API
-        
-        :param repo_owner: Owner of the repository
-        :param repo_name: Name of the repository
-        :param old_file_path: Current path of the file
-        :param new_file_path: New path for the file
-        :param branch: Branch to perform the operation on (default is 'main')
-        :param access_token: GitHub Personal Access Token
-        """
-        # GitHub API base URL
-        base_url = f'https://api.github.com/repos/{full_name}'
-        
-        # Headers for the API request
-        headers = {
-            'Accept': 'application/vnd.github.v3+json',
-            'Authorization': f'token {access_token}' if access_token else ''
+        """Rename a file by reusing the existing blob in a single git commit."""
+        if old_file_path == new_file_path:
+            return GithubService.get_sha_base_tree(access_token, full_name, branch)
+
+        parent_commit_sha = GithubService.get_sha_base_tree(access_token, full_name, branch)
+        base_tree_sha = GithubService.get_commit_tree_sha(access_token, full_name, parent_commit_sha)
+        file_sha = GithubService.get_file_sha(access_token, full_name, old_file_path, branch)
+
+        url = "https://api.github.com/repos/{}/git/trees".format(full_name)
+        headers = GithubService.base_header(access_token)
+        data = {
+            "base_tree": base_tree_sha,
+            "tree": [
+                {"path": old_file_path, "mode": "100644", "type": "blob", "sha": None},
+                {"path": new_file_path, "mode": "100644", "type": "blob", "sha": file_sha},
+            ],
         }
-        
-        # Step 1: Get the current file content and SHA
-        get_file_url = f'{base_url}/contents/{old_file_path}?ref={branch}'
-        response = requests.get(get_file_url, headers=headers)
+
+        response = requests.post(url, headers=headers, data=json.dumps(data))
         response.raise_for_status()
-        
-        file_data = response.json()
-        file_content = base64.b64decode(file_data['content']).decode('utf-8')
-        file_sha = file_data['sha']
-        
-        # Step 2: Create a commit to rename the file
-        commit_url = f'{base_url}/contents/{new_file_path}'
-        
-        commit_payload = {
-            'message': f'Rename {old_file_path} to {new_file_path}',
-            'content': base64.b64encode(file_content.encode('utf-8')).decode('utf-8'),
-            'branch': branch,
-            'sha': file_sha
-        }
-        
-        # Create the new file
-        response = requests.put(commit_url, json=commit_payload, headers=headers)
-        response.raise_for_status()
-        
-        # Step 3: Delete the old file
-        delete_payload = {
-            'message': f'Remove old file {old_file_path} after renaming',
-            'sha': file_sha,
-            'branch': branch
-        }
-        
-        delete_url = f'{base_url}/contents/{old_file_path}'
-        response = requests.delete(delete_url, json=delete_payload, headers=headers)
-        response.raise_for_status()
-        
-        print(f'Successfully renamed {old_file_path} to {new_file_path}')
+        new_tree_sha = response.json().get("sha")
+
+        commit_sha = GithubService.create_commit(
+            access_token,
+            new_tree_sha,
+            parent_commit_sha,
+            "Rename {} to {}".format(old_file_path, new_file_path),
+            full_name,
+        )
+        update_response = GithubService.update_sha(access_token, full_name, branch, commit_sha)
+        update_response.raise_for_status()
+        return commit_sha
 
 
 class GithubWorkflowService:
