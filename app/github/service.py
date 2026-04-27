@@ -79,7 +79,7 @@ class GithubCommitStatusService:
         project = ProjectService.get_by_name(project_name)
         sync_repository = GithubRepositoryService.get_by_project_id(project.id)
         if not sync_repository:
-            abort(404, "This project is not synchronized with GitHub")
+            abort(404)
         github_access_token = UserService.get_by_id(current_user.id).github_access_token
         return project, sync_repository, github_access_token
 
