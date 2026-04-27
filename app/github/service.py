@@ -128,6 +128,37 @@ class GithubCommitStatusService:
         return 'modified'
 
     @staticmethod
+    def _reset_local_added_sample(project_name, project_id, sample_name):
+        reply = grew_request(
+            "getConll",
+            data={"project_id": project_name, "sample_id": sample_name},
+        )
+        sample_tree = SampleExportService.serve_sample_trees(reply.get("data", {}))
+        sample_users = {
+            user_id
+            for sentence in sample_tree.values()
+            for user_id in sentence.get("conlls", {})
+        }
+
+        if USERNAME not in sample_users:
+            return
+
+        if sample_users == {USERNAME}:
+            GrewService.delete_samples(project_name, [sample_name])
+            SampleService.SampleBlindAnnotationLevelService.delete_by_sample_name(project_id, sample_name)
+            return
+
+        grew_request(
+            "eraseGraphs",
+            {
+                "project_id": project_name,
+                "sample_id": sample_name,
+                "sent_ids": "[]",
+                "user_id": USERNAME,
+            },
+        )
+
+    @staticmethod
     def get_modified_samples(project_name):
         _, sync_repository, github_access_token = GithubCommitStatusService._get_sync_context(project_name)
         current_samples = {sample["name"] for sample in GrewService.get_samples(project_name)}
@@ -176,8 +207,7 @@ class GithubCommitStatusService:
 
             if not download_url:
                 if sample_name in current_samples:
-                    GrewService.delete_samples(project_name, [sample_name])
-                    SampleService.SampleBlindAnnotationLevelService.delete_by_sample_name(project.id, sample_name)
+                    GithubCommitStatusService._reset_local_added_sample(project_name, project.id, sample_name)
                 continue
 
             file_name = sample_name + "_reset.conllu"
