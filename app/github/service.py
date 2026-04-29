@@ -113,11 +113,37 @@ class GithubCommitStatusService:
 
     @staticmethod
     def _count_changed_lines(diff_string):
-        return sum(
-            1
-            for line in diff_string.splitlines()
-            if line and (line.startswith('+') or line.startswith('-')) and not line.startswith('+++') and not line.startswith('---')
-        )
+        changes = 0
+        added_lines = 0
+        deleted_lines = 0
+
+        def count_block():
+            nonlocal changes, added_lines, deleted_lines
+            if added_lines or deleted_lines:
+                changes += max(added_lines, deleted_lines)
+                added_lines = 0
+                deleted_lines = 0
+
+        for line in diff_string.splitlines():
+            if not line or line.startswith('+++') or line.startswith('---'):
+                continue
+
+            if line.startswith('@@'):
+                count_block()
+                continue
+
+            if line.startswith('+'):
+                added_lines += 1
+                continue
+
+            if line.startswith('-'):
+                deleted_lines += 1
+                continue
+
+            count_block()
+
+        count_block()
+        return changes
 
     @staticmethod
     def _get_status_kind(sample_name, base_samples, current_samples):
