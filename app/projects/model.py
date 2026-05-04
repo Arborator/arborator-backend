@@ -3,7 +3,7 @@ from sqlalchemy import Boolean, Column, Integer, String, Boolean, Float
 from app import db  # noqa
 
 from app.shared.model import BaseM
-from app.github.model import GithubRepository, GithubCommitStatus
+from app.github.model import GithubRepository
 from app.history.model import History
 from app.constructicon.model import Constructicon
 
@@ -32,7 +32,6 @@ class Project(db.Model, BaseM):
     project_access = db.relationship("ProjectAccess", cascade="all,delete", backref="projects")
     project_last_access = db.relationship("LastAccess", cascade="all,delete", backref="projects")
     github_repository = db.relationship(GithubRepository, cascade="all,delete", backref="projects", uselist=False)
-    github_commit_status = db.relationship(GithubCommitStatus, cascade="all,delete", backref="projects")
     constructicon = db.relationship(Constructicon, cascade="all, delete", backref="projects")
     history = db.relationship(History, cascade="all, delete", backref="projects")
 

@@ -9,7 +9,6 @@ from app.config import Config
 from app.projects.service import LastAccessService, ProjectAccessService, ProjectService
 from app.user.service import UserService
 from app.samples.service import SampleBlindAnnotationLevelService
-from app.github.service import GithubCommitStatusService, GithubRepositoryService
 from app.utils.grew_utils import grew_request, GrewService
 from app.utils.ud_validator.validate import validate_ud
 
@@ -102,7 +101,6 @@ class SampleTreesResource(Resource):
         args = request.get_json()
         user_id = args.get("userId")
         conll = args.get("conll")
-        update_commit = args.get("updateCommit")
         sent_id = args.get("sentId")
         
         project = ProjectService.get_by_name(project_name)
@@ -132,8 +130,6 @@ class SampleTreesResource(Resource):
             print('tree saved under name: {} by user_id {}'.format(user_id, current_user.id))
             grew_request("saveGraph", data=data)
         LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
-        if GithubRepositoryService.get_by_project_id(project.id) and user_id == VALIDATED and update_commit:
-            GithubCommitStatusService.update_changes(project.id, sample_name)
 
         return { "status": "success", "new_conll": conll }
     
@@ -220,18 +216,22 @@ class SaveAllTreesResource(Resource):
             sample_name (str)
             conllGraph (str)
         """
+        project = ProjectService.get_by_name(project_name)
+        ProjectService.check_if_freezed(project)
         data = request.get_json()
+        conll_graph = data.get('conllGraph', '')
         
         file_name = sample_name + "_save_all.conllu"
         path_file = os.path.join(Config.UPLOAD_FOLDER, file_name)
         
         with open(path_file, "w", encoding="utf-8") as conll_file:
-            conll_file.write(data.get('conllGraph'))
+            conll_file.write(conll_graph)
             
         with open(path_file, "rb") as file_to_save:
             GrewService.save_sample(project_name, sample_name, file_to_save)
 
         os.remove(path_file)
+        LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
 
 @api.route("/<string:project_name>/samples/<string:sample_name>/trees/split")
 class SplitTreeResource(Resource):
@@ -255,9 +255,6 @@ class SplitTreeResource(Resource):
         print(inserted_sentences)
         TreeSegmentationService.insert_new_sentences(project_name, sample_name, sent_id, inserted_sentences)
         GrewService.erase_sentence(project_name, sample_name, sent_id)
-
-        if GithubRepositoryService.get_by_project_id(project.id):
-                GithubCommitStatusService.update_changes(project.id, sample_name)
         LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
 
 @api.route("/<string:project_name>/samples/<string:sample_name>/trees/merge")
@@ -283,7 +280,4 @@ class MergeTreesResource(Resource):
         TreeSegmentationService.insert_new_sentences(project_name, sample_name, first_sent_id, inserted_sentences)
         GrewService.erase_sentence(project_name, sample_name, first_sent_id)
         GrewService.erase_sentence(project_name, sample_name, second_sent_id)
-
-        if GithubRepositoryService.get_by_project_id(project.id):
-                GithubCommitStatusService.update_changes(project.id, sample_name)
         LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")

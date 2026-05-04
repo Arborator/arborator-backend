@@ -1,5 +1,5 @@
 from flask_restx import Namespace, Resource
-from flask import request
+from flask import abort, request
 from flask_login import current_user
 from flask_accepts.decorators.decorators import responds
 
@@ -70,26 +70,62 @@ class GithubRepositoryBranch(Resource):
 class GithubCommitResource(Resource):
     """Class contains endpoints related to commit"""
     def get(self, project_name):
-        """Get the number of changes to be committed"""
-        project = ProjectService.get_by_name(project_name)
-        modified_samples = GithubCommitStatusService.get_modified_samples(project.id)
-        for sample in modified_samples:
-            diff_string = GithubCommitStatusService.compare_changes_sample(project_name, sample["sample_name"])
-            sample["diff"] = diff_string
-        return modified_samples
+        """Get the git-like status of synchronized samples"""
+        return GithubCommitStatusService.get_modified_samples(project_name)
     
     def post(self, project_name):
-        """Create and push a commit"""
+        """Create and push a commit for the selected samples"""
         data = request.get_json()
         commit_message = data.get("commitMessage")
+        modified_samples_names = data.get("sampleNames", [])
+        if not modified_samples_names:
+            abort(400, "No samples selected for commit")
         project = ProjectService.get_by_name(project_name)
-        modified_samples = GithubCommitStatusService.get_modified_samples(project.id)
-        modified_samples_names = [sample["sample_name"] for sample in modified_samples]
         sha = GithubWorkflowService.commit_changes(modified_samples_names, project_name, commit_message)
         
         GithubRepositoryService.update_sha(project.id, sha)
-        GithubCommitStatusService.reset_samples(project.id, modified_samples_names)
         return { "status": "ok" }
+
+    def patch(self, project_name):
+        """Reset selected samples to the synchronized GitHub base state"""
+        data = request.get_json()
+        sample_names = data.get("sampleNames", [])
+        if not sample_names:
+            abort(400, "No samples selected for reset")
+        GithubCommitStatusService.reset_samples(project_name, sample_names)
+        LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
+        return { "status": "ok" }
+
+@api.route("/<string:project_name>/synchronize/rename")
+class GithubRenameSample(Resource):
+    def post(self, project_name):
+        data = request.get_json()
+        old_sample_name = data.get("oldName")
+        old_file_name = old_sample_name+".conllu"
+        new_sample_name = data.get("newName")
+        new_file_name = new_sample_name+".conllu"
+        github_access_token = UserService.get_by_id(current_user.id).github_access_token
+        project = ProjectService.get_by_name(project_name)
+        repo = GithubRepositoryService.get_by_project_id(project.id)
+
+        new_sha = GithubService.rename_file_in_github_repo(
+            github_access_token,
+            repo.repository_name,
+            old_file_name,
+            new_file_name,
+            repo.branch,
+        ) or GithubService.get_sha_base_tree(github_access_token, repo.repository_name, repo.branch)
+        GithubRepositoryService.update_sha(project.id, new_sha)
+        return { "status": "ok" }
+
+# route for pushing new samples immediatly (independently from other pending changes)
+@api.route("/<string:project_name>/synchronize/commit_samples")
+class GithubCommitSamples(Resource):
+    def post(self, project_name):
+        project = ProjectService.get_by_name(project_name)
+        data = request.get_json()
+        sha = GithubWorkflowService.commit_changes(data['new_samples'], project_name, "new samples added in ArboratorGrew")
+        GithubRepositoryService.update_sha(project.id, sha)
 
 @api.route("/<string:project_name>/synchronize/pull")
 class GithubPullResource(Resource):
@@ -119,14 +155,14 @@ class GithubPullRequestResource(Resource):
         data = request.get_json()
         branch = data.get("branch")
         title = data.get("title")
+
         user = UserService.get_by_id(current_user.id)
-
-        project_id = ProjectService.get_by_name(project_name).id
         access_token = user.github_access_token
-        branch_base = GithubRepositoryService.get_by_project_id(project_id).branch
-        full_name = GithubRepositoryService.get_by_project_id(project_id).repository_name
 
-        GithubService.create_pull_request(access_token, full_name, user.username, branch_base , branch, title)
+        project = ProjectService.get_by_name(project_name)
+        repo = GithubRepositoryService.get_by_project_id(project.id)
+
+        GithubService.create_pull_request(access_token, repo.repository_name, user.username, repo.branch, branch, title)
         return { "status": "ok" }
     
 @api.route("/<string:project_name>/synchronize/files")

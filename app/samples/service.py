@@ -11,9 +11,7 @@ from werkzeug.datastructures import FileStorage
 
 from app import db
 from app.config import Config
-from app.projects.service import ProjectService
 from app.utils.grew_utils import GrewService
-from app.github.service import GithubCommitStatusService, GithubRepositoryService
 
 from .model import SampleBlindAnnotationLevel
 
@@ -44,7 +42,6 @@ class SampleUploadService:
             new_username (str): the custom username used of the uploaded trees, or the same as the username
             samples_without_sent_ids (list[str]): list of samples that doesn't contain sent_ids Defaults to [].
         """
-        project = ProjectService.get_by_name(project_name)
         path_file = os.path.join(Config.UPLOAD_FOLDER, filename)
 
         fileobject.save(path_file)
@@ -66,11 +63,7 @@ class SampleUploadService:
 
         with open(path_file, "rb") as file_to_save:
             GrewService.save_sample(project_name, sample_name, file_to_save)
-            if GithubRepositoryService.get_by_project_id(project.id):
-                GithubCommitStatusService.create(project.id, sample_name)
-                if new_username == 'validated':
-                    GithubCommitStatusService.update_changes(project.id, sample_name)
-        
+                    
         os.remove(path_file)
 
 class SampleTokenizeService:
@@ -89,9 +82,8 @@ class SampleTokenizeService:
             rtl (bool): right to left script
         """
         existing_samples = GrewService.get_samples(project_name)
-        samples_names = [sample["name"] for sample in existing_samples]
-        project = ProjectService.get_by_name(project_name)
-        if sample_name not in samples_names:
+        existing_samples_names = [sample["name"] for sample in existing_samples]
+        if sample_name not in existing_samples_names:
             GrewService.create_samples(project_name, [sample_name])
             index = 0
         else: 
@@ -122,12 +114,8 @@ class SampleTokenizeService:
 
         with open(path_file, "rb") as file_to_save:
             GrewService.save_sample(project_name, sample_name, file_to_save)
-            if GithubRepositoryService.get_by_project_id(project.id):
-                GithubCommitStatusService.create(project.id, sample_name)
-                if username == "validated":
-                    GithubCommitStatusService.update_changes(project.id, sample_name)
-        
-        os.remove(path_file)    
+
+        os.remove(path_file)
 
 class SampleBlindAnnotationLevelService:
     
