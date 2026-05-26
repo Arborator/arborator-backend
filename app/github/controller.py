@@ -38,6 +38,12 @@ class GithubSynchronizationResource(Resource):
         project = ProjectService.get_by_name(project_name)
         github_access_token = UserService.get_by_id(current_user.id).github_access_token
 
+        # Check if repository branch is empty and create an initial commit if it is
+        if GithubService.is_repository_branch_empty(github_access_token, full_name):
+            GithubService.create_initial_empty_commit(github_access_token, full_name, "main")
+            branch_import = "main"
+            branch_sync = "main"
+
         GithubWorkflowService.import_files_from_github(full_name, project_name, branch_import, branch_sync)
         sha = GithubService.get_sha_base_tree(github_access_token, full_name, branch_sync)
         data = { "project_id": project.id, "user_id": current_user.id, "repository_name": full_name, "branch": branch_sync, "base_sha": sha }
