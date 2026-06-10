@@ -147,6 +147,12 @@ class GithubPullResource(Resource):
         LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
         return { "status": "ok" }
 
+@api.route("/<string:project_name>/synchronize/pull-preview")
+class GithubPullPreviewResource(Resource):
+    """preview which files would be affected by a pull"""
+    def get(self, project_name):
+        return GithubWorkflowService.preview_pull_changes(project_name)
+
 @api.route("/<string:project_name>/synchronize/pull-request")
 class GithubPullRequestResource(Resource):
     """Class deals with pull requests"""

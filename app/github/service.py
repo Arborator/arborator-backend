@@ -839,6 +839,34 @@ class GithubWorkflowService:
         base_tree = GithubService.get_sha_base_tree(access_token, sync_repository.repository_name, sync_repository.branch)
         return sync_repository.base_sha != base_tree
     
+    @staticmethod
+    def preview_pull_changes(project_name):
+        """Preview which files would be modified by pull without actually pulling
+        
+        Args:
+            project_name (str)
+        
+        Returns:
+            list: List of sample names that would be modified, added, or removed by the pull
+        """
+        project = ProjectService.get_by_name(project_name)
+        sync_repository = GithubRepositoryService.get_by_project_id(project.id)
+        github_access_token = UserService.get_by_id(current_user.id).github_access_token
+        
+        base_tree = GithubService.get_sha_base_tree(github_access_token, sync_repository.repository_name, sync_repository.branch)
+        modified_files = GithubService.compare_two_commits(github_access_token, sync_repository.repository_name, sync_repository.base_sha, base_tree)
+        
+        affected_samples = []
+        for file in modified_files:
+            if extension.search(file.get('filename')):
+                sample_name = file.get("filename").split(".conllu")[0]
+                affected_samples.append({
+                    "sample_name": sample_name,
+                    "status": file.get("status")
+                })
+        
+        return affected_samples
+    
     @staticmethod 
     def pull_changes(project_name):
         """Pull changes:
