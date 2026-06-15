@@ -692,6 +692,48 @@ class GithubService:
         update_response.raise_for_status()
         return commit_sha
 
+    @staticmethod
+    def is_repository_branch_empty(access_token, full_name):
+        """Check if a GitHub repository has no branches (is empty)
+        
+        Args:
+            access_token (str)
+            full_name (str): owner/repo
+            
+        Returns:
+            bool: True if repository has no branches
+        """
+        try:
+            branches = GithubService.list_repository_branches(access_token, full_name)
+            return len(branches) == 0
+        except:
+            return False
+
+    @staticmethod
+    def create_initial_empty_commit(access_token, full_name, branch_name="main"):
+        """Create an initial commit and branch for an empty repository by creating a README file
+        
+        Args:
+            access_token (str)
+            full_name (str): owner/repo
+            branch_name (str): name of the branch to create (default: main)
+            
+        Returns:
+            str: the commit SHA
+        """
+        url = "https://api.github.com/repos/{}/contents/README.md".format(full_name)
+        headers = GithubService.base_header(access_token)
+        content = base64.b64encode(b"").decode('utf-8') # empty content for the README file
+        data = {
+            "message": "Initial commit",
+            "content": content,
+            "branch": branch_name
+        }
+        response = requests.put(url, headers=headers, data=json.dumps(data))
+
+        result = response.json()
+        return result.get("commit").get("sha")
+
 
 class GithubWorkflowService:
 
@@ -796,6 +838,34 @@ class GithubWorkflowService:
         sync_repository = GithubRepositoryService.get_by_project_id(project.id)
         base_tree = GithubService.get_sha_base_tree(access_token, sync_repository.repository_name, sync_repository.branch)
         return sync_repository.base_sha != base_tree
+    
+    @staticmethod
+    def preview_pull_changes(project_name):
+        """Preview which files would be modified by pull without actually pulling
+        
+        Args:
+            project_name (str)
+        
+        Returns:
+            list: List of sample names that would be modified, added, or removed by the pull
+        """
+        project = ProjectService.get_by_name(project_name)
+        sync_repository = GithubRepositoryService.get_by_project_id(project.id)
+        github_access_token = UserService.get_by_id(current_user.id).github_access_token
+        
+        base_tree = GithubService.get_sha_base_tree(github_access_token, sync_repository.repository_name, sync_repository.branch)
+        modified_files = GithubService.compare_two_commits(github_access_token, sync_repository.repository_name, sync_repository.base_sha, base_tree)
+        
+        affected_samples = []
+        for file in modified_files:
+            if extension.search(file.get('filename')):
+                sample_name = file.get("filename").split(".conllu")[0]
+                affected_samples.append({
+                    "sample_name": sample_name,
+                    "status": file.get("status")
+                })
+        
+        return affected_samples
     
     @staticmethod 
     def pull_changes(project_name):
