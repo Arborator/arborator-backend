@@ -5,7 +5,7 @@ from typing import Dict, List
 
 from flask import abort, current_app
 from flask_login import current_user
-from sqlalchemy import desc
+from sqlalchemy import desc, update
 
 from app import db
 from .interface import ProjectInterface, ProjectExtendedInterface
@@ -100,16 +100,23 @@ class ProjectService:
     @staticmethod 
     def check_if_freezed(project: Project) -> None:
         """
-            Freezed projects are project that can't be edited
-            by the user, only the owner of the project who can
-            freeze the project, so if the project is freezed no one 
-            have access to the samples or features that update data
+            Freezed projects are projects that can't be edited
+            by non-admin users. Only admins can access frozen projects.
 
         Args:
             project (Project)
         """
-        if project.freezed and (not current_user.is_authenticated or ProjectAccessService.get_admins(project.id)[0] != current_user.username): 
-            abort(403, "You can't access the project when it's freezed")
+        if project.freezed:
+            if not current_user.is_authenticated:
+                abort(403, "You can't access the project when it's freezed")
+            
+            if current_user.super_admin:
+                return
+
+            user_id = current_user.id
+            project_user_access = ProjectAccessService.get_by_user_id(user_id, project.id)
+            if not project_user_access or project_user_access.access_level not in [2, 3]:
+                abort(403, "You can't access the project when it's freezed")
             
     @staticmethod
     def get_project_image(image_path: str) -> str:
@@ -169,12 +176,7 @@ class ProjectService:
             grew_project = next(project for project in grew_projects if project["name"] == project_name)
             project = ProjectService.get_by_name(project_name)
            
-            (
-                project.admins,
-                project.validators,
-                project.annotators,
-                project.guests,
-            ) = ProjectAccessService.get_all(project.id)
+            project.admins, project.annotators = ProjectAccessService.get_all(project.id)
             
             project.owner = project.admins[0] if project.admins else ''
             project.owner_avatar_url = UserService.get_by_username(project.admins[0]).picture_url if project.admins else ''
@@ -345,27 +347,17 @@ class ProjectAccessService:
         Returns:
             List[str]: list of admins usernames
         """
-        project_access_list: List[ProjectAccess] = ProjectAccess.query.filter_by(project_id=project_id, access_level=3)
+        # Support both access_level 2 (new) and 3 (old) for backward compatibility
+        project_access_list: List[ProjectAccess] = ProjectAccess.query.filter(
+            (ProjectAccess.project_id == project_id) & 
+            (ProjectAccess.access_level.in_([2, 3]))
+        ).all()
         if project_access_list:
             return [UserService.get_by_id(project_access.user_id).username for project_access in project_access_list]
         else:
             return []
 
-    @staticmethod
-    def get_validators(project_id: int) -> List[str]:
-        """Get validators of a project
 
-        Args:
-            project_id (int)
-
-        Returns:
-            List[str]: list of validators usernames
-        """
-        project_access_list: List[ProjectAccess] = ProjectAccess.query.filter_by(project_id=project_id, access_level=2)
-        if project_access_list:
-            return [UserService.get_by_id(project_access.user_id).username for project_access in project_access_list]
-        else:
-            return []
         
     @staticmethod
     def get_annotators(project_id: int) -> List[str]:
@@ -384,22 +376,6 @@ class ProjectAccessService:
             return []
 
     @staticmethod
-    def get_guests(project_id: int) -> List[str]:
-        """Get guests of a project
-
-        Args:
-            project_id (int)
-
-        Returns:
-            List[str]: list of guests username
-        """
-        project_access_list: List[ProjectAccess] = ProjectAccess.query.filter_by(project_id=project_id, access_level=4)
-        if project_access_list:
-            return [UserService.get_by_id(project_access.user_id).username for project_access in project_access_list]
-        else:
-            return []
-
-    @staticmethod
     def get_all(project_id: int):
         """Get all accesses of project
 
@@ -410,26 +386,20 @@ class ProjectAccessService:
             list of usernames of every type of user access
         """
         project_access_list: List[ProjectAccess] = ProjectAccess.query.filter_by(project_id=project_id).all()
-        admins, validators, annotators, guests = [], [], [], []
+        admins, annotators = [], []
         for project_access in project_access_list: 
             username = UserService.get_by_id(project_access.user_id).username
-            if project_access.access_level == 4: guests.append(username)
-            elif project_access.access_level == 1: annotators.append(username)
-            elif project_access.access_level == 2: validators.append(username)
-            elif project_access.access_level == 3: admins.append(username)
-        return admins, validators, annotators, guests
+            if project_access.access_level == 1: annotators.append(username)
+            elif project_access.access_level in [2, 3]: admins.append(username)
+        return admins, annotators
 
     @staticmethod
     def get_users_role(project_id: int) -> Dict[str, List[str]]:
         admins = ProjectAccessService.get_admins(project_id)
-        validators = ProjectAccessService.get_validators(project_id)
         annotators = ProjectAccessService.get_annotators(project_id)
-        guests = ProjectAccessService.get_guests(project_id)
         return {
             "admins": admins,
-            "validators": validators,
             "annotators": annotators,
-            "guests": guests,
         }
 
 
@@ -491,7 +461,7 @@ class ProjectAccessService:
         if not project_user_access:
             abort(401, "User doesn't belong to this project")
 
-        if project_user_access.access_level != 3:
+        if project_user_access.access_level not in [2, 3]:
             abort(401, "User doesn't have admin rights on this projects")
 
     
