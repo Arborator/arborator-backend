@@ -108,12 +108,15 @@ class SampleTreesResource(Resource):
         
         if not conll:
             abort(400)
+        
+        if user_id != current_user.username and user_id != VALIDATED:
+            abort(403, f"You can only modify your own trees, not {user_id}'s trees")
             
         if user_id == VALIDATED:
             sentence_json = sentenceConllToJson(conll)
             sentence_json["metaJson"]["validated_by"] = UserService.get_by_id(current_user.id).username
             conll = sentenceJsonToConll(sentence_json)
-            
+        
         if project.blind_annotation_mode == 1 and user_id == VALIDATED:
             conll = changeMetaFieldInSentenceConllu(conll, "user_id", VALIDATED)
         
@@ -139,6 +142,9 @@ class UserTreesResource(Resource):
     
     def delete(self, project_name: str, sample_name: str, username: str):
         """Remove trees of specific user """
+        if username != current_user.username:
+            abort(403, f"You can only delete your own trees, not {username}'s trees")
+        
         data = {"project_id": project_name,  "sample_id": sample_name, "sent_ids": "[]","user_id": username, }
         grew_request("eraseGraphs", data)
         LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")  
@@ -221,6 +227,17 @@ class SaveAllTreesResource(Resource):
         data = request.get_json()
         conll_graph = data.get('conllGraph', '')
         
+
+        user_ids = set()
+        for line in conll_graph.split('\n'):
+            if line.startswith('# user_id ='):
+                user_id = line.split('=', 1)[1].strip()
+                user_ids.add(user_id)
+        
+        allowed_users = {current_user.username, VALIDATED}
+        if not user_ids.issubset(allowed_users):
+            abort(403, "You can only save your own trees")
+        
         file_name = sample_name + "_save_all.conllu"
         path_file = os.path.join(Config.UPLOAD_FOLDER, file_name)
         
@@ -249,9 +266,20 @@ class SplitTreeResource(Resource):
         project = ProjectService.get_by_name(project_name)
         data = request.get_json()
         sent_id = data.get("sentId")
+        firstSents = data.get("firstSents")
+        secondSents = data.get("secondSents")
+        
+        all_user_ids = set()
+        for sent_dict in [firstSents, secondSents]:
+            if sent_dict:
+                all_user_ids.update(sent_dict.keys())
+        
+        if not all_user_ids.issubset({current_user.username}):
+            abort(403, "You can only modify your own trees")
+        
         inserted_sentences = []
-        inserted_sentences.append(data.get("firstSents"))
-        inserted_sentences.append(data.get("secondSents"))
+        inserted_sentences.append(firstSents)
+        inserted_sentences.append(secondSents)
         print(inserted_sentences)
         TreeSegmentationService.insert_new_sentences(project_name, sample_name, sent_id, inserted_sentences)
         GrewService.erase_sentence(project_name, sample_name, sent_id)
@@ -274,8 +302,13 @@ class MergeTreesResource(Resource):
         data = request.get_json()
         first_sent_id = data.get("firstSentId")
         second_sent_id = data.get("secondSentId")
+        merged_sentences = data.get("mergedSentences")
+        
+        if merged_sentences and not set(merged_sentences.keys()).issubset({current_user.username}):
+            abort(403, "You can only modify your own trees")
+        
         inserted_sentences = []
-        inserted_sentences.append(data.get("mergedSentences"))
+        inserted_sentences.append(merged_sentences)
 
         TreeSegmentationService.insert_new_sentences(project_name, sample_name, first_sent_id, inserted_sentences)
         GrewService.erase_sentence(project_name, sample_name, first_sent_id)
