@@ -17,6 +17,30 @@ from .service import TreeService, TreeSegmentationService, TreeValidationService
 BASE_TREE = "base_tree"
 VALIDATED = "validated"
 
+
+def user_can_write_validated_tree(project) -> bool:
+    if not current_user.is_authenticated:
+        return False
+
+    if current_user.super_admin:
+        return True
+
+    project_access = ProjectAccessService.get_by_user_id(current_user.id, project.id)
+    return bool(project_access and project_access.access_level >= 2)
+
+
+def check_tree_write_permission(project, user_id: str):
+    if not current_user.is_authenticated:
+        abort(403, "You must be authenticated to modify trees")
+
+    can_write_validated = user_can_write_validated_tree(project)
+    is_allowed_target = user_id == current_user.username or (
+        user_id == VALIDATED and can_write_validated
+    )
+
+    if not is_allowed_target:
+        abort(403, f"You can only modify your own trees, not {user_id}'s trees")
+
 api = Namespace(
     "Trees", description="Endpoints for dealing with trees of a sample"
 )  # noqa
@@ -109,8 +133,7 @@ class SampleTreesResource(Resource):
         if not conll:
             abort(400)
         
-        if user_id != current_user.username and user_id != VALIDATED:
-            abort(403, f"You can only modify your own trees, not {user_id}'s trees")
+        check_tree_write_permission(project, user_id)
             
         if user_id == VALIDATED:
             sentence_json = sentenceConllToJson(conll)
