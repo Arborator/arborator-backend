@@ -105,8 +105,15 @@ class SampleTreesResource(Resource):
                
         if current_user.is_authenticated:
             LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "read")
+        
+        staging_status = {}
+        try:
+            from .staging_service import StagingService
+            staging_status = StagingService.get_staged_status_by_sample(project.id, sample_name)
+        except Exception as e:
+            pass
             
-        data = { "sample_trees": sample_trees, "sent_ids": list(sample_trees.keys()), "blind_annotation_level": blind_annotation_level }
+        data = { "sample_trees": sample_trees, "sent_ids": list(sample_trees.keys()), "blind_annotation_level": blind_annotation_level, "staging_status": staging_status }
         return data
 
     def post(self, project_name: str, sample_name: str):
@@ -119,13 +126,15 @@ class SampleTreesResource(Resource):
             conll (str)
             update_commit (bool): if true we update changes number of the sample
             sent_id (str)
+            gitAdd (bool): if true and user is admin
         Returns: 
-            { "status": "success", "new_conll": with new changes to update frontend view}
+            { "status": "success", "new_conll": with new changes to update frontend view, "staged": bool, "staged_by": str, "staged_at": str }
         """
         args = request.get_json()
         user_id = args.get("userId")
         conll = args.get("conll")
         sent_id = args.get("sentId")
+        git_add = args.get("gitAdd", False)
         
         project = ProjectService.get_by_name(project_name)
         ProjectService.check_if_freezed(project)
@@ -157,7 +166,21 @@ class SampleTreesResource(Resource):
             grew_request("saveGraph", data=data)
         LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
 
-        return { "status": "success", "new_conll": conll }
+        # gitAdd staging
+        response = { "status": "success", "new_conll": conll, "staged": False }
+        if git_add and current_user.super_admin:
+            try:
+                from .staging_service import StagingService
+                StagingService.stage(project.id, sample_name, new_sent_id, user_id, current_user.username)
+                response["staged"] = True
+                response["staged_by"] = current_user.username
+                from datetime import datetime
+                response["staged_at"] = datetime.utcnow().isoformat()
+            except Exception as e:
+                print(f"Error staging tree: {e}")
+                if hasattr(e, 'response') and e.response and e.response.status_code == 409:
+                    abort(409, "This sentence is already staged by another admin")        
+        return response
     
 
 @api.route("/<string:project_name>/samples/<string:sample_name>/trees/<string:username>")

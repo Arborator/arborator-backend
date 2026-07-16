@@ -12,8 +12,8 @@ if args.mode != 'prod' and args.mode != 'dev':
     print('mode must be prod or dev')
     exit()
 
-if args.version != 'refactor_github' and args.version != 'add_grew_history' and args.version != 'update_dependencies':
-    print('version must be refactor_github or add_grew_history')
+if args.version != 'refactor_github' and args.version != 'add_grew_history' and args.version != 'update_dependencies' and args.version != 'add_staging_tables':
+    print('version must be refactor_github or add_grew_history, update_dependencies or add_staging_tables')
     exit()
 
 mode = args.mode
@@ -35,6 +35,40 @@ def migrate_update_dependencies(engine):
     with engine.connect() as connection:
         connection.execute(text("ALTER TABLE projects ADD collaborative_mode BOOLEAN NOT NULL DEFAULT(1);"))
 
+def migrate_add_staging_tables(engine):
+    with engine.connect() as connection:
+        # Create staged_trees table
+        connection.execute(text("""
+            CREATE TABLE IF NOT EXISTS staged_trees (
+                id INTEGER NOT NULL,
+                project_id INTEGER NOT NULL,
+                sample_id VARCHAR(255) NOT NULL,
+                sent_id VARCHAR(255) NOT NULL,
+                tree_user_id VARCHAR(255) NOT NULL,
+                staging_user_id VARCHAR(255) NOT NULL,
+                staged_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                pushed_at DATETIME,
+                status VARCHAR(50) NOT NULL DEFAULT 'staged',
+                PRIMARY KEY(id),
+                UNIQUE(project_id, sample_id, sent_id, tree_user_id)
+            )
+        """))
+        
+        # Create pinned_trees table
+        connection.execute(text("""
+            CREATE TABLE IF NOT EXISTS pinned_trees (
+                id INTEGER NOT NULL,
+                project_id INTEGER NOT NULL,
+                sample_id VARCHAR(255) NOT NULL,
+                sent_id VARCHAR(255) NOT NULL,
+                tree_user_id VARCHAR(255) NOT NULL,
+                pinned_by VARCHAR(255) NOT NULL,
+                pinned_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY(id),
+                UNIQUE(project_id, sample_id, sent_id, tree_user_id, pinned_by)
+            )
+        """))
+
 if args.version == 'add_grew_history':
     migrate_add_grew_history(engine)
            
@@ -43,3 +77,6 @@ if args.version == 'refactor_github':
 
 if args.version == 'update_dependencies':
     migrate_update_dependencies(engine)
+
+if args.version == 'add_staging_tables':
+    migrate_add_staging_tables(engine)
