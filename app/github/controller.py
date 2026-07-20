@@ -5,7 +5,7 @@ from flask_accepts.decorators.decorators import responds
 
 from app.projects.service import ProjectService
 from app.user.service import UserService
-from app.projects.service import LastAccessService
+from app.projects.service import LastAccessService, ProjectAccessService
 from .service import GithubRepositoryService, GithubService, GithubWorkflowService, GithubCommitStatusService
 from .schema import GithubRepositorySchema
 
@@ -122,6 +122,30 @@ class GithubRenameSample(Resource):
             repo.branch,
         ) or GithubService.get_sha_base_tree(github_access_token, repo.repository_name, repo.branch)
         GithubRepositoryService.update_sha(project.id, new_sha)
+        return { "status": "ok" }
+
+@api.route("/<string:project_name>/synchronize/stage")
+class GithubStageResource(Resource):
+    def delete(self, project_name):
+        """Unstage a tree for GitHub push"""
+        data = request.get_json()
+        sample_name = data.get("sample_name")
+        sent_id = data.get("sent_id")
+        tree_user_id = data.get("tree_user_id")
+        
+        if not all([sample_name, sent_id, tree_user_id]):
+            abort(400, "sample_name, sent_id, and tree_user_id are required")
+        
+        project = ProjectService.get_by_name(project_name)
+        ProjectService.check_if_project_exist(project)
+        
+        # Check if user is admin
+        ProjectAccessService.check_admin_access(project.id)
+        
+        # Unstage the tree
+        from app.trees.staging_service import StagingService
+        StagingService.unstage(project.id, sample_name, sent_id, tree_user_id)
+        
         return { "status": "ok" }
 
 # route for pushing new samples immediatly (independently from other pending changes)

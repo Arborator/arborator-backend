@@ -16,6 +16,7 @@ from app.config import Config
 from app.projects.service import ProjectService
 from app.utils.grew_utils import GrewService, grew_request , SampleExportService
 from app.user.service import UserService
+from app.trees.staging_service import StagingService
 import app.samples.service as SampleService
 
 from .model import GithubRepository
@@ -186,9 +187,31 @@ class GithubCommitStatusService:
 
     @staticmethod
     def get_modified_samples(project_name):
-        _, sync_repository, github_access_token = GithubCommitStatusService._get_sync_context(project_name)
+        project, sync_repository, github_access_token = GithubCommitStatusService._get_sync_context(project_name)
         current_samples = {sample["name"] for sample in GrewService.get_samples(project_name)}
-        current_contents = GrewService.get_samples_with_string_contents_as_dict(project_name, sorted(current_samples), USERNAME) if current_samples else {}
+        
+        all_staged_info = {}
+        for sample_name in current_samples:
+            staging_info = StagingService.get_staged_status_by_sample(project.id, sample_name)
+            if staging_info:
+                all_staged_info[sample_name] = staging_info
+        
+        # users who have staged trees
+        staged_users = set()
+        for sample_name, staging_info in all_staged_info.items():
+            for sent_id, trees_info in staging_info.items():
+                for tree_user_id in trees_info.keys():
+                    staged_users.add(tree_user_id)
+        
+        comparison_users = staged_users if staged_users else {USERNAME}
+        
+        all_users_to_compare = (staged_users | {USERNAME}) if staged_users else {USERNAME}
+        current_contents = {}
+        
+        for user_to_compare in all_users_to_compare:
+            user_contents = GrewService.get_samples_with_string_contents_as_dict(project_name, sorted(current_samples), user_to_compare) if current_samples else {}
+            current_contents.update(user_contents)
+        
         base_samples = GithubCommitStatusService._list_base_samples(
             github_access_token,
             sync_repository.repository_name,
@@ -208,11 +231,25 @@ class GithubCommitStatusService:
                 continue
 
             diff_string = GithubCommitStatusService._build_diff(base_content, current_content, sample_name)
+            
+            staging_info = all_staged_info.get(sample_name, {})
+            
+            staged_list = []
+            for sent_id, trees_info in staging_info.items():
+                for tree_user_id, stage_data in trees_info.items():
+                    staged_list.append({
+                        "sent_id": sent_id,
+                        "tree_user_id": tree_user_id,
+                        "staged_by": stage_data.get("staged_by"),
+                        "staged_at": stage_data.get("staged_at")
+                    })
+            
             modified_samples.append({
                 "sample_name": sample_name,
                 "changes_number": GithubCommitStatusService._count_changed_lines(diff_string),
                 "status": GithubCommitStatusService._get_status_kind(sample_name, base_samples, current_samples),
                 "diff": diff_string,
+                "staged_list": staged_list,
             })
 
         return modified_samples
