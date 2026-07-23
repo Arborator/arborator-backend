@@ -11,6 +11,8 @@ from app.user.service import UserService
 from app.samples.service import SampleBlindAnnotationLevelService
 from app.utils.grew_utils import grew_request, GrewService
 from app.utils.ud_validator.validate import validate_ud
+from app.github.service import GithubService
+from app.github.model import GithubRepository
 
 from .service import TreeService, TreeSegmentationService, TreeValidationService
 
@@ -168,18 +170,39 @@ class SampleTreesResource(Resource):
 
         # gitAdd staging
         response = { "status": "success", "new_conll": conll, "staged": False }
-        if git_add and current_user.super_admin:
-            try:
-                from .staging_service import StagingService
-                StagingService.stage(project.id, sample_name, new_sent_id, user_id, current_user.username)
-                response["staged"] = True
-                response["staged_by"] = current_user.username
-                from datetime import datetime
-                response["staged_at"] = datetime.utcnow().isoformat()
-            except Exception as e:
-                print(f"Error staging tree: {e}")
-                if hasattr(e, 'response') and e.response and e.response.status_code == 409:
-                    abort(409, "This sentence is already staged by another admin")        
+        if git_add:
+            # Check if user is admin of the project
+            is_admin = False
+            if current_user.super_admin:
+                is_admin = True
+            else:
+                user_project_access = ProjectAccessService.get_by_user_id(current_user.id, project.id)
+                if user_project_access and user_project_access.access_level in [2, 3]:
+                    is_admin = True
+            
+            if is_admin:
+                # Check if project is synchronized with GitHub
+                sync_repo = GithubRepository.query.filter_by(project_id=project.id).first()
+                if sync_repo:
+                    # Check if user has access to the GitHub repository
+                    user = UserService.get_by_id(current_user.id)
+                    has_github_access = GithubService.check_user_has_github_access(
+                        user.github_access_token,
+                        sync_repo.repository_name
+                    )
+                    if has_github_access:
+                        try:
+                            from .staging_service import StagingService
+                            StagingService.stage(project.id, sample_name, new_sent_id, user_id, current_user.username)
+                            response["staged"] = True
+                            response["staged_by"] = current_user.username
+                            from datetime import datetime
+                            response["staged_at"] = datetime.utcnow().isoformat()
+                        except Exception as e:
+                            if hasattr(e, 'response') and e.response and e.response.status_code == 409:
+                                abort(409, "This sentence is already staged by another admin")
+                            else:
+                                print(f"Error staging tree: {e}")
         return response
     
 
