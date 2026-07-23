@@ -356,6 +356,27 @@ class GithubService:
             repositories.append(repository) 
         return repositories 
 
+    @staticmethod    
+    def check_user_has_github_access(access_token, repository_full_name: str) -> bool:
+        try:
+            if not access_token:
+                return False
+            
+            # Get the repository info
+            repo_url = f"https://api.github.com/repos/{repository_full_name}"
+            headers = GithubService.base_header(access_token)
+            response = requests.get(repo_url, headers=headers)
+            
+            if response.status_code == 200:
+                repo_data = response.json()
+                permissions = repo_data.get("permissions", {})
+                return permissions.get("push", False) or permissions.get("admin", False)
+            
+            return False
+            
+        except Exception as e:
+            return False
+
     @staticmethod
     def list_repository_branches(access_token, full_name) -> List[str]:
         """List of repository branches, without dependbot branches
