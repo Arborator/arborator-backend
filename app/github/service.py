@@ -186,32 +186,44 @@ class GithubCommitStatusService:
         )
 
     @staticmethod
+    def _build_merged_conll(project_name, sample_name, staging_info):
+
+        status = grew_request("getConll", data={"project_id": project_name, "sample_id": sample_name})
+        if status.get("status") != "OK":
+            return ""
+
+        sample_tree_nots_noui = SampleExportService.serve_sample_trees(
+            status.get("data", {}), timestamps=False, user_ids=False, validated_by=False
+        )
+
+        merged_sentences = []
+        for sent_id, sent_data in sample_tree_nots_noui.items():
+            conlls = sent_data.get("conlls", {})
+
+            staged_user = None
+            if staging_info and sent_id in staging_info:
+                staged_users_for_sent = list(staging_info[sent_id].keys())
+                if staged_users_for_sent:
+                    staged_user = staged_users_for_sent[0]
+
+            if staged_user and staged_user in conlls:
+                merged_sentences.append(conlls[staged_user])
+            elif USERNAME in conlls:
+                merged_sentences.append(conlls[USERNAME])
+
+        return "".join(merged_sentences)
+
+    @staticmethod
     def get_modified_samples(project_name):
         project, sync_repository, github_access_token = GithubCommitStatusService._get_sync_context(project_name)
         current_samples = {sample["name"] for sample in GrewService.get_samples(project_name)}
-        
+
         all_staged_info = {}
         for sample_name in current_samples:
             staging_info = StagingService.get_staged_status_by_sample(project.id, sample_name)
             if staging_info:
                 all_staged_info[sample_name] = staging_info
-        
-        # users who have staged trees
-        staged_users = set()
-        for sample_name, staging_info in all_staged_info.items():
-            for sent_id, trees_info in staging_info.items():
-                for tree_user_id in trees_info.keys():
-                    staged_users.add(tree_user_id)
-        
-        comparison_users = staged_users if staged_users else {USERNAME}
-        
-        all_users_to_compare = (staged_users | {USERNAME}) if staged_users else {USERNAME}
-        current_contents = {}
-        
-        for user_to_compare in all_users_to_compare:
-            user_contents = GrewService.get_samples_with_string_contents_as_dict(project_name, sorted(current_samples), user_to_compare) if current_samples else {}
-            current_contents.update(user_contents)
-        
+
         base_samples = GithubCommitStatusService._list_base_samples(
             github_access_token,
             sync_repository.repository_name,
@@ -226,14 +238,20 @@ class GithubCommitStatusService:
                 sync_repository.base_sha,
                 sample_name,
             )
-            current_content = current_contents.get(sample_name, "")
+
+            staging_info = all_staged_info.get(sample_name, {})
+            if sample_name in current_samples:
+                current_content = GithubCommitStatusService._build_merged_conll(
+                    project_name, sample_name, staging_info
+                )
+            else:
+                current_content = ""
+
             if base_content == current_content:
                 continue
 
             diff_string = GithubCommitStatusService._build_diff(base_content, current_content, sample_name)
-            
-            staging_info = all_staged_info.get(sample_name, {})
-            
+
             staged_list = []
             for sent_id, trees_info in staging_info.items():
                 for tree_user_id, stage_data in trees_info.items():
@@ -243,7 +261,7 @@ class GithubCommitStatusService:
                         "staged_by": stage_data.get("staged_by"),
                         "staged_at": stage_data.get("staged_at")
                     })
-            
+
             modified_samples.append({
                 "sample_name": sample_name,
                 "changes_number": GithubCommitStatusService._count_changed_lines(diff_string),
@@ -574,14 +592,18 @@ class GithubService:
             new_base_sha(str)
         """
         tree = []
+        project = ProjectService.get_by_name(project_name)
         current_samples = {sample["name"] for sample in GrewService.get_samples(project_name)}
         existing_samples = [sample_name for sample_name in updated_samples if sample_name in current_samples]
-        sample_names, sample_content_files = GrewService.get_samples_with_string_contents(project_name, existing_samples)
-        for sample_name, sample in zip(sample_names, sample_content_files):
-            content = sample.get(USERNAME)
-            sha = GithubService.create_blob_for_updated_file(access_token, full_name, content)
-            blob = {"path": sample_name + CONLL, "mode": "100644", "type": "blob", "sha": sha}
-            tree.append(blob)
+
+        for sample_name in existing_samples:
+            # Get staging info we push staged
+            staging_info = StagingService.get_staged_status_by_sample(project.id, sample_name)
+            content = GithubCommitStatusService._build_merged_conll(project_name, sample_name, staging_info)
+            if content:
+                sha = GithubService.create_blob_for_updated_file(access_token, full_name, content)
+                blob = {"path": sample_name + CONLL, "mode": "100644", "type": "blob", "sha": sha}
+                tree.append(blob)
 
         deleted_samples = [sample_name for sample_name in updated_samples if sample_name not in current_samples]
         for sample_name in deleted_samples:
