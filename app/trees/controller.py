@@ -13,6 +13,7 @@ from app.utils.grew_utils import grew_request, GrewService
 from app.utils.ud_validator.validate import validate_ud
 from app.github.service import GithubService
 from app.github.model import GithubRepository
+from werkzeug.exceptions import HTTPException
 
 from .service import TreeService, TreeSegmentationService, TreeValidationService
 
@@ -198,11 +199,10 @@ class SampleTreesResource(Resource):
                             response["staged_by"] = current_user.username
                             from datetime import datetime
                             response["staged_at"] = datetime.utcnow().isoformat()
+                        except HTTPException:
+                            raise
                         except Exception as e:
-                            if hasattr(e, 'response') and e.response and e.response.status_code == 409:
-                                abort(409, "This sentence is already staged by another admin")
-                            else:
-                                print(f"Error staging tree: {e}")
+                            print(f"Error staging tree: {e}")
         return response
     
 

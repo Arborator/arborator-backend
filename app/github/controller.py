@@ -113,6 +113,10 @@ class GithubCommitResource(Resource):
         if not modified_samples_names:
             abort(400, "No samples selected for commit")
         sha = GithubWorkflowService.commit_changes(modified_samples_names, project_name, commit_message)
+
+        from app.trees.staging_service import StagingService
+        for sample_name in modified_samples_names:
+            StagingService.mark_as_pushed(project.id, sample_name, current_user.username)
         
         GithubRepositoryService.update_sha(project.id, sha)
         return { "status": "ok" }

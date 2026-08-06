@@ -23,6 +23,7 @@ class StagedTree(db.Model):
     # Staging dats
     staged_at = db.Column(db.DateTime, nullable=False, default=datetime)
     pushed_at = db.Column(db.DateTime, nullable=True)
+    pushed_by = db.Column(db.String(255), nullable=True)
     status = db.Column(db.String(50), nullable=False, default='staged')  # 'staged', 'pushed', 'unstaged'
     
     # only one staging per sample

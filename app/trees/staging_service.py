@@ -4,6 +4,9 @@ from app import db
 from .model import StagedTree
 
 
+VALIDATED_TREE_USER_ID = 'validated'
+
+
 class StagingService:
 
     @staticmethod
@@ -13,22 +16,36 @@ class StagingService:
             
         409: If already staged by a different admin
         """
-        # Check if already staged by someone else
+        # Only one admin can stage a sentence at a time
+        active_staging = StagedTree.query.filter_by(
+            project_id=project_id,
+            sample_id=sample_id,
+            sent_id=sent_id,
+            status='staged'
+        ).first()
+
+        if active_staging and (
+            active_staging.tree_user_id != tree_user_id
+            or active_staging.staging_user_id != staging_user_id
+        ):
+            abort(
+                409,
+                f"This sentence is already staged by {active_staging.staging_user_id}. "
+                f"You must unstage {active_staging.staging_user_id}'s tree before staging yours.",
+            )
+
         existing = StagedTree.query.filter_by(
             project_id=project_id,
             sample_id=sample_id,
             sent_id=sent_id,
             tree_user_id=tree_user_id
         ).first()
-        
-        if existing and existing.status == 'staged' and existing.staging_user_id != staging_user_id:
-            abort(409, f"Already staged by {existing.staging_user_id}")
-        
-        # Create staging
         if existing:
             existing.status = 'staged'
             existing.staging_user_id = staging_user_id
             existing.staged_at = datetime.utcnow()
+            existing.pushed_at = None
+            existing.pushed_by = None
         else:
             staged_tree = StagedTree(
                 project_id=project_id,
@@ -85,26 +102,35 @@ class StagingService:
         """
         Get staging status for all trees in a sample.
         """
-        staged_trees = StagedTree.query.filter_by(
-            project_id=project_id,
-            sample_id=sample_id,
-            status='staged'
-        ).all()
+        staged_trees = (
+            StagedTree.query.filter_by(
+                project_id=project_id,
+                sample_id=sample_id
+            )
+            .filter(StagedTree.status.in_(['staged', 'pushed']))
+            .all()
+        )
         
         result = {}
         for tree in staged_trees:
+            if tree.tree_user_id == VALIDATED_TREE_USER_ID:
+                continue
+
             if tree.sent_id not in result:
                 result[tree.sent_id] = {}
-            
+
             result[tree.sent_id][tree.tree_user_id] = {
+                'status': tree.status,
                 'staged_by': tree.staging_user_id,
-                'staged_at': tree.staged_at.isoformat() if tree.staged_at else None
+                'staged_at': tree.staged_at.isoformat() if tree.staged_at else None,
+                'pushed_by': tree.pushed_by,
+                'pushed_at': tree.pushed_at.isoformat() if tree.pushed_at else None
             }
         
         return result
 
     @staticmethod
-    def mark_as_pushed(project_id: int, sample_id: str, sent_id: str = None, tree_user_id: str = None):
+    def mark_as_pushed(project_id: int, sample_id: str, pushed_by: str, sent_id: str = None, tree_user_id: str = None):
         """
         Mark staged trees as pushed after GitHub push.
         """
@@ -118,10 +144,26 @@ class StagingService:
             query = query.filter_by(sent_id=sent_id)
         if tree_user_id:
             query = query.filter_by(tree_user_id=tree_user_id)
-        
-        for tree in query.all():
+
+        staged_trees = query.all()
+        for tree in staged_trees:
+            previous_pushed_trees = StagedTree.query.filter_by(
+                project_id=project_id,
+                sample_id=sample_id,
+                sent_id=tree.sent_id,
+                status='pushed'
+            ).all()
+
+            for previous_tree in previous_pushed_trees:
+                if previous_tree.tree_user_id == tree.tree_user_id:
+                    continue
+                previous_tree.status = 'unstaged'
+                previous_tree.pushed_at = None
+                previous_tree.pushed_by = None
+
             tree.status = 'pushed'
             tree.pushed_at = datetime.utcnow()
+            tree.pushed_by = pushed_by
         
         db.session.commit()
 

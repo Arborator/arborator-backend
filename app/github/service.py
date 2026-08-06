@@ -200,14 +200,27 @@ class GithubCommitStatusService:
         for sent_id, sent_data in sample_tree_nots_noui.items():
             conlls = sent_data.get("conlls", {})
 
-            staged_user = None
+            selected_user = None
             if staging_info and sent_id in staging_info:
-                staged_users_for_sent = list(staging_info[sent_id].keys())
+                staged_users_for_sent = [
+                    user_id
+                    for user_id, stage_data in staging_info[sent_id].items()
+                    if stage_data.get("status", "staged") == "staged"
+                ]
                 if staged_users_for_sent:
-                    staged_user = staged_users_for_sent[0]
+                    selected_user = staged_users_for_sent[0]
 
-            if staged_user and staged_user in conlls:
-                merged_sentences.append(conlls[staged_user])
+                if not selected_user:
+                    pushed_users_for_sent = [
+                        user_id
+                        for user_id, stage_data in staging_info[sent_id].items()
+                        if stage_data.get("status") == "pushed"
+                    ]
+                    if pushed_users_for_sent:
+                        selected_user = pushed_users_for_sent[0]
+
+            if selected_user and selected_user in conlls:
+                merged_sentences.append(conlls[selected_user])
             elif USERNAME in conlls:
                 merged_sentences.append(conlls[USERNAME])
 
@@ -255,6 +268,8 @@ class GithubCommitStatusService:
             staged_list = []
             for sent_id, trees_info in staging_info.items():
                 for tree_user_id, stage_data in trees_info.items():
+                    if stage_data.get("status", "staged") != "staged":
+                        continue
                     staged_list.append({
                         "sent_id": sent_id,
                         "tree_user_id": tree_user_id,
