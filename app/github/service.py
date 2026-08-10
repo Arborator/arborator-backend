@@ -227,6 +227,47 @@ class GithubCommitStatusService:
         return "".join(merged_sentences)
 
     @staticmethod
+    def _select_reset_targets(staging_info):
+        reset_targets = {}
+
+        for sent_id, trees_info in staging_info.items():
+            staged_entries = [
+                (user_id, stage_data)
+                for user_id, stage_data in trees_info.items()
+                if stage_data.get("status", "staged") == "staged"
+            ]
+            pushed_entries = [
+                (user_id, stage_data)
+                for user_id, stage_data in trees_info.items()
+                if stage_data.get("status") == "pushed"
+            ]
+
+            staged_with_previous_push = [
+                (user_id, stage_data)
+                for user_id, stage_data in staged_entries
+                if stage_data.get("pushed_at") or stage_data.get("pushed_by")
+            ]
+
+            if staged_with_previous_push:
+                reset_targets[sent_id] = staged_with_previous_push[0][0]
+            elif pushed_entries:
+                reset_targets[sent_id] = pushed_entries[0][0]
+            elif staged_entries:
+                reset_targets[sent_id] = staged_entries[0][0]
+
+        return reset_targets
+
+    @staticmethod
+    def _restore_reset_sample_user_ids(path_file, reset_targets):
+        sentences_json = SampleService.read_conllu_file_wrapper(path_file, keepEmptyTrees=True)
+
+        for sentence_json in sentences_json:
+            sent_id = str(sentence_json.get("metaJson", {}).get("sent_id", ""))
+            sentence_json["metaJson"]["user_id"] = reset_targets.get(sent_id, USERNAME)
+
+        SampleService.write_conllu_file_wrapper(path_file, sentences_json)
+
+    @staticmethod
     def get_modified_samples(project_name):
         project, sync_repository, github_access_token = GithubCommitStatusService._get_sync_context(project_name)
         current_samples = {sample["name"] for sample in GrewService.get_samples(project_name)}
@@ -293,6 +334,8 @@ class GithubCommitStatusService:
         current_samples = {sample["name"] for sample in GrewService.get_samples(project_name)}
 
         for sample_name in modified_samples:
+            staging_info = StagingService.get_staged_status_by_sample(project.id, sample_name)
+            reset_targets = GithubCommitStatusService._select_reset_targets(staging_info)
             file_metadata = GithubService.get_file_content_by_commit_sha(
                 github_access_token,
                 sync_repository.repository_name,
@@ -304,6 +347,7 @@ class GithubCommitStatusService:
             if not download_url:
                 if sample_name in current_samples:
                     GithubCommitStatusService._reset_local_added_sample(project_name, project.id, sample_name)
+                StagingService.clear_all_staging(project.id, sample_name)
                 continue
 
             file_name = sample_name + "_reset.conllu"
@@ -312,7 +356,7 @@ class GithubCommitStatusService:
             with open(path_file, "w", encoding="utf-8") as file:
                 file.write(content)
 
-            SampleService.add_or_replace_userid(path_file, USERNAME)
+            GithubCommitStatusService._restore_reset_sample_user_ids(path_file, reset_targets)
             SampleService.add_or_keep_timestamps(path_file)
 
             if sample_name not in current_samples:
@@ -320,6 +364,8 @@ class GithubCommitStatusService:
 
             with open(path_file, "rb") as file_to_save:
                 GrewService.save_sample(project_name, sample_name, file_to_save)
+
+            StagingService.restore_after_reset(project.id, sample_name, reset_targets)
 
             os.remove(path_file)
 

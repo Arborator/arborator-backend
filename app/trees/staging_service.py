@@ -44,8 +44,6 @@ class StagingService:
             existing.status = 'staged'
             existing.staging_user_id = staging_user_id
             existing.staged_at = datetime.utcnow()
-            existing.pushed_at = None
-            existing.pushed_by = None
         else:
             staged_tree = StagedTree(
                 project_id=project_id,
@@ -58,6 +56,33 @@ class StagingService:
             )
             db.session.add(staged_tree)
         
+        db.session.commit()
+
+    @staticmethod
+    def restore_after_reset(project_id: int, sample_id: str, reset_targets: dict):
+        staged_trees = StagedTree.query.filter_by(
+            project_id=project_id,
+            sample_id=sample_id,
+        ).all()
+
+        for tree in staged_trees:
+            if tree.tree_user_id == VALIDATED_TREE_USER_ID:
+                continue
+
+            target_user_id = reset_targets.get(tree.sent_id)
+            if target_user_id and tree.tree_user_id == target_user_id:
+                tree.status = 'pushed'
+                if tree.pushed_at is None:
+                    tree.pushed_at = tree.staged_at or datetime.utcnow()
+                if tree.pushed_by is None:
+                    tree.pushed_by = tree.staging_user_id
+                continue
+
+            if tree.status == 'staged' or target_user_id == tree.tree_user_id:
+                tree.status = 'unstaged'
+                tree.pushed_at = None
+                tree.pushed_by = None
+
         db.session.commit()
 
     @staticmethod
