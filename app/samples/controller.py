@@ -93,8 +93,13 @@ class SampleResource(Resource):
         files = request.files.to_dict(flat=False).get("files")
         samples_without_sent_ids = request.form.get("samplesWithoutSentIds")
         rtl = request.form.get("rtl")
+        stage_all = request.form.get("stageAll")
         
         rtl = json.loads(rtl)
+        if stage_all is not None:
+            stage_all = json.loads(stage_all)
+        else:
+            stage_all = False
         
         samples_to_commit = []
  
@@ -125,6 +130,10 @@ class SampleResource(Resource):
                 )
                 if not sample_name in existing_samples and username == "validated":
                     samples_to_commit.append(sample_name)
+
+                if stage_all and username and username != "validated":
+                    from app.trees.staging_service import StagingService
+                    StagingService.stage_sample(project_name, project.id, sample_name, username, current_user.username)
 
             pos_list, relation_list, feat_list, misc_list = GrewService.get_config_from_samples(project_name, sample_names)
 
@@ -206,12 +215,18 @@ class SampleTokenizeResource(Resource):
         lang = args.get("lang")
         text = args.get("text")
         rtl = args.get("rtl")
+        stage_all = args.get("stageAll", False)
 
+        project = ProjectService.get_by_name(project_name)
         grew_samples = GrewService.get_samples(project_name)
         existing_samples = [sa["name"] for sa in grew_samples]
 
         SampleTokenizeService.tokenize(text, option, lang, project_name, sample_name, username, rtl)
         LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
+
+        if stage_all and username and username != "validated":
+            from app.trees.staging_service import StagingService
+            StagingService.stage_sample(project_name, project.id, sample_name, username, current_user.username)
 
         samples_to_commit = []
         if not sample_name in existing_samples and username == "validated":

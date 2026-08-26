@@ -1,6 +1,7 @@
 from datetime import datetime
 from flask import abort
 from app import db
+from app.utils.grew_utils import grew_request
 from .model import StagedTree
 
 
@@ -84,6 +85,29 @@ class StagingService:
                 tree.pushed_by = None
 
         db.session.commit()
+
+    @staticmethod
+    @staticmethod
+    def stage_sample(project_name: str, project_id: int, sample_id: str, tree_user_id: str, staging_user_id: str):
+        """Stage every tree in a sample for the given user id."""
+        reply = grew_request(
+            "getConll",
+            data={"project_id": project_name, "sample_id": sample_id},
+        )
+        sample_data = reply.get("data", {})
+
+        for sent_id, sentence_data in sample_data.items():
+            if isinstance(sentence_data, dict) and "conlls" in sentence_data:
+                user_ids = sentence_data.get("conlls", {}).keys()
+            elif isinstance(sentence_data, dict):
+                user_ids = sentence_data.keys()
+            else:
+                continue
+
+            for user_id in user_ids:
+                if tree_user_id and user_id != tree_user_id:
+                    continue
+                StagingService.stage(project_id, sample_id, sent_id, user_id, staging_user_id)
 
     @staticmethod
     def unstage(project_id: int, sample_id: str, sent_id: str, tree_user_id: str):
