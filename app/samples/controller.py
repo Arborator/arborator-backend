@@ -66,6 +66,16 @@ class SampleResource(Resource):
             else:
                 sample["blind_annotation_level"] = 4
 
+            from app.trees.staging_service import StagingService
+            staging_status = StagingService.get_staged_status_by_sample(project.id, grew_sample["name"])
+            staged_count = sum(
+                1
+                for trees_info in staging_status.values()
+                for tree_info in trees_info.values()
+                if tree_info.get("status") == "staged"
+            )
+            sample["staged_count"] = staged_count
+
             processed_samples.append(sample)
         return processed_samples
 
