@@ -138,10 +138,8 @@ class SampleResource(Resource):
                     new_username=username,
                     samples_without_sent_ids=samples_without_sent_ids
                 )
-                if not sample_name in existing_samples and username == "validated":
-                    samples_to_commit.append(sample_name)
 
-                if stage_all and username and username != "validated":
+                if stage_all and username:
                     from app.trees.staging_service import StagingService
                     StagingService.stage_sample(project_name, project.id, sample_name, username, current_user.username)
 
@@ -228,20 +226,15 @@ class SampleTokenizeResource(Resource):
         stage_all = args.get("stageAll", False)
 
         project = ProjectService.get_by_name(project_name)
-        grew_samples = GrewService.get_samples(project_name)
-        existing_samples = [sa["name"] for sa in grew_samples]
 
         SampleTokenizeService.tokenize(text, option, lang, project_name, sample_name, username, rtl)
         LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
 
-        if stage_all and username and username != "validated":
+        if stage_all and username:
             from app.trees.staging_service import StagingService
             StagingService.stage_sample(project_name, project.id, sample_name, username, current_user.username)
 
-        samples_to_commit = []
-        if not sample_name in existing_samples and username == "validated":
-            samples_to_commit.append(sample_name)
-        response = { "samples_to_commit": samples_to_commit }
+        response = { "samples_to_commit": [] }
         return { "status": "OK", "data": response }
 
 @api.route("/<string:project_name>/samples/<string:sample_name>/blind-annotation-level")
@@ -292,8 +285,19 @@ class SampleEvaluationResource(Resource):
         Returns:
             file send as an attachement
         """
+        project = ProjectService.get_by_name(project_name)
         sample_conlls = GrewService.get_sample_trees(project_name, sample_name)
-        evaluations = SampleEvaluationService.evaluate_sample(sample_conlls)
+
+        from app.trees.staging_service import StagingService
+        staging_status = StagingService.get_staged_status_by_sample(project.id, sample_name)
+        reference_by_sentence = {
+            sent_id: tree_user_id
+            for sent_id, trees_info in staging_status.items()
+            for tree_user_id, info in trees_info.items()
+            if info.get("status") == "pushed"
+        }
+
+        evaluations = SampleEvaluationService.evaluate_sample(sample_conlls, reference_by_sentence)
         evaluations_tsv = SampleEvaluationService.evaluations_json_to_tsv(evaluations)
         uploadable_evaluations_tsv = SharedService.get_sendable_data(evaluations_tsv)
         file_name = f"{sample_name}_evaluations.tsv"
