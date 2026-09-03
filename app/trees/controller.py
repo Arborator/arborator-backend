@@ -214,16 +214,13 @@ class SampleTreesResource(Resource):
         else:
             try:
                 from .staging_service import StagingService
-                response["pinned"] = StagingService.upsert_pin_if_matches_reference(
-                    project_name,
+                StagingService.clear_status_for_tree(
                     project.id,
                     sample_name,
                     new_sent_id,
                     user_id,
                 )
-                if response["pinned"]:
-                    from datetime import datetime
-                    response["pinned_at"] = datetime.utcnow().isoformat()
+                response["pinned"] = False
             except Exception:
                 response["pinned"] = False
         return response

@@ -179,6 +179,37 @@ class StagingService:
         db.session.commit()
 
     @staticmethod
+    def clear_status_for_tree(project_id: int, sample_id: str, sent_id: str, tree_user_id: str):
+        """Clear persisted GitHub status for one tree after a regular save (non-stage)."""
+        staged_tree = StagedTree.query.filter_by(
+            project_id=project_id,
+            sample_id=sample_id,
+            sent_id=sent_id,
+            tree_user_id=tree_user_id,
+        ).first()
+
+        if staged_tree:
+            staged_tree.status = 'unstaged'
+            staged_tree.pushed_at = None
+            staged_tree.pushed_by = None
+
+        user_col = StagingService._get_pinned_user_column()
+        db.session.execute(
+            text(
+                f"DELETE FROM pinned_trees WHERE project_id = :project_id AND sample_id = :sample_id "
+                f"AND sent_id = :sent_id AND {user_col} = :tree_user_id"
+            ),
+            {
+                'project_id': project_id,
+                'sample_id': sample_id,
+                'sent_id': sent_id,
+                'tree_user_id': tree_user_id,
+            },
+        )
+
+        db.session.commit()
+
+    @staticmethod
     def stage(project_id: int, sample_id: str, sent_id: str, tree_user_id: str, staging_user_id: str):
         """
         Stage a tree for GitHub push.
