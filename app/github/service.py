@@ -879,6 +879,19 @@ class GithubService:
 class GithubWorkflowService:
 
     @staticmethod
+    def _sentences_by_id(conll_content: str):
+        sentence_map = {}
+        for conll in SampleService.split_conll_string_to_conlls_list(conll_content):
+            sent_id = None
+            for line in conll.rstrip().split("\n"):
+                if "# sent_id = " in line:
+                    sent_id = line.split("# sent_id = ")[-1]
+                    break
+            if sent_id:
+                sentence_map[sent_id] = conll.rstrip()
+        return sentence_map
+
+    @staticmethod
     def import_files_from_github(full_name, project_name, branch, branch_syn):
         """Import files from github:
             - Get repository files names of specific branch 
@@ -1030,6 +1043,7 @@ class GithubWorkflowService:
         for file in modified_files:
             if extension.search(file.get('filename')):
                 sample_name = file.get("filename").split(".conllu")[0]
+                StagingService.clear_all_pins(project.id, sample_name)
                 file_content= GithubService.get_file_content_by_commit_sha(github_access_token, sync_repository.repository_name, file.get("filename"), base_tree)
                 download_url = file_content.get("download_url")
                 if file.get("status") == "renamed":
@@ -1040,7 +1054,25 @@ class GithubWorkflowService:
                 if file.get("status") == "added":
                     GithubWorkflowService.create_sample_from_github_file(sample_name, download_url, project_name)
                 if file.get("status") == "modified":
-                    GithubWorkflowService.pull_change_existing_sample(project_name, sample_name, download_url)
+                    previous_file_content = GithubService.get_file_content_by_commit_sha(
+                        github_access_token,
+                        sync_repository.repository_name,
+                        file.get("filename"),
+                        sync_repository.base_sha,
+                    )
+                    previous_download_url = previous_file_content.get("download_url")
+                    previous_content = requests.get(previous_download_url).text if previous_download_url else ""
+                    new_content = requests.get(download_url).text if download_url else ""
+
+                    previous_sentences = GithubWorkflowService._sentences_by_id(previous_content)
+                    new_sentences = GithubWorkflowService._sentences_by_id(new_content)
+                    changed_sent_ids = {
+                        sent_id
+                        for sent_id in set(previous_sentences.keys()).union(new_sentences.keys())
+                        if previous_sentences.get(sent_id) != new_sentences.get(sent_id)
+                    }
+
+                    GithubWorkflowService.pull_change_existing_sample(project_name, sample_name, download_url, changed_sent_ids)
                 if file.get("status") == "removed":
                     GithubWorkflowService.delete_sample_from_project(project_name, sample_name)
         GithubRepositoryService.update_sha(project.id, base_tree)
@@ -1078,13 +1110,14 @@ class GithubWorkflowService:
         return sample_name, path_file
     
     @staticmethod
-    def pull_change_existing_sample(project_name, sample_name, download_url):
+    def pull_change_existing_sample(project_name, sample_name, download_url, changed_sent_ids=None):
         """pull changes of an existing file 
 
         Args:
             project_name (str)
             sample_name (str)
             download_url (str)
+            changed_sent_ids (set[str] | None): sentence ids changed in github
         """
         content = requests.get(download_url).text 
         file_name = sample_name + "_modified.conllu"
@@ -1098,19 +1131,16 @@ class GithubWorkflowService:
         with open(path_file, "rb") as file_to_save:
             GrewService.save_sample(project_name, sample_name, file_to_save)
         os.remove(path_file)
-        
-        conlls_strings = SampleService.split_conll_string_to_conlls_list(content)
+
         reply = grew_request("getConll", data={"project_id": project_name, "sample_id": sample_name},)
         sample_trees =SampleExportService.serve_sample_trees(reply.get("data", {}))
-        modified_sentences = []
-        for conll in conlls_strings:
-            for line in conll.rstrip().split("\n"):
-                if "# sent_id = " in line:
-                    sent_id = line.split("# sent_id = ")[-1] 
-                    modified_sentences.append(sent_id)
-        deleted_sentences = [sent_id for sent_id in sample_trees.keys() if sent_id not in modified_sentences]
-        if deleted_sentences:
-            data = { "project_id": project_name, "sample_id": sample_name, "sent_ids": json.dumps(deleted_sentences), "user_id": USERNAME }
+
+        if changed_sent_ids is None:
+            changed_sent_ids = set(sample_trees.keys())
+
+        unchanged_sentences = [sent_id for sent_id in sample_trees.keys() if sent_id not in changed_sent_ids]
+        if unchanged_sentences:
+            data = { "project_id": project_name, "sample_id": sample_name, "sent_ids": json.dumps(unchanged_sentences), "user_id": USERNAME }
             grew_request("eraseGraphs", data)
         
     @staticmethod

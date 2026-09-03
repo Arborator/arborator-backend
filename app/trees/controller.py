@@ -1,3 +1,4 @@
+import json
 import os
 from flask import abort, request
 from flask_login import current_user
@@ -113,6 +114,13 @@ class SampleTreesResource(Resource):
         try:
             from .staging_service import StagingService
             staging_status = StagingService.get_staged_status_by_sample(project.id, sample_name)
+            pinned_status = StagingService.get_pinned_status_by_sample(project.id, sample_name)
+            for sent_id, trees_info in pinned_status.items():
+                if sent_id not in staging_status:
+                    staging_status[sent_id] = {}
+                for user_id, info in trees_info.items():
+                    if user_id not in staging_status[sent_id] or staging_status[sent_id][user_id].get('status') != 'staged':
+                        staging_status[sent_id][user_id] = info
         except Exception as e:
             pass
             
@@ -170,7 +178,7 @@ class SampleTreesResource(Resource):
         LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
 
         # gitAdd staging
-        response = { "status": "success", "new_conll": conll, "staged": False }
+        response = { "status": "success", "new_conll": conll, "staged": False, "pinned": False }
         if git_add:
             # Check if user is admin of the project
             is_admin = False
@@ -203,6 +211,21 @@ class SampleTreesResource(Resource):
                             raise
                         except Exception as e:
                             print(f"Error staging tree: {e}")
+        else:
+            try:
+                from .staging_service import StagingService
+                response["pinned"] = StagingService.upsert_pin_if_matches_reference(
+                    project_name,
+                    project.id,
+                    sample_name,
+                    new_sent_id,
+                    user_id,
+                )
+                if response["pinned"]:
+                    from datetime import datetime
+                    response["pinned_at"] = datetime.utcnow().isoformat()
+            except Exception:
+                response["pinned"] = False
         return response
     
 
@@ -318,6 +341,38 @@ class SaveAllTreesResource(Resource):
 
         os.remove(path_file)
         LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
+
+
+@api.route("/<string:project_name>/samples/<string:sample_name>/trees/github-reference")
+class GithubReferenceTreeResource(Resource):
+
+    def delete(self, project_name: str, sample_name: str):
+        """Delete GitHub tree for one sentence."""
+        data = request.get_json() or {}
+        sent_id = data.get("sentId")
+
+        if not sent_id:
+            abort(400, "sentId is required")
+
+        project = ProjectService.get_by_name(project_name)
+        ProjectService.check_if_project_exist(project)
+        ProjectAccessService.check_admin_access(project.id)
+
+        grew_request(
+            "eraseGraphs",
+            {
+                "project_id": project_name,
+                "sample_id": sample_name,
+                "sent_ids": json.dumps([sent_id]),
+                "user_id": VALIDATED,
+            },
+        )
+
+        from .staging_service import StagingService
+        StagingService.clear_pins_for_sentence(project.id, sample_name, sent_id)
+        LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
+
+        return {"status": "ok"}
 
 @api.route("/<string:project_name>/samples/<string:sample_name>/trees/split")
 class SplitTreeResource(Resource):
