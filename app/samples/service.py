@@ -182,26 +182,30 @@ class SampleBlindAnnotationLevelService:
 
 class SampleEvaluationService:
     @staticmethod
-    def evaluate_sample(sample_conlls):
+    def evaluate_sample(sample_conlls, reference_by_sentence: Dict[str, str] = None):
         """Evaluate samples
 
         Args:
             sample_conlls (2-levels dict sent_id -> user_id -> conll_string)
+            reference_by_sentence (dict sent_id -> user_id): ground truth tree to compare
+                against for each sentence (the tree most recently pushed by an admin)
 
         Returns:
             evaluations (2-level dict user_id -> evaluation -> percentage)
         """
+        reference_by_sentence = reference_by_sentence or {}
         corrects = {}
         submitted = {}
         total = {"UPOS": 0, "DEPREL": 0, "HEAD": 0}
 
         for sentence_id, sentence_conlls in sample_conlls.items():
-            validated_tree_conll = sentence_conlls.get("validated")
-            if validated_tree_conll:
-                validated_tree_sentence_json = sentenceConllToJson(
-                    validated_tree_conll
+            reference_user_id = reference_by_sentence.get(sentence_id)
+            reference_tree_conll = sentence_conlls.get(reference_user_id) if reference_user_id else None
+            if reference_tree_conll:
+                reference_tree_sentence_json = sentenceConllToJson(
+                    reference_tree_conll
                 )
-                validated_tree = validated_tree_sentence_json["treeJson"]['nodesJson']
+                reference_tree = reference_tree_sentence_json["treeJson"]['nodesJson']
 
                 basetree_conll = sentence_conlls.get(BASE_TREE)
                 if basetree_conll:
@@ -212,15 +216,15 @@ class SampleEvaluationService:
                 else:
                     basetree_tree = {}
 
-                for token_id in validated_tree.keys():
-                    validated_tree_token = validated_tree.get(token_id)
-                    if validated_tree_token == None:
+                for token_id in reference_tree.keys():
+                    reference_tree_token = reference_tree.get(token_id)
+                    if reference_tree_token == None:
                         continue
                     basetree_token = basetree_tree.get(token_id, {})
                     for label in ["UPOS", "HEAD", "DEPREL"]:
                         if (
-                            validated_tree_token[label] != "_"
-                            and basetree_token.get(label) != validated_tree_token[label]
+                            reference_tree_token[label] != "_"
+                            and basetree_token.get(label) != reference_tree_token[label]
                         ):
                             total[label] += 1
             else:
@@ -228,7 +232,7 @@ class SampleEvaluationService:
 
             for user_id, user_conll in sentence_conlls.items():
 
-                if user_id != "validated":
+                if user_id != reference_user_id:
                     if not corrects.get(user_id):
                         corrects[user_id] = {"UPOS": 0, "DEPREL": 0, "HEAD": 0}
                     if not submitted.get(user_id):
@@ -240,8 +244,8 @@ class SampleEvaluationService:
                     user_tree = user_sentence_json["treeJson"]["nodesJson"]
 
                     for token_id in user_tree.keys():
-                        validated_tree_token = validated_tree.get(token_id)
-                        if validated_tree_token == None:
+                        reference_tree_token = reference_tree.get(token_id)
+                        if reference_tree_token == None:
                             continue
 
                         user_token = user_tree.get(token_id)
@@ -249,13 +253,13 @@ class SampleEvaluationService:
 
                         for label in ["UPOS", "HEAD", "DEPREL"]:
                             if (
-                                validated_tree_token[label] != "_"
-                                and basetree_token.get(label) != validated_tree_token[label]
+                                reference_tree_token[label] != "_"
+                                and basetree_token.get(label) != reference_tree_token[label]
                             ):
                                 if user_token[label] != "_":
                                     submitted[user_id][label] += 1
                                 corrects[user_id][label] += (
-                                    validated_tree_token[label] == user_token[label]
+                                    reference_tree_token[label] == user_token[label]
                                 )
         GRADE = 100
         evaluations = {}

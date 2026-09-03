@@ -16,6 +16,7 @@ from app.config import Config
 from app.projects.service import ProjectService
 from app.utils.grew_utils import GrewService, grew_request , SampleExportService
 from app.user.service import UserService
+from app.trees.staging_service import StagingService
 import app.samples.service as SampleService
 
 from .model import GithubRepository
@@ -23,7 +24,8 @@ from .model import GithubRepository
 
 extension = re.compile("^.*\.(conllu)$")
 
-USERNAME = 'validated'
+GITHUB_TREE_USER_ID = 'github'
+USERNAME = GITHUB_TREE_USER_ID
 CONLL = '.conllu'
 class GithubRepositoryService:
     """Class contains the methods that deal with GithubRepository entity """
@@ -185,10 +187,106 @@ class GithubCommitStatusService:
         )
 
     @staticmethod
+    def _build_merged_conll(project_name, sample_name, staging_info):
+
+        status = grew_request("getConll", data={"project_id": project_name, "sample_id": sample_name})
+        if status.get("status") != "OK":
+            return ""
+
+        sample_tree_nots_noui = SampleExportService.serve_sample_trees(
+            status.get("data", {}), timestamps=False, user_ids=False, validated_by=False
+        )
+
+        merged_sentences = []
+        for sent_id, sent_data in sample_tree_nots_noui.items():
+            conlls = sent_data.get("conlls", {})
+
+            selected_user = None
+            if staging_info and sent_id in staging_info:
+                staged_users_for_sent = [
+                    user_id
+                    for user_id, stage_data in staging_info[sent_id].items()
+                    if stage_data.get("status", "staged") == "staged"
+                ]
+                if staged_users_for_sent:
+                    selected_user = staged_users_for_sent[0]
+
+                if not selected_user:
+                    pushed_users_for_sent = [
+                        user_id
+                        for user_id, stage_data in staging_info[sent_id].items()
+                        if stage_data.get("status") == "pushed"
+                    ]
+                    if pushed_users_for_sent:
+                        selected_user = pushed_users_for_sent[0]
+
+            if selected_user and selected_user in conlls:
+                merged_sentences.append(conlls[selected_user])
+            elif USERNAME in conlls:
+                merged_sentences.append(conlls[USERNAME])
+
+        return "".join(merged_sentences)
+
+    @staticmethod
+    def _select_reset_targets(staging_info):
+        reset_targets = {}
+
+        for sent_id, trees_info in staging_info.items():
+            staged_entries = [
+                (user_id, stage_data)
+                for user_id, stage_data in trees_info.items()
+                if stage_data.get("status", "staged") == "staged"
+            ]
+            pushed_entries = [
+                (user_id, stage_data)
+                for user_id, stage_data in trees_info.items()
+                if stage_data.get("status") == "pushed"
+            ]
+
+            staged_with_previous_push = [
+                (user_id, stage_data)
+                for user_id, stage_data in staged_entries
+                if stage_data.get("pushed_at") or stage_data.get("pushed_by")
+            ]
+
+            if staged_with_previous_push:
+                reset_targets[sent_id] = staged_with_previous_push[0][0]
+            elif pushed_entries:
+                reset_targets[sent_id] = pushed_entries[0][0]
+            elif staged_entries:
+                reset_targets[sent_id] = staged_entries[0][0]
+
+        return reset_targets
+
+    @staticmethod
+    def _restore_reset_sample_user_ids(path_file, reset_targets):
+        sentences_json = SampleService.read_conllu_file_wrapper(path_file, keepEmptyTrees=True)
+
+        for sentence_json in sentences_json:
+            sent_id = str(sentence_json.get("metaJson", {}).get("sent_id", ""))
+            sentence_json["metaJson"]["user_id"] = reset_targets.get(sent_id, USERNAME)
+
+        SampleService.write_conllu_file_wrapper(path_file, sentences_json)
+
+    @staticmethod
+    def _has_staged_entries(staging_info):
+        for trees_info in staging_info.values():
+            for stage_data in trees_info.values():
+                if stage_data.get("status", "staged") == "staged":
+                    return True
+        return False
+
+    @staticmethod
     def get_modified_samples(project_name):
-        _, sync_repository, github_access_token = GithubCommitStatusService._get_sync_context(project_name)
+        project, sync_repository, github_access_token = GithubCommitStatusService._get_sync_context(project_name)
         current_samples = {sample["name"] for sample in GrewService.get_samples(project_name)}
-        current_contents = GrewService.get_samples_with_string_contents_as_dict(project_name, sorted(current_samples), USERNAME) if current_samples else {}
+
+        all_staged_info = {}
+        for sample_name in current_samples:
+            staging_info = StagingService.get_staged_status_by_sample(project.id, sample_name)
+            if staging_info and GithubCommitStatusService._has_staged_entries(staging_info):
+                all_staged_info[sample_name] = staging_info
+
         base_samples = GithubCommitStatusService._list_base_samples(
             github_access_token,
             sync_repository.repository_name,
@@ -196,23 +294,45 @@ class GithubCommitStatusService:
         )
 
         modified_samples = []
-        for sample_name in sorted(base_samples.union(current_samples)):
+        for sample_name in sorted(all_staged_info.keys()):
             base_content = GithubCommitStatusService._get_base_sample_content(
                 github_access_token,
                 sync_repository.repository_name,
                 sync_repository.base_sha,
                 sample_name,
             )
-            current_content = current_contents.get(sample_name, "")
+
+            staging_info = all_staged_info.get(sample_name, {})
+            if sample_name in current_samples:
+                current_content = GithubCommitStatusService._build_merged_conll(
+                    project_name, sample_name, staging_info
+                )
+            else:
+                current_content = ""
+
             if base_content == current_content:
                 continue
 
             diff_string = GithubCommitStatusService._build_diff(base_content, current_content, sample_name)
+
+            staged_list = []
+            for sent_id, trees_info in staging_info.items():
+                for tree_user_id, stage_data in trees_info.items():
+                    if stage_data.get("status", "staged") != "staged":
+                        continue
+                    staged_list.append({
+                        "sent_id": sent_id,
+                        "tree_user_id": tree_user_id,
+                        "staged_by": stage_data.get("staged_by"),
+                        "staged_at": stage_data.get("staged_at")
+                    })
+
             modified_samples.append({
                 "sample_name": sample_name,
                 "changes_number": GithubCommitStatusService._count_changed_lines(diff_string),
                 "status": GithubCommitStatusService._get_status_kind(sample_name, base_samples, current_samples),
                 "diff": diff_string,
+                "staged_list": staged_list,
             })
 
         return modified_samples
@@ -223,6 +343,8 @@ class GithubCommitStatusService:
         current_samples = {sample["name"] for sample in GrewService.get_samples(project_name)}
 
         for sample_name in modified_samples:
+            staging_info = StagingService.get_staged_status_by_sample(project.id, sample_name)
+            reset_targets = GithubCommitStatusService._select_reset_targets(staging_info)
             file_metadata = GithubService.get_file_content_by_commit_sha(
                 github_access_token,
                 sync_repository.repository_name,
@@ -234,6 +356,7 @@ class GithubCommitStatusService:
             if not download_url:
                 if sample_name in current_samples:
                     GithubCommitStatusService._reset_local_added_sample(project_name, project.id, sample_name)
+                StagingService.clear_all_staging(project.id, sample_name)
                 continue
 
             file_name = sample_name + "_reset.conllu"
@@ -242,7 +365,7 @@ class GithubCommitStatusService:
             with open(path_file, "w", encoding="utf-8") as file:
                 file.write(content)
 
-            SampleService.add_or_replace_userid(path_file, USERNAME)
+            GithubCommitStatusService._restore_reset_sample_user_ids(path_file, reset_targets)
             SampleService.add_or_keep_timestamps(path_file)
 
             if sample_name not in current_samples:
@@ -250,6 +373,8 @@ class GithubCommitStatusService:
 
             with open(path_file, "rb") as file_to_save:
                 GrewService.save_sample(project_name, sample_name, file_to_save)
+
+            StagingService.restore_after_reset(project.id, sample_name, reset_targets)
 
             os.remove(path_file)
 
@@ -318,6 +443,27 @@ class GithubService:
             }
             repositories.append(repository) 
         return repositories 
+
+    @staticmethod    
+    def check_user_has_github_access(access_token, repository_full_name: str) -> bool:
+        try:
+            if not access_token:
+                return False
+            
+            # Get the repository info
+            repo_url = f"https://api.github.com/repos/{repository_full_name}"
+            headers = GithubService.base_header(access_token)
+            response = requests.get(repo_url, headers=headers)
+            
+            if response.status_code == 200:
+                repo_data = response.json()
+                permissions = repo_data.get("permissions", {})
+                return permissions.get("push", False) or permissions.get("admin", False)
+            
+            return False
+            
+        except Exception as e:
+            return False
 
     @staticmethod
     def list_repository_branches(access_token, full_name) -> List[str]:
@@ -516,14 +662,18 @@ class GithubService:
             new_base_sha(str)
         """
         tree = []
+        project = ProjectService.get_by_name(project_name)
         current_samples = {sample["name"] for sample in GrewService.get_samples(project_name)}
         existing_samples = [sample_name for sample_name in updated_samples if sample_name in current_samples]
-        sample_names, sample_content_files = GrewService.get_samples_with_string_contents(project_name, existing_samples)
-        for sample_name, sample in zip(sample_names, sample_content_files):
-            content = sample.get(USERNAME)
-            sha = GithubService.create_blob_for_updated_file(access_token, full_name, content)
-            blob = {"path": sample_name + CONLL, "mode": "100644", "type": "blob", "sha": sha}
-            tree.append(blob)
+
+        for sample_name in existing_samples:
+            # Get staging info we push staged
+            staging_info = StagingService.get_staged_status_by_sample(project.id, sample_name)
+            content = GithubCommitStatusService._build_merged_conll(project_name, sample_name, staging_info)
+            if content:
+                sha = GithubService.create_blob_for_updated_file(access_token, full_name, content)
+                blob = {"path": sample_name + CONLL, "mode": "100644", "type": "blob", "sha": sha}
+                tree.append(blob)
 
         deleted_samples = [sample_name for sample_name in updated_samples if sample_name not in current_samples]
         for sample_name in deleted_samples:
@@ -738,6 +888,19 @@ class GithubService:
 class GithubWorkflowService:
 
     @staticmethod
+    def _sentences_by_id(conll_content: str):
+        sentence_map = {}
+        for conll in SampleService.split_conll_string_to_conlls_list(conll_content):
+            sent_id = None
+            for line in conll.rstrip().split("\n"):
+                if "# sent_id = " in line:
+                    sent_id = line.split("# sent_id = ")[-1]
+                    break
+            if sent_id:
+                sentence_map[sent_id] = conll.rstrip()
+        return sentence_map
+
+    @staticmethod
     def import_files_from_github(full_name, project_name, branch, branch_syn):
         """Import files from github:
             - Get repository files names of specific branch 
@@ -791,7 +954,7 @@ class GithubWorkflowService:
 
         SampleService.check_duplicate_sent_id(path_file, sample_name)
         SampleService.check_if_file_has_user_ids(path_file, sample_name)
-        SampleService.add_or_replace_userid(path_file, USERNAME)
+        SampleService.add_or_replace_userid(path_file, GITHUB_TREE_USER_ID)
         SampleService.add_or_keep_timestamps(path_file)
         
         grew_samples = GrewService.get_samples(project_name)
@@ -889,6 +1052,7 @@ class GithubWorkflowService:
         for file in modified_files:
             if extension.search(file.get('filename')):
                 sample_name = file.get("filename").split(".conllu")[0]
+                StagingService.clear_all_pins(project.id, sample_name)
                 file_content= GithubService.get_file_content_by_commit_sha(github_access_token, sync_repository.repository_name, file.get("filename"), base_tree)
                 download_url = file_content.get("download_url")
                 if file.get("status") == "renamed":
@@ -899,7 +1063,25 @@ class GithubWorkflowService:
                 if file.get("status") == "added":
                     GithubWorkflowService.create_sample_from_github_file(sample_name, download_url, project_name)
                 if file.get("status") == "modified":
-                    GithubWorkflowService.pull_change_existing_sample(project_name, sample_name, download_url)
+                    previous_file_content = GithubService.get_file_content_by_commit_sha(
+                        github_access_token,
+                        sync_repository.repository_name,
+                        file.get("filename"),
+                        sync_repository.base_sha,
+                    )
+                    previous_download_url = previous_file_content.get("download_url")
+                    previous_content = requests.get(previous_download_url).text if previous_download_url else ""
+                    new_content = requests.get(download_url).text if download_url else ""
+
+                    previous_sentences = GithubWorkflowService._sentences_by_id(previous_content)
+                    new_sentences = GithubWorkflowService._sentences_by_id(new_content)
+                    changed_sent_ids = {
+                        sent_id
+                        for sent_id in set(previous_sentences.keys()).union(new_sentences.keys())
+                        if previous_sentences.get(sent_id) != new_sentences.get(sent_id)
+                    }
+
+                    GithubWorkflowService.pull_change_existing_sample(project_name, sample_name, download_url, changed_sent_ids)
                 if file.get("status") == "removed":
                     GithubWorkflowService.delete_sample_from_project(project_name, sample_name)
         GithubRepositoryService.update_sha(project.id, base_tree)
@@ -937,13 +1119,14 @@ class GithubWorkflowService:
         return sample_name, path_file
     
     @staticmethod
-    def pull_change_existing_sample(project_name, sample_name, download_url):
+    def pull_change_existing_sample(project_name, sample_name, download_url, changed_sent_ids=None):
         """pull changes of an existing file 
 
         Args:
             project_name (str)
             sample_name (str)
             download_url (str)
+            changed_sent_ids (set[str] | None): sentence ids changed in github
         """
         content = requests.get(download_url).text 
         file_name = sample_name + "_modified.conllu"
@@ -951,25 +1134,22 @@ class GithubWorkflowService:
         with open(path_file, "w", encoding='utf-8') as file:
             file.write(content)
 
-        SampleService.add_or_replace_userid(path_file, USERNAME)
+        SampleService.add_or_replace_userid(path_file, GITHUB_TREE_USER_ID)
         SampleService.add_or_keep_timestamps(path_file)
         
         with open(path_file, "rb") as file_to_save:
             GrewService.save_sample(project_name, sample_name, file_to_save)
         os.remove(path_file)
-        
-        conlls_strings = SampleService.split_conll_string_to_conlls_list(content)
+
         reply = grew_request("getConll", data={"project_id": project_name, "sample_id": sample_name},)
         sample_trees =SampleExportService.serve_sample_trees(reply.get("data", {}))
-        modified_sentences = []
-        for conll in conlls_strings:
-            for line in conll.rstrip().split("\n"):
-                if "# sent_id = " in line:
-                    sent_id = line.split("# sent_id = ")[-1] 
-                    modified_sentences.append(sent_id)
-        deleted_sentences = [sent_id for sent_id in sample_trees.keys() if sent_id not in modified_sentences]
-        if deleted_sentences:
-            data = { "project_id": project_name, "sample_id": sample_name, "sent_ids": json.dumps(deleted_sentences), "user_id": USERNAME }
+
+        if changed_sent_ids is None:
+            changed_sent_ids = set(sample_trees.keys())
+
+        unchanged_sentences = [sent_id for sent_id in sample_trees.keys() if sent_id not in changed_sent_ids]
+        if unchanged_sentences:
+            data = { "project_id": project_name, "sample_id": sample_name, "sent_ids": json.dumps(unchanged_sentences), "user_id": GITHUB_TREE_USER_ID }
             grew_request("eraseGraphs", data)
         
     @staticmethod
