@@ -146,6 +146,7 @@ class SampleTreesResource(Resource):
         conll = args.get("conll")
         sent_id = args.get("sentId")
         git_add = args.get("gitAdd", False)
+        pin_to_github = args.get("pinToGithub", False)
         
         project = ProjectService.get_by_name(project_name)
         ProjectService.check_if_freezed(project)
@@ -214,13 +215,24 @@ class SampleTreesResource(Resource):
         else:
             try:
                 from .staging_service import StagingService
-                StagingService.clear_status_for_tree(
-                    project.id,
-                    sample_name,
-                    new_sent_id,
-                    user_id,
-                )
-                response["pinned"] = False
+                if pin_to_github:
+                    StagingService.force_pin_to_github_reference(
+                        project.id,
+                        sample_name,
+                        new_sent_id,
+                        user_id,
+                    )
+                    response["pinned"] = True
+                    from datetime import datetime
+                    response["pinned_at"] = datetime.utcnow().isoformat()
+                else:
+                    StagingService.clear_status_for_tree(
+                        project.id,
+                        sample_name,
+                        new_sent_id,
+                        user_id,
+                    )
+                    response["pinned"] = False
             except Exception:
                 response["pinned"] = False
         return response
@@ -347,6 +359,7 @@ class GithubReferenceTreeResource(Resource):
         """Delete GitHub tree for one sentence."""
         data = request.get_json() or {}
         sent_id = data.get("sentId")
+        keep_tree_user_id = data.get("keepTreeUserId")
 
         if not sent_id:
             abort(400, "sentId is required")
@@ -361,12 +374,12 @@ class GithubReferenceTreeResource(Resource):
                 "project_id": project_name,
                 "sample_id": sample_name,
                 "sent_ids": json.dumps([sent_id]),
-                "user_id": VALIDATED,
+                "user_id": "github",
             },
         )
 
         from .staging_service import StagingService
-        StagingService.clear_pins_for_sentence(project.id, sample_name, sent_id)
+        StagingService.clear_pins_for_sentence(project.id, sample_name, sent_id, keep_tree_user_id)
         LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
 
         return {"status": "ok"}

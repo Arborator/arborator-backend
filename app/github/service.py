@@ -24,7 +24,8 @@ from .model import GithubRepository
 
 extension = re.compile("^.*\.(conllu)$")
 
-USERNAME = 'validated'
+GITHUB_TREE_USER_ID = 'github'
+USERNAME = GITHUB_TREE_USER_ID
 CONLL = '.conllu'
 class GithubRepositoryService:
     """Class contains the methods that deal with GithubRepository entity """
@@ -268,6 +269,14 @@ class GithubCommitStatusService:
         SampleService.write_conllu_file_wrapper(path_file, sentences_json)
 
     @staticmethod
+    def _has_staged_entries(staging_info):
+        for trees_info in staging_info.values():
+            for stage_data in trees_info.values():
+                if stage_data.get("status", "staged") == "staged":
+                    return True
+        return False
+
+    @staticmethod
     def get_modified_samples(project_name):
         project, sync_repository, github_access_token = GithubCommitStatusService._get_sync_context(project_name)
         current_samples = {sample["name"] for sample in GrewService.get_samples(project_name)}
@@ -275,7 +284,7 @@ class GithubCommitStatusService:
         all_staged_info = {}
         for sample_name in current_samples:
             staging_info = StagingService.get_staged_status_by_sample(project.id, sample_name)
-            if staging_info:
+            if staging_info and GithubCommitStatusService._has_staged_entries(staging_info):
                 all_staged_info[sample_name] = staging_info
 
         base_samples = GithubCommitStatusService._list_base_samples(
@@ -285,7 +294,7 @@ class GithubCommitStatusService:
         )
 
         modified_samples = []
-        for sample_name in sorted(base_samples.union(current_samples)):
+        for sample_name in sorted(all_staged_info.keys()):
             base_content = GithubCommitStatusService._get_base_sample_content(
                 github_access_token,
                 sync_repository.repository_name,
@@ -945,7 +954,7 @@ class GithubWorkflowService:
 
         SampleService.check_duplicate_sent_id(path_file, sample_name)
         SampleService.check_if_file_has_user_ids(path_file, sample_name)
-        SampleService.add_or_replace_userid(path_file, USERNAME)
+        SampleService.add_or_replace_userid(path_file, GITHUB_TREE_USER_ID)
         SampleService.add_or_keep_timestamps(path_file)
         
         grew_samples = GrewService.get_samples(project_name)
@@ -1125,7 +1134,7 @@ class GithubWorkflowService:
         with open(path_file, "w", encoding='utf-8') as file:
             file.write(content)
 
-        SampleService.add_or_replace_userid(path_file, USERNAME)
+        SampleService.add_or_replace_userid(path_file, GITHUB_TREE_USER_ID)
         SampleService.add_or_keep_timestamps(path_file)
         
         with open(path_file, "rb") as file_to_save:
@@ -1140,7 +1149,7 @@ class GithubWorkflowService:
 
         unchanged_sentences = [sent_id for sent_id in sample_trees.keys() if sent_id not in changed_sent_ids]
         if unchanged_sentences:
-            data = { "project_id": project_name, "sample_id": sample_name, "sent_ids": json.dumps(unchanged_sentences), "user_id": USERNAME }
+            data = { "project_id": project_name, "sample_id": sample_name, "sent_ids": json.dumps(unchanged_sentences), "user_id": GITHUB_TREE_USER_ID }
             grew_request("eraseGraphs", data)
         
     @staticmethod

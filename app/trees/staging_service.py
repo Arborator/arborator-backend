@@ -8,6 +8,7 @@ from .model import StagedTree
 
 
 VALIDATED_TREE_USER_ID = 'validated'
+GITHUB_REFERENCE_TREE_USER_ID = 'github'
 PINNED_BY_GITHUB_REFERENCE = 'github_reference'
 
 
@@ -67,7 +68,7 @@ class StagingService:
         tree_user_id: str,
     ) -> bool:
         """Pin a user tree when it is identical to the GitHub reference tree for that sentence."""
-        if tree_user_id == VALIDATED_TREE_USER_ID:
+        if tree_user_id in [VALIDATED_TREE_USER_ID, GITHUB_REFERENCE_TREE_USER_ID]:
             return False
 
         reply = grew_request(
@@ -79,7 +80,7 @@ class StagingService:
         if not isinstance(sentence_data, dict):
             return False
 
-        reference_conll = sentence_data.get(VALIDATED_TREE_USER_ID)
+        reference_conll = sentence_data.get(GITHUB_REFERENCE_TREE_USER_ID)
         user_conll = sentence_data.get(tree_user_id)
 
         user_col = StagingService._get_pinned_user_column()
@@ -131,6 +132,49 @@ class StagingService:
         return True
 
     @staticmethod
+    def force_pin_to_github_reference(project_id: int, sample_id: str, sent_id: str, tree_user_id: str):
+        if tree_user_id in [VALIDATED_TREE_USER_ID, GITHUB_REFERENCE_TREE_USER_ID]:
+            return
+
+        user_col = StagingService._get_pinned_user_column()
+        existing_pin = db.session.execute(
+            text(
+                f"SELECT id FROM pinned_trees WHERE project_id = :project_id AND sample_id = :sample_id "
+                f"AND sent_id = :sent_id AND {user_col} = :tree_user_id AND pinned_by = :pinned_by"
+            ),
+            {
+                'project_id': project_id,
+                'sample_id': sample_id,
+                'sent_id': sent_id,
+                'tree_user_id': tree_user_id,
+                'pinned_by': PINNED_BY_GITHUB_REFERENCE,
+            },
+        ).fetchone()
+
+        if existing_pin:
+            db.session.execute(
+                text("UPDATE pinned_trees SET pinned_at = :pinned_at WHERE id = :id"),
+                {'pinned_at': datetime.utcnow(), 'id': existing_pin[0]},
+            )
+        else:
+            db.session.execute(
+                text(
+                    f"INSERT INTO pinned_trees (project_id, sample_id, sent_id, {user_col}, pinned_by, pinned_at) "
+                    "VALUES (:project_id, :sample_id, :sent_id, :tree_user_id, :pinned_by, :pinned_at)"
+                ),
+                {
+                    'project_id': project_id,
+                    'sample_id': sample_id,
+                    'sent_id': sent_id,
+                    'tree_user_id': tree_user_id,
+                    'pinned_by': PINNED_BY_GITHUB_REFERENCE,
+                    'pinned_at': datetime.utcnow(),
+                },
+            )
+
+        db.session.commit()
+
+    @staticmethod
     def get_pinned_status_by_sample(project_id: int, sample_id: str) -> dict:
         user_col = StagingService._get_pinned_user_column()
         pinned_rows = db.session.execute(
@@ -170,12 +214,27 @@ class StagingService:
         db.session.commit()
 
     @staticmethod
-    def clear_pins_for_sentence(project_id: int, sample_id: str, sent_id: str):
+    def clear_pins_for_sentence(project_id: int, sample_id: str, sent_id: str, keep_tree_user_id: str = None):
         StagingService._get_pinned_user_column()
-        db.session.execute(
-            text("DELETE FROM pinned_trees WHERE project_id = :project_id AND sample_id = :sample_id AND sent_id = :sent_id"),
-            {'project_id': project_id, 'sample_id': sample_id, 'sent_id': sent_id},
-        )
+        if keep_tree_user_id:
+            user_col = StagingService._get_pinned_user_column()
+            db.session.execute(
+                text(
+                    f"DELETE FROM pinned_trees WHERE project_id = :project_id AND sample_id = :sample_id "
+                    f"AND sent_id = :sent_id AND {user_col} != :keep_tree_user_id"
+                ),
+                {
+                    'project_id': project_id,
+                    'sample_id': sample_id,
+                    'sent_id': sent_id,
+                    'keep_tree_user_id': keep_tree_user_id,
+                },
+            )
+        else:
+            db.session.execute(
+                text("DELETE FROM pinned_trees WHERE project_id = :project_id AND sample_id = :sample_id AND sent_id = :sent_id"),
+                {'project_id': project_id, 'sample_id': sample_id, 'sent_id': sent_id},
+            )
         db.session.commit()
 
     @staticmethod
