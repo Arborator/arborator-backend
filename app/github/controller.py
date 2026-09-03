@@ -158,6 +158,30 @@ class GithubRenameSample(Resource):
 
 @api.route("/<string:project_name>/synchronize/stage")
 class GithubStageResource(Resource):
+    def post(self, project_name):
+        """Stage all trees of one user for a sample."""
+        data = request.get_json() or {}
+        sample_name = data.get("sample_name")
+        tree_user_id = data.get("tree_user_id")
+
+        if not all([sample_name, tree_user_id]):
+            abort(400, "sample_name and tree_user_id are required")
+
+        project = ProjectService.get_by_name(project_name)
+        ProjectService.check_if_project_exist(project)
+        ProjectAccessService.check_admin_access(project.id)
+
+        from app.trees.staging_service import StagingService
+        staged_count = StagingService.stage_sample(
+            project_name,
+            project.id,
+            sample_name,
+            tree_user_id,
+            current_user.username,
+        )
+
+        return {"status": "ok", "staged_count": staged_count}
+
     def delete(self, project_name):
         """Unstage a tree for GitHub push"""
         data = request.get_json()

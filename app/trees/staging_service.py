@@ -263,6 +263,7 @@ class StagingService:
             data={"project_id": project_name, "sample_id": sample_id},
         )
         sample_data = reply.get("data", {})
+        staged_count = 0
 
         for sent_id, sentence_data in sample_data.items():
             if isinstance(sentence_data, dict) and "conlls" in sentence_data:
@@ -276,6 +277,10 @@ class StagingService:
                 if tree_user_id and user_id != tree_user_id:
                     continue
                 StagingService.stage(project_id, sample_id, sent_id, user_id, staging_user_id)
+
+                staged_count += 1
+
+        return staged_count
 
     @staticmethod
     def unstage(project_id: int, sample_id: str, sent_id: str, tree_user_id: str):
