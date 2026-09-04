@@ -493,3 +493,56 @@ class StagingService:
             db.session.delete(tree)
         
         db.session.commit()
+
+    @staticmethod
+    def mark_sample_as_github_synced(project_name: str, project_id: int, sample_id: str, tree_user_id: str, synced_by: str):
+        """After initial sync import, mark imported user trees as github synced"""
+        StagingService.clear_all_staging(project_id, sample_id)
+
+        reply = grew_request(
+            "getConll",
+            data={"project_id": project_name, "sample_id": sample_id},
+        )
+        sample_data = reply.get("data", {})
+
+        now = datetime.utcnow()
+        for sent_id, sentence_data in sample_data.items():
+            if not isinstance(sentence_data, dict):
+                continue
+
+            if "conlls" in sentence_data:
+                user_ids = sentence_data.get("conlls", {}).keys()
+            else:
+                user_ids = sentence_data.keys()
+
+            if tree_user_id not in user_ids:
+                continue
+
+            staged_tree = StagedTree.query.filter_by(
+                project_id=project_id,
+                sample_id=sample_id,
+                sent_id=sent_id,
+                tree_user_id=tree_user_id,
+            ).first()
+
+            if staged_tree:
+                staged_tree.status = 'pushed'
+                staged_tree.staging_user_id = synced_by
+                staged_tree.staged_at = now
+                staged_tree.pushed_by = synced_by
+                staged_tree.pushed_at = now
+            else:
+                staged_tree = StagedTree(
+                    project_id=project_id,
+                    sample_id=sample_id,
+                    sent_id=sent_id,
+                    tree_user_id=tree_user_id,
+                    staging_user_id=synced_by,
+                    staged_at=now,
+                    status='pushed',
+                    pushed_by=synced_by,
+                    pushed_at=now,
+                )
+                db.session.add(staged_tree)
+
+        db.session.commit()

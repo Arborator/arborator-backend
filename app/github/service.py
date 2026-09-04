@@ -915,17 +915,29 @@ class GithubWorkflowService:
             branch_syn (str): branch used for the synchronization
         """
         access_token = UserService.get_by_id(current_user.id).github_access_token
+        sync_username = UserService.get_by_id(current_user.id).username
+        project = ProjectService.get_by_name(project_name)
         repository_files = GithubService.get_repository_files_of_branch(access_token, full_name, branch)
         conll_files = [file.get("name") for file in repository_files if extension.search(file.get('name'))]
 
         tmp_zip_file = GithubService.download_github_repository(access_token, full_name, branch)
         GithubService.extract_repository(tmp_zip_file)
-        GithubWorkflowService.clone_github_repository(conll_files, project_name)
+        imported_samples = GithubWorkflowService.clone_github_repository(conll_files, project_name, sync_username)
+
+        for sample_name in imported_samples:
+            StagingService.mark_sample_as_github_synced(
+                project_name,
+                project.id,
+                sample_name,
+                sync_username,
+                sync_username,
+            )
+
         if branch_syn != branch:  
             GithubService.create_new_branch_arborator(access_token, full_name, branch_syn, branch)
         
     @staticmethod 
-    def clone_github_repository(files, project_name):
+    def clone_github_repository(files, project_name, tree_user_id):
         """
             Clone github repository means create new samples from the files 
             of sync repo
@@ -934,14 +946,18 @@ class GithubWorkflowService:
             files (List[str])
             project_name (str)
         """
+        imported_samples = []
         for file in files:
             path_file = os.path.join(Config.UPLOAD_FOLDER, file)
             sample_name = file.split(CONLL)[0]
-            GithubWorkflowService.create_sample(sample_name, path_file, project_name)
+            GithubWorkflowService.create_sample(sample_name, path_file, project_name, tree_user_id)
+            imported_samples.append(sample_name)
             os.remove(path_file)
 
+        return imported_samples
+
     @staticmethod
-    def create_sample(sample_name, path_file, project_name):
+    def create_sample(sample_name, path_file, project_name, tree_user_id):
         """Create new sample
 
         Args:
@@ -954,7 +970,7 @@ class GithubWorkflowService:
 
         SampleService.check_duplicate_sent_id(path_file, sample_name)
         SampleService.check_if_file_has_user_ids(path_file, sample_name)
-        SampleService.add_or_replace_userid(path_file, GITHUB_TREE_USER_ID)
+        SampleService.add_or_replace_userid(path_file, tree_user_id)
         SampleService.add_or_keep_timestamps(path_file)
         
         grew_samples = GrewService.get_samples(project_name)
@@ -1096,7 +1112,7 @@ class GithubWorkflowService:
             project_name (str)
         """
         sample_name, path_file =  GithubWorkflowService.download_github_file_content(file, download_url)
-        GithubWorkflowService.create_sample(sample_name, path_file, project_name)
+        GithubWorkflowService.create_sample(sample_name, path_file, project_name, GITHUB_TREE_USER_ID)
         os.remove(path_file)
 
     @staticmethod

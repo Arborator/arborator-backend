@@ -7,6 +7,7 @@ from flask_restx import Namespace, Resource
 from app.config import Config
 from app.projects.service import LastAccessService, ProjectService
 from app.utils.grew_utils import GrewService, SampleExportService
+from app.trees.staging_service import StagingService
 
 
 
@@ -31,9 +32,10 @@ class ApplyRuleResource(Resource):
 
         for sample_name, sample_trees in data.items():
             new_conll = ''
-            for tree in sample_trees.values():
+            for sent_id, tree in sample_trees.items():
                 for user in tree["conlls"]:
                     new_conll += tree["conlls"][user] + "\n\n"
+                    StagingService.clear_status_for_tree(project.id, sample_name, sent_id, user)
                     
             file_name = sample_name + "_modified.conllu"
             path_file = os.path.join(Config.UPLOAD_FOLDER, file_name)
