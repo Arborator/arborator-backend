@@ -187,7 +187,23 @@ class GithubCommitStatusService:
         )
 
     @staticmethod
-    def _build_merged_conll(project_name, sample_name, staging_info):
+    def _ordered_conll_sentences(conll_content):
+        ordered = []
+        if not conll_content:
+            return ordered
+
+        for conll in SampleService.split_conll_string_to_conlls_list(conll_content):
+            sent_id = None
+            for line in conll.rstrip().split("\n"):
+                if line.startswith("# sent_id = "):
+                    sent_id = line.split("# sent_id = ", 1)[1]
+                    break
+            if sent_id:
+                ordered.append((sent_id, conll.rstrip()))
+        return ordered
+
+    @staticmethod
+    def _build_merged_conll(project_name, sample_name, staging_info, base_content=""):
 
         status = grew_request("getConll", data={"project_id": project_name, "sample_id": sample_name})
         if status.get("status") != "OK":
@@ -197,35 +213,42 @@ class GithubCommitStatusService:
             status.get("data", {}), timestamps=False, user_ids=False, validated_by=False
         )
 
-        merged_sentences = []
+        staged_user_by_sent = {}
+        for sent_id, trees_info in (staging_info or {}).items():
+            staged_users_for_sent = [
+                user_id
+                for user_id, stage_data in trees_info.items()
+                if stage_data.get("status", "staged") == "staged"
+            ]
+            if staged_users_for_sent:
+                staged_user_by_sent[sent_id] = staged_users_for_sent[0]
+
+        if not staged_user_by_sent:
+            return base_content or ""
+
+        staged_conll_by_sent = {}
         for sent_id, sent_data in sample_tree_nots_noui.items():
             conlls = sent_data.get("conlls", {})
-
-            selected_user = None
-            if staging_info and sent_id in staging_info:
-                staged_users_for_sent = [
-                    user_id
-                    for user_id, stage_data in staging_info[sent_id].items()
-                    if stage_data.get("status", "staged") == "staged"
-                ]
-                if staged_users_for_sent:
-                    selected_user = staged_users_for_sent[0]
-
-                if not selected_user:
-                    pushed_users_for_sent = [
-                        user_id
-                        for user_id, stage_data in staging_info[sent_id].items()
-                        if stage_data.get("status") == "pushed"
-                    ]
-                    if pushed_users_for_sent:
-                        selected_user = pushed_users_for_sent[0]
-
+            selected_user = staged_user_by_sent.get(sent_id)
             if selected_user and selected_user in conlls:
-                merged_sentences.append(conlls[selected_user])
-            elif USERNAME in conlls:
-                merged_sentences.append(conlls[USERNAME])
+                staged_conll_by_sent[sent_id] = conlls[selected_user].rstrip()
 
-        return "".join(merged_sentences)
+        merged_sentences = []
+        base_ids = set()
+
+        if base_content:
+            for sent_id, base_conll in GithubCommitStatusService._ordered_conll_sentences(base_content):
+                base_ids.add(sent_id)
+                merged_sentences.append(staged_conll_by_sent.get(sent_id, base_conll))
+
+        for sent_id in sample_tree_nots_noui.keys():
+            if sent_id in base_ids:
+                continue
+            conll = staged_conll_by_sent.get(sent_id)
+            if conll:
+                merged_sentences.append(conll)
+
+        return ("\n\n".join(merged_sentences) + "\n\n") if merged_sentences else ""
 
     @staticmethod
     def _select_reset_targets(staging_info):
@@ -305,7 +328,7 @@ class GithubCommitStatusService:
             staging_info = all_staged_info.get(sample_name, {})
             if sample_name in current_samples:
                 current_content = GithubCommitStatusService._build_merged_conll(
-                    project_name, sample_name, staging_info
+                    project_name, sample_name, staging_info, base_content
                 )
             else:
                 current_content = ""
@@ -669,7 +692,15 @@ class GithubService:
         for sample_name in existing_samples:
             # Get staging info we push staged
             staging_info = StagingService.get_staged_status_by_sample(project.id, sample_name)
-            content = GithubCommitStatusService._build_merged_conll(project_name, sample_name, staging_info)
+            base_content = GithubCommitStatusService._get_base_sample_content(
+                access_token,
+                full_name,
+                base_tree,
+                sample_name,
+            )
+            content = GithubCommitStatusService._build_merged_conll(project_name, sample_name, staging_info, base_content)
+            if content == base_content:
+                continue
             if content:
                 sha = GithubService.create_blob_for_updated_file(access_token, full_name, content)
                 blob = {"path": sample_name + CONLL, "mode": "100644", "type": "blob", "sha": sha}
