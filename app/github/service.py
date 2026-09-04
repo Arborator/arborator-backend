@@ -282,6 +282,32 @@ class GithubCommitStatusService:
         return reset_targets
 
     @staticmethod
+    def _staged_sent_ids(staging_info):
+        sent_ids = set()
+        for sent_id, trees_info in (staging_info or {}).items():
+            for stage_data in trees_info.values():
+                if stage_data.get("status", "staged") == "staged":
+                    sent_ids.add(sent_id)
+                    break
+        return sent_ids
+
+    @staticmethod
+    def _replace_user_id_in_conll(conll: str, user_id: str):
+        if not user_id:
+            return conll
+        replaced = []
+        found = False
+        for line in conll.rstrip().split("\n"):
+            if line.startswith("# user_id ="):
+                replaced.append(f"# user_id = {user_id}")
+                found = True
+            else:
+                replaced.append(line)
+        if not found:
+            replaced.insert(0, f"# user_id = {user_id}")
+        return "\n".join(replaced)
+
+    @staticmethod
     def _restore_reset_sample_user_ids(path_file, reset_targets):
         sentences_json = SampleService.read_conllu_file_wrapper(path_file, keepEmptyTrees=True)
 
@@ -367,6 +393,10 @@ class GithubCommitStatusService:
 
         for sample_name in modified_samples:
             staging_info = StagingService.get_staged_status_by_sample(project.id, sample_name)
+            staged_sent_ids = GithubCommitStatusService._staged_sent_ids(staging_info)
+            if not staged_sent_ids:
+                continue
+
             reset_targets = GithubCommitStatusService._select_reset_targets(staging_info)
             file_metadata = GithubService.get_file_content_by_commit_sha(
                 github_access_token,
@@ -385,10 +415,27 @@ class GithubCommitStatusService:
             file_name = sample_name + "_reset.conllu"
             path_file = os.path.join(Config.UPLOAD_FOLDER, file_name)
             content = requests.get(download_url).text
-            with open(path_file, "w", encoding="utf-8") as file:
-                file.write(content)
 
-            GithubCommitStatusService._restore_reset_sample_user_ids(path_file, reset_targets)
+            base_sentences = dict(GithubCommitStatusService._ordered_conll_sentences(content))
+            reset_sentences = []
+            for sent_id in staged_sent_ids:
+                base_conll = base_sentences.get(sent_id)
+                if not base_conll:
+                    continue
+                reset_sentences.append(
+                    GithubCommitStatusService._replace_user_id_in_conll(
+                        base_conll,
+                        reset_targets.get(sent_id),
+                    )
+                )
+
+            if not reset_sentences:
+                StagingService.restore_after_reset(project.id, sample_name, reset_targets)
+                continue
+
+            with open(path_file, "w", encoding="utf-8") as file:
+                file.write("\n\n".join(reset_sentences) + "\n\n")
+
             SampleService.add_or_keep_timestamps(path_file)
 
             if sample_name not in current_samples:
