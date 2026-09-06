@@ -373,6 +373,44 @@ class StagingService:
         return staged_count
 
     @staticmethod
+    def stage_selected_sentences(
+        project_name: str,
+        project_id: int,
+        sample_id: str,
+        sent_ids: list,
+        tree_user_id: str,
+        staging_user_id: str,
+    ):
+        """Stage only selected trees ids for the given user id."""
+        if not sent_ids:
+            return 0
+
+        reply = grew_request(
+            "getConll",
+            data={"project_id": project_name, "sample_id": sample_id},
+        )
+        sample_data = reply.get("data", {})
+        staged_count = 0
+
+        for sent_id in sent_ids:
+            sentence_data = sample_data.get(sent_id)
+            if not isinstance(sentence_data, dict):
+                continue
+
+            if "conlls" in sentence_data:
+                user_ids = sentence_data.get("conlls", {}).keys()
+            else:
+                user_ids = sentence_data.keys()
+
+            for user_id in user_ids:
+                if tree_user_id and user_id != tree_user_id:
+                    continue
+                StagingService.stage(project_id, sample_id, sent_id, user_id, staging_user_id)
+                staged_count += 1
+
+        return staged_count
+
+    @staticmethod
     def unstage(project_id: int, sample_id: str, sent_id: str, tree_user_id: str):
         """
         Remove staging flag from a tree.

@@ -204,6 +204,35 @@ class GithubStageResource(Resource):
         
         return { "status": "ok" }
 
+
+@api.route("/<string:project_name>/synchronize/stage-selected")
+class GithubStageSelectedResource(Resource):
+    def post(self, project_name):
+        """Stage selected trees ids of one user for one sample."""
+        data = request.get_json() or {}
+        sample_name = data.get("sample_name")
+        tree_user_id = data.get("tree_user_id")
+        sent_ids = data.get("sent_ids", [])
+
+        if not all([sample_name, tree_user_id]) or not isinstance(sent_ids, list) or not sent_ids:
+            abort(400, "sample_name, tree_user_id, and non-empty sent_ids are required")
+
+        project = ProjectService.get_by_name(project_name)
+        ProjectService.check_if_project_exist(project)
+        ProjectAccessService.check_admin_access(project.id)
+
+        from app.trees.staging_service import StagingService
+        staged_count = StagingService.stage_selected_sentences(
+            project_name,
+            project.id,
+            sample_name,
+            sent_ids,
+            tree_user_id,
+            current_user.username,
+        )
+
+        return {"status": "ok", "staged_count": staged_count}
+
 # route for pushing new samples immediatly (independently from other pending changes)
 @api.route("/<string:project_name>/synchronize/commit_samples")
 class GithubCommitSamples(Resource):
