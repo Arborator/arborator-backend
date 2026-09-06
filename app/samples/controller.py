@@ -194,6 +194,8 @@ class SampleNameResource(Resource):
         """
         args = request.get_json()
         new_sample_name = args.get("newSampleName")
+        project = ProjectService.get_by_name(project_name)
+        ProjectAccessService.check_admin_access(project.id)
         
         response = grew_request("renameSample", {
             "project_id": project_name,
