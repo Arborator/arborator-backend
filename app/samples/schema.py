@@ -10,3 +10,4 @@ class SampleSchema(Schema):
     treeByUser = fields.Dict(keys=fields.String(), values=fields.Integer(), attribute="tree_by_user")
     tags = fields.Dict(keys=fields.String(), values=fields.Integer(), attribute="tags")
     blindAnnotationLevel = fields.Integer(attribute="blind_annotation_level")
+    stagedCount = fields.Integer(attribute="staged_count")
