@@ -11,3 +11,4 @@ class SampleSchema(Schema):
     tags = fields.Dict(keys=fields.String(), values=fields.Integer(), attribute="tags")
     blindAnnotationLevel = fields.Integer(attribute="blind_annotation_level")
     stagedCount = fields.Integer(attribute="staged_count")
+    pushedCount = fields.Integer(attribute="pushed_count")

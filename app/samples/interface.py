@@ -12,3 +12,4 @@ class SampleInterface(TypedDict, total=False):
     tags: dict[str, int]
     blind_annotation_level: int
     staged_count: int
+    pushed_count: int

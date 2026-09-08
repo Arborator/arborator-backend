@@ -76,6 +76,14 @@ class SampleResource(Resource):
             )
             sample["staged_count"] = staged_count
 
+            pushed_count = sum(
+                1
+                for trees_info in staging_status.values()
+                for tree_info in trees_info.values()
+                if tree_info.get("status") == "pushed"
+            )
+            sample["pushed_count"] = pushed_count
+
             processed_samples.append(sample)
         return processed_samples
 
