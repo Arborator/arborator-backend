@@ -355,6 +355,31 @@ class SaveAllTreesResource(Resource):
 @api.route("/<string:project_name>/samples/<string:sample_name>/trees/github-reference")
 class GithubReferenceTreeResource(Resource):
 
+    def get(self, project_name: str, sample_name: str):
+        """Return GitHub reference trees for each sentence in a sample."""
+        project = ProjectService.get_by_name(project_name)
+        ProjectService.check_if_project_exist(project)
+        ProjectService.check_if_freezed(project)
+
+        from app.github.service import GithubCommitStatusService
+
+        try:
+            _, sync_repository, github_access_token = GithubCommitStatusService._get_sync_context(project_name)
+            base_content = GithubCommitStatusService._get_base_sample_content(
+                github_access_token,
+                sync_repository.repository_name,
+                sync_repository.base_sha,
+                sample_name,
+            )
+        except Exception:
+            return {"github_reference_trees": {}}
+
+        github_reference_trees = {}
+        for sent_id, conll in GithubCommitStatusService._ordered_conll_sentences(base_content):
+            github_reference_trees[sent_id] = conll
+
+        return {"github_reference_trees": github_reference_trees}
+
     def delete(self, project_name: str, sample_name: str):
         """Delete GitHub tree for one sentence."""
         data = request.get_json() or {}
