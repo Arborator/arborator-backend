@@ -72,7 +72,7 @@ class ProjectResource(Resource):
                 {
                     "user_id": creator_id,
                     "project_id": new_project.id,
-                    "access_level": 3,
+                    "access_level": 2,
                 }
             )
 

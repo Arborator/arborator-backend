@@ -9,3 +9,4 @@ class GithubRepositorySchema(Schema):
     repositoryName = fields.String(attribute="repository_name")
     branch = fields.String(attribute="branch")
     baseSha = fields.String(attribute="base_sha")
+    hasGithubAccess = fields.Boolean(attribute="has_github_access", allow_none=True)
