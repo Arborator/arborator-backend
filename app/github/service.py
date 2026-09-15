@@ -510,6 +510,7 @@ class GithubService:
                "name": repo.get("full_name"),
                "owner_name": repo.get("owner").get("login"),
                "owner_avatar": repo.get("owner").get("avatar_url"),
+               "default_branch": repo.get("default_branch"),
             }
             repositories.append(repository) 
         return repositories 
