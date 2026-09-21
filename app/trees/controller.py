@@ -1,5 +1,6 @@
 import json
 import os
+from datetime import datetime, timezone
 from flask import abort, request
 from flask_login import current_user
 from flask_restx import Namespace, Resource
@@ -206,8 +207,7 @@ class SampleTreesResource(Resource):
                             StagingService.stage(project.id, sample_name, new_sent_id, user_id, current_user.username)
                             response["staged"] = True
                             response["staged_by"] = current_user.username
-                            from datetime import datetime
-                            response["staged_at"] = datetime.utcnow().isoformat()
+                            response["staged_at"] = datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
                         except HTTPException:
                             raise
                         except Exception as e:
@@ -223,8 +223,7 @@ class SampleTreesResource(Resource):
                         user_id,
                     )
                     response["pinned"] = True
-                    from datetime import datetime
-                    response["pinned_at"] = datetime.utcnow().isoformat()
+                    response["pinned_at"] = datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
                 else:
                     StagingService.clear_status_for_tree(
                         project.id,

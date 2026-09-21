@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from flask import abort
 from sqlalchemy import text
 from app import db
@@ -13,6 +13,21 @@ PINNED_BY_GITHUB_REFERENCE = 'github_reference'
 
 
 class StagingService:
+
+    @staticmethod
+    def _to_utc_iso(value) -> str:
+        if not value:
+            return None
+
+        if isinstance(value, datetime):
+            dt = value
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            else:
+                dt = dt.astimezone(timezone.utc)
+            return dt.isoformat().replace('+00:00', 'Z')
+
+        return str(value)
 
     @staticmethod
     def _get_pinned_user_column() -> str:
@@ -200,7 +215,7 @@ class StagingService:
             result[sent_id][tree_user_id] = {
                 'status': 'pinned',
                 'staged_by': 'github',
-                'staged_at': pinned_at.isoformat() if hasattr(pinned_at, 'isoformat') else (str(pinned_at) if pinned_at else None),
+                'staged_at': StagingService._to_utc_iso(pinned_at),
             }
         return result
 
@@ -442,7 +457,7 @@ class StagingService:
         if staged_tree:
             return {
                 'staged_by': staged_tree.staging_user_id,
-                'staged_at': staged_tree.staged_at.isoformat() if staged_tree.staged_at else None,
+                'staged_at': StagingService._to_utc_iso(staged_tree.staged_at),
                 'tree_user_id': staged_tree.tree_user_id
             }
         return {}
@@ -472,9 +487,9 @@ class StagingService:
             result[tree.sent_id][tree.tree_user_id] = {
                 'status': tree.status,
                 'staged_by': tree.staging_user_id,
-                'staged_at': tree.staged_at.isoformat() if tree.staged_at else None,
+                'staged_at': StagingService._to_utc_iso(tree.staged_at),
                 'pushed_by': tree.pushed_by,
-                'pushed_at': tree.pushed_at.isoformat() if tree.pushed_at else None
+                'pushed_at': StagingService._to_utc_iso(tree.pushed_at)
             }
         
         return result
