@@ -1,5 +1,6 @@
 import json
 import os
+import re
 from datetime import datetime, timezone
 from flask import abort, request
 from flask_login import current_user
@@ -21,6 +22,7 @@ from .service import TreeService, TreeSegmentationService, TreeValidationService
 
 BASE_TREE = "base_tree"
 VALIDATED = "validated"
+DRAFT_USER_PATTERN = re.compile(r"^(?P<owner>.+)_draft(?P<index>\d+)$")
 
 
 def user_can_write_validated_tree(project) -> bool:
@@ -39,7 +41,12 @@ def check_tree_write_permission(project, user_id: str):
         abort(403, "You must be authenticated to modify trees")
 
     can_write_validated = user_can_write_validated_tree(project)
-    is_allowed_target = user_id == current_user.username or (
+    is_owned_draft = bool(
+        user_id
+        and DRAFT_USER_PATTERN.match(user_id)
+        and user_id.startswith(f"{current_user.username}_draft")
+    )
+    is_allowed_target = user_id == current_user.username or is_owned_draft or (
         user_id == VALIDATED and can_write_validated
     )
 
@@ -100,6 +107,14 @@ class SampleTreesResource(Resource):
                 if project_access <= 1 and  not current_user.super_admin:
                     sample_trees = TreeService.add_user_tree(sample_trees, username)   
                     restricted_users = [BASE_TREE, VALIDATED, username]
+                    draft_prefix = f"{username}_draft"
+                    draft_users = {
+                        user_id
+                        for sentence in sample_trees.values()
+                        for user_id in sentence.get("conlls", {}).keys()
+                        if user_id.startswith(draft_prefix)
+                    }
+                    restricted_users.extend(list(draft_users))
                     sample_trees = TreeService.restrict_trees(sample_trees, restricted_users)
             else:
                 restricted_users = [BASE_TREE, VALIDATED]
@@ -242,12 +257,62 @@ class UserTreesResource(Resource):
     
     def delete(self, project_name: str, sample_name: str, username: str):
         """Remove trees of specific user """
-        if username != current_user.username:
+        is_owned_draft = bool(
+            username
+            and DRAFT_USER_PATTERN.match(username)
+            and username.startswith(f"{current_user.username}_draft")
+        )
+
+        if username != current_user.username and not is_owned_draft:
             abort(403, f"You can only delete your own trees, not {username}'s trees")
         
         data = {"project_id": project_name,  "sample_id": sample_name, "sent_ids": "[]","user_id": username, }
         grew_request("eraseGraphs", data)
         LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")  
+
+
+@api.route("/<string:project_name>/samples/<string:sample_name>/trees/draft")
+class DraftTreeResource(Resource):
+
+    def delete(self, project_name: str, sample_name: str):
+        """Delete one draft tree for one sentence."""
+        data = request.get_json() or {}
+        sent_id = data.get("sentId")
+        user_id = data.get("userId")
+
+        if not sent_id or not user_id:
+            abort(400, "sentId and userId are required")
+
+        is_owned_draft = bool(
+            user_id
+            and DRAFT_USER_PATTERN.match(user_id)
+            and user_id.startswith(f"{current_user.username}_draft")
+        )
+        if not is_owned_draft:
+            abort(403, "You can only delete your own draft trees")
+
+        project = ProjectService.get_by_name(project_name)
+        ProjectService.check_if_project_exist(project)
+        ProjectService.check_if_freezed(project)
+
+        grew_request(
+            "eraseGraphs",
+            {
+                "project_id": project_name,
+                "sample_id": sample_name,
+                "sent_ids": json.dumps([sent_id]),
+                "user_id": user_id,
+            },
+        )
+
+        try:
+            from .staging_service import StagingService
+            StagingService.clear_status_for_tree(project.id, sample_name, sent_id, user_id)
+        except Exception:
+            pass
+
+        LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
+        return {"status": "ok"}
         
 @api.route("/<string:project_name>/samples/<string:sample_name>/validate")
 class ValidateSampleTrees(Resource):
@@ -335,6 +400,9 @@ class SaveAllTreesResource(Resource):
                 user_ids.add(user_id)
         
         allowed_users = {current_user.username, VALIDATED}
+        draft_prefix = f"{current_user.username}_draft"
+        allowed_draft_users = {user_id for user_id in user_ids if user_id.startswith(draft_prefix)}
+        allowed_users.update(allowed_draft_users)
         if not user_ids.issubset(allowed_users):
             abort(403, "You can only save your own trees")
         
