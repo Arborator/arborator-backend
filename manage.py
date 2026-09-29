@@ -37,6 +37,15 @@ def init_db_cmd():
         db.create_all()
 
 
+@cli.command(name="migrate_add_pushed_by")
+def migrate_add_pushed_by_cmd():
+    """Add pushed_by column to staged_trees without dropping data."""
+    with app.app_context():
+        from commands.migrate_add_pushed_by import migrate_add_pushed_by
+
+        migrate_add_pushed_by()
+
+
 @cli.command(name="drop_all")
 def drop_all_cmd():
     import click as _click

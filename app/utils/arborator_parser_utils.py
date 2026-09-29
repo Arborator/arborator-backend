@@ -93,7 +93,10 @@ class ArboratorParserAPI:
     def list():
         """Get the list of the parsers in the GPU server"""
         return ArboratorParserAPI.send_get_request("/list")
-    
+    @staticmethod
+    def status():
+        """Get the status of the GPU server"""
+        return ArboratorParserAPI.send_get_request("/status")
     @staticmethod
     def delete_model(project_name: str, model_id: str):
         """Delete specific model of specific project"""

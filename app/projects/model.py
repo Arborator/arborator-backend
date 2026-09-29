@@ -66,7 +66,7 @@ class ProjectAccess(db.Model):
     """Different type of user access in the project"""
     
     __tablename__ = "projectaccess"
-    ACCESS = [(1, "annotator"), (2, "validator"), (3, "admin"), (4, "guest")]
+    ACCESS = [(1, "annotator"), (2, "admin")]
     LABEL_TO_LEVEL = {v: k for k, v in dict(ACCESS).items()}
     
     id = Column(Integer, primary_key=True)
