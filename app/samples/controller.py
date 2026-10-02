@@ -111,13 +111,42 @@ class SampleResource(Resource):
         files = request.files.to_dict(flat=False).get("files")
         samples_without_sent_ids = request.form.get("samplesWithoutSentIds")
         rtl = request.form.get("rtl")
-        stage_all = request.form.get("stageAll")
-        
+        import_mode = request.form.get("importMode", "username")
         rtl = json.loads(rtl)
-        if stage_all is not None:
-            stage_all = json.loads(stage_all)
-        else:
-            stage_all = False
+        stage_all = import_mode == "usernameAndStageAll"
+        
+        if import_mode == "usernameDraft" and username:
+            try:
+                grew_samples = GrewService.get_samples(project_name)
+                draft_prefix = f"{username}_draft"
+                existing_draft_indexes = []
+                
+                for sample in grew_samples:
+                    reply = grew_request(
+                        "getConll",
+                        data={"project_id": project_name, "sample_id": sample["name"]}
+                    )
+                    sample_data = reply.get("data", {})
+                    for sentence_data in sample_data.values():
+                        if isinstance(sentence_data, dict) and "conlls" in sentence_data:
+                            user_ids = sentence_data.get("conlls", {}).keys()
+                        elif isinstance(sentence_data, dict):
+                            user_ids = sentence_data.keys()
+                        else:
+                            continue
+                        
+                        for user_id in user_ids:
+                            if user_id.startswith(draft_prefix):
+                                try:
+                                    index = int(user_id[len(draft_prefix):])
+                                    existing_draft_indexes.append(index)
+                                except (ValueError, IndexError):
+                                    pass
+                
+                next_draft_index = max(existing_draft_indexes) + 1 if existing_draft_indexes else 1
+                username = f"{draft_prefix}{next_draft_index}"
+            except Exception:
+                username = f"{username}_draft1"
         
         samples_to_commit = []
  
@@ -225,6 +254,7 @@ class SampleTokenizeResource(Resource):
             lang(str): for plain text there is two languages (french or english)
             text(str)
             rtl(bool): right to left script
+            importMode(str): "username", "usernameDraft", or "usernameAndStageAll"
         """
         args = request.get_json()
         username = args.get("username")
@@ -233,7 +263,45 @@ class SampleTokenizeResource(Resource):
         lang = args.get("lang")
         text = args.get("text")
         rtl = args.get("rtl")
-        stage_all = args.get("stageAll", False)
+        import_mode = args.get("importMode", "username")
+        
+        stage_all = import_mode == "usernameAndStageAll"
+        
+        # Handle draft username generation for usernameDraft import mode
+        if import_mode == "usernameDraft" and username:
+            # Get next draft index by searching all existing trees in project
+            try:
+                grew_samples = GrewService.get_samples(project_name)
+                draft_prefix = f"{username}_draft"
+                existing_draft_indexes = []
+                
+                for sample in grew_samples:
+                    reply = grew_request(
+                        "getConll",
+                        data={"project_id": project_name, "sample_id": sample["name"]}
+                    )
+                    sample_data = reply.get("data", {})
+                    for sentence_data in sample_data.values():
+                        if isinstance(sentence_data, dict) and "conlls" in sentence_data:
+                            user_ids = sentence_data.get("conlls", {}).keys()
+                        elif isinstance(sentence_data, dict):
+                            user_ids = sentence_data.keys()
+                        else:
+                            continue
+                        
+                        for user_id in user_ids:
+                            if user_id.startswith(draft_prefix):
+                                try:
+                                    index = int(user_id[len(draft_prefix):])
+                                    existing_draft_indexes.append(index)
+                                except (ValueError, IndexError):
+                                    pass
+                
+                next_draft_index = max(existing_draft_indexes) + 1 if existing_draft_indexes else 1
+                username = f"{draft_prefix}{next_draft_index}"
+            except Exception:
+                # Fallback: just append _draft1 if something goes wrong
+                username = f"{username}_draft1"
 
         project = ProjectService.get_by_name(project_name)
 
