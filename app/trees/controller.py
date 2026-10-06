@@ -500,7 +500,13 @@ class SplitTreeResource(Resource):
             if sent_dict:
                 all_user_ids.update(sent_dict.keys())
         
-        if not all_user_ids.issubset({current_user.username}):
+        is_admin = current_user.super_admin
+        if not is_admin:
+            user_project_access = ProjectAccessService.get_by_user_id(current_user.id, project.id)
+            if user_project_access and user_project_access.access_level in [2, 3]:
+                is_admin = True
+        
+        if not is_admin and not all_user_ids.issubset({current_user.username}):
             abort(403, "You can only modify your own trees")
         
         inserted_sentences = []
@@ -510,6 +516,7 @@ class SplitTreeResource(Resource):
         TreeSegmentationService.insert_new_sentences(project_name, sample_name, sent_id, inserted_sentences)
         GrewService.erase_sentence(project_name, sample_name, sent_id)
         LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
+        return { "status": "success" }
 
 @api.route("/<string:project_name>/samples/<string:sample_name>/trees/merge")
 
@@ -530,7 +537,13 @@ class MergeTreesResource(Resource):
         second_sent_id = data.get("secondSentId")
         merged_sentences = data.get("mergedSentences")
         
-        if merged_sentences and not set(merged_sentences.keys()).issubset({current_user.username}):
+        is_admin = current_user.super_admin
+        if not is_admin:
+            user_project_access = ProjectAccessService.get_by_user_id(current_user.id, project.id)
+            if user_project_access and user_project_access.access_level in [2, 3]:
+                is_admin = True
+        
+        if not is_admin and merged_sentences and not set(merged_sentences.keys()).issubset({current_user.username}):
             abort(403, "You can only modify your own trees")
         
         inserted_sentences = []
@@ -540,3 +553,4 @@ class MergeTreesResource(Resource):
         GrewService.erase_sentence(project_name, sample_name, first_sent_id)
         GrewService.erase_sentence(project_name, sample_name, second_sent_id)
         LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
+        return { "status": "success" }
