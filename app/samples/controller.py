@@ -1,6 +1,7 @@
 import json
 import re
 from typing import List
+import os
 
 from flask.helpers import send_file
 from flask_accepts.decorators.decorators import responds
@@ -12,6 +13,13 @@ from werkzeug.utils import secure_filename
 from app.projects.service import ProjectAccessService, ProjectService, LastAccessService
 from app.utils.grew_utils import GrewService, SampleExportService, grew_request
 from app.shared.service import SharedService
+
+def safe_filename_with_accents(filename: str) -> str:
+    filename = filename.replace('/', '').replace('\\', '').replace('\0', '')
+    filename = os.path.basename(filename)
+    if not filename:
+        return 'file'
+    return filename
 
 from .service import (
     SampleEvaluationService,
@@ -161,7 +169,7 @@ class SampleResource(Resource):
             
             for file in files:
                 
-                filename = secure_filename(file.filename)
+                filename = safe_filename_with_accents(file.filename)
                 sample_name = reextensions.sub("", filename)
                 sample_names.append(sample_name)
                 
