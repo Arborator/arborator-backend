@@ -28,9 +28,7 @@ class ProjectExtendedInterface(ProjectInterface, total=False):
     users: List[str]
     owner_avatar_url: str
     admins: List[str]
-    validators: List[str]
     annotators: List[str]
-    guests: List[str]
     number_sentences: int 
     number_samples: int
     number_trees: int
