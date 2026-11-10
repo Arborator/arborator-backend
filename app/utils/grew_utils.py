@@ -17,6 +17,9 @@ from conllup.conllup import sentenceConllToJson
 from conllup.processing import constructTextFromTreeJson
 
 
+DRAFT_USER_PATTERN = re.compile(r"^.+_draft[0-9]+$")
+
+
 def grew_request(fct_name, data={}, files={}):
     """Send grew request
 
@@ -269,7 +272,7 @@ class GrewService:
                 'edges':…
             })
         """
-        user_ids = GrewService.get_user_ids(user_type, other_user)
+        user_ids = GrewService.get_search_user_ids(user_type, other_user)
         data = {
             "project_id": project_id,
             "request": request,
@@ -277,6 +280,7 @@ class GrewService:
             "sample_ids": json.dumps(sample_ids)
         }
         reply = grew_request("searchRequestInGraphs", data=data)
+        reply["data"] = GrewService.filter_draft_results(reply["data"])
         return reply
 
     @staticmethod
@@ -291,7 +295,7 @@ class GrewService:
             other_user (str)
 
         """
-        user_ids = GrewService.get_user_ids(user_type, other_user)
+        user_ids = GrewService.get_search_user_ids(user_type, other_user)
         data = {
             "project_id": project_id,
             "package": package,
@@ -299,7 +303,23 @@ class GrewService:
             "sample_ids": json.dumps(sample_ids)
         }
         reply = grew_request("tryPackage", data=data)
+        reply["data"] = GrewService.filter_draft_results(reply["data"])
         return reply
+
+    @staticmethod
+    def filter_draft_results(results):
+        return [
+            result
+            for result in results
+            if not DRAFT_USER_PATTERN.match(result["user_id"])
+        ]
+
+    @staticmethod
+    def get_search_user_ids(user_type: str, other_user: str):
+        user_ids = GrewService.get_user_ids(user_type, other_user)
+        if isinstance(user_ids, dict) and "__last__" in user_ids["one"]:
+            return {"one_non_draft": user_ids["one"]}
+        return user_ids
     
     @staticmethod
     def get_relation_table(project_id: str, sample_ids, user_type, other_user):
