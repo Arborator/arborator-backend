@@ -207,7 +207,24 @@ class GrewService:
         grew_samples = reply.get("data", [])
 
         return grew_samples
-    
+
+    @staticmethod
+    def get_project_sent_ids(project_id: str) -> Dict[str, str]:
+        """Map every sent_id already present in the project to the sample containing it
+
+        Args:
+            project_id (str)
+
+        Returns:
+            Dict[str, str]: {sent_id: sample_name}
+        """
+        sent_id_to_sample: Dict[str, str] = {}
+        for sample in GrewService.get_samples(project_id):
+            sample_trees = GrewService.get_sample_trees(project_id, sample["name"])
+            for sent_id in sample_trees:
+                sent_id_to_sample[sent_id] = sample["name"]
+        return sent_id_to_sample
+
     @staticmethod
     def create_samples(project_id: str, sample_ids: List[str]):
         """Create samples

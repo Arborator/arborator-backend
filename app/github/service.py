@@ -1049,6 +1049,7 @@ class GithubWorkflowService:
 
         SampleService.check_duplicate_sent_id(path_file, sample_name)
         SampleService.check_if_file_has_user_ids(path_file, sample_name)
+        SampleService.check_sent_ids_not_in_project(project_name, path_file, sample_name)
         SampleService.add_or_replace_userid(path_file, tree_user_id)
         SampleService.add_or_keep_timestamps(path_file)
         

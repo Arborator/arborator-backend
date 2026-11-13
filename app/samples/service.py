@@ -51,6 +51,11 @@ class SampleUploadService:
         
         check_duplicate_sent_id(path_file, sample_name)
         check_if_file_has_user_ids(path_file, sample_name)
+        try:
+            check_sent_ids_not_in_project(project_name, path_file, sample_name)
+        except Exception:
+            os.remove(path_file)
+            raise
 
         add_or_replace_userid(path_file, new_username)
         add_or_keep_timestamps(path_file)
@@ -378,6 +383,24 @@ def check_duplicate_sent_id(path_file: str, sample_name: str):
     for count in sent_ids_count.values():
         if count > 1:
             abort(406, "{} has duplicated sent_ids".format(sample_name))
+
+def check_sent_ids_not_in_project(project_name: str, path_file: str, sample_name: str):
+    """Abort if any sent_id of the file already exists in the project"""
+    sentences_json = read_conllu_file_wrapper(path_file, keepEmptyTrees=True)
+    file_sent_ids = [sentence["metaJson"]["sent_id"] for sentence in sentences_json if "sent_id" in sentence["metaJson"].keys()]
+    if not file_sent_ids:
+        return
+
+    project_sent_ids = GrewService.get_project_sent_ids(project_name)
+    existing_sent_ids = [sent_id for sent_id in file_sent_ids if sent_id in project_sent_ids]
+    if existing_sent_ids:
+        existing_samples = sorted({project_sent_ids[sent_id] for sent_id in existing_sent_ids})
+        abort(
+            409,
+            "This sample already exists in the project: {} sent_ids already used in sample(s) {}".format(
+                len(existing_sent_ids), ", ".join(existing_samples)
+            ),
+        )
     
 def check_if_file_has_user_ids(path_file: str, sample_name: str):
     """check if in the file there is sentences with user_id"""
