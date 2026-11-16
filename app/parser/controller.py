@@ -43,6 +43,16 @@ class ParserModelsListResource(Resource):
                         })
             return { "status": "success",  "data": pretrained_models }
 
+@api.route("/status")
+class ParserStatusResource(Resource):
+    def get(self):
+        """Get parser GPU status"""
+        print("<PARSER> status request")
+        response = ArboratorParserAPI.status()
+        if response["status"] == "failure":
+            return response, 503
+        return response
+
 @api.route("/list/<string:project_name>/<string:model_id>")       
 class ParserModelIdResource(Resource): 
     def delete(self, project_name: str, model_id: str):

@@ -11,3 +11,5 @@ class SampleInterface(TypedDict, total=False):
     tree_by_user: dict[str, int]
     tags: dict[str, int]
     blind_annotation_level: int
+    staged_count: int
+    pushed_count: int

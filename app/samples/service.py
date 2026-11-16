@@ -51,6 +51,11 @@ class SampleUploadService:
         
         check_duplicate_sent_id(path_file, sample_name)
         check_if_file_has_user_ids(path_file, sample_name)
+        try:
+            check_sent_ids_not_in_project(project_name, path_file, sample_name)
+        except Exception:
+            os.remove(path_file)
+            raise
 
         add_or_replace_userid(path_file, new_username)
         add_or_keep_timestamps(path_file)
@@ -182,26 +187,30 @@ class SampleBlindAnnotationLevelService:
 
 class SampleEvaluationService:
     @staticmethod
-    def evaluate_sample(sample_conlls):
+    def evaluate_sample(sample_conlls, reference_by_sentence: Dict[str, str] = None):
         """Evaluate samples
 
         Args:
             sample_conlls (2-levels dict sent_id -> user_id -> conll_string)
+            reference_by_sentence (dict sent_id -> user_id): ground truth tree to compare
+                against for each sentence (the tree most recently pushed by an admin)
 
         Returns:
             evaluations (2-level dict user_id -> evaluation -> percentage)
         """
+        reference_by_sentence = reference_by_sentence or {}
         corrects = {}
         submitted = {}
         total = {"UPOS": 0, "DEPREL": 0, "HEAD": 0}
 
         for sentence_id, sentence_conlls in sample_conlls.items():
-            validated_tree_conll = sentence_conlls.get("validated")
-            if validated_tree_conll:
-                validated_tree_sentence_json = sentenceConllToJson(
-                    validated_tree_conll
+            reference_user_id = reference_by_sentence.get(sentence_id)
+            reference_tree_conll = sentence_conlls.get(reference_user_id) if reference_user_id else None
+            if reference_tree_conll:
+                reference_tree_sentence_json = sentenceConllToJson(
+                    reference_tree_conll
                 )
-                validated_tree = validated_tree_sentence_json["treeJson"]['nodesJson']
+                reference_tree = reference_tree_sentence_json["treeJson"]['nodesJson']
 
                 basetree_conll = sentence_conlls.get(BASE_TREE)
                 if basetree_conll:
@@ -212,15 +221,15 @@ class SampleEvaluationService:
                 else:
                     basetree_tree = {}
 
-                for token_id in validated_tree.keys():
-                    validated_tree_token = validated_tree.get(token_id)
-                    if validated_tree_token == None:
+                for token_id in reference_tree.keys():
+                    reference_tree_token = reference_tree.get(token_id)
+                    if reference_tree_token == None:
                         continue
                     basetree_token = basetree_tree.get(token_id, {})
                     for label in ["UPOS", "HEAD", "DEPREL"]:
                         if (
-                            validated_tree_token[label] != "_"
-                            and basetree_token.get(label) != validated_tree_token[label]
+                            reference_tree_token[label] != "_"
+                            and basetree_token.get(label) != reference_tree_token[label]
                         ):
                             total[label] += 1
             else:
@@ -228,7 +237,7 @@ class SampleEvaluationService:
 
             for user_id, user_conll in sentence_conlls.items():
 
-                if user_id != "validated":
+                if user_id != reference_user_id:
                     if not corrects.get(user_id):
                         corrects[user_id] = {"UPOS": 0, "DEPREL": 0, "HEAD": 0}
                     if not submitted.get(user_id):
@@ -240,8 +249,8 @@ class SampleEvaluationService:
                     user_tree = user_sentence_json["treeJson"]["nodesJson"]
 
                     for token_id in user_tree.keys():
-                        validated_tree_token = validated_tree.get(token_id)
-                        if validated_tree_token == None:
+                        reference_tree_token = reference_tree.get(token_id)
+                        if reference_tree_token == None:
                             continue
 
                         user_token = user_tree.get(token_id)
@@ -249,13 +258,13 @@ class SampleEvaluationService:
 
                         for label in ["UPOS", "HEAD", "DEPREL"]:
                             if (
-                                validated_tree_token[label] != "_"
-                                and basetree_token.get(label) != validated_tree_token[label]
+                                reference_tree_token[label] != "_"
+                                and basetree_token.get(label) != reference_tree_token[label]
                             ):
                                 if user_token[label] != "_":
                                     submitted[user_id][label] += 1
                                 corrects[user_id][label] += (
-                                    validated_tree_token[label] == user_token[label]
+                                    reference_tree_token[label] == user_token[label]
                                 )
         GRADE = 100
         evaluations = {}
@@ -374,6 +383,24 @@ def check_duplicate_sent_id(path_file: str, sample_name: str):
     for count in sent_ids_count.values():
         if count > 1:
             abort(406, "{} has duplicated sent_ids".format(sample_name))
+
+def check_sent_ids_not_in_project(project_name: str, path_file: str, sample_name: str):
+    """Abort if any sent_id of the file already exists in the project"""
+    sentences_json = read_conllu_file_wrapper(path_file, keepEmptyTrees=True)
+    file_sent_ids = [sentence["metaJson"]["sent_id"] for sentence in sentences_json if "sent_id" in sentence["metaJson"].keys()]
+    if not file_sent_ids:
+        return
+
+    project_sent_ids = GrewService.get_project_sent_ids(project_name)
+    existing_sent_ids = [sent_id for sent_id in file_sent_ids if sent_id in project_sent_ids]
+    if existing_sent_ids:
+        existing_samples = sorted({project_sent_ids[sent_id] for sent_id in existing_sent_ids})
+        abort(
+            409,
+            "This sample already exists in the project: {} sent_ids already used in sample(s) {}".format(
+                len(existing_sent_ids), ", ".join(existing_samples)
+            ),
+        )
     
 def check_if_file_has_user_ids(path_file: str, sample_name: str):
     """check if in the file there is sentences with user_id"""

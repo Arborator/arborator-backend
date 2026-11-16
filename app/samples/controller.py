@@ -1,6 +1,7 @@
 import json
 import re
 from typing import List
+import os
 
 from flask.helpers import send_file
 from flask_accepts.decorators.decorators import responds
@@ -12,6 +13,13 @@ from werkzeug.utils import secure_filename
 from app.projects.service import ProjectAccessService, ProjectService, LastAccessService
 from app.utils.grew_utils import GrewService, SampleExportService, grew_request
 from app.shared.service import SharedService
+
+def safe_filename_with_accents(filename: str) -> str:
+    filename = filename.replace('/', '').replace('\\', '').replace('\0', '')
+    filename = os.path.basename(filename)
+    if not filename:
+        return 'file'
+    return filename
 
 from .service import (
     SampleEvaluationService,
@@ -66,6 +74,24 @@ class SampleResource(Resource):
             else:
                 sample["blind_annotation_level"] = 4
 
+            from app.trees.staging_service import StagingService
+            staging_status = StagingService.get_staged_status_by_sample(project.id, grew_sample["name"])
+            staged_count = sum(
+                1
+                for trees_info in staging_status.values()
+                for tree_info in trees_info.values()
+                if tree_info.get("status") == "staged"
+            )
+            sample["staged_count"] = staged_count
+
+            pushed_count = sum(
+                1
+                for trees_info in staging_status.values()
+                for tree_info in trees_info.values()
+                if tree_info.get("status") == "pushed"
+            )
+            sample["pushed_count"] = pushed_count
+
             processed_samples.append(sample)
         return processed_samples
 
@@ -93,8 +119,42 @@ class SampleResource(Resource):
         files = request.files.to_dict(flat=False).get("files")
         samples_without_sent_ids = request.form.get("samplesWithoutSentIds")
         rtl = request.form.get("rtl")
-        
+        import_mode = request.form.get("importMode", "username")
         rtl = json.loads(rtl)
+        stage_all = import_mode == "usernameAndStageAll"
+        
+        if import_mode == "usernameDraft" and username:
+            try:
+                grew_samples = GrewService.get_samples(project_name)
+                draft_prefix = f"{username}_draft"
+                existing_draft_indexes = []
+                
+                for sample in grew_samples:
+                    reply = grew_request(
+                        "getConll",
+                        data={"project_id": project_name, "sample_id": sample["name"]}
+                    )
+                    sample_data = reply.get("data", {})
+                    for sentence_data in sample_data.values():
+                        if isinstance(sentence_data, dict) and "conlls" in sentence_data:
+                            user_ids = sentence_data.get("conlls", {}).keys()
+                        elif isinstance(sentence_data, dict):
+                            user_ids = sentence_data.keys()
+                        else:
+                            continue
+                        
+                        for user_id in user_ids:
+                            if user_id.startswith(draft_prefix):
+                                try:
+                                    index = int(user_id[len(draft_prefix):])
+                                    existing_draft_indexes.append(index)
+                                except (ValueError, IndexError):
+                                    pass
+                
+                next_draft_index = max(existing_draft_indexes) + 1 if existing_draft_indexes else 1
+                username = f"{draft_prefix}{next_draft_index}"
+            except Exception:
+                username = f"{username}_draft1"
         
         samples_to_commit = []
  
@@ -109,7 +169,7 @@ class SampleResource(Resource):
             
             for file in files:
                 
-                filename = secure_filename(file.filename)
+                filename = safe_filename_with_accents(file.filename)
                 sample_name = reextensions.sub("", filename)
                 sample_names.append(sample_name)
                 
@@ -123,8 +183,10 @@ class SampleResource(Resource):
                     new_username=username,
                     samples_without_sent_ids=samples_without_sent_ids
                 )
-                if not sample_name in existing_samples and username == "validated":
-                    samples_to_commit.append(sample_name)
+
+                if stage_all and username:
+                    from app.trees.staging_service import StagingService
+                    StagingService.stage_sample(project_name, project.id, sample_name, username, current_user.username)
 
             pos_list, relation_list, feat_list, misc_list = GrewService.get_config_from_samples(project_name, sample_names)
 
@@ -177,6 +239,8 @@ class SampleNameResource(Resource):
         """
         args = request.get_json()
         new_sample_name = args.get("newSampleName")
+        project = ProjectService.get_by_name(project_name)
+        ProjectAccessService.check_admin_access(project.id)
         
         response = grew_request("renameSample", {
             "project_id": project_name,
@@ -198,6 +262,7 @@ class SampleTokenizeResource(Resource):
             lang(str): for plain text there is two languages (french or english)
             text(str)
             rtl(bool): right to left script
+            importMode(str): "username", "usernameDraft", or "usernameAndStageAll"
         """
         args = request.get_json()
         username = args.get("username")
@@ -206,17 +271,56 @@ class SampleTokenizeResource(Resource):
         lang = args.get("lang")
         text = args.get("text")
         rtl = args.get("rtl")
+        import_mode = args.get("importMode", "username")
+        
+        stage_all = import_mode == "usernameAndStageAll"
+        
+        # Handle draft username generation for usernameDraft import mode
+        if import_mode == "usernameDraft" and username:
+            # Get next draft index by searching all existing trees in project
+            try:
+                grew_samples = GrewService.get_samples(project_name)
+                draft_prefix = f"{username}_draft"
+                existing_draft_indexes = []
+                
+                for sample in grew_samples:
+                    reply = grew_request(
+                        "getConll",
+                        data={"project_id": project_name, "sample_id": sample["name"]}
+                    )
+                    sample_data = reply.get("data", {})
+                    for sentence_data in sample_data.values():
+                        if isinstance(sentence_data, dict) and "conlls" in sentence_data:
+                            user_ids = sentence_data.get("conlls", {}).keys()
+                        elif isinstance(sentence_data, dict):
+                            user_ids = sentence_data.keys()
+                        else:
+                            continue
+                        
+                        for user_id in user_ids:
+                            if user_id.startswith(draft_prefix):
+                                try:
+                                    index = int(user_id[len(draft_prefix):])
+                                    existing_draft_indexes.append(index)
+                                except (ValueError, IndexError):
+                                    pass
+                
+                next_draft_index = max(existing_draft_indexes) + 1 if existing_draft_indexes else 1
+                username = f"{draft_prefix}{next_draft_index}"
+            except Exception:
+                # Fallback: just append _draft1 if something goes wrong
+                username = f"{username}_draft1"
 
-        grew_samples = GrewService.get_samples(project_name)
-        existing_samples = [sa["name"] for sa in grew_samples]
+        project = ProjectService.get_by_name(project_name)
 
         SampleTokenizeService.tokenize(text, option, lang, project_name, sample_name, username, rtl)
         LastAccessService.update_last_access_per_user_and_project(current_user.id, project_name, "write")
 
-        samples_to_commit = []
-        if not sample_name in existing_samples and username == "validated":
-            samples_to_commit.append(sample_name)
-        response = { "samples_to_commit": samples_to_commit }
+        if stage_all and username:
+            from app.trees.staging_service import StagingService
+            StagingService.stage_sample(project_name, project.id, sample_name, username, current_user.username)
+
+        response = { "samples_to_commit": [] }
         return { "status": "OK", "data": response }
 
 @api.route("/<string:project_name>/samples/<string:sample_name>/blind-annotation-level")
@@ -267,8 +371,19 @@ class SampleEvaluationResource(Resource):
         Returns:
             file send as an attachement
         """
+        project = ProjectService.get_by_name(project_name)
         sample_conlls = GrewService.get_sample_trees(project_name, sample_name)
-        evaluations = SampleEvaluationService.evaluate_sample(sample_conlls)
+
+        from app.trees.staging_service import StagingService
+        staging_status = StagingService.get_staged_status_by_sample(project.id, sample_name)
+        reference_by_sentence = {
+            sent_id: tree_user_id
+            for sent_id, trees_info in staging_status.items()
+            for tree_user_id, info in trees_info.items()
+            if info.get("status") == "pushed"
+        }
+
+        evaluations = SampleEvaluationService.evaluate_sample(sample_conlls, reference_by_sentence)
         evaluations_tsv = SampleEvaluationService.evaluations_json_to_tsv(evaluations)
         uploadable_evaluations_tsv = SharedService.get_sendable_data(evaluations_tsv)
         file_name = f"{sample_name}_evaluations.tsv"
